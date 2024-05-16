@@ -1,0 +1,78 @@
+{
+    "name": "vanilo/demo",
+    "description": "Vanilo Demo Application",
+    "keywords": ["vanilo", "laravel", "ecommerce"],
+    "license": "MIT",
+    "type": "project",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.3",
+        "ext-gd": "*",
+        "ext-pcntl": "*",
+        "ext-imagick": "*",
+        "guzzlehttp/guzzle": "^7.5",
+        "laravel/framework": "^11.0",
+        "laravel/telescope": "^5.0",
+        "laravel/tinker": "^2.0",
+        "laravel/ui": "^4.0",
+        "league/flysystem-aws-s3-v3": "^3.0",
+        "league/flysystem-path-prefixing": "^3.0",
+        "phpseclib/phpseclib": "^3.0",
+        "symfony/process": "^7.0",
+        "vanilo/admin": "^4.0",
+        "vanilo/euplatesc": "^4.0",
+        "vanilo/framework": "^4.0",
+        "vanilo/mollie": "^2.0",
+        "vanilo/netopia": "^3.0",
+        "vanilo/payment": "^4.0"
+    },
+    "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.13",
+        "spatie/laravel-ignition": "^2.5",
+        "fakerphp/faker": "^1.23",
+        "laravel/dusk": "^8.2",
+        "mockery/mockery": "^1.6",
+        "phpunit/phpunit": "^11.2"
+    },
+    "autoload": {
+        "files": [
+            "app/Helpers/Helpers.php"
+        ],
+        "classmap": [
+            "database/seeds",
+            "database/factories"
+        ],
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": [
+            ]
+        }
+    },
+    "scripts": {
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate"
+        ],
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}

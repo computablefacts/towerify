@@ -1,0 +1,7 @@
+name: towerify-ui
+type: laravel-9
+config:
+  dockerfile: ./towerify/Dockerfile
+  envs:
+    prod:
+      domain: app.towerify.io

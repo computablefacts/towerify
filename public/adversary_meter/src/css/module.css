@@ -1,0 +1,163 @@
+html {
+    height: 100%;
+}
+
+.h-0 {
+    height: 0;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.v-scroll {
+    overflow-y: scroll;
+}
+
+.border-top-dark-grey {
+    border-top: 1px solid rgba(143, 153, 168, .4);
+}
+
+.border-bottom-dark-grey {
+    border-bottom: 1px solid rgba(143, 153, 168, .4);
+}
+
+.bg-success-lightest {
+    background-color: #e6f4ea;
+}
+
+.bg-warning-lightest {
+    background-color: #fff3cd;
+}
+
+.bg-info-lightest {
+    background-color: #e2eaf8;
+}
+
+.bg-danger-lightest {
+    background-color: #f8d7da;
+}
+
+.background-light-grey {
+    background-color: #F5F5F5 !important;
+}
+
+.background-dark-grey {
+    background-color: #edeff2 !important;
+}
+
+.bg-very-light-orange {
+    background-color: #fff6e2 !important;
+}
+
+.badge-outline {
+    background-color: transparent !important;
+    border: 1px solid #7F87B3;
+    color: #7F87B3;
+}
+
+.badge {
+    border-radius: 1rem !important;
+}
+
+.orange-shadow {
+    box-shadow: 0 5px 5px #fea00040;
+}
+
+.black-shadow {
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.14);
+}
+
+.very-light-orange {
+    background-color: #fdf7ebf7;
+}
+
+.light-orange {
+    background-color: rgb(255 228 176 / 97%)
+}
+
+.light-green {
+    background-color: rgb(238 255 220 / 97%)
+}
+
+.green {
+    color: #32AA15;
+}
+
+.red {
+    color: #dc3545;
+}
+
+.orange {
+    color: #fd7e14 !important;
+}
+
+.fuchsia {
+    background-color: #ec4eec !important;
+}
+
+.blue {
+    color: #215db0;
+}
+
+.lightblue{
+    color: #00BCD4;
+}
+
+.background-red {
+    background-color: #dc3545 !important;
+}
+
+.background-orange {
+    background-color: #ffc107!important;
+    color: #212529 !important;
+}
+
+.dot {
+    height: 15px;
+    width: 15px;
+    background-color: #FCD7D7;
+    border-radius: 50%;
+    display: inline-block;
+    border:1px solid red;
+}
+
+.border-orange {
+    border:1px solid darkorange;
+}
+
+.border-green {
+    border:1px solid #65d53b;
+}
+
+.high {
+    background-color: #FCD7D7 !important;
+    border:1px solid red;
+}
+
+.high-unverified {
+    background-color: #e0e0e0 !important;
+    border: 1px solid #4f4c4c
+}
+
+.medium {
+    background-color: #ffde96 !important;
+    border: 1px solid #ffc107
+}
+
+.low {
+    background-color: #FDF7BF !important;
+    border: 1px solid #dcbd35;
+}
+
+.font-size-35 {
+    font-size: 35px;
+}
+
+.table-fixed {
+    table-layout: fixed;
+}
+
+.text-right {
+    text-align: right;
+}

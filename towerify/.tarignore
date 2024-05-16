@@ -1,0 +1,6 @@
+.?*/*
+towerify/*/*.tar.gz
+bootstrap/cache/*.*
+storage/app/public/*
+node_modules
+vendor

@@ -1,0 +1,60 @@
+name: tests
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        php: [ '8.3' ]
+        laravel: [ '11.7' ]
+    name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Installing PHP
+        uses: shivammathur/setup-php@main
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json, sqlite3
+          tools: composer:v2
+      - name: Lock Laravel Version
+        run: composer require "laravel/framework:${{ matrix.laravel }}.*" --no-update -v
+      - name: Composer Install
+        run: composer install --prefer-dist --no-progress --no-interaction
+        env:
+          DB_CONNECTION: sqlite
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: ":memory:"
+          DB_PORT: 3000
+          DB_USERNAME: root
+          DB_PASSWORD: ""
+      - name: Run Tests [mysql 5.7]
+        run: php vendor/bin/phpunit --testdox
+        env:
+          DB_PORT: ${{ job.services.mysql.ports[3306] }}
+          DB_USERNAME: root
+          DB_PASSWORD: ""
+      - name: Run Tests [mysql 8.0]
+        run: php vendor/bin/phpunit --testdox
+        env:
+          DB_PORT: ${{ job.services.mysql8.ports[3306] }}
+          DB_USERNAME: root
+          DB_PASSWORD: ""
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: tw_testdb
+        ports:
+          - 3306
+      mysql8:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: tw_testdb
+        ports:
+          - 3306

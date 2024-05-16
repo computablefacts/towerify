@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  backupGlobals="false"
+  bootstrap="vendor/autoload.php"
+  colors="true"
+  processIsolation="false"
+  stopOnFailure="true"
+  stopOnError="true"
+  testdox="true"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.2/phpunit.xsd"
+  cacheDirectory=".phpunit.cache"
+  backupStaticProperties="false">
+  <testsuites>
+    <testsuite name="Feature">
+      <directory suffix="Test.php">./tests/Feature</directory>
+    </testsuite>
+    <testsuite name="Unit">
+      <directory suffix="Test.php">./tests/Unit</directory>
+    </testsuite>
+  </testsuites>
+  <php>
+    <env name="APP_ENV" value="testing"/>
+    <env name="APP_KEY" value="base64:YZzRGIAPQgqSLZBJ7rILm7B05FfdvxSBaHVoQFzBuS0="/>
+    <env name="CACHE_DRIVER" value="array"/>
+    <env name="SESSION_DRIVER" value="array"/>
+    <env name="QUEUE_DRIVER" value="sync"/>
+    <env name="DB_CONNECTION" value="mysql"/>
+    <env name="DB_HOST" value="127.0.0.1"/>
+    <env name="DB_PORT" value="3306"/>
+    <env name="DB_DATABASE" value="tw_testdb"/>
+    <env name="DB_USERNAME" value="tw_testuser"/>
+    <env name="DB_PASSWORD" value="z0rglub"/>
+    <env name="USE_SCHEMA_DUMP" value="true"/>
+  </php>
+  <source>
+    <include>
+      <directory suffix=".php">./app</directory>
+    </include>
+  </source>
+</phpunit>

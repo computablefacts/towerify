@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Models;
+
+use App\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+
+class YnhUser extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'username',
+        'fullname',
+        'email',
+        'ynh_server_id',
+        'updated',
+    ];
+
+    protected $casts = [
+        'updated' => 'boolean',
+    ];
+
+    public static function from(User $user): Collection
+    {
+        $tenantId = $user->tenant_id;
+
+        if ($tenantId) {
+
+            $customerId = $user->customer_id;
+
+            if ($customerId) {
+                return YnhUser::select('ynh_users.*')
+                    ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_users.ynh_server_id')
+                    ->join('users', 'users.id', '=', 'ynh_servers.user_id')
+                    ->where('ynh_users.username', $user->ynhUsername())
+                    ->where('users.tenant_id', $tenantId)
+                    ->where('users.customer_id', $customerId)
+                    ->get();
+            }
+            return YnhUser::select('ynh_users.*')
+                ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_users.ynh_server_id')
+                ->join('users', 'users.id', '=', 'ynh_servers.user_id')
+                ->where('ynh_users.username', $user->ynhUsername())
+                ->where('users.tenant_id', $tenantId)
+                ->get();
+        }
+        return YnhUser::where('username', $user->ynhUsername())->get();
+    }
+
+    public function server(): BelongsTo
+    {
+        return $this->belongsTo(YnhServer::class);
+    }
+
+    public function permissions(): HasMany
+    {
+        return $this->hasMany(YnhPermission::class);
+    }
+}

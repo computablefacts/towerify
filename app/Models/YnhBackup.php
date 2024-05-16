@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Models;
+
+use App\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class YnhBackup extends Model
+{
+    use HasFactory;
+
+    protected $table = 'ynh_backups';
+
+    protected $fillable = [
+        'ynh_server_id',
+        'user_id',
+        'name',
+        'size',
+        'storage_path',
+        'result'
+    ];
+
+    protected $casts = [
+        'result' => 'array',
+    ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function server(): BelongsTo
+    {
+        return $this->belongsTo(YnhServer::class);
+    }
+}
