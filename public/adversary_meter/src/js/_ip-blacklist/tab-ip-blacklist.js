@@ -1,8 +1,7 @@
 'use strict'
 
 import {Table} from "../_shared/table.js";
-import {downloadCsv} from "../helpers.js";
-import {createNode} from "../helpers.js";
+import {createNode, downloadCsv} from "../helpers.js";
 
 export class TabIPBlacklist extends com.computablefacts.widgets.Widget {
 

@@ -56,9 +56,9 @@
   "En pause": "Paused",
   "Télécharger un fichier d'exemple": "Download a sample file",
   "Importer": "Import",
-  "ex: computablefacts.com": "e.g., computablefacts.com",
+  "ex: computablefacts.com": "e.g. computablefacts.com",
   "Rechercher": "Search",
-  "ex: google.com": "e.g., google.com",
+  "ex: google.com": "e.g. google.com",
   "+ Ajouter": "+ Add",
   "Actif ajouté avec succès.": "Asset added successfully.",
   "Ce n'est pas un nom de domaine ou une adresse ip valide.": "This is not a valid domain name or IP address.",
@@ -143,7 +143,7 @@
   "1 - Selectionnez un fournisseur de Cloud": "1 - Select a Cloud Provider",
   "Nous utiliserons ce fournisseur pour déployer vos honeypots.": "We will use this provider to deploy your honeypots.",
   "2 - Choisissez des sous-domaines": "2 - Choose sub-domains",
-  "Saisissez trois noms de sous-domaines vous appartenant. Nous utiliserons ceux-ci pour alimenter vos honeypots.": "Enter three sub-domain names that you own. We will use these to feed your honeypots.",
+  "Saisissez trois noms de sous-domaines vous appartenant MAIS QUE VOUS N'UTILISEZ PAS. Nous utiliserons ceux-ci pour alimenter vos honeypots.": "Enter three sub-domain names that you own BUT DO NOT USE. We will use these to feed your honeypots.",
   "Veuillez fournir un sous-domaine valide.": "Please provide a valid sub-domain.",
   "Etape suivante": "Next step",
   "Ignorer la configuration des honeypots": "Ignore the honeypots configuration",
@@ -197,5 +197,6 @@
   "même vulnérabilité pour le même actif": "same vulnerability on same asset",
   "de même type ({{type}})": "with same type ({{type}})",
   "Sauvegarder": "Save",
-  "Masquer les vulnérabilités": "Hide vulnerabilities"
+  "Masquer les vulnérabilités": "Hide vulnerabilities",
+  "Il n'y a aucune vulnérabilité de détectée.": "There is no vulnerability to display."
 }

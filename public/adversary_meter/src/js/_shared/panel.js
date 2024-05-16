@@ -454,7 +454,9 @@ export class Panel extends com.computablefacts.widgets.Widget {
         return `
             <div class="row border-top-dark-grey border-bottom-dark-grey background-light-grey mt-3 mb-3">
               <div class="col p-3">
-                <h5 class="mb-0"><strong>${i18next.t('Ports ouverts')}</strong></h5>
+                <h5 class="mb-0">
+                  <strong>${i18next.t('Ports ouverts')}&nbsp;(&nbsp;<span class="orange">${ports.length}</span>&nbsp;)</strong>
+                </h5>
               </div>
             </div>
             <div class="row">
@@ -562,7 +564,9 @@ export class Panel extends com.computablefacts.widgets.Widget {
         return `
             <div class="row border-top-dark-grey border-bottom-dark-grey background-light-grey mb-3">
               <div class="col p-3">
-                <h5 class="mb-0"><strong>${i18next.t('Vulnérabilités')}</strong></h5>
+                <h5 class="mb-0">
+                  <strong>${i18next.t('Vulnérabilités')}&nbsp;(&nbsp;<span class="orange">${displayedVulnerabilities.length}</span>&nbsp;)</strong>
+                </h5>
               </div>
             </div>
             <div class="row">
@@ -676,7 +680,7 @@ export class Panel extends com.computablefacts.widgets.Widget {
             <div class="row border-top-dark-grey border-bottom-dark-grey background-light-grey mb-3 mt-3">
               <div class="col p-3">
                 <h5 class="mb-0">
-                    <strong>${i18next.t('Vulnérabilités Cachées')}</strong>
+                    <strong>${i18next.t('Vulnérabilités Cachées')}&nbsp;(&nbsp;<span class="orange">${displayedVulnerabilities.length}</span>&nbsp;)</strong>
                     <i class="fal fa-chevron-right cursor-pointer float-end" id="toggleHiddenVulns"></i>
                 </h5>
               </div>

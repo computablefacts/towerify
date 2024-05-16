@@ -18,7 +18,7 @@ tbody:nth-of-type(1) tr:nth-of-type(1) td {
 }
 
 td {
-    height: 4rem;
+    height: 1rem;
 }
 
 tr {
@@ -44,7 +44,7 @@ tbody tr:last-child td {
 }
 
 tbody tr td {
-    height: 4rem;
+    height: 1rem;
     position: relative;
     vertical-align: middle;
 }

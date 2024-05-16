@@ -13,7 +13,7 @@ export class Table extends com.computablefacts.widgets.Widget {
     this.sortedData_ = [];
     this.widths_ = widths;
     this.sorts_ = sorts;
-    this.limit_ = 10;
+    this.limit_ = 20;
     this.currentPage_ = 0;
     this.pages = [];
     this.activeSortIcon_ = null;

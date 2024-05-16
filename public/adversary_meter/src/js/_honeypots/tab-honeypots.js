@@ -17,8 +17,8 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
     this.render()
   }
 
-  onCancelConfiguration(callback){
-    if (callback){
+  onCancelConfiguration(callback) {
+    if (callback) {
       this.observers_.register('cancel-configuration', (params) => callback(params))
     }
   }
@@ -27,7 +27,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
 
     const btnAddHoneypots = container.querySelector('#add-honeypots');
 
-    if (btnAddHoneypots){
+    if (btnAddHoneypots) {
       btnAddHoneypots.disabled = true;
     }
 
@@ -110,7 +110,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
         const btnIgnoreConfig = container.querySelector('#ignore-config');
 
         if (btnIgnoreConfig) {
-            btnIgnoreConfig.disabled = true;
+          btnIgnoreConfig.disabled = true;
         }
 
         const loader = event.target.querySelector('#ignore-loader');
@@ -125,7 +125,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
 
     let template = ``;
 
-    if (this.selects_.length){
+    if (this.selects_.length) {
       this.selects_.forEach((select) => select.destroy())
     }
     if (this.status_ === 'inactive') {
@@ -156,7 +156,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
         </label>
       </div>
         <h3 class="mt-4">${i18next.t('2 - Choisissez des sous-domaines')}</h3>
-        <div>${i18next.t('Saisissez trois noms de sous-domaines vous appartenant. Nous utiliserons ceux-ci pour alimenter vos honeypots.')}</div>      <form class="mt-4" id="tld-form" class="needs-validation" novalidate>
+        <div>${i18next.t('Saisissez trois noms de sous-domaines vous appartenant MAIS QUE VOUS N\'UTILISEZ PAS. Nous utiliserons ceux-ci pour alimenter vos honeypots.')}</div>      <form class="mt-4" id="tld-form" class="needs-validation" novalidate>
         <div class="d-flex mb-2 mt-3">
             <div class="mb-1 flex-grow-1">
                 <input id="honeypot1-input" class="bp4-input w-100" type="text"
@@ -200,21 +200,21 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
       </form>`;
     } else if (this.status_ === "dns_setup") {
       template = `
-        <div class="d-flex light-orange p-4 border-orange">
-            <div class="my-auto mx-2">
+        <div class="d-flex light-orange p-4 border-orange mt-4">
+          <div class="my-auto mx-2">
             <i class="fal fa-sync fa-2x float-end"></i>
-            </div>
-            <div>
-                <div class="fw-bold">${i18next.t('Statut de la configuration :')}</div>
-                <div>${i18next.t('En attente de la configuration de vos DNS.')}</div>
-            </div>
+          </div>
+          <div>
+            <div class="fw-bold">${i18next.t('Statut de la configuration :')}</div>
+            <div>${i18next.t('En attente de la configuration de vos DNS.')}</div>
+          </div>
         </div>
         <div class="my-2 d-flex flex-column flex-grow-1">
-            <div class="fw-bold px-2 my-2">${i18next.t('Routez chacun de vos DNS vers ladresse IP y étant associée :')}</div>
-            <div class="flex-grow-1 overflow-auto" id="dns-table"></div>
+          <div class="fw-bold px-2 my-2">${i18next.t('Routez chacun de vos DNS vers ladresse IP y étant associée :')}</div>
+          <div class="flex-grow-1 overflow-auto" id="dns-table"></div>
         </div>
         <div class="my-2 text-right flex-grow-1">
-            <a href="#" class="orange fw-bold" id="end-config">${i18next.t('terminer >')}</a>
+          <a href="#" class="orange fw-bold" id="end-config">${i18next.t('terminer >')}</a>
         </div>`;
 
       setTimeout(() => {
@@ -228,6 +228,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
         let alignment = ['left', 'left', 'left'];
 
         const dnsData = this.honeypots_.map(honeypot => {
+
           let type, value;
 
           switch (honeypot.value_3) {
@@ -245,8 +246,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
             default:
               break;
           }
-
-          return { type, nom: honeypot.value_0, value: value };
+          return {type, nom: honeypot.value_0, value: value};
         });
 
         const table = new Table(this.container.querySelector('#dns-table'), columns, alignment,
@@ -261,7 +261,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
               data => createNode('div', data.value),
             ]
           },
-          [100, 100,100],
+          [100, 100, 100],
           [
             (a, b) => {
               if (!a.type || !b.type) {
@@ -287,41 +287,50 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
         table.data = dnsData;
       }, 2000); // 2000 milliseconds = 2 seconds
 
-
-    }
-    else if (this.status_ === "honeypot_setup") {
+    } else if (this.status_ === "honeypot_setup") {
       template = `
-      <div class="d-flex light-orange p-4 border-orange">
-        <div class="my-auto mx-2">
-          <i class="fal fa-sync fa-2x float-end"></i>
+        <div class="d-flex light-orange p-4 border-orange mt-4">
+          <div class="my-auto mx-2">
+            <i class="fal fa-sync fa-2x float-end"></i>
+          </div>
+          <div>
+              <div class="fw-bold">${i18next.t('Statut de la configuration:')}</div>
+              <div>${i18next.t('Nous sommes en train de configurer vos honeypots.')}</div>
+          </div>
         </div>
-        <div>
-            <div class="fw-bold">${i18next.t('Statut de la configuration:')}</div>
-            <div>${i18next.t('Nous sommes en train de configurer vos honeypots.')}</div>
-        </div>
-      </div>
-      <div class="my-2">
-        <div class="fw-bold px-2">${i18next.t('ComputableFacts s\'occupe actuellement de la configuration de vos honeypots.')}</div>
-        <div class="px-2 my-2">${i18next.t('Nous vous tiendrons au courant dès que ceux-ci seront actifs.')}</div>
-      </div>`;
+        <div class="my-2">
+          <div class="fw-bold px-2">
+            ${i18next.t('ComputableFacts s\'occupe actuellement de la configuration de vos honeypots.')}
+          </div>
+          <div class="px-2 my-2">
+            ${i18next.t('Nous vous tiendrons au courant dès que ceux-ci seront actifs.')}
+          </div>
+          <button id="ignore-config" type="button" class="btn btn-primary rounded-0 mb-1 w-100 mt-4">
+            ${i18next.t('Accéder au tableau de bord')} <i id="ignore-loader" class="ms-2 d-none fas fa-spinner fa-spin"></i>
+          </button>
+        </div>`;
     } else if (this.status === "setup_complete") {
       template = `
-      <div class="d-flex light-green p-4 border-green">
-        <div class="my-auto mx-2">
-          <i class="fal fa-check fa-2x float-end"></i>
+        <div class="d-flex light-green p-4 border-green mt-4">
+          <div class="my-auto mx-2">
+            <i class="fal fa-check fa-2x float-end"></i>
+          </div>
+          <div>
+            <div class="fw-bold">${i18next.t('Status HoneyPot:')}</div>
+            <div> ${i18next.t('Votre HoneyPot est maintenant opérationnel.')}</div>
+          </div>
         </div>
-        <div>
-          <div class="fw-bold"> ${i18next.t('Status HoneyPot:')} </div>
-          <div> ${i18next.t('Votre HoneyPot est maintenant opérationnel.')} </div>
-        </div>
-      </div>
-      <div class="my-2">
-        <div class="fw-bold px-2"> ${i18next.t('La configuration de votre HoneyPot est terminée.')} </div>
-        <div class="px-2 my-2"> ${i18next.t('Vous pouvez dès maintenant accéder à votre tableau de bord.')} </div>
-        <button id="add-honeypots" type="button" class="btn btn-primary float-end rounded-0 mb-1">
-          ${i18next.t('Accéder au tableau de bord')}
-        </button>
-      </div>`;
+        <div class="my-2">
+          <div class="fw-bold px-2">
+            ${i18next.t('La configuration de votre HoneyPot est terminée.')}
+          </div>
+          <div class="px-2 my-2">
+            ${i18next.t('Vous pouvez dès maintenant accéder à votre tableau de bord.')}
+          </div>
+          <button id="add-honeypots" type="button" class="btn btn-primary float-end rounded-0 mb-1">
+            ${i18next.t('Accéder au tableau de bord')}
+          </button>
+        </div>`;
     }
     return template;
   }

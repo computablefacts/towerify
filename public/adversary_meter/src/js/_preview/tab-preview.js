@@ -192,7 +192,7 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
     if (!data.length){
       template += `
         <div class="background-light-grey border flex-grow-1 p-2 d-flex justify-content-center">
-          <p class="my-auto">${i18next.t('Aucune vulnérabilité détectée.')}</p>
+          <p class="my-auto">${i18next.t('Il n\'y a aucune vulnérabilité de détectée.')}</p>
         </div>`
       el.innerHTML = template;
       return;
