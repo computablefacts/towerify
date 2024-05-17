@@ -229,7 +229,17 @@ same thing at the same time.
       AWS_USE_PATH_STYLE_ENDPOINT=false
       AWS_BUCKET_PUBLIC=<your public bucket>
       AWS_BUCKET_PRIVATE=<your private bucket>
-      
+
+      # Emails (optional)
+      MAIL_MAILER=<your mailer>
+      MAIL_HOST=<your host>
+      MAIL_PORT=<your port>
+      MAIL_USERNAME=<your username>
+      MAIL_PASSWORD=<your password>
+      MAIL_ENCRYPTION=tls
+      MAIL_FROM_ADDRESS=<your email address>
+      MAIL_FROM_NAME="${APP_NAME}"
+
       # AdversaryMeter (optional)
       AM_URL=https://sentinel.computablefacts.com
       AM_IP_ADDRESSES=51.159.17.217,51.159.18.48,51.159.18.50,212.129.7.115
