@@ -15,7 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 
 Route::get('catalog', function () {
-    \Illuminate\Support\Facades\Auth::login(\App\User::where('email', 'engineering@computablefacts.com')->firstOrFail());
+    \Illuminate\Support\Facades\Auth::login(\App\User::where('email', config('towerify.admin.email'))->firstOrFail());
     $apps = \App\Models\Product::orderBy('name')
         ->get()
         ->map(function (\App\Models\Product $product) {
