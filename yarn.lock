@@ -3077,12 +3077,6 @@ lower-case@^2.0.2:
   dependencies:
     tslib "^2.0.3"
 
-lru-cache@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.npmjs.org/lru-cache/-/lru-cache-6.0.0.tgz"
-  dependencies:
-    yallist "^4.0.0"
-
 make-dir@^3.0.0, make-dir@^3.0.2, make-dir@^3.1.0:
   version "3.1.0"
   resolved "https://registry.npmjs.org/make-dir/-/make-dir-3.1.0.tgz"
@@ -4046,14 +4040,12 @@ selfsigned@^2.1.1:
     node-forge "^1"
 
 semver@^6.0.0, semver@^6.1.1, semver@^6.1.2, semver@^6.3.0:
-  version "6.3.0"
-  resolved "https://registry.npmjs.org/semver/-/semver-6.3.0.tgz"
+  version "6.3.1"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.1.tgz#556d2ef8689146e46dcea4bfdd095f3434dffcb4"
 
 semver@^7.3.2, semver@^7.3.5:
-  version "7.3.8"
-  resolved "https://registry.npmjs.org/semver/-/semver-7.3.8.tgz"
-  dependencies:
-    lru-cache "^6.0.0"
+  version "7.6.2"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.2.tgz#1e3b34759f896e8f14d6134732ce798aeb0c6e13"
 
 send@0.18.0:
   version "0.18.0"
@@ -4656,10 +4648,6 @@ xtend@^4.0.0:
 y18n@^5.0.5:
   version "5.0.8"
   resolved "https://registry.npmjs.org/y18n/-/y18n-5.0.8.tgz"
-
-yallist@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.npmjs.org/yallist/-/yallist-4.0.0.tgz"
 
 yaml@^1.10.0, yaml@^1.10.2:
   version "1.10.2"
