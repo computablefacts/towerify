@@ -11,7 +11,7 @@
     },
     "devDependencies": {
         "alpinejs": "3.10",
-        "axios": "^0.27",
+        "axios": "^0.28",
         "bootstrap": "5.3",
         "jquery": "^3.5.1",
         "laravel-mix": "^6.0.49",
