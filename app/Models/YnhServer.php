@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ServerStatusEnum;
 use App\Enums\SshTraceStateEnum;
 use App\Hashing\TwHasher;
 use App\Helpers\AdversaryMeter;
@@ -131,6 +132,44 @@ class YnhServer extends Model
     public function domain(): ?YnhDomain
     {
         return $this->domains->where('is_principal', true)->first();
+    }
+
+    public function status(): ServerStatusEnum
+    {
+        if (!$this->isReady()) {
+            return ServerStatusEnum::DOWN;
+        }
+
+        // Check if status is running
+        $minDate = Carbon::today()->subMinutes(10);
+        $isRunning = collect(DB::select("
+            SELECT COUNT(*) AS count
+            FROM ynh_osquery
+            WHERE ynh_server_id = {$this->id}
+            -- AND name IN ('memory_available_snapshot', 'disk_available_snapshot')
+            AND calendar_time >= '{$minDate->toDateString()}'
+        "))->first();
+
+        if ($isRunning->count > 0) {
+            return ServerStatusEnum::RUNNING;
+        }
+
+        // Check if status is unknown
+        $minDate = $minDate->subMinutes(10);
+        $isUnknown = collect(DB::select("
+            SELECT COUNT(*) AS count
+            FROM ynh_osquery
+            WHERE ynh_server_id = {$this->id}
+            -- AND name IN ('memory_available_snapshot', 'disk_available_snapshot')
+            AND calendar_time >= '{$minDate->toDateString()}'
+        "))->first();
+
+        if ($isUnknown->count > 0) {
+            return ServerStatusEnum::UNKNOWN;
+        }
+
+        // Here, the server is probably down :-(
+        return ServerStatusEnum::DOWN;
     }
 
     public function sshKeyPair(): SshKeyPair
