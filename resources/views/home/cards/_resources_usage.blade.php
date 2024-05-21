@@ -57,30 +57,32 @@
         };
       }
 
-      @foreach($memory_usage as $serverId => $usage)
-      memory_series['{{ $serverId }}'] = @json($usage);
+      @foreach($memory_usage as $serverName => $usage)
+      memory_series['{{ $serverName }}'] = @json($usage);
       @endforeach
-      @foreach($disk_usage as $serverId => $usage)
-      disk_series['{{ $serverId }}'] = @json($usage);
+      @foreach($disk_usage as $serverName => $usage)
+      disk_series['{{ $serverName }}'] = @json($usage);
       @endforeach
 
     </script>
-    @foreach($memory_usage as $serverId => $usage)
+    <?php $serverNames = $memory_usage->keys()->concat($disk_usage->keys())->unique()->sort() ?>
+    @foreach($serverNames as $serverName)
+    <?php $serverId = md5($serverName) ?>
     <div class="row p-4">
       <div class="col-6">
         <canvas id="chart-memory-{{ $serverId }}" style="height:300px;"></canvas>
         <script>
-          memory_charts['{{ $serverId }}'] = new Chart(
+          memory_charts['{{ $serverName }}'] = new Chart(
             document.getElementById("chart-memory-{{ $serverId }}").getContext('2d'),
-            barChartConfig(memory_series['{{ $serverId }}'], 'Memory Usage', 'Memory Used (Gb)', 'Memory Left (Gb)'));
+            barChartConfig(memory_series['{{ $serverName }}'], 'Memory Usage', 'Memory Used (Gb)', 'Memory Left (Gb)'));
         </script>
       </div>
       <div class="col-6">
         <canvas id="chart-disk-{{ $serverId }}" style="height:300px;"></canvas>
         <script>
-          disk_charts['{{ $serverId }}'] = new Chart(
+          disk_charts['{{ $serverName }}'] = new Chart(
             document.getElementById("chart-disk-{{ $serverId }}").getContext('2d'),
-            barChartConfig(disk_series['{{ $serverId }}'], 'Disk Usage', 'Disk Used (Gb)', 'Disk Left (Gb)'));
+            barChartConfig(disk_series['{{ $serverName }}'], 'Disk Usage', 'Disk Used (Gb)', 'Disk Left (Gb)'));
         </script>
       </div>
     </div>
