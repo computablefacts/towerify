@@ -321,6 +321,8 @@ if [ -f /etc/osquery/forward-snapshots.sh ]; then
 fi
 
 cat /etc/osquery/osquery.conf | \
+  jq $'del(.schedule.socket_events)' | \
+  jq $'del(.schedule.network_interfaces_snapshot)' | \
   jq $'.schedule.packages_available_snapshot += {query:"SELECT name, version, source FROM deb_packages;",interval:86400,snapshot:true}' | \
   jq $'.schedule.memory_available_snapshot += {query:"select printf(\'%.2f\',((memory_total - memory_available) * 1.0)/1073741824) as used_space_gb, printf(\'%.2f\',(1.0 * memory_available / 1073741824)) as space_left_gb, printf(\'%.2f\',(1.0 * memory_total / 1073741824)) as total_space_gb, printf(\'%.2f\',(((memory_total - memory_available) * 1.0)/1073741824)/(1.0 * memory_total / 1073741824)) * 100 as \'%_used\', printf(\'%.2f\',(1.0 * memory_available / 1073741824)/(1.0 * memory_total / 1073741824)) * 100 as \'%_available\' from memory_info;",interval:300,snapshot:true}' | \
   jq $'.schedule.disk_available_snapshot += {query:"select printf(\'%.2f\',((blocks - blocks_available * 1.0) * blocks_size)/1073741824) as used_space_gb, printf(\'%.2f\',(1.0 * blocks_available * blocks_size / 1073741824)) as space_left_gb, printf(\'%.2f\',(1.0 * blocks * blocks_size / 1073741824)) as total_space_gb, printf(\'%.2f\',(((blocks - blocks_available * 1.0) * blocks_size)/1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 as \'%_used\', printf(\'%.2f\',(1.0 * blocks_available * blocks_size / 1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 as \'%_available\' from mounts where path = \'/\';",interval:300,snapshot:true}' \
