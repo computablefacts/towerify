@@ -15,16 +15,16 @@
         @else
         @foreach($pendingActions as $pendingAction)
         <div>
-          @if($pendingAction->state->value === 'pending')
+          @if($pendingAction->state === \App\Enums\SshTraceStateEnum::PENDING)
           <span class="me-2 tw-dot-blue"></span>
-          @elseif ($pendingAction->state->value === 'in_progress')
+          @elseif ($pendingAction->state === \App\Enums\SshTraceStateEnum::IN_PROGRESS)
           <span class="me-2 tw-dot-orange"></span>
-          @elseif ($pendingAction->state->value === 'done')
+          @elseif ($pendingAction->state === \App\Enums\SshTraceStateEnum::DONE)
           <span class="me-2 tw-dot-green"></span>
           @else
           <span class="me-2 tw-dot-red"></span>
           @endif
-          {{ $pendingAction->updated_at }} - {{ $pendingAction->trace }}
+          {{ $pendingAction->updated_at }} - {{ $pendingAction->server->name }} - {{ $pendingAction->trace }}
         </div>
         @endforeach
         @endif

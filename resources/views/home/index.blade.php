@@ -6,6 +6,8 @@
   <span class="breadcrumb-item active">{{ __('My Apps') }}</span>
   @elseif($tab === 'servers')
   <span class="breadcrumb-item active">{{ __('Servers') }}</span>
+  @elseif($tab === 'traces')
+  <span class="breadcrumb-item active">{{ __('Traces') }}</span>
   @elseif($tab === 'interdependencies')
   <span class="breadcrumb-item active">{{ __('Interdependencies') }}</span>
   @elseif($tab === 'resources_usage')
@@ -42,6 +44,14 @@
       <a class="nav-link {{ $tab === 'servers' ? 'active' : '' }}"
          href="/home?tab=servers">
         {{ __('Servers') }}
+      </a>
+    </li>
+    @endif
+    @if(Auth::user()->canListServers())
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'traces' ? 'active' : '' }}"
+         href="/home?tab=traces">
+        {{ __('Traces') }}
       </a>
     </li>
     @endif
@@ -117,6 +127,21 @@
   @endif
   @if($tab === 'interdependencies')
   @include('home.cards._interdependencies')
+  @endif
+  @if($tab === 'traces')
+  <div class="row">
+    <div class="col-12">
+      @include('home.cards._pending_actions')
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      @include('home.cards._traces')
+    </div>
+  </div>
+  <script>
+    setTimeout(() => window.location.reload(), 15000);
+  </script>
   @endif
 </div>
 @endsection

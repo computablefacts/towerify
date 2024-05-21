@@ -1,25 +1,39 @@
 @if(Auth::user()->canListServers())
-<div class="card card-accent-secondary tw-card">
+@if($traces->isEmpty())
+<div class="card card-accent-secondary mt-4 tw-card">
   <div class="card-header">
     <h3 class="m-0"><b>{{ __('Traces') }}</b></h3>
   </div>
   <div class="card-body">
     <div class="row">
       <div class="mb-3 col">
-        @if($traces->isEmpty())
         <div class="row">
           <div class="col">
             None.
           </div>
         </div>
-        @else
-        @foreach($traces as $trace)
+      </div>
+    </div>
+  </div>
+</div>
+@else
+<?php $tracesGroupedByServers = $traces->groupBy(fn($trace) => $trace->server->name) ?>
+<?php $servers = $tracesGroupedByServers->map(fn($traces, $server) => $server)->sort() ?>
+@foreach($servers as $server)
+<div class="card card-accent-secondary mt-4 tw-card">
+  <div class="card-header">
+    <h3 class="m-0"><b>{{ $server }} / {{ __('Latest traces') }}</b></h3>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="mb-3 col">
+        @foreach($tracesGroupedByServers[$server] as $trace)
         <div>
-          @if($trace->state->value === 'pending')
+          @if($trace->state === \App\Enums\SshTraceStateEnum::PENDING)
           <span class="me-2 tw-dot-blue"></span>
-          @elseif ($trace->state->value === 'in_progress')
+          @elseif ($trace->state === \App\Enums\SshTraceStateEnum::IN_PROGRESS)
           <span class="me-2 tw-dot-orange"></span>
-          @elseif ($trace->state->value === 'done')
+          @elseif ($trace->state === \App\Enums\SshTraceStateEnum::DONE)
           <span class="me-2 tw-dot-green"></span>
           @else
           <span class="me-2 tw-dot-red"></span>
@@ -27,9 +41,10 @@
           {{ $trace->updated_at }} - {{ $trace->trace }}
         </div>
         @endforeach
-        @endif
       </div>
     </div>
   </div>
 </div>
+@endforeach
+@endif
 @endif

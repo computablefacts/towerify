@@ -29,4 +29,9 @@ class YnhSshTraces extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function server(): BelongsTo
+    {
+        return $this->belongsTo(YnhServer::class, 'ynh_server_id', 'id');
+    }
 }

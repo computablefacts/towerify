@@ -35,7 +35,7 @@ class YnhServer extends Model
         'ssh_public_key',
         'ssh_private_key',
         'user_id', // the user who created this server
-        'updated', // restricted usage to UpdateServersInfos
+        'updated', // restricted usage to PullServersInfos
         'is_ready',
         'ynh_order_id',
         'secret',
