@@ -48,7 +48,13 @@
       @foreach($servers->sortBy('name') as $server)
       <tr>
         <td class="ps-4" width="25px">
-          <span class="{{ $server->is_ready ? 'tw-dot-green' : 'tw-dot-red' }}"></span>
+          @if($server->status() === \App\Enums\ServerStatusEnum::RUNNING)
+          <span class="tw-dot-green"></span>
+          @elseif($server->status() === \App\Enums\ServerStatusEnum::UNKNOWN)
+          <span class="tw-dot-orange"></span>
+          @else
+          <span class="tw-dot-red"></span>
+          @endif
         </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
