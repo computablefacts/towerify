@@ -34,8 +34,8 @@ class HomeController extends Controller
         $disk_usage = collect();
 
         if ($tab === 'resources_usage') {
-            $memory_usage = $this->memoryUsage($servers)->groupBy('ynh_server_id');
-            $disk_usage = $this->diskUsage($servers)->groupBy('ynh_server_id');
+            $memory_usage = $this->memoryUsage($servers)->groupBy('ynh_server_name');
+            $disk_usage = $this->diskUsage($servers)->groupBy('ynh_server_name');
         }
 
         $security_events = collect();
