@@ -61,7 +61,7 @@
       content: () => {
         const div = document.createElement('div');
         div.classList.add('popper-div');
-        div.innerHTML = edge.services.join('\n');
+        div.innerHTML = `<div>${edge.services.join('</div><div>')}</div>`;
         document.body.appendChild(div);
         return div;
       },
