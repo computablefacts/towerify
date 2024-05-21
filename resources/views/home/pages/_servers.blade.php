@@ -69,7 +69,7 @@
   @include('home.cards._backups', [ 'backups' => $server->backups ])
   @endif
   @if($tab === 'traces')
-  <div class="row mb-4">
+  <div class="row">
     <div class="col-12">
       @include('home.cards._pending_actions', [ 'pendingActions' => $server->pendingActions() ])
     </div>

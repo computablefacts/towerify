@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invitation;
 use App\Models\YnhOrder;
 use App\Models\YnhServer;
+use App\Models\YnhSshTraces;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -62,6 +63,22 @@ class HomeController extends Controller
             $invitations = Invitation::whereNull('user_id')->get();
         }
 
+        $pendingActions = collect();
+        $traces = collect();
+
+        if ($tab === 'traces') {
+            $pendingActions = $servers->flatMap(fn(YnhServer $server) => $server->pendingActions())
+                ->sortBy([
+                    fn(YnhSshTraces $a, YnhSshTraces $b) => $a->updated_at->diffInMilliseconds($b->updated_at),
+                    fn(YnhSshTraces $a, YnhSshTraces $b) => strcmp($a->server->name, $b->server->name),
+                ]);
+            $traces = $servers->flatMap(fn(YnhServer $server) => $server->latestTraces())
+                ->sortBy([
+                    fn(YnhSshTraces $a, YnhSshTraces $b) => strcmp($a->server->name, $b->server->name),
+                    fn(YnhSshTraces $a, YnhSshTraces $b) => $b->order - $a->order,
+                ]);
+        }
+
         $users = collect();
 
         if ($tab === 'users') {
@@ -75,7 +92,7 @@ class HomeController extends Controller
                 $users = User::where('is_active', true)->get();
             }
         }
-        return view('home.index', compact('tab', 'servers', 'orders', 'users', 'invitations', 'memory_usage', 'disk_usage', 'security_events', 'interdependencies'));
+        return view('home.index', compact('tab', 'servers', 'orders', 'users', 'invitations', 'memory_usage', 'disk_usage', 'security_events', 'interdependencies', 'traces', 'pendingActions'));
     }
 
     private function memoryUsage(Collection $servers): Collection
