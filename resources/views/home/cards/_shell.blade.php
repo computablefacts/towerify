@@ -96,7 +96,7 @@
       <pre id="shell-content">
         <div id="shell-logo">
           {{ $server->name }} - {{ $server->ip() }}<span></span>
-          {{ Auth::user()->ynhUsername() }}<span></span>
+          Logged in as {{ $server->ssh_username }}!<span></span>
         </div>
       </pre>
       <div id="shell-input">
@@ -110,6 +110,7 @@
 </div>
 <script>
 
+  const loadingIndicator = 'Running...';
   const commandHistory = [];
   let historyPosition = 0;
   let eShellCmdInput = null;
@@ -130,12 +131,13 @@
     eShellContent.innerHTML += "\n\n";
     eShellContent.innerHTML += '<span class=\"shell-prompt\">' + genPrompt() + '</span> ';
     eShellContent.innerHTML += escapeHtml(command);
-    eShellContent.innerHTML += "\n";
+    eShellContent.innerHTML += "\n" + loadingIndicator;
     eShellContent.scrollTop = eShellContent.scrollHeight;
   }
 
   function _insertStdout(stdout) {
-    eShellContent.innerHTML += escapeHtml(stdout);
+    eShellContent.innerHTML = eShellContent.innerHTML.substring(0,
+      eShellContent.innerHTML.lastIndexOf(loadingIndicator)) + escapeHtml(stdout);
     eShellContent.scrollTop = eShellContent.scrollHeight;
   }
 
