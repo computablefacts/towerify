@@ -822,19 +822,21 @@ EOT;
                 if (!array_key_exists($fromIp, $fromId)) {
                     $fromServer = YnhServer::where('ip_address', $fromIp)->first();
                     if ($fromServer) {
-                        $fromId[$fromIp] = $fromServer ? $fromServer->id : null;
+                        $fromId[$fromIp] = $fromServer->id;
                     } else {
                         $fromServer = YnhServer::where('ip_address_v6', $fromIp)->first();
-                        $fromId[$fromIp] = $fromServer ? $fromServer->id : null;
+                        if ($fromServer) {
+                            $fromId[$fromIp] = $fromServer->id;
+                        }
                     }
                 }
 
                 YnhNginxLogs::updateOrCreate([
-                    'to_ynh_server_id' => $toId,
                     'from_ip_address' => $fromIp,
+                    'to_ynh_server_id' => $toId,
                     'service' => $service,
                 ], [
-                    'from_ynh_server_id' => $fromId[$fromIp],
+                    'from_ynh_server_id' => $fromId[$fromIp] ?? null,
                     'to_ynh_server_id' => $toId,
                     'from_ip_address' => $fromIp,
                     'to_ip_address' => $toIp,
