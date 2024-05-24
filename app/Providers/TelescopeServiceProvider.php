@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Laravel\Telescope\EntryType;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
@@ -21,13 +23,28 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         $isLocal = $this->app->environment('local');
 
-        Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
-            return $isLocal ||
-                $entry->isReportableException() ||
-                $entry->isFailedRequest() ||
-                $entry->isFailedJob() ||
-                $entry->isScheduledTask() ||
-                $entry->hasMonitoredTag();
+        Telescope::filterBatch(function (Collection $entries) use ($isLocal) {
+            return $isLocal || $entries->contains(function ($entry) {
+
+                    /** @var IncomingEntry $entry */
+
+                    return $this->isLogEntry($entry) ||
+                        $entry->isReportableException() ||
+                        $entry->isFailedRequest() ||
+                        $entry->isFailedJob() ||
+                        $this->isLogEntry($entry) ||
+                        $this->isSlowQuery($entry) ||
+                        $this->isSlowRequest($entry) ||
+                        $entry->isScheduledTask() ||
+                        $entry->hasMonitoredTag();
+                });
+        });
+
+        Telescope::tag(function (IncomingEntry $entry) {
+            if ($entry->type === 'request') {
+                return ['status:' . $entry->content['response_status']];
+            }
+            return [];
         });
     }
 
@@ -69,5 +86,22 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     private function whitelistDomains(): array
     {
         return collect(config('towerify.telescope.whitelist.domains'))->map(fn(string $domain) => '@' . $domain)->toArray();
+    }
+
+    private function isSlowQuery(IncomingEntry $entry): bool
+    {
+        return $entry->type === EntryType::QUERY && ($entry->content['slow'] ?? false);
+    }
+
+    private function isSlowRequest(IncomingEntry $entry): bool
+    {
+        return ($entry->type === EntryType::REQUEST) &&
+            array_key_exists('duration', $entry->content) &&
+            $entry->content['duration'] > 5000;
+    }
+
+    private function isLogEntry(IncomingEntry $entry): bool
+    {
+        return $entry->type === EntryType::LOG;
     }
 }
