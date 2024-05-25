@@ -48,6 +48,8 @@ class YnhServer extends Model
 
     protected $hidden = ['ssh_private_key', 'secret'];
 
+    private ?ServerStatusEnum $statusCached = null;
+
     public static function forUser(User $user, bool $readyOnly = false): Collection
     {
         if (!$user) {
@@ -139,6 +141,9 @@ class YnhServer extends Model
         if (!$this->isReady()) {
             return ServerStatusEnum::DOWN;
         }
+        if ($this->statusCached) {
+            return $this->statusCached;
+        }
 
         // Check if status is running
         $minDate = Carbon::today()->subMinutes(10);
@@ -147,11 +152,12 @@ class YnhServer extends Model
             FROM ynh_osquery
             WHERE ynh_server_id = {$this->id}
             -- AND name IN ('memory_available_snapshot', 'disk_available_snapshot')
-            AND calendar_time >= '{$minDate->toDateString()}'
+            AND calendar_time >= '{$minDate->toDateTimeString()}'
         "))->first();
 
         if ($isRunning->count > 0) {
-            return ServerStatusEnum::RUNNING;
+            $this->statusCached = ServerStatusEnum::RUNNING;
+            return $this->statusCached;
         }
 
         // Check if status is unknown
@@ -161,15 +167,17 @@ class YnhServer extends Model
             FROM ynh_osquery
             WHERE ynh_server_id = {$this->id}
             -- AND name IN ('memory_available_snapshot', 'disk_available_snapshot')
-            AND calendar_time >= '{$minDate->toDateString()}'
+            AND calendar_time >= '{$minDate->toDateTimeString()}'
         "))->first();
 
         if ($isUnknown->count > 0) {
-            return ServerStatusEnum::UNKNOWN;
+            $this->statusCached = ServerStatusEnum::UNKNOWN;
+            return $this->statusCached;
         }
 
         // Here, the server is probably down :-(
-        return ServerStatusEnum::DOWN;
+        $this->statusCached = ServerStatusEnum::DOWN;
+        return $this->statusCached;
     }
 
     public function sshKeyPair(): SshKeyPair
