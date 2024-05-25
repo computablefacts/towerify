@@ -46,6 +46,8 @@ RUN apt-get update && apt-get install -y \
     dnsutils
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
+# imagick/imagick@master : see https://github.com/Imagick/imagick/issues/640#issuecomment-2077206945 for details
 RUN install-php-extensions \
         intl \
         pcntl \
@@ -53,7 +55,7 @@ RUN install-php-extensions \
         pdo_pgsql \
         exif \
         opcache \
-        imagick
+        imagick/imagick@master
 
 # PHP configuration
 # Use the default production configuration
