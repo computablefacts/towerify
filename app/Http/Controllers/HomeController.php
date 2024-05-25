@@ -317,12 +317,9 @@ class HomeController extends Controller
         $ids = $servers->pluck('id')->join(',');
         $nodes = $servers->isEmpty() ? collect() : collect(DB::select("
             SELECT
-              CASE 
-                WHEN ynh_servers.name IS NULL THEN from_ip_address 
-                ELSE ynh_servers.name 
-              END AS label
+              ynh_servers.name AS label
             FROM ynh_nginx_logs 
-            LEFT JOIN ynh_servers ON ynh_servers.id = to_ynh_server_id
+            INNER JOIN ynh_servers ON ynh_servers.id = from_ynh_server_id
             WHERE from_ynh_server_id IN ({$ids})
             AND from_ip_address NOT IN ('{$adversaryMeterIpAddresses}') 
 
@@ -355,7 +352,7 @@ class HomeController extends Controller
               target.name AS dest,
               GROUP_CONCAT(service SEPARATOR '|') AS services
             FROM ynh_nginx_logs
-            LEFT JOIN ynh_servers AS source ON source.id = from_ynh_server_id
+            INNER JOIN ynh_servers AS source ON source.id = from_ynh_server_id
             INNER JOIN ynh_servers AS target ON target.id = to_ynh_server_id
             WHERE from_ip_address NOT IN ('{$adversaryMeterIpAddresses}')
             AND from_ynh_server_id IN ({$ids})

@@ -63,7 +63,12 @@ class YnhServerController extends Controller
 
     public function testSshConnection(YnhServer $server, TestSshConnectionRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $isOk = $server->sshKeyPair()->isSshConnectionUpAndRunning($request->ip, $request->port, $request->username);
+
         if ($isOk) {
             return response()->json(['success' => 'Connection succeeded.']);
         }
@@ -72,6 +77,9 @@ class YnhServerController extends Controller
 
     public function configure(YnhServer $server, ConfigureHostRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
         if ($server->isReady()) {
             return response()->json(['error' => "The server has already been setup. Please, contact the support for more informations."]);
         }
@@ -137,6 +145,10 @@ class YnhServerController extends Controller
 
     public function installOsquery(YnhServer $server, InstallOsqueryRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $uid = Str::random(10);
         $ssh = $server->sshConnection($uid, Auth::user());
         if ($server->sshInstallOsquery($ssh)) {
@@ -177,6 +189,10 @@ class YnhServerController extends Controller
 
     public function delete(YnhServer $server, RemoveHostRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $uid = Str::random(10);
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The server is being removed from the inventory!");
@@ -201,6 +217,10 @@ class YnhServerController extends Controller
 
     public function uninstallApp(YnhServer $server, YnhApplication $application, UninstallAppRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $uid = Str::random(10);
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "Your application is being removed!");
@@ -212,6 +232,10 @@ class YnhServerController extends Controller
 
     public function installApp(YnhServer $server, YnhOrder $ynhOrder, InstallAppRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $order = $ynhOrder;
 
         if (!$server->isReady()) {
@@ -235,6 +259,10 @@ class YnhServerController extends Controller
 
     public function addTwrUserPermission(YnhServer $server, User $user, string $perm, AddUserPermissionRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         // TODO : sanity checks
 
         $uid = Str::random(10);
@@ -248,6 +276,10 @@ class YnhServerController extends Controller
 
     public function addUserPermission(YnhServer $server, YnhUser $ynhUser, string $perm, AddUserPermissionRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $user = $ynhUser;
 
         // TODO : sanity checks
@@ -263,6 +295,10 @@ class YnhServerController extends Controller
 
     public function removeUserPermission(YnhServer $server, YnhUser $ynhUser, string $perm, RemoveUserPermissionRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $user = $ynhUser;
 
         // TODO : sanity checks
@@ -278,6 +314,10 @@ class YnhServerController extends Controller
 
     public function pullServerInfos(YnhServer $server, PullServerInfosRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $uid = Str::random(10);
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The server infos are being pulled!");
@@ -289,6 +329,10 @@ class YnhServerController extends Controller
 
     public function createBackup(YnhServer $server, CreateBackupRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $uid = Str::random(10);
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The server backup is being created!");
@@ -300,6 +344,10 @@ class YnhServerController extends Controller
 
     public function downloadBackup(YnhServer $server, YnhBackup $backup, DownloadBackupRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $serverTenantId = $server->user->tenant_id;
         $serverCustomerId = $server->user->customer_id;
 
@@ -358,6 +406,10 @@ class YnhServerController extends Controller
 
     public function executeShellCommand(YnhServer $server, ExecuteShellCommandRequest $request)
     {
+        if ($server->isFrozen()) {
+            return response()->json(['error' => "The server configuration is frozen."]);
+        }
+
         $cmd = $request->get('cmd');
         $uid = Str::random(10);
         $ssh = $server->sshConnection($uid, Auth::user());

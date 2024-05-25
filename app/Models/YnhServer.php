@@ -39,11 +39,13 @@ class YnhServer extends Model
         'is_ready',
         'ynh_order_id',
         'secret',
+        'is_frozen',
     ];
 
     protected $casts = [
         'updated' => 'boolean',
         'is_ready' => 'boolean',
+        'is_frozen' => 'boolean',
     ];
 
     protected $hidden = ['ssh_private_key', 'secret'];
@@ -121,6 +123,11 @@ class YnhServer extends Model
         return $this->is_ready !== null && $this->is_ready;
     }
 
+    public function isFrozen(): bool
+    {
+        return $this->is_frozen;
+    }
+
     public function ip(): ?string
     {
         return $this->ip_address;
@@ -138,6 +145,9 @@ class YnhServer extends Model
 
     public function status(): ServerStatusEnum
     {
+        if ($this->isFrozen()) {
+            return ServerStatusEnum::UNKNOWN;
+        }
         if (!$this->isReady()) {
             return ServerStatusEnum::DOWN;
         }

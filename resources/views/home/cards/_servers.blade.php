@@ -48,7 +48,9 @@
       @foreach($servers->sortBy('name') as $server)
       <tr>
         <td class="ps-4" width="25px">
-          @if($server->status() === \App\Enums\ServerStatusEnum::RUNNING)
+          @if($server->isFrozen())
+          <span class="tw-dot-blue"></span>
+          @elseif($server->status() === \App\Enums\ServerStatusEnum::RUNNING)
           <span class="tw-dot-green"></span>
           @elseif($server->status() === \App\Enums\ServerStatusEnum::UNKNOWN)
           <span class="tw-dot-orange"></span>
@@ -58,38 +60,58 @@
         </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
+            @if($server->isFrozen())
+            {{ $server->name }}
+            @else
             <a href="{{ route('ynh.servers.edit', $server->id) }}">
               {{ $server->name }}
             </a>
+            @endif
           </span>
         </td>
         <td>
           {{ $server->ip() }}
         </td>
         <td>
-          @if($server->ipv6() === "<unavailable>")
-            -
+          @if($server->isFrozen() || $server->ipv6() === "<unavailable>")
+          -
           @else
-            {{ $server->ipv6() }}
+          {{ $server->ipv6() }}
           @endif
         </td>
         <td>
+          @if($server->isFrozen())
+          -
+          @else
           {{ $server->domain()?->name }}
+          @endif
         </td>
         <td>
+          @if($server->isFrozen())
+          -
+          @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=domains">
             {{ $server->domains->count() }}
           </a>
+          @endif
         </td>
         <td>
+          @if($server->isFrozen())
+          -
+          @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=applications">
             {{ $server->applications->count() }}
           </a>
+          @endif
         </td>
         <td>
+          @if($server->isFrozen())
+          -
+          @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=users">
             {{ $server->users->count() }}
           </a>
+          @endif
         </td>
         <th>
           @if($server->isReady() && Auth::user()->canManageServers())
