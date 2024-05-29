@@ -64,7 +64,7 @@ class ConfigureHostListener extends AbstractListener
             foreach ($this->ipAddresses() as $ip) {
                 $isOk = $isOk && $server->sshDoWhitelistIpAddress($ssh, $ip);
             }
-            foreach ($this->ipDockerAddresses() as $ip) {
+            foreach ($this->dockerIpAddresses() as $ip) {
                 $isOk = $isOk && $server->sshDoWhitelistIpAddress($ssh, $ip);
             }
 
@@ -104,7 +104,7 @@ class ConfigureHostListener extends AbstractListener
         return config('towerify.adversarymeter.ip_addresses');
     }
 
-    private function ipDockerAddresses(): array
+    private function dockerIpAddresses(): array
     {
         return ['172.16.0.0/12', '192.168.0.0/16', '10.0.0.0/8'];
     }
