@@ -60,6 +60,4 @@
   </div>
   @endif
 </div>
-<script>
-</script>
 @endif

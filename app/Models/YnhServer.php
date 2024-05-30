@@ -156,13 +156,12 @@ class YnhServer extends Model
         }
 
         // Check if status is running
-        $minDate = Carbon::today()->subMinutes(10);
+        $minDate = Carbon::now()->subMinutes(10);
         $isRunning = collect(DB::select("
-            SELECT COUNT(*) AS count
-            FROM ynh_osquery
-            WHERE ynh_server_id = {$this->id}
-            -- AND name IN ('memory_available_snapshot', 'disk_available_snapshot')
-            AND calendar_time >= '{$minDate->toDateTimeString()}'
+          SELECT COUNT(id) AS count
+          FROM ynh_osquery
+          WHERE ynh_server_id = {$this->id}
+          AND calendar_time >= '{$minDate->toDateTimeString()}'
         "))->first();
 
         if ($isRunning->count > 0) {
@@ -173,11 +172,10 @@ class YnhServer extends Model
         // Check if status is unknown
         $minDate = $minDate->subMinutes(10);
         $isUnknown = collect(DB::select("
-            SELECT COUNT(*) AS count
-            FROM ynh_osquery
-            WHERE ynh_server_id = {$this->id}
-            -- AND name IN ('memory_available_snapshot', 'disk_available_snapshot')
-            AND calendar_time >= '{$minDate->toDateTimeString()}'
+          SELECT COUNT(id) AS count
+          FROM ynh_osquery
+          WHERE ynh_server_id = {$this->id}
+          AND calendar_time >= '{$minDate->toDateTimeString()}'
         "))->first();
 
         if ($isUnknown->count > 0) {
