@@ -92,7 +92,13 @@ class HomeController extends Controller
                 $users = User::where('is_active', true)->get();
             }
         }
-        return view('home.index', compact('tab', 'servers', 'orders', 'users', 'invitations', 'memory_usage', 'disk_usage', 'security_events', 'interdependencies', 'traces', 'pendingActions'));
+
+        $domains = collect();
+
+        if ($tab === 'domains') {
+            $domains = $servers->flatMap(fn(YnhServer $server) => $server->domains);
+        }
+        return view('home.index', compact('tab', 'servers', 'orders', 'users', 'invitations', 'memory_usage', 'disk_usage', 'security_events', 'interdependencies', 'traces', 'pendingActions', 'domains'));
     }
 
     private function memoryUsage(Collection $servers): Collection
