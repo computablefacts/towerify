@@ -1,4 +1,4 @@
-C@if(Auth::user()->canListServers())
+@if(Auth::user()->canListServers())
 <div class="card card-accent-secondary tw-card">
   <div class="card-header d-flex flex-row">
     <div class="align-items-start">
