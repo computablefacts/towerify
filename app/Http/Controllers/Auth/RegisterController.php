@@ -75,7 +75,7 @@ class RegisterController extends Controller
         $tenant = Tenant::create(['name' => Str::random()]);
 
         $user->tenant_id = $tenant->id;
-        $user->syncRoles([Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER]);
+        $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
         $user->type = UserType::CLIENT();
         $user->save();
 
