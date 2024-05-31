@@ -6,6 +6,8 @@
   <span class="breadcrumb-item active">{{ __('My Apps') }}</span>
   @elseif($tab === 'servers')
   <span class="breadcrumb-item active">{{ __('Servers') }}</span>
+  @elseif($tab === 'backups')
+  <span class="breadcrumb-item active">{{ __('Backups') }}</span>
   @elseif($tab === 'domains')
   <span class="breadcrumb-item active">{{ __('Domains') }}</span>
   @elseif($tab === 'applications')
@@ -48,6 +50,14 @@
       <a class="nav-link {{ $tab === 'servers' ? 'active' : '' }}"
          href="/home?tab=servers">
         {{ __('Servers') }}
+      </a>
+    </li>
+    @endif
+    @if(Auth::user()->canListServers())
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'backups' ? 'active' : '' }}"
+         href="/home?tab=backups">
+        {{ __('Backups') }}
       </a>
     </li>
     @endif
@@ -129,6 +139,9 @@
   @endif
   @if($tab === 'servers')
   @include('home.cards._servers')
+  @endif
+  @if($tab === 'backups')
+  @include('home.cards._towerify_backups')
   @endif
   @if($tab === 'domains')
   @include('home.cards._towerify_domains')

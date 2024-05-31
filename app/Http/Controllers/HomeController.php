@@ -106,7 +106,12 @@ class HomeController extends Controller
         if ($tab === "applications") {
             $applications = $servers->flatMap(fn(YnhServer $server) => $server->applications);
         }
-        return view('home.index', compact('tab', 'servers', 'orders', 'users', 'invitations', 'memory_usage', 'disk_usage', 'security_events', 'interdependencies', 'traces', 'pendingActions', 'domains', 'applications'));
+
+        $backups = collect();
+        if ($tab === 'backups') {
+            $backups = $servers->flatMap(fn(YnhServer $server) => $server->backups);
+        }
+        return view('home.index', compact('tab', 'servers', 'orders', 'users', 'invitations', 'memory_usage', 'disk_usage', 'security_events', 'interdependencies', 'traces', 'pendingActions', 'domains', 'applications', 'backups'));
     }
 
     private function memoryUsage(Collection $servers): Collection
