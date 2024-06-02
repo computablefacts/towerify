@@ -47,6 +47,7 @@ $apps = \App\Models\YnhPermission::apps(Auth::user())
               @else
               {{ $app->application->name }}
               @endif
+              &nbsp;&nbsp;<i class="zmdi zmdi-open-in-new"></i>
             </a>
           </span>
           <div class="text-muted">

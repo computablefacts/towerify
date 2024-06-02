@@ -8,7 +8,7 @@
     </div>
     @if(Auth::user()->canManageUsers())
     <div class="align-items-end">
-      <h3 class="m-0">
+      <h3 class="m-0 cursor-pointer">
         <a onclick="toggleForm()">
           {{ __('+ new') }}
         </a>
@@ -52,20 +52,22 @@
     <table class="table table-hover">
       <thead>
       <tr>
-        <th>{{ __('Username') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Username') }}
+        </th>
         <th>{{ __('Email') }}</th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      @foreach($invitations->sortBy('name') as $invitation)
+      @foreach($invitations->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $invitation)
       <tr>
         <td>
           {{ $invitation->name }}
         </td>
         <td>
           <a href="mailto:{{ $invitation->email }}" target="_blank">
-            {{ $invitation->email }}
+            {{ $invitation->email }}&nbsp;&nbsp;<i class="zmdi zmdi-open-in-new"></i>
           </a>
         </td>
         <td>

@@ -24,21 +24,23 @@
     <table class="table table-hover">
       <thead>
       <tr>
-        <th>{{ __('Username') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Username') }}
+        </th>
         <th>{{ __('Email') }}</th>
         <th></th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      @foreach($users->sortBy('name') as $user)
+      @foreach($users->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $user)
       <tr>
         <td>
           {{ $user->name }}
         </td>
         <td>
           <a href="mailto:{{ $user->email }}" target="_blank">
-            {{ $user->email }}
+            {{ $user->email }}&nbsp;&nbsp;<i class="zmdi zmdi-open-in-new"></i>
           </a>
         </td>
         <td>

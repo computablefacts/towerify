@@ -31,7 +31,9 @@
       <tr>
         <th class="ps-4" width="25px"></th>
         <th width="70px"></th>
-        <th>{{ __('Date') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Date') }}
+        </th>
         <th>{{ __('Name') }}</th>
         <th>{{ __('Categories') }}</th>
         <th>{{ __('Order') }}</th>

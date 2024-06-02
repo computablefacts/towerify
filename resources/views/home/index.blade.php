@@ -6,6 +6,12 @@
   <span class="breadcrumb-item active">{{ __('My Apps') }}</span>
   @elseif($tab === 'servers')
   <span class="breadcrumb-item active">{{ __('Servers') }}</span>
+  @elseif($tab === 'backups')
+  <span class="breadcrumb-item active">{{ __('Backups') }}</span>
+  @elseif($tab === 'domains')
+  <span class="breadcrumb-item active">{{ __('Domains') }}</span>
+  @elseif($tab === 'applications')
+  <span class="breadcrumb-item active">{{ __('Applications') }}</span>
   @elseif($tab === 'traces')
   <span class="breadcrumb-item active">{{ __('Traces') }}</span>
   @elseif($tab === 'interdependencies')
@@ -44,6 +50,30 @@
       <a class="nav-link {{ $tab === 'servers' ? 'active' : '' }}"
          href="/home?tab=servers">
         {{ __('Servers') }}
+      </a>
+    </li>
+    @endif
+    @if(Auth::user()->canListServers())
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'backups' ? 'active' : '' }}"
+         href="/home?tab=backups">
+        {{ __('Backups') }}
+      </a>
+    </li>
+    @endif
+    @if(Auth::user()->canListServers())
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'domains' ? 'active' : '' }}"
+         href="/home?tab=domains">
+        {{ __('Domains') }}
+      </a>
+    </li>
+    @endif
+    @if(Auth::user()->canListServers())
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'applications' ? 'active' : '' }}"
+         href="/home?tab=applications">
+        {{ __('Applications') }}
       </a>
     </li>
     @endif
@@ -109,6 +139,15 @@
   @endif
   @if($tab === 'servers')
   @include('home.cards._servers')
+  @endif
+  @if($tab === 'backups')
+  @include('home.cards._towerify_backups')
+  @endif
+  @if($tab === 'domains')
+  @include('home.cards._towerify_domains')
+  @endif
+  @if($tab === 'applications')
+    @include('home.cards._towerify_applications')
   @endif
   @if($tab === 'orders')
   @include('home.cards._orders')

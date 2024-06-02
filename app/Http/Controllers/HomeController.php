@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -92,7 +94,25 @@ class HomeController extends Controller
                 $users = User::where('is_active', true)->get();
             }
         }
-        return view('home.index', compact('tab', 'servers', 'orders', 'users', 'invitations', 'memory_usage', 'disk_usage', 'security_events', 'interdependencies', 'traces', 'pendingActions'));
+
+        $domains = collect();
+
+        if ($tab === 'domains') {
+            $domains = $servers->flatMap(fn(YnhServer $server) => $server->domains);
+        }
+
+        $applications = collect();
+
+        if ($tab === "applications") {
+            $applications = $servers->flatMap(fn(YnhServer $server) => $server->applications);
+        }
+
+        $backups = collect();
+
+        if ($tab === 'backups') {
+            $backups = $servers->flatMap(fn(YnhServer $server) => $server->backups);
+        }
+        return view('home.index', compact('tab', 'servers', 'orders', 'users', 'invitations', 'memory_usage', 'disk_usage', 'security_events', 'interdependencies', 'traces', 'pendingActions', 'domains', 'applications', 'backups'));
     }
 
     private function memoryUsage(Collection $servers): Collection

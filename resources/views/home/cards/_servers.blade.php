@@ -34,7 +34,9 @@
       <thead>
       <tr>
         <th class="ps-4" width="25px"></th>
-        <th>{{ __('Name') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
+        </th>
         <th>{{ __('IP V4') }}</th>
         <th>{{ __('IP V6') }}</th>
         <th>{{ __('Domain') }}</th>
@@ -45,7 +47,7 @@
       </tr>
       </thead>
       <tbody>
-      @foreach($servers->sortBy('name') as $server)
+      @foreach($servers->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $server)
       <tr>
         <td class="ps-4" width="25px">
           @if($server->isFrozen())

@@ -1,7 +1,11 @@
 @if(Auth::user()->canListServers())
 <div class="card card-accent-secondary tw-card">
-  <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Domains') }}</b></h3>
+  <div class="card-header d-flex flex-row">
+    <div class="align-items-start">
+      <h3 class="m-0">
+        {{ __('Domains') }}
+      </h3>
+    </div>
   </div>
   @if($domains->isEmpty())
   <div class="card-body">
@@ -16,8 +20,11 @@
     <table class="table table-hover">
       <thead>
       <tr>
+        <th>{{ __('Server') }}</th>
+        <th>{{ __('IP V4') }}</th>
+        <th>{{ __('IP V6') }}</th>
         <th>
-          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Domain') }}
         </th>
         <th></th>
       </tr>
@@ -25,6 +32,19 @@
       <tbody>
       @foreach($domains->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $domain)
       <tr>
+        <td>
+          <span class="font-lg mb-3 fw-bold">
+            <a href="{{ route('ynh.servers.edit', $domain->server->id) }}">
+              {{ $domain->server->name }}
+            </a>
+          </span>
+        </td>
+        <td>
+          {{ $domain->server->ip() }}
+        </td>
+        <td>
+          {{ $domain->server->ipv6() }}
+        </td>
         <td>
           {{ $domain->name }}
         </td>

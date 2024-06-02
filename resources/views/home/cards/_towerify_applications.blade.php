@@ -1,7 +1,7 @@
 @if(Auth::user()->canListApps())
 <div class="card card-accent-secondary tw-card">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Applications Deployed') }}</b></h3>
+    <h3 class="m-0"><b>{{ __('Applications') }}</b></h3>
   </div>
   <div id="result-1" class="alert alert-dismissible fade show m-2" style="display:none;">
     <button type="button" class="btn-close" aria-label="Close" onclick="closeResult1()"></button>
@@ -20,6 +20,7 @@
     <table class="table table-hover">
       <thead>
       <tr>
+        <th>{{ __('Server') }}</th>
         <th>
           <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
         </th>
@@ -32,6 +33,13 @@
       <tbody>
       @foreach($applications->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $app)
       <tr>
+        <td>
+          <span class="font-lg mb-3 fw-bold">
+            <a href="{{ route('ynh.servers.edit', $app->server->id) }}">
+              {{ $app->server->name }}
+            </a>
+          </span>
+        </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
             <a href="https://{{ $app->path }}" target="_blank">

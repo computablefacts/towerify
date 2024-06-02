@@ -20,16 +20,17 @@
     <table class="table table-hover">
       <thead>
       <tr>
-        <th>{{ __('Name') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
+        </th>
         <th>{{ __('Username') }}</th>
         <th>{{ __('Email') }}</th>
-        <th>{{ __('Permissions') }}</th>
         <th></th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      @foreach($users->sortBy('fullname') as $user)
+      @foreach($users->sortBy('fullname', SORT_NATURAL|SORT_FLAG_CASE) as $user)
       <tr>
         <td>
           <span class="font-lg mb-3 fw-bold">
@@ -41,23 +42,8 @@
         </td>
         <td>
           <a href="mailto:{{ $user->email }}" target="_blank">
-            {{ $user->email }}
+            {{ $user->email }}&nbsp;&nbsp;<i class="zmdi zmdi-open-in-new"></i>
           </a>
-        </td>
-        <td>
-          @php
-          $userPermissions = $user
-          ->permissions
-          ->filter(fn($perm) => $perm->application->ynh_server_id === $server->id)
-          ->sortBy('application.name');
-          @endphp
-          @foreach($userPermissions as $permission)
-          <span class="tw-pill rounded-pill bg-primary">
-            <a href="https://{{ $permission->application->path }}" target="_blank" class="text-white">
-              {{ $permission->application->name }}
-            </a>
-          </span>
-          @endforeach
         </td>
         <td>
           @if(Auth::user()->canManageUsers())
@@ -122,6 +108,23 @@
           </div>
           @endif
           @endif
+        </td>
+      </tr>
+      <tr>
+        <td colspan="5">
+          @php
+          $userPermissions = $user
+          ->permissions
+          ->filter(fn($perm) => $perm->application->ynh_server_id === $server->id)
+          ->sortBy('application.name');
+          @endphp
+          @foreach($userPermissions as $permission)
+          <span class="tw-pill rounded-pill bg-primary">
+            <a href="https://{{ $permission->application->path }}" target="_blank" class="text-white">
+              {{ $permission->application->name }}
+            </a>
+          </span>
+          @endforeach
         </td>
       </tr>
       @endforeach

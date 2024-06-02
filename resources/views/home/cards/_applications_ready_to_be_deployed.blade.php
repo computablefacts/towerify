@@ -22,6 +22,9 @@
       <tr>
         <th class="ps-4" width="25px"></th>
         <th width="70px"></th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Date') }}
+        </th>
         <th>{{ __('Name') }}</th>
         <th>{{ __('Categories') }}</th>
         <th>{{ __('Order') }}</th>
@@ -40,6 +43,9 @@
           <img src="{{ $order->thumbnailUrl() ?: $defaultThumbnail }}"
                alt="{{ $order->name() }}"
                class="mw-100" style="height: 2.5em;"/>
+        </td>
+        <td>
+          {{ $order->updated_at->format('Y-m-d H:i') }}
         </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
