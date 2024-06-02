@@ -108,6 +108,7 @@ class HomeController extends Controller
         }
 
         $backups = collect();
+
         if ($tab === 'backups') {
             $backups = $servers->flatMap(fn(YnhServer $server) => $server->backups);
         }

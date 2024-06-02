@@ -20,7 +20,9 @@
     <table class="table table-hover">
       <thead>
       <tr>
-        <th>{{ __('Name') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
+        </th>
         <th>{{ __('Description') }}</th>
         <th>{{ __('Sku') }}</th>
         <th>{{ __('Version') }}</th>
@@ -28,12 +30,12 @@
       </tr>
       </thead>
       <tbody>
-      @foreach($applications->sortBy('name') as $app)
+      @foreach($applications->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $app)
       <tr>
         <td>
           <span class="font-lg mb-3 fw-bold">
             <a href="https://{{ $app->path }}" target="_blank">
-              {{ $app->name }}
+              {{ $app->name }}&nbsp;&nbsp;<i class="zmdi zmdi-open-in-new"></i>
             </a>
           </span>
         </td>

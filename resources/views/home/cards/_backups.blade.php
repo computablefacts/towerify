@@ -46,7 +46,9 @@ function formatBytes($bytes, $precision = 2)
     <table class="table table-hover">
       <thead>
       <tr>
-        <th>{{ __('Date') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Date') }}
+        </th>
         <th>{{ __('Name') }}</th>
         <th>{{ __('Size') }}</th>
         <th></th>
@@ -69,7 +71,7 @@ function formatBytes($bytes, $precision = 2)
           <a href="/ynh/servers/{{ $server->id }}/backup/{{ $backup->id }}"
              class="cursor-pointer"
              title="download">
-            <img src="{{ asset('images/download.png') }}" height="20" class="float-end">
+            <i class="zmdi zmdi-download"></i>
           </a>
           @endif
         </td>

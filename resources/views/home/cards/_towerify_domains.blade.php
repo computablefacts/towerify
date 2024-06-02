@@ -23,12 +23,14 @@
         <th>{{ __('Server') }}</th>
         <th>{{ __('IP V4') }}</th>
         <th>{{ __('IP V6') }}</th>
-        <th>{{ __('Domain') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Domain') }}
+        </th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      @foreach($domains->sortBy('name') as $domain)
+      @foreach($domains->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $domain)
       <tr>
         <td>
           <span class="font-lg mb-3 fw-bold">

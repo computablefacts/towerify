@@ -16,12 +16,14 @@
     <table class="table table-hover">
       <thead>
       <tr>
-        <th>{{ __('Name') }}</th>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
+        </th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      @foreach($domains->sortBy('name') as $domain)
+      @foreach($domains->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $domain)
       <tr>
         <td>
           {{ $domain->name }}
