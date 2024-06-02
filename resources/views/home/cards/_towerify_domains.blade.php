@@ -20,7 +20,7 @@
     <table class="table table-hover">
       <thead>
       <tr>
-        <th>{{ __('Name') }}</th>
+        <th>{{ __('Server') }}</th>
         <th>{{ __('IP V4') }}</th>
         <th>{{ __('IP V6') }}</th>
         <th>{{ __('Domain') }}</th>
