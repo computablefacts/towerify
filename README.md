@@ -88,6 +88,11 @@ file. Adjust these values to your desired credentials.
 
 * __My Apps.__ The applications relevant to your work, making your dashboard cleaner and more efficient.
 * __Servers.__ Displays the list of hardware resources to which you have permissions to deploy applications.
+* __Backups.__ Enables you to download backups for recovery or archival purposes as required.
+* __Domains.__ Displays the list of domains managed across all servers.
+* __Applications.__ Display the list of applications installed across all servers.
+* __Traces.__ Provides you with the ability to audit the latest actions performed across all servers, including commands
+  that have been executed, those currently running, and upcoming commands.
 * __Interdependencies.__ Presents a visual graph that illustrates the relationships and connections between various
   pieces of hardware and web services. Constructed by analyzing nginx logs.
 * __Resources Usage.__ Provides a detailed breakdown of how much memory and storage is being utilized by each server.
