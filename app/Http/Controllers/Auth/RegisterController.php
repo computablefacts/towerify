@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Hashing\TwHasher;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\Tenant;
@@ -69,7 +70,7 @@ class RegisterController extends Controller
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+            'password' => TwHasher::hash($data['password']),
         ]);
 
         $tenant = Tenant::create(['name' => Str::random()]);
