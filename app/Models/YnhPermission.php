@@ -27,6 +27,7 @@ class YnhPermission extends Model
     {
         $users = YnhUser::from($user)->map(fn(YnhUser $ynhUser) => $ynhUser->id)->all();
         return YnhPermission::whereIn('ynh_user_id', $users)
+            ->whereNotIn('name', ['sftp.main', 'ssh.main'])
             ->get()
             ->sortBy([
                 ['application.name', 'asc']
