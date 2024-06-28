@@ -888,6 +888,34 @@ EOT;
                     'updated' => true,
                 ]);
             }
+
+            // Add two specific apps, the SSH and the SFTP, that are not packaged apps.
+            // Deal with them as if they were.
+            YnhApplication::updateOrCreate([
+                'ynh_server_id' => $this->id,
+                'sku' => 'ssh',
+            ], [
+                'name' => 'ssh',
+                'description' => null,
+                'version' => 'shadow',
+                'path' => null,
+                'sku' => 'ssh',
+                'ynh_server_id' => $this->id,
+                'updated' => true,
+            ]);
+            YnhApplication::updateOrCreate([
+                'ynh_server_id' => $this->id,
+                'sku' => 'sftp',
+            ], [
+                'name' => 'sftp',
+                'description' => null,
+                'version' => 'shadow',
+                'path' => null,
+                'sku' => 'sftp',
+                'ynh_server_id' => $this->id,
+                'updated' => true,
+            ]);
+
             DB::transaction(function () {
                 YnhApplication::where('ynh_server_id', $this->id)
                     ->where('updated', false)
