@@ -9,17 +9,17 @@
 @stop
 
 @section('content')
-    <div class="container">
+    <div class="container mt-3">
         <h1>Wonderful {{ $order->getBillpayer()->firstname }}!</h1>
         <hr>
-
-        <div class="alert alert-success">Your order has been registered with number
-            <strong>{{ $order->getNumber() }}</strong>.
+        <div class="alert alert-success">
+          Your order has been registered with number <strong>{{ $order->getNumber() }}</strong>.
         </div>
 
-        <h3>Payment</h3>
-
-        {!! $paymentRequest->getHtmlSnippet(); !!}
+        @if(!empty($paymentRequest->getHtmlSnippet()))
+          <h3>Payment</h3>
+          {!! $paymentRequest->getHtmlSnippet(); !!}
+        @endif
 
         @unless($paymentRequest->willRedirect())
             @include('checkout._final_success_text')
