@@ -386,6 +386,8 @@ cat /etc/osquery/osquery.conf | \
 mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
 osqueryctl restart osqueryd
 
+cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '0 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -
+
 TVAR1=$(cat <<SETVAR
 tail -F /var/log/osquery/osqueryd.results.log | jq -c 'select(.columns == null or .columns.cmdline == null or (.columns.cmdline | contains("tail -F /var/log/osquery/osqueryd.results.log") | not)) | {ip:"{$this->ip_address}",secret:"{$this->secret}",events:[.]}' | while read -r LINE; do curl -s -H "Content-Type: application/json" -XPOST https://app.towerify.io/metrics --data-binary "\\\$LINE"; done >/dev/null
 SETVAR
