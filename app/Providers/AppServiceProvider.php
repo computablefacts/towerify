@@ -75,13 +75,18 @@ use App\Observers\TaxonomyObserver;
 use App\Observers\TaxRateObserver;
 use App\Observers\ZoneMemberObserver;
 use App\Observers\ZoneObserver;
+use App\Rules\AtLeastOneDigit;
+use App\Rules\AtLeastOneLetter;
+use App\Rules\AtLeastOneLowercaseLetter;
+use App\Rules\AtLeastOneUppercaseLetter;
+use App\Rules\OnlyLettersAndDigits;
 use App\User;
-use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -101,6 +106,14 @@ class AppServiceProvider extends ServiceProvider
         Hash::extend('tw_hasher', static function () {
             return new TwHasher();
         });
+
+        Password::defaults(Password::min(12)->max(100)->rules([
+            new OnlyLettersAndDigits,
+            new AtLeastOneLetter,
+            new AtLeastOneDigit,
+            new AtLeastOneUppercaseLetter,
+            new AtLeastOneLowercaseLetter,
+        ]));
 
         $this->app->concord->registerModel(\Konekt\Address\Contracts\Address::class, Address::class);
         $this->app->concord->registerModel(\Vanilo\Adjustments\Contracts\Adjustment::class, Adjustment::class);

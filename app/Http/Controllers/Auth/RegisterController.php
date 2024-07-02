@@ -10,6 +10,7 @@ use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Konekt\User\Models\UserType;
 
 class RegisterController extends Controller
@@ -53,9 +54,9 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'name' => 'required|string|max:100',
+            'email' => 'required|string|email|max:100|unique:users',
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ]);
     }
 
@@ -81,7 +82,7 @@ class RegisterController extends Controller
         $user->save();
 
         $this->setupAccount($tenant, $user);
-        
+
         return $user;
     }
 
