@@ -1000,11 +1000,17 @@ EOT;
                 if ($app && isset($scope['allowed'])) {
                     $users->each(function (YnhUser $user) use ($app, $permission, $scope) {
 
-                        $userIsAllowed = collect($scope['allowed'])->contains(function (string $scope) use ($user) {
-                            return $scope === 'visitors' || $scope === 'all_users' || $scope === $user->username;
+                        $isVisitors = collect($scope['allowed'])->contains(function (string $scope) {
+                            return $scope === 'visitors';
+                        });
+                        $isAllUsers = collect($scope['allowed'])->contains(function (string $scope) {
+                            return $scope === 'all_users';
+                        });
+                        $isUserSpecific = collect($scope['allowed'])->contains(function (string $scope) use ($user) {
+                            return $scope === $user->username;
                         });
 
-                        if ($userIsAllowed) {
+                        if ($isVisitors || $isAllUsers || $isUserSpecific) {
                             YnhPermission::updateOrCreate([
                                 'ynh_user_id' => $user->id,
                                 'ynh_application_id' => $app->id,
@@ -1014,6 +1020,9 @@ EOT;
                                 'ynh_user_id' => $user->id,
                                 'ynh_application_id' => $app->id,
                                 'updated' => true,
+                                'is_visitors' => $isVisitors,
+                                'is_all_users' => $isAllUsers,
+                                'is_user_specific' => $isUserSpecific,
                             ]);
                         }
                     });
