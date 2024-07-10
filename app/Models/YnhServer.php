@@ -147,8 +147,10 @@ class YnhServer extends Model
 
     public function lastHeartbeat(): ?Carbon
     {
+        $minDate = Carbon::now()->subMinutes(30);
         $heartbeat = YnhOsquery::select(['calendar_time'])
             ->where('ynh_server_id', $this->id)
+            ->where('calendar_time', '>=', $minDate->toDateTimeString())
             ->orderBy('calendar_time', 'desc')
             ->first();
         return $heartbeat?->calendar_time;
@@ -177,7 +179,7 @@ class YnhServer extends Model
         // Check if status is running
         $minDate = Carbon::now()->subMinutes(10);
 
-        if ($lastHeartbeat->isAfter($minDate->toDateTimeString())) {
+        if ($lastHeartbeat->isAfter($minDate)) {
             $this->statusCached = ServerStatusEnum::RUNNING;
             return $this->statusCached;
         }
@@ -185,7 +187,7 @@ class YnhServer extends Model
         // Check if status is unknown
         $minDate = $minDate->subMinutes(10);
 
-        if ($lastHeartbeat->isAfter($minDate->toDateTimeString())) {
+        if ($lastHeartbeat->isAfter($minDate)) {
             $this->statusCached = ServerStatusEnum::UNKNOWN;
             return $this->statusCached;
         }
