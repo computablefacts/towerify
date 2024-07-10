@@ -206,6 +206,7 @@ class YnhServer extends Model
     {
         if ($user) {
             return YnhPermission::select('ynh_permissions.*')
+                ->where('is_user_specific', true)
                 ->join('ynh_applications', 'ynh_applications.id', '=', 'ynh_permissions.ynh_application_id')
                 ->where('ynh_applications.ynh_server_id', $this->id)
                 ->where('ynh_permissions.ynh_user_id', $user->id)
