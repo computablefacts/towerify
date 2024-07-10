@@ -29,6 +29,7 @@ class YnhOsquery extends Model
     protected $casts = [
         'numerics' => 'boolean',
         'columns' => 'array',
+        'calendar_time' => 'datetime',
     ];
 
     public function server(): BelongsTo

@@ -111,6 +111,11 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::post('/reset-password', function () {
+    $email = \Illuminate\Support\Facades\Auth::user()->email;
+    return view('auth.passwords.email', compact('email'));
+})->middleware('auth')->name('reset-password');
+
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
         Route::get('', 'YnhServerController@create')->name('create');

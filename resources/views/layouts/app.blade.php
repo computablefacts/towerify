@@ -87,6 +87,13 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('reset-password') }}"
+                                       onclick="event.preventDefault();document.getElementById('reset-password-form').submit();">
+                                      {{ __('Reset Password') }}
+                                    </a>
+                                    <form id="reset-password-form" action="{{ route('reset-password') }}" method="POST" style="display:none;">
+                                      @csrf
+                                    </form>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

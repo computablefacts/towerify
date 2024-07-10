@@ -17,10 +17,16 @@ class YnhPermission extends Model
         'ynh_user_id',
         'ynh_application_id',
         'updated',
+        'is_visitors',
+        'is_all_users',
+        'is_user_specific',
     ];
 
     protected $casts = [
         'updated' => 'boolean',
+        'is_visitors' => 'boolean',
+        'is_all_users' => 'boolean',
+        'is_user_specific' => 'boolean',
     ];
 
     public static function apps(User $user): Collection
@@ -28,6 +34,7 @@ class YnhPermission extends Model
         $users = YnhUser::from($user)->map(fn(YnhUser $ynhUser) => $ynhUser->id)->all();
         return YnhPermission::whereIn('ynh_user_id', $users)
             ->whereNotIn('name', ['sftp.main', 'ssh.main'])
+            ->where('is_user_specific', true)
             ->get()
             ->sortBy([
                 ['application.name', 'asc']
