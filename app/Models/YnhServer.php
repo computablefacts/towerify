@@ -145,6 +145,15 @@ class YnhServer extends Model
         return $this->domains->where('is_principal', true)->first();
     }
 
+    public function lastHeartbeat(): ?Carbon
+    {
+        $heartbeat = YnhOsquery::select(['calendar_time'])
+            ->where('ynh_server_id', $this->id)
+            ->orderBy('calendar_time', 'desc')
+            ->first();
+        return $heartbeat?->calendar_time;
+    }
+
     public function status(): ServerStatusEnum
     {
         if ($this->isFrozen()) {
@@ -157,30 +166,26 @@ class YnhServer extends Model
             return $this->statusCached;
         }
 
+        $lastHeartbeat = $this->lastHeartbeat();
+
+        if (!$lastHeartbeat) {
+            // Here, the server is probably down :-(
+            $this->statusCached = ServerStatusEnum::DOWN;
+            return $this->statusCached;
+        }
+
         // Check if status is running
         $minDate = Carbon::now()->subMinutes(10);
-        $isRunning = collect(DB::select("
-          SELECT COUNT(id) AS count
-          FROM ynh_osquery
-          WHERE ynh_server_id = {$this->id}
-          AND calendar_time >= '{$minDate->toDateTimeString()}'
-        "))->first();
 
-        if ($isRunning->count > 0) {
+        if ($lastHeartbeat->isAfter($minDate->toDateTimeString())) {
             $this->statusCached = ServerStatusEnum::RUNNING;
             return $this->statusCached;
         }
 
         // Check if status is unknown
         $minDate = $minDate->subMinutes(10);
-        $isUnknown = collect(DB::select("
-          SELECT COUNT(id) AS count
-          FROM ynh_osquery
-          WHERE ynh_server_id = {$this->id}
-          AND calendar_time >= '{$minDate->toDateTimeString()}'
-        "))->first();
 
-        if ($isUnknown->count > 0) {
+        if ($lastHeartbeat->isAfter($minDate->toDateTimeString())) {
             $this->statusCached = ServerStatusEnum::UNKNOWN;
             return $this->statusCached;
         }

@@ -49,7 +49,7 @@
       <tbody>
       @foreach($servers->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $server)
       <tr>
-        <td class="ps-4" width="25px">
+        <td class="ps-4" width="25px" title="{{ $server->lastHeartbeat()?->format('Y-m-d H:i:s') }}">
           @if($server->isFrozen())
           <span class="tw-dot-blue"></span>
           @elseif($server->status() === \App\Enums\ServerStatusEnum::RUNNING)
