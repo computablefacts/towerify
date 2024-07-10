@@ -85,7 +85,9 @@ class YnhServer extends Model
 
     public function applications(): HasMany
     {
-        return $this->hasMany(YnhApplication::class, 'ynh_server_id', 'id');
+        return $this
+            ->hasMany(YnhApplication::class, 'ynh_server_id', 'id')
+            ->whereNotIn('ynh_applications.name', ['sftp', 'ssh']);
     }
 
     public function domains(): HasMany
