@@ -1068,7 +1068,6 @@ EOT;
         }
 
         $fullname = preg_replace("/[^A-Za-z0-9 ,.'-]/", '', $fullname);
-        $fullname = Str::lower($fullname);
         $password = Str::replace('!', '\!', $password); // history substitution
         $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Creating user profile...');
         $isOk = $ssh->executeCommand("sudo yunohost user create {$username} -F \"{$fullname}\" -p \"{$password}\" -d {$domain->name}", $output);
