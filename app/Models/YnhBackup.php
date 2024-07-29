@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasTenant2;
 use App\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class YnhBackup extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTenant2;
 
     protected $table = 'ynh_backups';
 

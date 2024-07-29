@@ -9,6 +9,7 @@ use App\Helpers\AdversaryMeter;
 use App\Helpers\AppStore;
 use App\Helpers\SshConnection2;
 use App\Helpers\SshKeyPair;
+use App\Traits\HasTenant2;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -23,7 +24,7 @@ use Illuminate\Support\Str;
 
 class YnhServer extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTenant2;
 
     protected $fillable = [
         'name',

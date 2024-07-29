@@ -37,6 +37,8 @@ use App\Models\TaxCategory;
 use App\Models\Taxon;
 use App\Models\Taxonomy;
 use App\Models\TaxRate;
+use App\Models\YnhBackup;
+use App\Models\YnhServer;
 use App\Models\Zone;
 use App\Models\ZoneMember;
 use App\Observers\AddressObserver;
@@ -73,6 +75,8 @@ use App\Observers\TaxCategoryObserver;
 use App\Observers\TaxonObserver;
 use App\Observers\TaxonomyObserver;
 use App\Observers\TaxRateObserver;
+use App\Observers\YnhBackupObserver;
+use App\Observers\YnhServerObserver;
 use App\Observers\ZoneMemberObserver;
 use App\Observers\ZoneObserver;
 use App\Rules\AtLeastOneDigit;
@@ -186,6 +190,8 @@ class AppServiceProvider extends ServiceProvider
         Taxon::observe(TaxonObserver::class);
         Taxonomy::observe(TaxonomyObserver::class);
         TaxRate::observe(TaxRateObserver::class);
+        YnhBackup::observe(YnhBackupObserver::class);
+        YnhServer::observe(YnhServerObserver::class);
         ZoneMember::observe(ZoneMemberObserver::class);
         Zone::observe(ZoneObserver::class);
     }
