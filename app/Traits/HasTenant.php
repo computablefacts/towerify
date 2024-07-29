@@ -31,7 +31,6 @@ trait HasTenant
                         ->whereRaw("(tenant_id IS NULL OR tenant_id = {$tenantId})");
                 }
 
-                $table = $builder->getModel()->getTable();
                 $builder->whereNull('created_by')
                     ->orWhereIn('created_by', $users);
             }
