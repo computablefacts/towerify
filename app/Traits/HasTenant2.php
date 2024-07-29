@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * This trait scopes a query using the `created_by` field of the model it is added to.
+ * This trait scopes a query using the `user_id` field of the model it is added to.
  */
-trait HasTenant
+trait HasTenant2
 {
     protected static function booted()
     {
         parent::booted();
-        static::addGlobalScope('tenant_scope', function (Builder $builder) {
+        static::addGlobalScope('tenant_scope_2', function (Builder $builder) {
 
             $user = Auth::user();
             $tenantId = $user?->tenant_id;
@@ -34,15 +34,15 @@ trait HasTenant
                         ->whereRaw("(tenant_id IS NULL OR tenant_id = {$tenantId})");
                 }
 
-                $builder->whereNull('created_by')
-                    ->orWhereIn('created_by', $users);
+                $builder->whereNull('user_id')
+                    ->orWhereIn('user_id', $users);
             }
         });
     }
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by', 'id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function tenant(): ?Tenant

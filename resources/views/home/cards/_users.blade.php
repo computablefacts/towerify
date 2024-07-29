@@ -115,6 +115,7 @@
           @php
           $userPermissions = $user
           ->permissions
+          ->where('is_user_specific', true)
           ->filter(fn($perm) => $perm->application->ynh_server_id === $server->id)
           ->sortBy('application.name');
           @endphp
@@ -123,7 +124,7 @@
             <a href="https://{{ $permission->application->path }}" target="_blank" class="text-white">
               {{ $permission->application->name }}
             </a>
-          </span>
+          </span>&nbsp;
           @endforeach
         </td>
       </tr>

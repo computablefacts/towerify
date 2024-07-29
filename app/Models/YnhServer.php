@@ -9,6 +9,7 @@ use App\Helpers\AdversaryMeter;
 use App\Helpers\AppStore;
 use App\Helpers\SshConnection2;
 use App\Helpers\SshKeyPair;
+use App\Traits\HasTenant2;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -23,7 +24,7 @@ use Illuminate\Support\Str;
 
 class YnhServer extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTenant2;
 
     protected $fillable = [
         'name',
@@ -147,8 +148,10 @@ class YnhServer extends Model
 
     public function lastHeartbeat(): ?Carbon
     {
+        $minDate = Carbon::now()->subMinutes(30);
         $heartbeat = YnhOsquery::select(['calendar_time'])
             ->where('ynh_server_id', $this->id)
+            ->where('calendar_time', '>=', $minDate->toDateTimeString())
             ->orderBy('calendar_time', 'desc')
             ->first();
         return $heartbeat?->calendar_time;
@@ -177,7 +180,7 @@ class YnhServer extends Model
         // Check if status is running
         $minDate = Carbon::now()->subMinutes(10);
 
-        if ($lastHeartbeat->isAfter($minDate->toDateTimeString())) {
+        if ($lastHeartbeat->isAfter($minDate)) {
             $this->statusCached = ServerStatusEnum::RUNNING;
             return $this->statusCached;
         }
@@ -185,7 +188,7 @@ class YnhServer extends Model
         // Check if status is unknown
         $minDate = $minDate->subMinutes(10);
 
-        if ($lastHeartbeat->isAfter($minDate->toDateTimeString())) {
+        if ($lastHeartbeat->isAfter($minDate)) {
             $this->statusCached = ServerStatusEnum::UNKNOWN;
             return $this->statusCached;
         }
@@ -1066,7 +1069,6 @@ EOT;
         }
 
         $fullname = preg_replace("/[^A-Za-z0-9 ,.'-]/", '', $fullname);
-        $fullname = Str::lower($fullname);
         $password = Str::replace('!', '\!', $password); // history substitution
         $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Creating user profile...');
         $isOk = $ssh->executeCommand("sudo yunohost user create {$username} -F \"{$fullname}\" -p \"{$password}\" -d {$domain->name}", $output);

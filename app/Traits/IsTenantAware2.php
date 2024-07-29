@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * This trait scopes the actions available to a given user using the `created_by` field of a model.
+ * This trait scopes the actions available to a given user using the `user_id` field of a model.
  */
-trait IsTenantAware
+trait IsTenantAware2
 {
     public function deleting(Model $model)
     {
@@ -24,8 +24,8 @@ trait IsTenantAware
     {
         $user = Auth::user();
 
-        if (!$model->created_by) {
-            $model->created_by = $user?->id;
+        if (!$model->user_id) {
+            $model->user_id = $user?->id;
             return true;
         }
         if (!$user || !$user->tenant_id || $user->tenant_id === optional($model->tenant())->id) {
@@ -38,8 +38,8 @@ trait IsTenantAware
     {
         $user = Auth::user();
 
-        if (!$model->created_by) {
-            $model->created_by = $user?->id;
+        if (!$model->user_id) {
+            $model->user_id = $user?->id;
             return true;
         }
         if (!$user || !$user->tenant_id || $user->tenant_id === optional($model->tenant())->id) {

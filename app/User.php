@@ -72,7 +72,7 @@ class User extends \Konekt\AppShell\Models\User
 
     public function ynhUsername(): string
     {
-        return Str::before(Str::before($this->email, '@'), '+');
+        return Str::lower(Str::before(Str::before($this->email, '@'), '+'));
     }
 
     public function ynhPassword(): string
