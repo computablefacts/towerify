@@ -7,7 +7,6 @@ use App\Models\YnhOrder;
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
 use App\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -115,7 +114,6 @@ class HomeController extends Controller
 
     private function memoryUsage(Collection $servers): Collection
     {
-        $minDate = Carbon::today()->subDays(2);
         return $servers->isEmpty() ? collect() : collect(DB::select("
             SELECT 
               ynh_servers.name AS ynh_server_name, 
@@ -131,8 +129,21 @@ class HomeController extends Controller
                     ROUND(AVG(json_unquote(json_extract(ynh_osquery.columns, '$.used_space_gb'))), 2) AS used_space_gb
                 FROM ynh_osquery
                 WHERE ynh_osquery.name = 'memory_available_snapshot'
-                AND ynh_osquery.calendar_time >= '{$minDate->toDateString()}'
+                AND ynh_osquery.packed = 1
                 GROUP BY ynh_osquery.ynh_server_id, ynh_osquery.calendar_time
+
+                UNION
+
+                SELECT 
+                  ynh_server_id,
+                  timestamp,
+                  percent_available,
+                  percent_used,
+                  space_left_gb,
+                  total_space_gb,
+                  used_space_gb
+                FROM ynh_memory_usage
+
                 ORDER BY timestamp DESC
                 LIMIT 1000
             ) AS t
@@ -144,7 +155,6 @@ class HomeController extends Controller
 
     private function diskUsage(Collection $servers): Collection
     {
-        $minDate = Carbon::today()->subDays(2);
         return $servers->isEmpty() ? collect() : collect(DB::select("
             SELECT
               ynh_servers.name AS ynh_server_name,
@@ -160,8 +170,21 @@ class HomeController extends Controller
                     ROUND(AVG(json_unquote(json_extract(ynh_osquery.columns, '$.used_space_gb'))), 2) AS used_space_gb
                 FROM ynh_osquery
                 WHERE ynh_osquery.name = 'disk_available_snapshot'
-                AND ynh_osquery.calendar_time >= '{$minDate->toDateString()}'
+                AND ynh_osquery.packed = 1
                 GROUP BY ynh_osquery.ynh_server_id, ynh_osquery.calendar_time
+
+                UNION
+
+                SELECT 
+                  ynh_server_id,
+                  timestamp,
+                  percent_available,
+                  percent_used,
+                  space_left_gb,
+                  total_space_gb,
+                  used_space_gb
+                FROM ynh_disk_usage
+
                 ORDER BY timestamp DESC
                 LIMIT 1000
             ) AS t
