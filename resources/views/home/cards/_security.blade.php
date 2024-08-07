@@ -285,7 +285,15 @@
           {{ $event->status }}
         </td>
         <td>
-          {{ $event->used_by }}
+          @foreach(explode(',', $event->used_by) as $binary)
+          @if($binary === '-')
+          -
+          @else
+          <span class="tw-pill rounded-pill bg-primary">
+            {{ $binary }}
+          </span>&nbsp;
+          @endif
+          @endforeach
         </td>
         <td>
           <span class="tw-pill rounded-pill bg-primary">
