@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CheckoutRequest;
 use App\Models\Billpayer;
 use App\Models\TaxRate;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Konekt\Address\Models\CountryProxy;
 use Vanilo\Cart\Contracts\CartManager;
@@ -34,6 +35,7 @@ class CheckoutController extends Controller
     public function show()
     {
         $checkout = false;
+        /** @var User $user */
         $user = Auth::user();
 
         if ($this->cart->isNotEmpty()) {
@@ -47,8 +49,9 @@ class CheckoutController extends Controller
         if ($user) {
 
             $lastOrder = Order::select('orders.*')
-                ->join('users', 'users.id', '=', 'orders.created_by')
+                ->join('users', 'users.id', '=', 'orders.user_id')
                 ->where('users.tenant_id', $user->tenant_id)
+                ->whereRaw($user->customer_id ? "users.customer_id = {$user->customer_id}" : "1=1")
                 ->orderBy('orders.created_at', 'desc')
                 ->first();
 

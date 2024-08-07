@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->job(new PullServersInfos())->hourly();
-        $schedule->job(new AgeOffOsqueryEvents())->daily();
+        $schedule->job(new AgeOffOsqueryEvents())->hourly();
         $schedule->command('telescope:prune --hours=48')->daily();
     }
 

@@ -24,12 +24,14 @@ class YnhOsquery extends Model
         'numerics',
         'columns',
         'action',
+        'packed',
     ];
 
     protected $casts = [
         'numerics' => 'boolean',
         'columns' => 'array',
         'calendar_time' => 'datetime',
+        'packed' => 'boolean',
     ];
 
     public function server(): BelongsTo
