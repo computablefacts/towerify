@@ -30,12 +30,6 @@
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {{ $tab === 'traces' ? 'active' : '' }}"
-         href="{{ route('ynh.servers.edit', $server) }}?tab=traces">
-        {{ __('Traces') }}
-      </a>
-    </li>
-    <li class="nav-item">
       <a class="nav-link {{ $tab === 'domains' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=domains">
         {{ __('Domains') }}
@@ -45,6 +39,30 @@
       <a class="nav-link {{ $tab === 'applications' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=applications">
         {{ __('Applications') }}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'traces' ? 'active' : '' }}"
+         href="{{ route('ynh.servers.edit', $server) }}?tab=traces">
+        {{ __('Traces') }}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'interdependencies' ? 'active' : '' }}"
+         href="{{ route('ynh.servers.edit', $server) }}?tab=interdependencies">
+        {{ __('Interdependencies') }}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'resources_usage' ? 'active' : '' }}"
+         href="{{ route('ynh.servers.edit', $server) }}?tab=resources_usage">
+        {{ __('Resources Usage') }}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'security' ? 'active' : '' }}"
+         href="{{ route('ynh.servers.edit', $server) }}?tab=security">
+        {{ __('Security') }}
       </a>
     </li>
     <li class="nav-item">
@@ -100,6 +118,15 @@
       @include('home.cards._applications_ready_to_be_deployed', [ 'orders' => $orders ])
     </div>
   </div>
+  @endif
+  @if($tab === 'interdependencies')
+  @include('home.cards._interdependencies')
+  @endif
+  @if($tab === 'resources_usage')
+  @include('home.cards._resources_usage')
+  @endif
+  @if($tab === 'security')
+  @include('home.cards._security')
   @endif
   @if($tab === 'users')
   @include('home.cards._users', [ 'users' => $server->users ])
