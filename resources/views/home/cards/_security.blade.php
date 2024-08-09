@@ -25,7 +25,7 @@
       <thead>
       <tr>
         <th>{{ __('Server') }}</th>
-        <th>{{ __('Timestamp') }}</th>
+        <th><i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Timestamp') }}</th>
         <th>{{ __('Key File') }}</th>
         <th>{{ __('Key') }}</th>
         <th>{{ __('Key Comment') }}</th>
@@ -53,7 +53,7 @@
           {{ \Illuminate\Support\Str::limit($event->key, 50, '...') }}
         </td>
         <td>
-          {{ $event->key_comment }}
+          {{ $event->key_comment ?? '-' }}
         </td>
         <td>
           {{ $event->algorithm }}
@@ -96,7 +96,7 @@
       <thead>
       <tr>
         <th>{{ __('Server') }}</th>
-        <th>{{ __('Timestamp') }}</th>
+        <th><i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Timestamp') }}</th>
         <th>{{ __('PID') }}</th>
         <th>{{ __('Entry Host') }}</th>
         <th>{{ __('Entry Timestamp') }}</th>
@@ -123,7 +123,7 @@
           {{ $event->pid }}
         </td>
         <td>
-          {{ $event->entry_host }}
+          {{ $event->entry_host ?? '-' }}
         </td>
         <td>
           {{ $event->entry_timestamp }}
@@ -135,7 +135,7 @@
           {{ $event->entry_type }}
         </td>
         <td>
-          {{ $event->entry_username }}
+          {{ $event->entry_username ?? '-' }}
         </td>
         <td>
           <span class="tw-pill rounded-pill bg-primary">
@@ -175,7 +175,7 @@
       <thead>
       <tr>
         <th>{{ __('Server') }}</th>
-        <th>{{ __('Timestamp') }}</th>
+        <th><i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Timestamp') }}</th>
         <th>{{ __('User ID') }}</th>
         <th>{{ __('Group ID') }}</th>
         <th>{{ __('Username') }}</th>
@@ -250,7 +250,7 @@
       <thead>
       <tr>
         <th>{{ __('Server') }}</th>
-        <th>{{ __('Timestamp') }}</th>
+        <th><i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Timestamp') }}</th>
         <th>{{ __('Name') }}</th>
         <th>{{ __('Size') }}</th>
         <th>{{ __('Address') }}</th>
@@ -333,7 +333,7 @@
       <thead>
       <tr>
         <th>{{ __('Server') }}</th>
-        <th>{{ __('Timestamp') }}</th>
+        <th><i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Timestamp') }}</th>
         <th>{{ __('Path') }}</th>
         <th>{{ __('Group') }}</th>
         <th>{{ __('Username') }}</th>
