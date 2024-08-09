@@ -27,6 +27,7 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $tab = $request->input('tab', 'my-apps');
+        $limit = $request->input('limit', 20);
         $user = Auth::user();
         $servers = YnhServer::forUser($user);
         $memory_usage = collect();
@@ -41,11 +42,11 @@ class HomeController extends Controller
 
         if ($tab === 'security') {
             $security_events = [
-                'authorized_keys' => YnhOsquery::authorizedKeysSecurityEvents($servers),
-                'kernel_modules' => YnhOsquery::kernelModulesSecurityEvents($servers),
-                'suid_bin' => YnhOsquery::suidBinSecurityEvents($servers),
-                'last_logins_and_logouts' => YnhOsquery::lastLoginsAndLogoutsSecurityEvents($servers),
-                'users' => YnhOsquery::usersSecurityEvents($servers),
+                'authorized_keys' => YnhOsquery::authorizedKeys($servers, $limit),
+                'kernel_modules' => YnhOsquery::kernelModules($servers, $limit),
+                'suid_bin' => YnhOsquery::suidBinaries($servers, $limit),
+                'last_logins_and_logouts' => YnhOsquery::loginsAndLogouts($servers, $limit),
+                'users' => YnhOsquery::users($servers, $limit),
             ];
         }
 
@@ -116,6 +117,7 @@ class HomeController extends Controller
         }
         return view('home.index', compact(
             'tab',
+            'limit',
             'servers',
             'orders',
             'users',

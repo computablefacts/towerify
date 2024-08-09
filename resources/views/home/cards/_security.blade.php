@@ -3,7 +3,7 @@
 @if($security_events['authorized_keys'])
 <div class="card card-accent-secondary tw-card mt-4">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Authorized Keys (Last 20 Events)') }}</b></h3>
+    <h3 class="m-0"><b>{{ __('Authorized Keys (last :count events)', ['count' => $limit]) }}</b></h3>
   </div>
   @if(count($security_events['authorized_keys']) === 0)
   <div class="card-body">
@@ -11,7 +11,7 @@
       {{ __('An access key has been added or removed.') }}
     </div>
     <div class="row">
-      <div class="col">
+      <div class="col pt-2">
         None.
       </div>
     </div>
@@ -74,7 +74,7 @@
 @if($security_events['last_logins_and_logouts'])
 <div class="card card-accent-secondary tw-card mt-4">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Logins and Logouts (Last 20 Events)') }}</b></h3>
+    <h3 class="m-0"><b>{{ __('Logins and Logouts (last :count events)', ['count' => $limit]) }}</b></h3>
   </div>
   @if(count($security_events['last_logins_and_logouts']) === 0)
   <div class="card-body">
@@ -82,7 +82,7 @@
       {{ __('System logins and logouts.') }}
     </div>
     <div class="row">
-      <div class="col">
+      <div class="col pt-2">
         None.
       </div>
     </div>
@@ -153,7 +153,7 @@
 @if($security_events['users'])
 <div class="card card-accent-secondary tw-card mt-4">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ __('User Accounts (Last 20 Events)') }}</b></h3>
+    <h3 class="m-0"><b>{{ __('User Accounts (last :count events)', ['count' => $limit]) }}</b></h3>
   </div>
   @if(count($security_events['users']) === 0)
   <div class="card-body">
@@ -161,7 +161,7 @@
       {{ __('System logins and logouts.') }}
     </div>
     <div class="row">
-      <div class="col">
+      <div class="col pt-2">
         None.
       </div>
     </div>
@@ -228,7 +228,7 @@
 @if($security_events['kernel_modules'])
 <div class="card card-accent-secondary tw-card mt-4">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Kernel Modules (Last 20 Events)') }}</b></h3>
+    <h3 class="m-0"><b>{{ __('Kernel Modules (last :count events)', ['count' => $limit]) }}</b></h3>
   </div>
   @if(count($security_events['kernel_modules']) === 0)
   <div class="card-body">
@@ -236,7 +236,7 @@
       {{ __('A kernel module has been added or removed.') }}
     </div>
     <div class="row">
-      <div class="col">
+      <div class="col pt-2">
         None.
       </div>
     </div>
@@ -311,7 +311,7 @@
 @if($security_events['suid_bin'])
 <div class="card card-accent-secondary tw-card mt-4">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Suid Binaries (Last 20 Events)') }}</b></h3>
+    <h3 class="m-0"><b>{{ __('Suid Binaries (last :count events)', ['count' => $limit]) }}</b></h3>
   </div>
   @if(count($security_events['suid_bin']) === 0)
   <div class="card-body">
@@ -319,7 +319,7 @@
       {{ __('A suid binary has been detected (often used in backdoors).') }}
     </div>
     <div class="row">
-      <div class="col">
+      <div class="col pt-2">
         None.
       </div>
     </div>

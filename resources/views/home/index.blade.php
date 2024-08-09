@@ -104,7 +104,7 @@
     @if(Auth::user()->canListServers())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'security' ? 'active' : '' }}"
-         href="/home?tab=security">
+         href="/home?tab=security&limit=20">
         {{ __('Security') }}
       </a>
     </li>
@@ -147,7 +147,7 @@
   @include('home.cards._towerify_domains')
   @endif
   @if($tab === 'applications')
-    @include('home.cards._towerify_applications')
+  @include('home.cards._towerify_applications')
   @endif
   @if($tab === 'orders')
   @include('home.cards._orders')
