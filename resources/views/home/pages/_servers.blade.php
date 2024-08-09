@@ -30,12 +30,6 @@
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {{ $tab === 'traces' ? 'active' : '' }}"
-         href="{{ route('ynh.servers.edit', $server) }}?tab=traces">
-        {{ __('Traces') }}
-      </a>
-    </li>
-    <li class="nav-item">
       <a class="nav-link {{ $tab === 'domains' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=domains">
         {{ __('Domains') }}
@@ -45,6 +39,12 @@
       <a class="nav-link {{ $tab === 'applications' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=applications">
         {{ __('Applications') }}
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'traces' ? 'active' : '' }}"
+         href="{{ route('ynh.servers.edit', $server) }}?tab=traces">
+        {{ __('Traces') }}
       </a>
     </li>
     <li class="nav-item">
