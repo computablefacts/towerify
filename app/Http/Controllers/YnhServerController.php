@@ -29,7 +29,9 @@ use App\Http\Requests\UninstallAppRequest;
 use App\Models\YnhApplication;
 use App\Models\YnhBackup;
 use App\Models\YnhDomain;
+use App\Models\YnhNginxLogs;
 use App\Models\YnhOrder;
+use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use App\Models\YnhUser;
 use App\User;
@@ -51,14 +53,54 @@ class YnhServerController extends Controller
     public function index(YnhServer $server, Request $request)
     {
         $tab = $request->input('tab', 'settings');
-        $orders = YnhOrder::where('product_type', ProductTypeEnum::APPLICATION->value)
-            ->whereNotExists(function ($query) {
-                $query->select(DB::raw('1'))
-                    ->from('ynh_applications')
-                    ->whereRaw('ynh_applications.ynh_order_id = ynh_orders.id');
-            })
-            ->get();
-        return view('home.pages._servers', compact('server', 'orders', 'tab'));
+        $user = Auth::user();
+        $servers = collect([$server]);
+        $memory_usage = collect();
+        $disk_usage = collect();
+
+        if ($tab === 'resources_usage') {
+            $memory_usage = YnhOsquery::memoryUsage($servers)->groupBy('ynh_server_name');
+            $disk_usage = YnhOsquery::diskUsage($servers)->groupBy('ynh_server_name');
+        }
+
+        $security_events = collect();
+
+        if ($tab === 'security') {
+            $security_events = [
+                'authorized_keys' => YnhOsquery::authorizedKeysSecurityEvents($servers),
+                'kernel_modules' => YnhOsquery::kernelModulesSecurityEvents($servers),
+                'suid_bin' => YnhOsquery::suidBinSecurityEvents($servers),
+                'last_logins_and_logouts' => YnhOsquery::lastLoginsAndLogoutsSecurityEvents($servers),
+                'users' => YnhOsquery::usersSecurityEvents($servers),
+            ];
+        }
+
+        $interdependencies = collect();
+
+        if ($tab === 'interdependencies') {
+            $interdependencies = YnhNginxLogs::interdependencies(YnhServer::forUser($user), $server);
+        }
+
+        $orders = collect();
+
+        if ($tab === 'applications') {
+            $orders = YnhOrder::where('product_type', ProductTypeEnum::APPLICATION->value)
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw('1'))
+                        ->from('ynh_applications')
+                        ->whereRaw('ynh_applications.ynh_order_id = ynh_orders.id');
+                })
+                ->get();
+        }
+        return view('home.pages._servers', compact(
+            'tab',
+            'server',
+            'memory_usage',
+            'disk_usage',
+            'security_events',
+            'orders',
+            'interdependencies'
+        ));
     }
 
     public function testSshConnection(YnhServer $server, TestSshConnectionRequest $request)
