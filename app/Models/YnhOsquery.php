@@ -168,17 +168,23 @@ class YnhOsquery extends Model
                 ynh_servers.name AS ynh_server_name,
                 TIMESTAMP(ynh_osquery.calendar_time - SECOND(ynh_osquery.calendar_time)) AS timestamp,
                 json_unquote(json_extract(ynh_osquery.columns, '$.pid')) AS pid,    
-                json_unquote(json_extract(ynh_osquery.columns, '$.host')) AS entry_host,
+                CASE
+                  WHEN json_unquote(json_extract(ynh_osquery.columns, '$.host')) = 'null' THEN NULL
+                  ELSE json_unquote(json_extract(ynh_osquery.columns, '$.host'))
+                END AS entry_host,
                 json_unquote(json_extract(ynh_osquery.columns, '$.time')) AS entry_timestamp,
                 json_unquote(json_extract(ynh_osquery.columns, '$.tty')) AS entry_terminal,
                 json_unquote(json_extract(ynh_osquery.columns, '$.type_name')) AS entry_type,
-                json_unquote(json_extract(ynh_osquery.columns, '$.username')) AS entry_username,
+                CASE
+                    WHEN json_unquote(json_extract(ynh_osquery.columns, '$.username')) = 'null' THEN NULL
+                    ELSE json_unquote(json_extract(ynh_osquery.columns, '$.username'))
+                END AS entry_username,
                 ynh_osquery.action
             FROM ynh_osquery
             INNER JOIN ynh_servers ON ynh_servers.id = ynh_osquery.ynh_server_id
             WHERE ynh_osquery.name = 'last'
             AND ynh_osquery.ynh_server_id IN ({$servers->pluck('id')->join(',')})
-            ORDER BY timestamp DESC
+            ORDER BY timestamp DESC, entry_timestamp DESC
             LIMIT 20;
         "));
     }
@@ -264,7 +270,10 @@ class YnhOsquery extends Model
                 TIMESTAMP(ynh_osquery.calendar_time - SECOND(ynh_osquery.calendar_time)) AS timestamp,
                 json_unquote(json_extract(ynh_osquery.columns, '$.key_file')) AS key_file,
                 json_unquote(json_extract(ynh_osquery.columns, '$.key')) AS `key`,
-                json_unquote(json_extract(ynh_osquery.columns, '$.comment')) AS key_comment,
+                CASE
+                  WHEN json_unquote(json_extract(ynh_osquery.columns, '$.comment')) = 'null' THEN NULL
+                  ELSE json_unquote(json_extract(ynh_osquery.columns, '$.comment'))
+                END AS key_comment,
                 json_unquote(json_extract(ynh_osquery.columns, '$.algorithm')) AS algorithm,
                 ynh_osquery.action
             FROM ynh_osquery
