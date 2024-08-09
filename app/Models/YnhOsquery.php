@@ -118,7 +118,7 @@ class YnhOsquery extends Model
         "));
     }
 
-    public static function usersSecurityEvents(Collection $servers): Collection
+    public static function users(Collection $servers): Collection
     {
         // {
         //      "description":null,
@@ -151,7 +151,7 @@ class YnhOsquery extends Model
         "));
     }
 
-    public static function lastLoginsAndLogoutsSecurityEvents(Collection $servers): Collection
+    public static function loginsAndLogouts(Collection $servers): Collection
     {
         // {
         //      "host":null,
@@ -189,7 +189,7 @@ class YnhOsquery extends Model
         "));
     }
 
-    public static function suidBinSecurityEvents(Collection $servers): Collection
+    public static function suidBin(Collection $servers): Collection
     {
         // {
         //      "groupname":"tty",
@@ -216,7 +216,7 @@ class YnhOsquery extends Model
         "));
     }
 
-    public static function kernelModulesSecurityEvents(Collection $servers): Collection
+    public static function kernelModules(Collection $servers): Collection
     {
         // {
         //      "address":"0xffffffffc0223000",
@@ -245,7 +245,7 @@ class YnhOsquery extends Model
         "));
     }
 
-    public static function authorizedKeysSecurityEvents(Collection $servers): Collection
+    public static function authorizedKeys(Collection $servers): Collection
     {
         // {
         //      "algorithm":"ssh-rsa",

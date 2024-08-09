@@ -41,11 +41,11 @@ class HomeController extends Controller
 
         if ($tab === 'security') {
             $security_events = [
-                'authorized_keys' => YnhOsquery::authorizedKeysSecurityEvents($servers),
-                'kernel_modules' => YnhOsquery::kernelModulesSecurityEvents($servers),
-                'suid_bin' => YnhOsquery::suidBinSecurityEvents($servers),
-                'last_logins_and_logouts' => YnhOsquery::lastLoginsAndLogoutsSecurityEvents($servers),
-                'users' => YnhOsquery::usersSecurityEvents($servers),
+                'authorized_keys' => YnhOsquery::authorizedKeys($servers),
+                'kernel_modules' => YnhOsquery::kernelModules($servers),
+                'suid_bin' => YnhOsquery::suidBin($servers),
+                'last_logins_and_logouts' => YnhOsquery::loginsAndLogouts($servers),
+                'users' => YnhOsquery::users($servers),
             ];
         }
 
