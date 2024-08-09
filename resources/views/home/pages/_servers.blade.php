@@ -61,7 +61,7 @@
     </li>
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'security' ? 'active' : '' }}"
-         href="{{ route('ynh.servers.edit', $server) }}?tab=security">
+         href="{{ route('ynh.servers.edit', $server) }}?tab=security&limit=40">
         {{ __('Security') }}
       </a>
     </li>

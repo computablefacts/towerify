@@ -53,6 +53,7 @@ class YnhServerController extends Controller
     public function index(YnhServer $server, Request $request)
     {
         $tab = $request->input('tab', 'settings');
+        $limit = $request->input('limit', 40);
         $user = Auth::user();
         $servers = collect([$server]);
         $memory_usage = collect();
@@ -67,11 +68,11 @@ class YnhServerController extends Controller
 
         if ($tab === 'security') {
             $security_events = [
-                'authorized_keys' => YnhOsquery::authorizedKeys($servers),
-                'kernel_modules' => YnhOsquery::kernelModules($servers),
-                'suid_bin' => YnhOsquery::suidBin($servers),
-                'last_logins_and_logouts' => YnhOsquery::loginsAndLogouts($servers),
-                'users' => YnhOsquery::users($servers),
+                'authorized_keys' => YnhOsquery::authorizedKeys($servers, $limit),
+                'kernel_modules' => YnhOsquery::kernelModules($servers, $limit),
+                'suid_bin' => YnhOsquery::suidBinaries($servers, $limit),
+                'last_logins_and_logouts' => YnhOsquery::loginsAndLogouts($servers, $limit),
+                'users' => YnhOsquery::users($servers, $limit),
             ];
         }
 
@@ -94,6 +95,7 @@ class YnhServerController extends Controller
         }
         return view('home.pages._servers', compact(
             'tab',
+            'limit',
             'server',
             'memory_usage',
             'disk_usage',

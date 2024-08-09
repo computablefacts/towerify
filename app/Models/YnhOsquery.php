@@ -36,7 +36,7 @@ class YnhOsquery extends Model
         'packed' => 'boolean',
     ];
 
-    public static function memoryUsage(Collection $servers): Collection
+    public static function memoryUsage(Collection $servers, int $limit = 1000): Collection
     {
         return $servers->isEmpty() ? collect() : collect(DB::select("
             SELECT 
@@ -69,7 +69,7 @@ class YnhOsquery extends Model
                 FROM ynh_memory_usage
 
                 ORDER BY timestamp DESC
-                LIMIT 1000
+                LIMIT {$limit}
             ) AS t
             INNER JOIN ynh_servers ON ynh_servers.id = t.ynh_server_id
             WHERE ynh_servers.id IN ({$servers->pluck('id')->join(',')})
@@ -77,7 +77,7 @@ class YnhOsquery extends Model
         "));
     }
 
-    public static function diskUsage(Collection $servers): Collection
+    public static function diskUsage(Collection $servers, int $limit = 1000): Collection
     {
         return $servers->isEmpty() ? collect() : collect(DB::select("
             SELECT
@@ -110,7 +110,7 @@ class YnhOsquery extends Model
                 FROM ynh_disk_usage
 
                 ORDER BY timestamp DESC
-                LIMIT 1000
+                LIMIT {$limit}
             ) AS t
             INNER JOIN ynh_servers ON ynh_servers.id = t.ynh_server_id
             WHERE ynh_servers.id IN ({$servers->pluck('id')->join(',')}) 
@@ -118,7 +118,7 @@ class YnhOsquery extends Model
         "));
     }
 
-    public static function users(Collection $servers): Collection
+    public static function users(Collection $servers, int $limit): Collection
     {
         // {
         //      "description":null,
@@ -147,11 +147,11 @@ class YnhOsquery extends Model
             WHERE ynh_osquery.name = 'users'
             AND ynh_osquery.ynh_server_id IN ({$servers->pluck('id')->join(',')})
             ORDER BY timestamp DESC
-            LIMIT 20;
+            LIMIT {$limit};
         "));
     }
 
-    public static function loginsAndLogouts(Collection $servers): Collection
+    public static function loginsAndLogouts(Collection $servers, int $limit): Collection
     {
         // {
         //      "host":null,
@@ -185,11 +185,11 @@ class YnhOsquery extends Model
             WHERE ynh_osquery.name = 'last'
             AND ynh_osquery.ynh_server_id IN ({$servers->pluck('id')->join(',')})
             ORDER BY timestamp DESC, entry_timestamp DESC
-            LIMIT 20;
+            LIMIT {$limit};
         "));
     }
 
-    public static function suidBin(Collection $servers): Collection
+    public static function suidBinaries(Collection $servers, int $limit): Collection
     {
         // {
         //      "groupname":"tty",
@@ -212,11 +212,11 @@ class YnhOsquery extends Model
             WHERE ynh_osquery.name = 'suid_bin'
             AND ynh_osquery.ynh_server_id IN ({$servers->pluck('id')->join(',')})
             ORDER BY timestamp DESC
-            LIMIT 20;
+            LIMIT {$limit};
         "));
     }
 
-    public static function kernelModules(Collection $servers): Collection
+    public static function kernelModules(Collection $servers, int $limit): Collection
     {
         // {
         //      "address":"0xffffffffc0223000",
@@ -241,11 +241,11 @@ class YnhOsquery extends Model
             WHERE ynh_osquery.name = 'kernel_modules'
             AND ynh_osquery.ynh_server_id IN ({$servers->pluck('id')->join(',')})
             ORDER BY timestamp DESC
-            LIMIT 20
+            LIMIT {$limit}
         "));
     }
 
-    public static function authorizedKeys(Collection $servers): Collection
+    public static function authorizedKeys(Collection $servers, int $limit): Collection
     {
         // {
         //      "algorithm":"ssh-rsa",
@@ -281,7 +281,7 @@ class YnhOsquery extends Model
             WHERE ynh_osquery.name = 'authorized_keys'
             AND ynh_osquery.ynh_server_id IN ({$servers->pluck('id')->join(',')})
             ORDER BY timestamp DESC
-            LIMIT 20
+            LIMIT {$limit}
         "));
     }
 
