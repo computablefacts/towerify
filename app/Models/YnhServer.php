@@ -313,13 +313,13 @@ class YnhServer extends Model
 
     public function startMonitoringAsset(User $user, string $domainOrIpAddress): bool
     {
-        $tenant = $user->tenant();
+        $team = $user->customer?->company_name;
 
-        if (!$tenant || !$user) {
+        if (!$team) {
             return false;
         }
 
-        $json = AdversaryMeter::addAsset($tenant->name, $user, $domainOrIpAddress);
+        $json = AdversaryMeter::addAsset($team, $user, $domainOrIpAddress);
 
         if (count($json) === 0) {
             return false;
@@ -331,19 +331,19 @@ class YnhServer extends Model
             // TODO : check that $user->am_api_token is equal to $json['api_token'] ?
         }
 
-        AdversaryMeter::switchTeam($tenant->name, $user);
+        AdversaryMeter::switchTeam($team, $user);
         return true;
     }
 
     public function stopMonitoringAsset(User $user, string $domainOrIpAddress): bool
     {
-        $tenant = $user->tenant();
+        $team = $user->customer?->company_name;
 
-        if (!$tenant || !$user) {
+        if (!$team) {
             return false;
         }
 
-        $json = AdversaryMeter::removeAsset($tenant->name, $user, $domainOrIpAddress);
+        $json = AdversaryMeter::removeAsset($team, $user, $domainOrIpAddress);
 
         if (count($json) === 0) {
             return false;
