@@ -38,7 +38,7 @@ class AgeOffOsqueryEvents implements ShouldQueue
                 ->update(['packed' => false]);
 
             DB::unprepared("
-                INSERT INTO ynh_disk_usage (
+                INSERT INTO ynh_osquery_disk_usage (
                   ynh_server_id,
                   timestamp,
                   percent_available,
@@ -76,7 +76,7 @@ class AgeOffOsqueryEvents implements ShouldQueue
                 ->update(['packed' => false]);
 
             DB::unprepared("
-                INSERT INTO ynh_memory_usage (
+                INSERT INTO ynh_osquery_memory_usage (
                   ynh_server_id,
                   timestamp,
                   percent_available,

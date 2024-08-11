@@ -66,7 +66,7 @@ class YnhOsquery extends Model
                   space_left_gb,
                   total_space_gb,
                   used_space_gb
-                FROM ynh_memory_usage
+                FROM ynh_osquery_memory_usage
 
                 ORDER BY timestamp DESC
                 LIMIT {$limit}
@@ -107,7 +107,7 @@ class YnhOsquery extends Model
                   space_left_gb,
                   total_space_gb,
                   used_space_gb
-                FROM ynh_disk_usage
+                FROM ynh_osquery_disk_usage
 
                 ORDER BY timestamp DESC
                 LIMIT {$limit}
