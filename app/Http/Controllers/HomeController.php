@@ -30,6 +30,15 @@ class HomeController extends Controller
         $limit = $request->input('limit', 20);
         $user = Auth::user();
         $servers = YnhServer::forUser($user);
+        $os_infos = YnhOsquery::osInfos($servers)
+            ->map(function ($osInfos) {
+                return (object)[
+                    'ynh_server_id' => $osInfos->ynh_server_id,
+                    'os' => "{$osInfos->os} {$osInfos->major_version}.{$osInfos->minor_version} ({$osInfos->architecture})",
+                ];
+            })
+            ->groupBy('ynh_server_id');
+
         $memory_usage = collect();
         $disk_usage = collect();
 
@@ -130,7 +139,8 @@ class HomeController extends Controller
             'pendingActions',
             'domains',
             'applications',
-            'backups'
+            'backups',
+            'os_infos'
         ));
     }
 }

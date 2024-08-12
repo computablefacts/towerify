@@ -37,6 +37,7 @@
         <th>
           <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
         </th>
+        <th>{{ __('OS') }}</th>
         <th>{{ __('IP V4') }}</th>
         <th>{{ __('IP V6') }}</th>
         <th>{{ __('Domain') }}</th>
@@ -72,10 +73,13 @@
           </span>
         </td>
         <td>
+          {{ isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-' }}
+        </td>
+        <td>
           {{ $server->ip() }}
         </td>
         <td>
-          @if($server->isFrozen() || $server->ipv6() === "<unavailable>")
+          @if($server->isFrozen() || $server->ipv6() === '<unavailable>')
           -
           @else
           {{ $server->ipv6() }}

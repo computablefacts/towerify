@@ -36,6 +36,49 @@ class YnhOsquery extends Model
         'packed' => 'boolean',
     ];
 
+    public static function osInfos(Collection $servers): Collection
+    {
+        // {
+        //      "arch":"x86_64",
+        //      "build":null,
+        //      "codename":"bullseye",
+        //      "major":"11",
+        //      "minor":"0",
+        //      "name":"Debian GNU\/Linux",
+        //      "patch":"0",
+        //      "platform":"debian",
+        //      "platform_like":null,
+        //      "version":"11 (bullseye)"
+        // }
+        return $servers->isEmpty() ? collect() : collect(DB::select("
+            SELECT DISTINCT 
+                ynh_osquery.ynh_server_id,
+                ynh_servers.name AS ynh_server_name,
+                TIMESTAMP(ynh_osquery.calendar_time - SECOND(ynh_osquery.calendar_time)) AS `timestamp`,
+                json_unquote(json_extract(ynh_osquery.columns, '$.arch')) AS architecture,
+                json_unquote(json_extract(ynh_osquery.columns, '$.codename')) AS codename,
+                CAST(json_unquote(json_extract(ynh_osquery.columns, '$.major')) AS INTEGER) AS major_version,
+                CAST(json_unquote(json_extract(ynh_osquery.columns, '$.minor')) AS INTEGER) AS minor_version,
+                json_unquote(json_extract(ynh_osquery.columns, '$.platform')) AS os,
+                CASE
+                  WHEN json_unquote(json_extract(ynh_osquery.columns, '$.patch')) = 'null' THEN NULL
+                  ELSE CAST(json_unquote(json_extract(ynh_osquery.columns, '$.patch')) AS INTEGER)
+                END AS patch_version
+            FROM ynh_osquery
+            INNER JOIN (
+              SELECT 
+                ynh_server_id, MAX(calendar_time) AS calendar_time 
+              FROM ynh_osquery 
+              WHERE name = 'os_version'
+              GROUP BY ynh_server_id
+            ) AS t ON t.ynh_server_id = ynh_osquery.ynh_server_id AND t.calendar_time = ynh_osquery.calendar_time
+            INNER JOIN ynh_servers ON ynh_servers.id = ynh_osquery.ynh_server_id
+            WHERE ynh_osquery.name = 'os_version'
+            AND ynh_osquery.ynh_server_id IN ({$servers->pluck('id')->join(',')})
+            ORDER BY timestamp DESC
+        "));
+    }
+
     public static function memoryUsage(Collection $servers, int $limit = 1000): Collection
     {
         return $servers->isEmpty() ? collect() : collect(DB::select("
