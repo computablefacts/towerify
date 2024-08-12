@@ -41,12 +41,14 @@ class YnhServer extends Model
         'ynh_order_id',
         'secret',
         'is_frozen',
+        'added_with_curl',
     ];
 
     protected $casts = [
         'updated' => 'boolean',
         'is_ready' => 'boolean',
         'is_frozen' => 'boolean',
+        'added_with_curl' => 'boolean',
     ];
 
     protected $hidden = ['ssh_private_key', 'secret'];
@@ -129,6 +131,11 @@ class YnhServer extends Model
     public function isFrozen(): bool
     {
         return $this->is_frozen;
+    }
+
+    public function addedWithCurl(): bool
+    {
+        return $this->added_with_curl;
     }
 
     public function ip(): ?string
@@ -368,11 +375,16 @@ if [ ! -f /etc/osquery/osquery.conf ]; then
     rm osquery_5.11.0-1.linux_amd64.deb
     osqueryctl start osqueryd
 
+    apt install git -y
+
     git clone https://github.com/palantir/osquery-configuration.git
     cp osquery-configuration/Classic/Servers/Linux/* /etc/osquery/
     cp -r osquery-configuration/Classic/Servers/Linux/packs/ /etc/osquery/
     osqueryctl restart osqueryd
     rm -rf osquery-configuration/
+    
+    # apt remove git -y
+    # apt purge git -y
 fi
 
 apt install tmux -y

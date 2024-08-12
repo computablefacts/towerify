@@ -9,10 +9,11 @@
     "require": {
         "php": "^8.3",
         "ext-gd": "*",
-        "ext-pcntl": "*",
         "ext-imagick": "*",
+        "ext-pcntl": "*",
         "guzzlehttp/guzzle": "^7.5",
         "laravel/framework": "^11.0",
+        "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.0",
         "laravel/ui": "^4.0",

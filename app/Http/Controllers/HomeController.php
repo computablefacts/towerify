@@ -28,6 +28,7 @@ class HomeController extends Controller
     {
         $tab = $request->input('tab', 'my-apps');
         $limit = $request->input('limit', 20);
+        /** @var User $user */
         $user = Auth::user();
         $servers = YnhServer::forUser($user);
         $os_infos = YnhOsquery::osInfos($servers)
