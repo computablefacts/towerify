@@ -140,6 +140,9 @@ Route::get('setup/script', function (\Illuminate\Http\Request $request) {
         return response('The server is already configured', 500)
             ->header('Content-Type', 'text/plain');
     }
+    if (!$server->secret) {
+        $server->secret = Str::random(30);
+    }
     if (!$server->ssh_port) {
         $server->ssh_port = 22;
     }
