@@ -182,8 +182,8 @@ if [ ! -f /etc/osquery/osquery.conf ]; then
     osqueryctl restart osqueryd
     rm -rf osquery-configuration/
     
-    apt remove git -y
-    apt purge git -y
+    # apt remove git -y
+    # apt purge git -y
 fi
 
 apt install tmux -y
