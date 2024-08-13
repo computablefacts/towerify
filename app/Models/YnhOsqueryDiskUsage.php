@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class YnhMemoryUsage extends Model
+class YnhOsqueryDiskUsage extends Model
 {
     use HasFactory;
 
-    protected $table = 'ynh_memory_usage';
+    protected $table = 'ynh_osquery_disk_usage';
 
     protected $fillable = [
         'ynh_server_id',

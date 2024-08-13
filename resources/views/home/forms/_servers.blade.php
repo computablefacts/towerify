@@ -123,12 +123,12 @@
       <button type="button" onclick="testSshConnection()" class="btn btn-outline-primary">
         {{ __('Test SSH Connection') }}
       </button>
-      @if(Auth::user()->canManageServers() && !$server->isReady())
+      @if(Auth::user()->canManageServers() && !$server->addedWithCurl() && !$server->isReady())
       <button type="button" onclick="setupHost()" class="btn btn-outline-primary mx-4">
         {{ __('Configure Host') }}
       </button>
       @endif
-      @if(Auth::user()->canManageServers())
+      @if(Auth::user()->canManageServers() && !$server->addedWithCurl())
       <button type="button" onclick="installOsquery()" class="btn btn-outline-primary mx-4">
         {{ __('Install Osquery') }}
       </button>

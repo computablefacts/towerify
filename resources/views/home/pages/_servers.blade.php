@@ -23,6 +23,7 @@
         {{ __('Settings') }}
       </a>
     </li>
+    @if(!$server->addedWithCurl())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'backups' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=backups">
@@ -53,6 +54,7 @@
         {{ __('Interdependencies') }}
       </a>
     </li>
+    @endif
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'resources_usage' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=resources_usage">
@@ -65,6 +67,7 @@
         {{ __('Security') }}
       </a>
     </li>
+    @if(!$server->addedWithCurl())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'users' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=users">
@@ -78,6 +81,7 @@
         {{ __('Shell') }}
       </a>
     </li>
+    @endif
     @endif
   </ul>
   @if(!$tab || $tab === 'settings')

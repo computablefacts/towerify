@@ -1,3 +1,19 @@
+@if(Auth::user()->canManageServers())
+<div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+  <div class="card-body">
+    <div class="row">
+      <pre class="m-0"><b>If you are simply looking to retrieve metrics or security events from an existing server:</b>
+<b>1.</b> In the browser, go to <a href="https://app.towerify.io/setup/token" target="_blank">https://app.towerify.io/setup/token</a> to get a specific cURL token.
+   Please, note that your token will be shown only once; ensure you store it safely.
+<b>2.</b> On the server, run:
+   <b>2.1</b> curl -s 'https://app.towerify.io/setup/script?api_token=&lt;token&gt;&server_ip=&lt;ip&gt;&server_name=&lt;name&gt;' >install.sh
+   <b>2.2</b> chmod +x install.sh
+   <b>2.3</b> ./install.sh
+   <b>2.4</b> rm install.sh</pre>
+    </div>
+  </div>
+</div>
+@endif
 @if(Auth::user()->canListServers())
 <div class="card card-accent-secondary tw-card">
   <div class="card-header d-flex flex-row">
@@ -37,6 +53,7 @@
         <th>
           <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
         </th>
+        <th>{{ __('OS') }}</th>
         <th>{{ __('IP V4') }}</th>
         <th>{{ __('IP V6') }}</th>
         <th>{{ __('Domain') }}</th>
@@ -72,10 +89,13 @@
           </span>
         </td>
         <td>
+          {{ isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-' }}
+        </td>
+        <td>
           {{ $server->ip() }}
         </td>
         <td>
-          @if($server->isFrozen() || $server->ipv6() === "<unavailable>")
+          @if($server->isFrozen() || $server->ipv6() === '<unavailable>')
           -
           @else
           {{ $server->ipv6() }}
@@ -89,7 +109,7 @@
           @endif
         </td>
         <td>
-          @if($server->isFrozen())
+          @if($server->isFrozen() || $server->addedWithCurl())
           -
           @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=domains">
@@ -98,7 +118,7 @@
           @endif
         </td>
         <td>
-          @if($server->isFrozen())
+          @if($server->isFrozen() || $server->addedWithCurl())
           -
           @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=applications">
@@ -107,7 +127,7 @@
           @endif
         </td>
         <td>
-          @if($server->isFrozen())
+          @if($server->isFrozen() || $server->addedWithCurl())
           -
           @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=users">

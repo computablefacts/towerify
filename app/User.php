@@ -6,12 +6,15 @@ use App\Hashing\TwHasher;
 use App\Models\Permission;
 use App\Models\Tenant;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * DO NOT MOVE OR REMOVE THIS CLASS OTHERWISE EVERYTHING FALLS APART...
  */
 class User extends \Konekt\AppShell\Models\User
 {
+    use HasApiTokens;
+
     public function tenant(): ?Tenant
     {
         if ($this->tenant_id) {

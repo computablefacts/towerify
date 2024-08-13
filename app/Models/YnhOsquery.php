@@ -36,6 +36,115 @@ class YnhOsquery extends Model
         'packed' => 'boolean',
     ];
 
+    public static function installOsquery(YnhServer $server): string
+    {
+        return <<<EOT
+#!/bin/bash
+
+if [ ! -f /etc/osquery/osquery.conf ]; then
+
+    wget https://pkg.osquery.io/deb/osquery_5.11.0-1.linux_amd64.deb
+    apt install ./osquery_5.11.0-1.linux_amd64.deb
+    rm osquery_5.11.0-1.linux_amd64.deb
+    osqueryctl start osqueryd
+
+    apt install git -y
+    
+    git clone https://github.com/palantir/osquery-configuration.git
+    cp osquery-configuration/Classic/Servers/Linux/* /etc/osquery/
+    cp -r osquery-configuration/Classic/Servers/Linux/packs/ /etc/osquery/
+    osqueryctl restart osqueryd
+    rm -rf osquery-configuration/
+    
+    # apt remove git -y
+    # apt purge git -y
+fi
+
+apt install tmux -y
+sudo -H -u root bash -c 'tmux kill-ses -t forward-results'
+sudo -H -u root bash -c 'tmux kill-ses -t forward-snapshots'
+
+if [ -f /etc/osquery/forward-results.sh ]; then
+  rm -f /etc/osquery/forward-results.sh
+fi
+if [ -f /etc/osquery/forward-snapshots.sh ]; then
+  rm -f /etc/osquery/forward-snapshots.sh
+fi
+
+cat /etc/osquery/osquery.conf | \
+  jq $'del(.schedule.socket_events)' | \
+  jq $'del(.schedule.network_interfaces_snapshot)' | \
+  jq $'del(.schedule.process_events)' | \
+  jq $'.schedule.packages_available_snapshot += {query:"SELECT name, version, source FROM deb_packages;",interval:86400,snapshot:true}' | \
+  jq $'.schedule.memory_available_snapshot += {query:"select printf(\'%.2f\',((memory_total - memory_available) * 1.0)/1073741824) as used_space_gb, printf(\'%.2f\',(1.0 * memory_available / 1073741824)) as space_left_gb, printf(\'%.2f\',(1.0 * memory_total / 1073741824)) as total_space_gb, printf(\'%.2f\',(((memory_total - memory_available) * 1.0)/1073741824)/(1.0 * memory_total / 1073741824)) * 100 as \'%_used\', printf(\'%.2f\',(1.0 * memory_available / 1073741824)/(1.0 * memory_total / 1073741824)) * 100 as \'%_available\' from memory_info;",interval:300,snapshot:true}' | \
+  jq $'.schedule.disk_available_snapshot += {query:"select printf(\'%.2f\',((blocks - blocks_available * 1.0) * blocks_size)/1073741824) as used_space_gb, printf(\'%.2f\',(1.0 * blocks_available * blocks_size / 1073741824)) as space_left_gb, printf(\'%.2f\',(1.0 * blocks * blocks_size / 1073741824)) as total_space_gb, printf(\'%.2f\',(((blocks - blocks_available * 1.0) * blocks_size)/1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 as \'%_used\', printf(\'%.2f\',(1.0 * blocks_available * blocks_size / 1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 as \'%_available\' from mounts where path = \'/\';",interval:300,snapshot:true}' \
+  >/etc/osquery/osquery2.conf
+
+mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
+osqueryctl restart osqueryd
+
+cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '0 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -
+
+TVAR1=$(cat <<SETVAR
+tail -F /var/log/osquery/osqueryd.results.log | jq -c 'select(.columns == null or .columns.cmdline == null or (.columns.cmdline | contains("tail -F /var/log/osquery/osqueryd.results.log") | not)) | {ip:"{$server->ip_address}",secret:"{$server->secret}",events:[.]}' | while read -r LINE; do curl -s -H "Content-Type: application/json" -XPOST https://app.towerify.io/metrics --data-binary "\\\$LINE"; done >/dev/null
+SETVAR
+)
+sudo -H -u root bash -c 'tmux new-session -A -d -s forward-results'
+tmux send-keys -t forward-results "\$TVAR1" C-m
+
+TVAR2=$(cat <<SETVAR
+tail -F /var/log/osquery/osqueryd.snapshots.log | jq -c 'select(.columns == null or .columns.cmdline == null or (.columns.cmdline | contains("tail -F /var/log/osquery/osqueryd.snapshots.log") | not)) | {ip:"{$server->ip_address}",secret:"{$server->secret}",events:[.]}' | while read -r LINE; do curl -s -H "Content-Type: application/json" -XPOST https://app.towerify.io/metrics --data-binary "\\\$LINE"; done >/dev/null
+SETVAR
+)
+sudo -H -u root bash -c 'tmux new-session -A -d -s forward-snapshots'
+tmux send-keys -t forward-snapshots "\$TVAR2" C-m
+
+EOT;
+    }
+
+    public static function osInfos(Collection $servers): Collection
+    {
+        // {
+        //      "arch":"x86_64",
+        //      "build":null,
+        //      "codename":"bullseye",
+        //      "major":"11",
+        //      "minor":"0",
+        //      "name":"Debian GNU\/Linux",
+        //      "patch":"0",
+        //      "platform":"debian",
+        //      "platform_like":null,
+        //      "version":"11 (bullseye)"
+        // }
+        return $servers->isEmpty() ? collect() : collect(DB::select("
+            SELECT DISTINCT 
+                ynh_osquery.ynh_server_id,
+                ynh_servers.name AS ynh_server_name,
+                TIMESTAMP(ynh_osquery.calendar_time - SECOND(ynh_osquery.calendar_time)) AS `timestamp`,
+                json_unquote(json_extract(ynh_osquery.columns, '$.arch')) AS architecture,
+                json_unquote(json_extract(ynh_osquery.columns, '$.codename')) AS codename,
+                CAST(json_unquote(json_extract(ynh_osquery.columns, '$.major')) AS INTEGER) AS major_version,
+                CAST(json_unquote(json_extract(ynh_osquery.columns, '$.minor')) AS INTEGER) AS minor_version,
+                json_unquote(json_extract(ynh_osquery.columns, '$.platform')) AS os,
+                CASE
+                  WHEN json_unquote(json_extract(ynh_osquery.columns, '$.patch')) = 'null' THEN NULL
+                  ELSE CAST(json_unquote(json_extract(ynh_osquery.columns, '$.patch')) AS INTEGER)
+                END AS patch_version
+            FROM ynh_osquery
+            INNER JOIN (
+              SELECT 
+                ynh_server_id, MAX(calendar_time) AS calendar_time 
+              FROM ynh_osquery 
+              WHERE name = 'os_version'
+              GROUP BY ynh_server_id
+            ) AS t ON t.ynh_server_id = ynh_osquery.ynh_server_id AND t.calendar_time = ynh_osquery.calendar_time
+            INNER JOIN ynh_servers ON ynh_servers.id = ynh_osquery.ynh_server_id
+            WHERE ynh_osquery.name = 'os_version'
+            AND ynh_osquery.ynh_server_id IN ({$servers->pluck('id')->join(',')})
+            ORDER BY timestamp DESC
+        "));
+    }
+
     public static function memoryUsage(Collection $servers, int $limit = 1000): Collection
     {
         return $servers->isEmpty() ? collect() : collect(DB::select("
@@ -66,7 +175,7 @@ class YnhOsquery extends Model
                   space_left_gb,
                   total_space_gb,
                   used_space_gb
-                FROM ynh_memory_usage
+                FROM ynh_osquery_memory_usage
 
                 ORDER BY timestamp DESC
                 LIMIT {$limit}
@@ -107,7 +216,7 @@ class YnhOsquery extends Model
                   space_left_gb,
                   total_space_gb,
                   used_space_gb
-                FROM ynh_disk_usage
+                FROM ynh_osquery_disk_usage
 
                 ORDER BY timestamp DESC
                 LIMIT {$limit}

@@ -11,8 +11,13 @@
 |
 */
 
+use App\Helpers\SshKeyPair;
+use App\Models\YnhServer;
+use App\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 Route::get('catalog', function () {
     \Illuminate\Support\Facades\Auth::login(\App\User::where('email', config('towerify.admin.email'))->firstOrFail());
@@ -34,6 +39,141 @@ Route::get('catalog', function () {
         })
         ->values();
     return new JsonResponse($apps, 200, ['Access-Control-Allow-Origin' => '*']);
+});
+
+Route::get('/setup/token', function (\Illuminate\Http\Request $request) {
+
+    /** @var User $user */
+    $user = $request->user();
+
+    if (!$user->canManageServers()) {
+        return new JsonResponse([
+            'status' => 'failure',
+            'message' => 'User must be able to manage servers.',
+            'user' => $user,
+        ], 200, ['Access-Control-Allow-Origin' => '*']);
+    }
+
+    // Upon first connection, generate a user-specific 'system' token.
+    // This token will enable the user to configure servers using curl.
+    /** @var \Laravel\Sanctum\PersonalAccessToken $token */
+    $token = $user->tokens->where('name', 'system')->first();
+    $plainTextToken = null;
+
+    if (!$token) {
+        $token = $user->createToken('system', ['setup.sh']);
+        if (!$token) {
+            return new JsonResponse([
+                'status' => 'failure',
+                'message' => 'The token could not be generated.',
+                'user' => $user,
+            ], 200, ['Access-Control-Allow-Origin' => '*']);
+        }
+        $plainTextToken = $token->plainTextToken;
+        $token = $token?->accessToken;
+    }
+    if ($token->cant('setup.sh')) {
+        $token->abilities = array_merge($token->abilities, ['setup.sh']);
+        $token->save();
+    }
+    if (!$plainTextToken) {
+        return new JsonResponse([
+            'status' => 'success',
+            'message' => 'A \'system\' token has already been generated. Please, reuse it.',
+            'token' => null,
+        ], 200, ['Access-Control-Allow-Origin' => '*']);
+    }
+    return new JsonResponse([
+        'status' => 'success',
+        'message' => 'The \'system\' token has been generated.',
+        'token' => $plainTextToken,
+    ], 200, ['Access-Control-Allow-Origin' => '*']);
+})->middleware('auth');
+
+Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
+
+    $token = $request->input('api_token');
+
+    if (!$token) {
+        return response('Missing token', 403)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    /** @var \Laravel\Sanctum\PersonalAccessToken $token */
+    $token = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+
+    if (!$token || $token->cant('setup.sh')) {
+        return response('Invalid token', 403)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    /** @var User $user */
+    $user = $token->tokenable;
+    Auth::login($user);
+
+    $ip = $request->input('server_ip');
+
+    if (!$ip) {
+        return response('Invalid IP address', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $server = \App\Models\YnhServer::where('ip_address', $ip)->first();
+
+    if (!$server) {
+        $server = \App\Models\YnhServer::where('ip_address_v6', $ip)->first();
+        if (!$server) {
+            $name = $request->input('server_name', "cURL/{$ip}");
+            $server = YnhServer::create([
+                'name' => $name,
+                'ip_address' => $ip,
+                'user_id' => $user->id,
+                'secret' => Str::random(30),
+                'is_ready' => false,
+                'is_frozen' => true,
+                'added_with_curl' => true,
+            ]);
+            $server->save();
+        }
+    }
+    if ($server->is_ready) {
+        return response('The server is already configured', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+    if (!$server->secret) {
+        $server->secret = Str::random(30);
+    }
+    if (!$server->ssh_port) {
+        $server->ssh_port = 22;
+    }
+    if (!$server->ssh_username) {
+        $server->ssh_username = 'twr_admin';
+    }
+    if (!$server->ssh_public_key || !$server->ssh_private_key) {
+
+        $keys = new SshKeyPair();
+        $keys->init();
+
+        $server->ssh_public_key = $keys->publicKey();
+        $server->ssh_private_key = $keys->privateKey();
+    }
+
+    $server->is_ready = true;
+    $server->is_frozen = false;
+    $server->added_with_curl = true;
+    $server->save();
+
+    // 1. In the browser, go to "https://app.towerify.io" and login using your user account.
+    // 2. In the browser, go to "https://app.towerify.io/setup/token" to get a user-specific cURL token.
+    // 3. On the server, run:
+    //    3.1 curl -s 'https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name>' >install.sh
+    //    3.2 chmod +x install.sh
+    //    3.3 ./install.sh
+    //    3.4 rm install.sh
+    $installScript = \App\Models\YnhOsquery::installOsquery($server);
+
+    return response($installScript, 200)
+        ->header('Content-Type', 'text/plain');
 });
 
 Route::post('metrics', function (\Illuminate\Http\Request $request) {
