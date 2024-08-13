@@ -16,8 +16,6 @@ class VerifyCsrfToken extends Middleware
         '/payment/netopia/*',
         '/payment/paypal/*',
         '/payment/adyen/*',
-        '/payment/stripe/*',
-        '/payment/simplepay/*',
         '/payment/braintree/*',
         '/payment/mollie/*',
         '/metrics',

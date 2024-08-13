@@ -315,11 +315,6 @@ Route::group(['prefix' => 'payment/paypal', 'as' => 'payment.paypal.'], function
     Route::any('webhook', 'PaypalReturnController@webhook')->name('webhook');
 });
 
-Route::group(['prefix' => 'payment/simplepay', 'as' => 'payment.simplepay.'], function () {
-    Route::get('return', 'SimplepayReturnController@return')->name('return');
-    Route::post('silent', 'SimplepayReturnController@silent')->name('silent');
-});
-
 Route::group(['prefix' => 'payment/mollie', 'as' => 'payment.mollie.'], function () {
     Route::get('{paymentId}/return', 'MollieController@return')->name('return');
     Route::post('webhook', 'MollieController@webhook')->name('webhook');
@@ -332,8 +327,4 @@ Route::group(['prefix' => 'payment/adyen', 'as' => 'payment.adyen.'], function (
 
 Route::group(['prefix' => 'payment/braintree', 'as' => 'payment.braintree.'], function () {
     Route::post('{paymentId}/submit', 'BraintreeController@submit')->name('submit');
-});
-
-Route::group(['prefix' => 'payment/stripe', 'as' => 'payment.stripe.'], function () {
-    Route::post('webhook', 'StripeReturnController@webhook');
 });
