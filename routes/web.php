@@ -41,7 +41,7 @@ Route::get('catalog', function () {
     return new JsonResponse($apps, 200, ['Access-Control-Allow-Origin' => '*']);
 });
 
-Route::get('setup/token', function (\Illuminate\Http\Request $request) {
+Route::get('/setup/token', function (\Illuminate\Http\Request $request) {
 
     /** @var User $user */
     $user = $request->user();
@@ -90,7 +90,7 @@ Route::get('setup/token', function (\Illuminate\Http\Request $request) {
     ], 200, ['Access-Control-Allow-Origin' => '*']);
 })->middleware('auth');
 
-Route::get('setup/script', function (\Illuminate\Http\Request $request) {
+Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
 
     $token = $request->input('api_token');
 
