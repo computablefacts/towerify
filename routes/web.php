@@ -163,12 +163,13 @@ Route::get('setup/script', function (\Illuminate\Http\Request $request) {
     $server->added_with_curl = true;
     $server->save();
 
-    // 1. In the browser, go to "https://towerify.io/setup/token" to get a user-specific cURL token.
-    // 2. On the server, run:
-    //    2.1 curl -s 'https://towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name>' >install.sh
-    //    2.2 chmod +x install.sh
-    //    2.3 ./install.sh
-    //    2.4 rm install.sh
+    // 1. In the browser, go to "https://app.towerify.io" and login using your user account.
+    // 2. In the browser, go to "https://app.towerify.io/setup/token" to get a user-specific cURL token.
+    // 3. On the server, run:
+    //    3.1 curl -s 'https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name>' >install.sh
+    //    3.2 chmod +x install.sh
+    //    3.3 ./install.sh
+    //    3.4 rm install.sh
     $installScript = \App\Models\YnhOsquery::installOsquery($server);
 
     return response($installScript, 200)
