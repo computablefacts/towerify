@@ -1,4 +1,4 @@
-@if(Auth::user()->canListServers())
+@if(Auth::user()->canManageServers())
 <div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
   <div class="card-body">
     <div class="row">
@@ -13,6 +13,8 @@
     </div>
   </div>
 </div>
+@endif
+@if(Auth::user()->canListServers())
 <div class="card card-accent-secondary tw-card">
   <div class="card-header d-flex flex-row">
     <div class="align-items-start">
