@@ -130,12 +130,12 @@ class YnhServer extends Model
 
     public function isFrozen(): bool
     {
-        return $this->is_frozen;
+        return $this->is_frozen != null && $this->is_frozen;
     }
 
     public function addedWithCurl(): bool
     {
-        return $this->added_with_curl;
+        return $this->added_with_curl != null && $this->added_with_curl;
     }
 
     public function ip(): ?string

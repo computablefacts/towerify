@@ -1,4 +1,18 @@
 @if(Auth::user()->canListServers())
+<div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+  <div class="card-body">
+    <div class="row">
+      <pre class="m-0"><b>If you are simply looking to retrieve metrics or security events from an existing server:</b>
+<b>1.</b> In the browser, go to <a href="https://app.towerify.io/setup/token" target="_blank">https://app.towerify.io/setup/token</a> to get a specific cURL token.
+   Please, note that your token will be shown only once; ensure you store it safely.
+<b>2.</b> On the server, run:
+   <b>2.1</b> curl -s 'https://app.towerify.io/setup/script?api_token=&lt;token&gt;&server_ip=&lt;ip&gt;&server_name=&lt;name&gt;' >install.sh
+   <b>2.2</b> chmod +x install.sh
+   <b>2.3</b> ./install.sh
+   <b>2.4</b> rm install.sh</pre>
+    </div>
+  </div>
+</div>
 <div class="card card-accent-secondary tw-card">
   <div class="card-header d-flex flex-row">
     <div class="align-items-start">
