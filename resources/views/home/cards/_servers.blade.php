@@ -135,7 +135,7 @@
           @endif
         </td>
         <th>
-          @if($server->isReady() && Auth::user()->canManageServers())
+          @if($server->isReady() && !$server->addedWithCurl() && Auth::user()->canManageServers())
           <a id="refresh-{{ $server->id }}"
              onclick="refresh('{{ $server->id }}')"
              class="cursor-pointer"
