@@ -93,7 +93,7 @@
           @endif
         </td>
         <td>
-          @if($server->isFrozen())
+          @if($server->isFrozen() || $server->addedWithCurl())
           -
           @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=domains">
@@ -102,7 +102,7 @@
           @endif
         </td>
         <td>
-          @if($server->isFrozen())
+          @if($server->isFrozen() || $server->addedWithCurl())
           -
           @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=applications">
@@ -111,7 +111,7 @@
           @endif
         </td>
         <td>
-          @if($server->isFrozen())
+          @if($server->isFrozen() || $server->addedWithCurl())
           -
           @else
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=users">
