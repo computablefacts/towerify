@@ -15,6 +15,7 @@ class ProductController extends Controller
     public function __construct(ProductSearch $productFinder)
     {
         $this->productFinder = $productFinder;
+        $this->middleware('auth');
     }
 
     public function index(ProductIndexRequest $request, string $taxonomyName = null, Taxon $taxon = null)
