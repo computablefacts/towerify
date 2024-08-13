@@ -365,69 +365,7 @@ class YnhServer extends Model
 
     public function sshInstallOsquery(SshConnection2 $ssh)
     {
-        $installScript = <<<EOT
-#!/bin/bash
-
-if [ ! -f /etc/osquery/osquery.conf ]; then
-
-    wget https://pkg.osquery.io/deb/osquery_5.11.0-1.linux_amd64.deb
-    apt install ./osquery_5.11.0-1.linux_amd64.deb
-    rm osquery_5.11.0-1.linux_amd64.deb
-    osqueryctl start osqueryd
-
-    apt install git -y
-
-    git clone https://github.com/palantir/osquery-configuration.git
-    cp osquery-configuration/Classic/Servers/Linux/* /etc/osquery/
-    cp -r osquery-configuration/Classic/Servers/Linux/packs/ /etc/osquery/
-    osqueryctl restart osqueryd
-    rm -rf osquery-configuration/
-    
-    # apt remove git -y
-    # apt purge git -y
-fi
-
-apt install tmux -y
-sudo -H -u root bash -c 'tmux kill-ses -t forward-results'
-sudo -H -u root bash -c 'tmux kill-ses -t forward-snapshots'
-
-if [ -f /etc/osquery/forward-results.sh ]; then
-  rm -f /etc/osquery/forward-results.sh
-fi
-if [ -f /etc/osquery/forward-snapshots.sh ]; then
-  rm -f /etc/osquery/forward-snapshots.sh
-fi
-
-cat /etc/osquery/osquery.conf | \
-  jq $'del(.schedule.socket_events)' | \
-  jq $'del(.schedule.network_interfaces_snapshot)' | \
-  jq $'del(.schedule.process_events)' | \
-  jq $'.schedule.packages_available_snapshot += {query:"SELECT name, version, source FROM deb_packages;",interval:86400,snapshot:true}' | \
-  jq $'.schedule.memory_available_snapshot += {query:"select printf(\'%.2f\',((memory_total - memory_available) * 1.0)/1073741824) as used_space_gb, printf(\'%.2f\',(1.0 * memory_available / 1073741824)) as space_left_gb, printf(\'%.2f\',(1.0 * memory_total / 1073741824)) as total_space_gb, printf(\'%.2f\',(((memory_total - memory_available) * 1.0)/1073741824)/(1.0 * memory_total / 1073741824)) * 100 as \'%_used\', printf(\'%.2f\',(1.0 * memory_available / 1073741824)/(1.0 * memory_total / 1073741824)) * 100 as \'%_available\' from memory_info;",interval:300,snapshot:true}' | \
-  jq $'.schedule.disk_available_snapshot += {query:"select printf(\'%.2f\',((blocks - blocks_available * 1.0) * blocks_size)/1073741824) as used_space_gb, printf(\'%.2f\',(1.0 * blocks_available * blocks_size / 1073741824)) as space_left_gb, printf(\'%.2f\',(1.0 * blocks * blocks_size / 1073741824)) as total_space_gb, printf(\'%.2f\',(((blocks - blocks_available * 1.0) * blocks_size)/1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 as \'%_used\', printf(\'%.2f\',(1.0 * blocks_available * blocks_size / 1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 as \'%_available\' from mounts where path = \'/\';",interval:300,snapshot:true}' \
-  >/etc/osquery/osquery2.conf
-
-mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
-osqueryctl restart osqueryd
-
-cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '0 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -
-
-TVAR1=$(cat <<SETVAR
-tail -F /var/log/osquery/osqueryd.results.log | jq -c 'select(.columns == null or .columns.cmdline == null or (.columns.cmdline | contains("tail -F /var/log/osquery/osqueryd.results.log") | not)) | {ip:"{$this->ip_address}",secret:"{$this->secret}",events:[.]}' | while read -r LINE; do curl -s -H "Content-Type: application/json" -XPOST https://app.towerify.io/metrics --data-binary "\\\$LINE"; done >/dev/null
-SETVAR
-)
-sudo -H -u root bash -c 'tmux new-session -A -d -s forward-results'
-tmux send-keys -t forward-results "\$TVAR1" C-m
-
-TVAR2=$(cat <<SETVAR
-tail -F /var/log/osquery/osqueryd.snapshots.log | jq -c 'select(.columns == null or .columns.cmdline == null or (.columns.cmdline | contains("tail -F /var/log/osquery/osqueryd.snapshots.log") | not)) | {ip:"{$this->ip_address}",secret:"{$this->secret}",events:[.]}' | while read -r LINE; do curl -s -H "Content-Type: application/json" -XPOST https://app.towerify.io/metrics --data-binary "\\\$LINE"; done >/dev/null
-SETVAR
-)
-sudo -H -u root bash -c 'tmux new-session -A -d -s forward-snapshots'
-tmux send-keys -t forward-snapshots "\$TVAR2" C-m
-
-EOT;
-
+        $installScript = YnhOsquery::installOsquery($this);
         $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Installing Osquery...');
         $filename = 'install-yunohost-' . Str::random(10);
         $isOk = $ssh->upload($filename, $installScript);
