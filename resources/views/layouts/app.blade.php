@@ -112,9 +112,6 @@
         </nav>
 
         <main class="py-4">
-            @guest
-            <!-- COMING SOON -->
-            @else
             <div class="container">
                 <div class="row">
                   <div class="col-md-9 d-flex align-items-center">
@@ -132,7 +129,6 @@
                   @include('flash::message')
                 </div>
             </div>
-            @endguest
             @yield('content')
         </main>
     </div>
