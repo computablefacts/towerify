@@ -52,8 +52,7 @@ if [ ! -f /etc/osquery/osquery.conf ]; then
 
     # Pull Palantir's base rules
     git clone https://github.com/palantir/osquery-configuration.git
-    cp osquery-configuration/Classic/Servers/Linux/* /etc/osquery/
-    cp -r osquery-configuration/Classic/Servers/Linux/packs/ /etc/osquery/
+    cp -r osquery-configuration/Classic/Servers/Linux/* /etc/osquery/
     rm -rf osquery-configuration/
 fi
 if [ ! -f /opt/logalert/config.json ]; then
