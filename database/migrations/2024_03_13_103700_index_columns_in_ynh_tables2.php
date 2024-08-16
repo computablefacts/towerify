@@ -26,7 +26,7 @@ return new class extends Migration {
     public function down()
     {
         Schema::table('ynh_osquery', function (Blueprint $table) {
-            $table->index('calendar_time');
+            $table->dropIndex(['calendar_time']);
         });
     }
 };

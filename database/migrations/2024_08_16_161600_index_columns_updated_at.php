@@ -13,12 +13,11 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::table('ynh_servers', function (Blueprint $table) {
-            $table->index('secret');
-            $table->index('ip_address');
-        });
         Schema::table('ynh_osquery', function (Blueprint $table) {
-            $table->index('name');
+            $table->index('updated_at');
+        });
+        Schema::table('ynh_the_cyber_brief', function (Blueprint $table) {
+            $table->index('updated_at');
         });
     }
 
@@ -29,12 +28,11 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::table('ynh_osquery', function (Blueprint $table) {
-            $table->dropIndex(['name']);
+        Schema::table('ynh_the_cyber_brief', function (Blueprint $table) {
+            $table->dropIndex(['updated_at']);
         });
-        Schema::table('ynh_servers', function (Blueprint $table) {
-            $table->dropIndex(['secret']);
-            $table->dropIndex(['ip_address']);
+        Schema::table('ynh_osquery', function (Blueprint $table) {
+            $table->dropIndex(['updated_at']);
         });
     }
 };
