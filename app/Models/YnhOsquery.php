@@ -41,7 +41,7 @@ class YnhOsquery extends Model
         return <<<EOT
 #!/bin/bash
 
-apt install wget curl git tmux -y
+apt install wget curl git tmux jq -y
 
 if [ ! -f /etc/osquery/osquery.conf ]; then
 
