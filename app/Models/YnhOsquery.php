@@ -41,26 +41,33 @@ class YnhOsquery extends Model
         return <<<EOT
 #!/bin/bash
 
+apt install wget curl git tmux -y
+
 if [ ! -f /etc/osquery/osquery.conf ]; then
 
+    # Install Osquery
     wget https://pkg.osquery.io/deb/osquery_5.11.0-1.linux_amd64.deb
     apt install ./osquery_5.11.0-1.linux_amd64.deb
     rm osquery_5.11.0-1.linux_amd64.deb
-    osqueryctl start osqueryd
 
-    apt install git -y
-    
+    # Pull Palantir's base rules
     git clone https://github.com/palantir/osquery-configuration.git
     cp osquery-configuration/Classic/Servers/Linux/* /etc/osquery/
     cp -r osquery-configuration/Classic/Servers/Linux/packs/ /etc/osquery/
-    osqueryctl restart osqueryd
     rm -rf osquery-configuration/
-    
-    # apt remove git -y
-    # apt purge git -y
+fi
+if [ ! -f /opt/logalert/config.json ]; then
+
+  # Install LogAlert
+  mkdir -p /opt/logalert
+  curl -L https://github.com/jhuckaby/logalert/releases/latest/download/logalert-linux-x64 >/opt/logalert/logalert.bin
+  chmod 755 /opt/logalert/logalert.bin
+
+  # Set base config
+  echo '{"monitors":[{"name":"Monitor Osquery Daemon Output","path":"/var/log/osquery/osqueryd.*.log","match":".*","regexp":true,"url":"https://app.towerify.io/logalert/{$server->secret}"}],"sleep":5,"echo":true,"verbose":2}' >/opt/logalert/config.json
 fi
 
-apt install tmux -y
+# LEGACY CODE BEGINS HERE
 sudo -H -u root bash -c 'tmux kill-ses -t forward-results'
 sudo -H -u root bash -c 'tmux kill-ses -t forward-snapshots'
 
@@ -70,7 +77,13 @@ fi
 if [ -f /etc/osquery/forward-snapshots.sh ]; then
   rm -f /etc/osquery/forward-snapshots.sh
 fi
+# LEGACY CODE ENDS HERE
 
+# Stop LogAlert then Osquery
+sudo -H -u root bash -c 'tmux kill-ses -t logalert'
+osqueryctl stop osqueryd
+
+# Update Osquery's rules
 cat /etc/osquery/osquery.conf | \
   jq $'del(.schedule.socket_events)' | \
   jq $'del(.schedule.network_interfaces_snapshot)' | \
@@ -81,23 +94,14 @@ cat /etc/osquery/osquery.conf | \
   >/etc/osquery/osquery2.conf
 
 mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
-osqueryctl restart osqueryd
 
+# Drop Osquery daemon's output every sunday at 01:00 am
 cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '0 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -
 
-TVAR1=$(cat <<SETVAR
-tail -F /var/log/osquery/osqueryd.results.log | jq -c 'select(.columns == null or .columns.cmdline == null or (.columns.cmdline | contains("tail -F /var/log/osquery/osqueryd.results.log") | not)) | {ip:"{$server->ip_address}",secret:"{$server->secret}",events:[.]}' | while read -r LINE; do curl -s -H "Content-Type: application/json" -XPOST https://app.towerify.io/metrics --data-binary "\\\$LINE"; done >/dev/null
-SETVAR
-)
-sudo -H -u root bash -c 'tmux new-session -A -d -s forward-results'
-tmux send-keys -t forward-results "\$TVAR1" C-m
-
-TVAR2=$(cat <<SETVAR
-tail -F /var/log/osquery/osqueryd.snapshots.log | jq -c 'select(.columns == null or .columns.cmdline == null or (.columns.cmdline | contains("tail -F /var/log/osquery/osqueryd.snapshots.log") | not)) | {ip:"{$server->ip_address}",secret:"{$server->secret}",events:[.]}' | while read -r LINE; do curl -s -H "Content-Type: application/json" -XPOST https://app.towerify.io/metrics --data-binary "\\\$LINE"; done >/dev/null
-SETVAR
-)
-sudo -H -u root bash -c 'tmux new-session -A -d -s forward-snapshots'
-tmux send-keys -t forward-snapshots "\$TVAR2" C-m
+# Start Osquery then LogAlert 
+osqueryctl start osqueryd
+sudo -H -u root bash -c 'tmux new-session -A -d -s logalert'
+tmux send-keys -t logalert "/opt/logalert/logalert.bin" C-m
 
 EOT;
     }
