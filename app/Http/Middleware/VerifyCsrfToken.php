@@ -14,6 +14,7 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         '/setup/token',
         '/setup/script',
+        '/logalert/*',
         '/metrics',
     ];
 }

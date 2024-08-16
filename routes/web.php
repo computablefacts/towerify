@@ -176,35 +176,88 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
         ->header('Content-Type', 'text/plain');
 });
 
-Route::post('metrics', function (\Illuminate\Http\Request $request) {
+Route::post('/logalert/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    // See https://github.com/jhuckaby/logalert?tab=readme-ov-file#web-hook-alerts for details
+    $payload = $request->all();
+    $validator = Validator::make(
+        $payload,
+        [
+            'name' => 'required|string',
+            'file' => 'required|string|min:1|max:255',
+            'date' => 'required|string',
+            'hostname' => 'required|string',
+            'lines' => 'required|array|min:1|max:500',
+        ]
+    );
+    if ($validator->fails()) {
+        return new JsonResponse([
+            'status' => 'failure',
+            'message' => 'payload validation failed',
+            'payload' => $payload,
+        ], 200, ['Access-Control-Allow-Origin' => '*']);
+    }
     try {
 
-        // {ip:"<ip address>", secret:"<secret>", events:[<events>]}
-        $payload = $request->all();
-        $validator = Validator::make(
-            $payload,
-            [
-                'ip' => 'required|ip',
-                'secret' => 'required|string|min:1|max:50',
-                // 'events' => 'required|array|min:1|max:500',
-                // 'events.*.name' => 'required|string',
-                // 'events.*.hostIdentifier' => 'required|string',
-                // 'events.*.calendarTime' => 'required|string',
-                // 'events.*.unixTime' => 'required|integer',
-                // 'events.*.epoch' => 'required|integer',
-                // 'events.*.counter' => 'required|integer',
-                // 'events.*.numerics' => 'required|boolean',
-                // 'events.*.columns' => 'required|array|min:1',
-                // 'events.*.action' => 'required|string',
-            ]
-        );
-        if ($validator->fails()) {
+        $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+        if (!$server) {
             return new JsonResponse([
                 'status' => 'failure',
-                'message' => 'payload validation failed',
+                'message' => 'server not found',
                 'payload' => $payload,
             ], 200, ['Access-Control-Allow-Origin' => '*']);
         }
+
+        $events = collect($request->input('lines'))
+            ->map(fn($line) => $line ? json_decode($line, true) : [])
+            ->filter(fn($event) => count($event) > 0)
+            ->all();
+        $nbEventsAdded = $server->addOsqueryEvents($events);
+
+        // \Illuminate\Support\Facades\Log::debug('LogAlert - nb_events_added=' . $nbEventsAdded);
+
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\Log::error($e);
+        return new JsonResponse([
+            'status' => 'failure',
+            'message' => $e->getMessage(),
+            'payload' => $payload,
+        ], 200, ['Access-Control-Allow-Origin' => '*']);
+    }
+    return new JsonResponse(['status' => 'success'], 200, ['Access-Control-Allow-Origin' => '*']);
+});
+
+/**  @deprecated */
+Route::post('metrics', function (\Illuminate\Http\Request $request) {
+
+    // {ip:"<ip address>", secret:"<secret>", events:[<events>]}
+    $payload = $request->all();
+    $validator = Validator::make(
+        $payload,
+        [
+            'ip' => 'required|ip',
+            'secret' => 'required|string|min:1|max:50',
+            // 'events' => 'required|array|min:1|max:500',
+            // 'events.*.name' => 'required|string',
+            // 'events.*.hostIdentifier' => 'required|string',
+            // 'events.*.calendarTime' => 'required|string',
+            // 'events.*.unixTime' => 'required|integer',
+            // 'events.*.epoch' => 'required|integer',
+            // 'events.*.counter' => 'required|integer',
+            // 'events.*.numerics' => 'required|boolean',
+            // 'events.*.columns' => 'required|array|min:1',
+            // 'events.*.action' => 'required|string',
+        ]
+    );
+    if ($validator->fails()) {
+        return new JsonResponse([
+            'status' => 'failure',
+            'message' => 'payload validation failed',
+            'payload' => $payload,
+        ], 200, ['Access-Control-Allow-Origin' => '*']);
+    }
+    try {
 
         $server = \App\Models\YnhServer::where('ip_address', $request->input('ip'))
             ->where('secret', $request->input('secret'))
