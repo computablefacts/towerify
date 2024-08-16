@@ -64,7 +64,7 @@ if [ ! -f /opt/logalert/config.json ]; then
   chmod 755 /opt/logalert/logalert.bin
 
   # Set base config
-  echo '{"monitors":[{"name":"Monitor Osquery Daemon Output","path":"/var/log/osquery/osqueryd.*.log","match":".*","regexp":true,"url":"https://app.towerify.io/logalert/{$server->secret}"}],"sleep":5,"echo":true,"verbose":2}' >/opt/logalert/config.json
+  echo '{"monitors":[{"name":"Monitor Osquery Daemon Output","path":"/var/log/osquery/osqueryd.*.log","match":".*","regexp":true,"url":"https://app.towerify.io/logalert/{$server->secret}"}],"sleep":5,"echo":true,"verbose":1}' >/opt/logalert/config.json
 fi
 
 # LEGACY CODE BEGINS HERE
