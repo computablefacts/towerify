@@ -98,6 +98,9 @@ mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
 # Drop Osquery daemon's output every sunday at 01:00 am
 cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '0 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -
 
+# Drop LogAlert's logs every day at 01:00 am
+cat <(fgrep -i -v 'rm /opt/logalert/log.txt' <(crontab -l)) <(echo '0 1 * * * rm /opt/logalert/log.txt') | crontab -
+
 # Start Osquery then LogAlert 
 osqueryctl start osqueryd
 sudo -H -u root bash -c 'tmux new-session -A -d -s logalert'
