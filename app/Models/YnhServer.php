@@ -161,7 +161,7 @@ class YnhServer extends Model
             ->where('updated_at', '>=', $minDate->toDateTimeString())
             ->orderBy('updated_at', 'desc')
             ->first();
-        return $heartbeat?->calendar_time;
+        return $heartbeat?->updated_at;
     }
 
     public function status(): ServerStatusEnum
