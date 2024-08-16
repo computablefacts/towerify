@@ -12,14 +12,8 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        '/payment/eup/*',
-        '/payment/netopia/*',
-        '/payment/paypal/*',
-        '/payment/adyen/*',
-        '/payment/stripe/*',
-        '/payment/simplepay/*',
-        '/payment/braintree/*',
-        '/payment/mollie/*',
+        '/setup/token',
+        '/setup/script',
         '/metrics',
     ];
 }

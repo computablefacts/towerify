@@ -20,4 +20,10 @@ return [
         'username' => env('ADMIN_USERNAME'),
         'password' => env('ADMIN_PASSWORD'),
     ],
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+    ],
+    'scraperapi' => [
+        'api_key' => env('SCRAPERAPI_API_KEY'),
+    ],
 ];

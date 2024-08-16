@@ -12,7 +12,7 @@
         "ext-imagick": "*",
         "ext-pcntl": "*",
         "guzzlehttp/guzzle": "^7.5",
-        "laravel/framework": "^11.0",
+        "laravel/framework": "^11.20",
         "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.0",
@@ -22,10 +22,7 @@
         "phpseclib/phpseclib": "^3.0",
         "symfony/process": "^7.0",
         "vanilo/admin": "^4.0",
-        "vanilo/euplatesc": "^4.0",
         "vanilo/framework": "^4.0",
-        "vanilo/mollie": "^2.0",
-        "vanilo/netopia": "^3.0",
         "vanilo/payment": "^4.0"
     },
     "require-dev": {

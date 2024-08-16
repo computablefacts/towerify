@@ -52,16 +52,6 @@
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                          <a class="nav-link" href="{{ route('product.index') }}">Store</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" href="{{ route('cart.show') }}">Cart
-                            @if (Cart::isNotEmpty())
-                            <span class="tw-pill rounded-pill bg-secondary">{{ Cart::itemCount() }}</span>
-                            @endif
-                          </a>
-                        </li>
                         <!-- Authentication Links -->
                         @guest
                             <li class="nav-item">
@@ -74,7 +64,17 @@
                             </li>
                         @else
                             <li class="nav-item">
-                              <a class="nav-link" href="{{ route('home') }}">Home</a>
+                                <a class="nav-link" href="{{ route('product.index') }}">Store</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('cart.show') }}">Cart
+                                    @if (Cart::isNotEmpty())
+                                        <span class="tw-pill rounded-pill bg-secondary">{{ Cart::itemCount() }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('home') }}">Home</a>
                             </li>
                             @if(Auth::user()->isAdmin())
                             <li class="nav-item">
@@ -112,7 +112,6 @@
         </nav>
 
         <main class="py-4">
-
             <div class="container">
                 <div class="row">
                   <div class="col-md-9 d-flex align-items-center">
@@ -130,7 +129,6 @@
                   @include('flash::message')
                 </div>
             </div>
-
             @yield('content')
         </main>
     </div>

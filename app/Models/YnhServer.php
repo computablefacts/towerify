@@ -156,10 +156,10 @@ class YnhServer extends Model
     public function lastHeartbeat(): ?Carbon
     {
         $minDate = Carbon::now()->subMinutes(30);
-        $heartbeat = YnhOsquery::select(['calendar_time'])
+        $heartbeat = YnhOsquery::select(['updated_at'])
             ->where('ynh_server_id', $this->id)
-            ->where('calendar_time', '>=', $minDate->toDateTimeString())
-            ->orderBy('calendar_time', 'desc')
+            ->where('updated_at', '>=', $minDate->toDateTimeString())
+            ->orderBy('updated_at', 'desc')
             ->first();
         return $heartbeat?->calendar_time;
     }

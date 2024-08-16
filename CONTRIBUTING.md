@@ -244,6 +244,10 @@ same thing at the same time.
       AM_URL=https://sentinel.computablefacts.com
       AM_IP_ADDRESSES=51.159.17.217,51.159.18.48,51.159.18.50,212.129.7.115
       AM_API_KEY=<your api key>
+      
+      # The Cyber Brief (optional)
+      OPENAI_API_KEY=<your OpenAI api key>
+      SCRAPERAPI_API_KEY=<your ScraperAPI api key>
       ```
 - Install dependencies:
   ```
