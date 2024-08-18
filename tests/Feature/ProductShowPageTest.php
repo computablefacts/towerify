@@ -21,7 +21,13 @@ class ProductShowPageTest extends TestCase
             'price' => 11500
         ]);
 
-        $response = $this->get(route('product.show', $product->slug));
+        $user = \App\User::create([
+            'name' => 'Awesome Web User',
+            'password' => bcrypt('whatapassword'),
+            'email' => 'awesome@vanilo.com'
+        ]);
+
+        $response = $this->actingAs($user)->get(route('product.show', $product->slug));
 
         $response->assertStatus(200);
 
