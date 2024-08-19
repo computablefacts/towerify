@@ -30,6 +30,21 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css"
     media="all" type="text/css" rel="stylesheet" integrity="sha256-3sPp8BkKUE7QyPSl6VfBByBroQbKxKG7tsusY2mhbVY="
     crossorigin="anonymous">
+
+  <!-- Reactjs -->
+  <script src="{{ asset('adversary_meter/src/blueprintjs/reactjs/react.production.min.js') }}"></script>
+  <script src="{{ asset('adversary_meter/src/blueprintjs/reactjs/react-dom.production.min.js') }}"></script>
+  <script src="{{ asset('adversary_meter/src/blueprintjs/reactjs/react-is.production.min.js') }}"></script>
+
+  <!-- Blueprintjs -->
+  <link href="{{ asset('adversary_meter/src/blueprintjs/normalize/normalize.css') }}" rel="stylesheet"/>
+  <link href="{{ asset('adversary_meter/src/blueprintjs/blueprintjs/blueprint-icons.css') }}" rel="stylesheet"/>
+  <link href="{{ asset('adversary_meter/src/blueprintjs/blueprintjs/blueprint.css') }}" rel="stylesheet"/>
+  <link href="{{ asset('adversary_meter/src/blueprintjs/blueprintjs/blueprint-popover2.css') }}" rel="stylesheet"/>
+  <link href="{{ asset('adversary_meter/src/blueprintjs/blueprintjs/table.css') }}" rel="stylesheet"/>
+  <link href="{{ asset('adversary_meter/src/blueprintjs/blueprintjs/blueprint-select.css') }}" rel="stylesheet"/>
+  <link href="{{ asset('adversary_meter/src/blueprintjs/blueprintjs/blueprint-datetime.css') }}" rel="stylesheet"/>
+
 </head>
 <body>
 <div id="app">
@@ -65,6 +80,11 @@
             @endif
           </li>
           @else
+          @if(isset($notifications) && count($notifications) > 0)
+          <li class="nav-item d-flex align-items-center">
+            @include('layouts._notifications')
+          </li>
+          @endif
           @if(Auth::user()->isAdmin())
           <li class="nav-item">
             <a class="nav-link" href="{{ config('konekt.app_shell.ui.url') }}" target="_blank">
@@ -133,10 +153,38 @@
     @yield('content')
   </main>
 </div>
+<div id="drawer-25"></div>
 
 <!-- Scripts -->
 @stack('alpine')
 <script src="{{ asset('js/app.js') }}"></script>
 @stack('scripts')
+<script>
+  /*
+   * Fix Blueprintjs issue.
+   *
+   * https://adambien.blog/roller/abien/entry/uncaught_referenceerror_process_is_not
+   */
+  window.process = {
+    env: {
+      NODE_ENV: 'production'
+    }
+  }
+</script>
+<script src="{{ asset('adversary_meter/src/blueprintjs/main.min.js') }}"></script>
+<script>
+
+  const drawer25 = {
+    el: new com.computablefacts.blueprintjs.MinimalDrawer(document.getElementById('drawer-25'), '25%'), render: null
+  };
+  drawer25.el.onOpen(el => {
+    // console.log(drawer);
+    const div = document.createElement('div');
+    div.innerHTML = drawer25.render ? drawer25.render() : '';
+    el.appendChild(div);
+  });
+  drawer25.el.onClose(() => drawer25.render = null);
+
+</script>
 </body>
 </html>

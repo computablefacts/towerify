@@ -125,6 +125,9 @@ class HomeController extends Controller
         if ($tab === 'orders') {
             $orders = YnhOrder::forUser($user);
         }
+
+        $notifications = []; // TODO : load notifications from database
+
         return view('home.index', compact(
             'tab',
             'limit',
@@ -141,7 +144,8 @@ class HomeController extends Controller
             'domains',
             'applications',
             'backups',
-            'os_infos'
+            'os_infos',
+            'notifications'
         ));
     }
 }
