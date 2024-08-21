@@ -195,7 +195,7 @@ class YnhServerController extends Controller
 
         $uid = Str::random(10);
         $ssh = $server->sshConnection($uid, Auth::user());
-        if ($server->sshInstallOsquery($ssh)) {
+        if ($server->sshInstallLogAlertAndOsquery($ssh)) {
             return response()->json(['success' => "Osquery has been installed!"]);
         }
         return response()->json(['error' => "An error occurred."]);

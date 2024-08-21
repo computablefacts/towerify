@@ -36,34 +36,101 @@ class YnhOsquery extends Model
         'packed' => 'boolean',
     ];
 
-    public static function installOsquery(YnhServer $server): string
+    public static function configLogAlert(YnhServer $server): array
+    {
+        return ["monitors" => [
+            [
+                "name" => "Monitor Osquery Daemon Output",
+                "path" => "/var/log/osquery/osqueryd.*.log",
+                "match" => ".*",
+                "regexp" => true,
+                "url" => "https://app.towerify.io/logalert/{$server->secret}"
+            ]
+        ],
+            "sleep" => 5,
+            "echo" => false,
+            "verbose" => 1
+        ];
+    }
+
+    public static function configOsquery(): array
+    {
+        $schedule = [];
+        YnhOsqueryRule::orderBy('name', 'asc')
+            ->get()
+            ->each(function (YnhOsqueryRule $rule) use (&$schedule) {
+                $schedule[$rule->name] = [
+                    'query' => $rule->query,
+                    'interval' => $rule->interval,
+                    'removed' => $rule->removed,
+                    'snapshot' => $rule->snapshot,
+                    'platform' => $rule->platform->value,
+                ];
+            });
+        return [
+            "options" => [
+                "logger_snapshot_event_type" => "true",
+                "schedule_splay_percent" => 10
+            ],
+            "platform" => "linux",
+            "schedule" => $schedule,
+            "file_paths" => [
+                "configuration" => [
+                    "/etc/passwd",
+                    "/etc/shadow",
+                    "/etc/ld.so.preload",
+                    "/etc/ld.so.conf",
+                    "/etc/ld.so.conf.d/%%",
+                    "/etc/pam.d/%%",
+                    "/etc/resolv.conf",
+                    "/etc/rc%/%%",
+                    "/etc/my.cnf",
+                    "/etc/modules",
+                    "/etc/hosts",
+                    "/etc/hostname",
+                    "/etc/fstab",
+                    "/etc/crontab",
+                    "/etc/cron%/%%",
+                    "/etc/init/%%",
+                    "/etc/rsyslog.conf"
+                ],
+                "binaries" => [
+                    "/usr/bin/%%",
+                    "/usr/sbin/%%",
+                    "/bin/%%",
+                    "/sbin/%%",
+                    "/usr/local/bin/%%",
+                    "/usr/local/sbin/%%"
+                ]
+            ],
+            "events" => [
+                "disable_subscribers" => [
+                    "user_events"
+                ]
+            ],
+            "packs" => [],
+        ];
+    }
+
+    public static function installLogAlertAndOsquery(YnhServer $server): string
     {
         return <<<EOT
 #!/bin/bash
 
-apt install wget curl git tmux jq -y
+apt install wget curl tmux jq -y
 
+# Install Osquery
 if [ ! -f /etc/osquery/osquery.conf ]; then
-
-    # Install Osquery
     wget https://pkg.osquery.io/deb/osquery_5.11.0-1.linux_amd64.deb
     apt install ./osquery_5.11.0-1.linux_amd64.deb
     rm osquery_5.11.0-1.linux_amd64.deb
-
-    # Pull Palantir's base rules
-    git clone https://github.com/palantir/osquery-configuration.git
-    cp -r osquery-configuration/Classic/Servers/Linux/* /etc/osquery/
-    rm -rf osquery-configuration/
 fi
-if [ ! -f /opt/logalert/config.json ]; then
 
-  # Install LogAlert
+# Install LogAlert
+if [ ! -f /opt/logalert/config.json ]; then 
   mkdir -p /opt/logalert
   curl -L https://github.com/jhuckaby/logalert/releases/latest/download/logalert-linux-x64 >/opt/logalert/logalert.bin
   chmod 755 /opt/logalert/logalert.bin
-
-  # Set base config
-  echo '{"monitors":[{"name":"Monitor Osquery Daemon Output","path":"/var/log/osquery/osqueryd.*.log","match":".*","regexp":true,"url":"https://app.towerify.io/logalert/{$server->secret}"}],"sleep":5,"echo":true,"verbose":1}' >/opt/logalert/config.json
 fi
 
 # LEGACY CODE BEGINS HERE
@@ -82,17 +149,19 @@ fi
 sudo -H -u root bash -c 'tmux kill-ses -t logalert'
 osqueryctl stop osqueryd
 
-# Update Osquery's rules
-cat /etc/osquery/osquery.conf | \
-  jq $'del(.schedule.socket_events)' | \
-  jq $'del(.schedule.network_interfaces_snapshot)' | \
-  jq $'del(.schedule.process_events)' | \
-  jq $'.schedule.packages_available_snapshot += {query:"SELECT name, version, source FROM deb_packages;",interval:86400,snapshot:true}' | \
-  jq $'.schedule.memory_available_snapshot += {query:"select printf(\'%.2f\',((memory_total - memory_available) * 1.0)/1073741824) as used_space_gb, printf(\'%.2f\',(1.0 * memory_available / 1073741824)) as space_left_gb, printf(\'%.2f\',(1.0 * memory_total / 1073741824)) as total_space_gb, printf(\'%.2f\',(((memory_total - memory_available) * 1.0)/1073741824)/(1.0 * memory_total / 1073741824)) * 100 as \'%_used\', printf(\'%.2f\',(1.0 * memory_available / 1073741824)/(1.0 * memory_total / 1073741824)) * 100 as \'%_available\' from memory_info;",interval:300,snapshot:true}' | \
-  jq $'.schedule.disk_available_snapshot += {query:"select printf(\'%.2f\',((blocks - blocks_available * 1.0) * blocks_size)/1073741824) as used_space_gb, printf(\'%.2f\',(1.0 * blocks_available * blocks_size / 1073741824)) as space_left_gb, printf(\'%.2f\',(1.0 * blocks * blocks_size / 1073741824)) as total_space_gb, printf(\'%.2f\',(((blocks - blocks_available * 1.0) * blocks_size)/1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 as \'%_used\', printf(\'%.2f\',(1.0 * blocks_available * blocks_size / 1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 as \'%_available\' from mounts where path = \'/\';",interval:300,snapshot:true}' \
-  >/etc/osquery/osquery2.conf
+# Update LogAlert configuration
+wget -O /opt/logalert/config2.json https://app.towerify.io/logalert/{$server->secret}
 
-mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
+if jq empty /opt/logalert/config2.json; then
+  mv -f /opt/logalert/config2.json /opt/logalert/config.json
+fi
+
+# Update Osquery configuration
+wget -O /etc/osquery/osquery2.conf https://app.towerify.io/osquery/{$server->secret}
+
+if jq empty /etc/osquery/osquery2.conf; then
+  mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
+fi
 
 # Drop Osquery daemon's output every sunday at 01:00 am
 cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '0 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -

@@ -251,7 +251,7 @@ class DatabaseSeeder extends Seeder
 
     private function setupOsqueryRules(): void
     {
-        $rules = $this->palantirOsqueryRulesForLinux()['schedule'];
+        $rules = $this->palantirOsqueryRules()['schedule'];
         foreach ($rules as $name => $rule) {
             $fields = [];
             if (isset($rule['description'])) {
@@ -322,7 +322,7 @@ class DatabaseSeeder extends Seeder
         ]];
     }
 
-    private function palantirOsqueryRulesForLinux(): array
+    private function palantirOsqueryRules(): array
     {
         // See https://github.com/palantir/osquery-configuration/blob/master/Classic/Servers/Linux/osquery.conf for details
         $rules = <<< EOF

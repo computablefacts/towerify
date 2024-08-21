@@ -36,30 +36,6 @@ return new class extends Migration {
                 \App\Enums\OsqueryPlatformEnum::ALL->value,
             ])->default(\App\Enums\OsqueryPlatformEnum::ALL->value);
         });
-        Schema::create('ynh_osquery_rules_scope_customer', function (Blueprint $table) {
-
-            $table->id();
-            $table->timestamps();
-
-            // Link a rule to a customer
-            $table->intOrBigIntBasedOnRelated('rule_id', Schema::connection(null), 'ynh_osquery_rules.id')->cascadeOnDelete();
-            $table->foreign('rule_id')->references('id')->on('ynh_osquery_rules')->cascadeOnDelete();
-
-            $table->intOrBigIntBasedOnRelated('customer_id', Schema::connection(null), 'customers.id')->cascadeOnDelete();
-            $table->foreign('customer_id')->references('id')->on('customers')->cascadeOnDelete();
-        });
-        Schema::create('ynh_osquery_rules_scope_tenant', function (Blueprint $table) {
-
-            $table->id();
-            $table->timestamps();
-
-            // Link a rule to a tenant
-            $table->intOrBigIntBasedOnRelated('rule_id', Schema::connection(null), 'ynh_osquery_rules.id')->cascadeOnDelete();
-            $table->foreign('rule_id')->references('id')->on('ynh_osquery_rules')->cascadeOnDelete();
-
-            $table->intOrBigIntBasedOnRelated('tenant_id', Schema::connection(null), 'tenants.id')->cascadeOnDelete();
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
-        });
     }
 
     /**
@@ -69,8 +45,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('ynh_osquery_rules_scope_tenant');
-        Schema::dropIfExists('ynh_osquery_rules_scope_customer');
         Schema::dropIfExists('ynh_osquery_rules');
     }
 };

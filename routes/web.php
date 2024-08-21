@@ -170,7 +170,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
     //    3.2 chmod +x install.sh
     //    3.3 ./install.sh
     //    3.4 rm install.sh
-    $installScript = \App\Models\YnhOsquery::installOsquery($server);
+    $installScript = \App\Models\YnhOsquery::installLogAlertAndOsquery($server);
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
@@ -226,6 +226,36 @@ Route::post('/logalert/{secret}', function (string $secret, \Illuminate\Http\Req
         ], 200, ['Access-Control-Allow-Origin' => '*']);
     }
     return new JsonResponse(['status' => 'success'], 200, ['Access-Control-Allow-Origin' => '*']);
+});
+
+Route::get('/logalert/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+    if (!$server) {
+        return response('Unknown server', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $config = json_encode(\App\Models\YnhOsquery::configLogAlert($server));
+
+    return response($config, 200)
+        ->header('Content-Type', 'text/plain');
+});
+
+Route::get('/osquery/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+    if (!$server) {
+        return response('Unknown server', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $config = json_encode(\App\Models\YnhOsquery::configOsquery());
+
+    return response($config, 200)
+        ->header('Content-Type', 'text/plain');
 });
 
 /**  @deprecated */
