@@ -20,6 +20,8 @@
   <span class="breadcrumb-item active">{{ __('Resources Usage') }}</span>
   @elseif($tab === 'security')
   <span class="breadcrumb-item active">{{ __('Security') }}</span>
+  @elseif($tab === 'security_rules')
+  <span class="breadcrumb-item active">{{ __('Security Rules') }}</span>
   @elseif($tab === 'orders')
   <span class="breadcrumb-item active">{{ __('Orders') }}</span>
   @elseif($tab === 'users')
@@ -109,6 +111,12 @@
       </a>
     </li>
     @endif
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'security_rules' ? 'active' : '' }}"
+         href="/home?tab=security_rules">
+        {{ __('Security Rules') }}
+      </a>
+    </li>
     @if(Auth::user()->canListOrders())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'orders' ? 'active' : '' }}"
@@ -163,6 +171,9 @@
   @endif
   @if($tab === 'security')
   @include('home.cards._security')
+  @endif
+  @if($tab === 'security_rules')
+  @include('home.cards._osquery_rules', [ 'rules' => $security_rules ])
   @endif
   @if($tab === 'interdependencies')
   @include('home.cards._interdependencies')

@@ -1,0 +1,55 @@
+<div class="card card-accent-secondary tw-card">
+  @if($rules->isEmpty())
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
+        None.
+      </div>
+    </div>
+  </div>
+  @else
+  <div class="card-body p-0">
+    <table class="table table-hover">
+      <thead>
+      <tr>
+        <th>
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
+        </th>
+        <th>{{ __('Interval (in seconds)') }}</th>
+        <th>{{ __('Platform') }}</th>
+        <th>{{ __('Snapshot') }}</th>
+        <th>{{ __('Removed') }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      @foreach($rules->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $rule)
+      <tr>
+        <td>
+          <span class="font-lg mb-3 fw-bold">
+            {{ $rule->name }}
+          </span>
+          <div class="text-muted">
+            {{ $rule->description }}
+          </div>
+        </td>
+        <td>
+          {{ $rule->interval }}
+        </td>
+        <td>
+          <span class="tw-pill rounded-pill bg-primary">
+            {{ $rule->platform->value }}
+          </span>
+        </td>
+        <td>
+          {{ $rule->snapshot ? 'YES' : 'NO' }}
+        </td>
+        <td>
+          {{ $rule->removed ? 'YES' : 'NO' }}
+        </td>
+      </tr>
+      @endforeach
+      </tbody>
+    </table>
+  </div>
+  @endif
+</div>

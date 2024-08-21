@@ -6,6 +6,7 @@ use App\Models\Invitation;
 use App\Models\YnhNginxLogs;
 use App\Models\YnhOrder;
 use App\Models\YnhOsquery;
+use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
 use App\User;
@@ -58,6 +59,12 @@ class HomeController extends Controller
                 'last_logins_and_logouts' => YnhOsquery::loginsAndLogouts($servers, $limit),
                 'users' => YnhOsquery::users($servers, $limit),
             ];
+        }
+
+        $security_rules = collect();
+
+        if ($tab === 'security_rules') {
+            $security_rules = YnhOsqueryRule::get();
         }
 
         $interdependencies = collect();
@@ -138,6 +145,7 @@ class HomeController extends Controller
             'memory_usage',
             'disk_usage',
             'security_events',
+            'security_rules',
             'interdependencies',
             'traces',
             'pendingActions',
