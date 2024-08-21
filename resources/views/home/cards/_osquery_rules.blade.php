@@ -15,7 +15,7 @@
         <th>
           <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
         </th>
-        <th>{{ __('Interval (in seconds)') }}</th>
+        <th>{{ __('Interval') }}</th>
         <th>{{ __('Platform') }}</th>
         <th>{{ __('Snapshot') }}</th>
         <th>{{ __('Removed') }}</th>
@@ -33,7 +33,7 @@
           </div>
         </td>
         <td>
-          {{ $rule->interval }}
+          {{ \Carbon\CarbonInterval::seconds($rule->interval)->cascade()->forHumans(); }}
         </td>
         <td>
           <span class="tw-pill rounded-pill bg-primary">
