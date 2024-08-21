@@ -257,6 +257,12 @@ class DatabaseSeeder extends Seeder
             if (isset($rule['description'])) {
                 $fields['description'] = $rule['description'];
             }
+            if (isset($rule['value'])) {
+                $fields['value'] = $rule['value'];
+            }
+            if (isset($rule['version'])) {
+                $fields['version'] = $rule['version'];
+            }
             if (isset($rule['query'])) {
                 $fields['query'] = $rule['query'];
             }
@@ -279,6 +285,12 @@ class DatabaseSeeder extends Seeder
             $fields = [];
             if (isset($rule['description'])) {
                 $fields['description'] = $rule['description'];
+            }
+            if (isset($rule['value'])) {
+                $fields['value'] = $rule['value'];
+            }
+            if (isset($rule['version'])) {
+                $fields['version'] = $rule['version'];
             }
             if (isset($rule['query'])) {
                 $fields['query'] = $rule['query'];
@@ -352,9 +364,20 @@ class DatabaseSeeder extends Seeder
     "apt_sources": {
       "query": "SELECT * FROM apt_sources;",
       "interval": 86400,
-      "description": "Display apt package manager sources.",
+      "description": "Retrieves all the APT sources to install packages from in the target Linux system.",
+      "value": "In the future this may not have a lot of value as we expect to have installed only signed packages",
+      "version": "1.4.5",
       "snapshot": true,
       "platform": "ubuntu"
+    },
+    "portage_packages": {
+      "query": "select * from portage_packages;",
+      "interval": 86400,
+      "platform": "linux",
+      "version": "2.0.0",
+      "description": "Retrieves all the installed packages on the target Linux system.",
+      "value": "This, with the help of vulnerability feed, can help tell if a vulnerable application is installed.",
+      "version": "1.4.5"
     },
     "authorized_keys": {
       "query": "SELECT * FROM users CROSS JOIN authorized_keys USING (uid);",
@@ -385,7 +408,9 @@ class DatabaseSeeder extends Seeder
     "deb_packages": {
       "query": "SELECT * FROM deb_packages;",
       "interval": 86400,
-      "description": "Display all installed DEB packages.",
+      "description": "Retrieves all the installed DEB packages in the target Linux system.",
+      "value": "This, with the help of vulnerability feed, can help tell if a vulnerable application is installed.",
+      "version": "1.4.5",
       "snapshot": true,
       "platform": "ubuntu"
     },
@@ -443,6 +468,8 @@ class DatabaseSeeder extends Seeder
       "query": "SELECT * FROM kernel_info;",
       "interval": 86400,
       "description": "Retrieves information from the current kernel in the target system.",
+      "value": "Kernel version can tell you vulnerabilities based on the version.",
+      "version" : "1.4.5",
       "snapshot": true
     },
     "kernel_integrity": {
@@ -453,13 +480,80 @@ class DatabaseSeeder extends Seeder
     "kernel_modules": {
       "query": "SELECT * FROM kernel_modules;",
       "interval": 3600,
-      "description": "Linux kernel modules both loaded and within the load search path."
+      "description": "Retrieves all the information for the current kernel modules in the target Linux system.",
+      "value": "Only for Linux. It may pinpoint inserted modules that can carry malicious payloads.",
+      "version": "1.4.5"
     },
     "kernel_modules_snapshot": {
       "query": "SELECT * FROM kernel_modules;",
       "interval": 86400,
-      "description": "Linux kernel modules both loaded and within the load search path.",
+      "description": "Retrieves all the information for the current kernel modules in the target Linux system.",
+      "value": "Only for Linux. It may pinpoint inserted modules that can carry malicious payloads.",
+      "version": "1.4.5",
       "snapshot": true
+    },
+    "browser_plugins": {
+      "query": "SELECT browser_plugins.* FROM users JOIN browser_plugins USING (uid);",
+      "interval": 86400,
+      "platform": "darwin",
+      "description": "Retrieves the list of C/NPAPI browser plugins in the target system.",
+      "value": "General security posture.",
+      "version": "1.6.1"
+    },
+    "safari_extensions": {
+      "query": "SELECT safari_extensions.* FROM users JOIN safari_extensions USING (uid);",
+      "interval": 86400,
+      "platform": "darwin",
+      "description": "Retrieves the list of extensions for Safari in the target system.",
+      "value": "General security posture.",
+      "version": "1.6.1"
+    },
+    "opera_extensions": {
+      "query": "select opera_extensions.* from users join opera_extensions using (uid);",
+      "interval": 86400,
+      "platform": "posix",
+      "description": "Retrieves the list of extensions for Opera in the target system.",
+      "value": "General security posture.",
+      "version": "1.6.1"
+    },
+    "chrome_extensions": {
+      "query": "select chrome_extensions.* from users join chrome_extensions using (uid);",
+      "interval": 86400,
+      "description": "Retrieves the list of extensions for Chrome in the target system.",
+      "value": "General security posture.",
+      "version": "1.6.1"
+    },
+    "firefox_addons": {
+      "query": "select firefox_addons.* from users join firefox_addons using (uid);",
+      "interval": 86400,
+      "platform": "posix",
+      "description" : "Retrieves the list of addons for Firefox in the target system.",
+      "value" : "General security posture.",
+      "version": "1.6.1"
+    },
+    "homebrew_packages": {
+      "query": "select * from homebrew_packages;",
+      "interval": 86400,
+      "platform": "darwin",
+      "description": "Retrieves the list of brew packages installed in the target OSX system.",
+      "value": "This, with the help of a vulnerability feed, can help tell if a vulnerable application is installed.",
+      "version": "1.4.5"
+    },
+    "package_receipts": {
+      "query": "select * from package_receipts;",
+      "interval": 86400,
+      "platform": "darwin",
+      "description": "Retrieves all the PKG related information stored in OSX.",
+      "value": "It could give you a trail of installed/deleted packages",
+      "version": "1.4.5"
+    },
+    "installed_applications": {
+      "query": "SELECT * FROM apps;",
+      "interval": 86400,
+      "platform": "darwin",
+      "description": "Retrieves all the currently installed applications in the target OSX system.",
+      "value": "This, with the help of a vulnerability feed, can help tell if a vulnerable application is installed.",
+      "version": "1.4.5"
     },
     "last": {
       "query": "SELECT * FROM last;",
@@ -503,8 +597,18 @@ class DatabaseSeeder extends Seeder
     "os_version": {
       "query": "SELECT * FROM os_version;",
       "interval": 86400,
-      "description": "Retrieves information from the Operating System where osquery is currently running.",
+      "description": "Retrieves the current version of the running osquery in the target system and where the configuration was loaded from.",
+      "value": "OS version will tell which distribution the OS is running on, allowing to detect the main distribution",
+      "version" : "1.4.5",
       "snapshot": true
+    },
+    "kextstat": {
+      "query": "SELECT * FROM kernel_extensions;",
+      "interval": 86400,
+      "platform": "darwin",
+      "description": "Retrieves all the information about the current kernel extensions for the target OSX system.",
+      "value": "Only for OS X. It may pinpoint inserted modules that can carry malicious payloads.",
+      "version": "1.4.5"
     },
     "osquery_info": {
       "query": "SELECT * FROM osquery_info;",
@@ -521,7 +625,9 @@ class DatabaseSeeder extends Seeder
     "rpm_packages": {
       "query": "SELECT name, version, release, arch FROM rpm_packages;",
       "interval": 86400,
-      "description": "Display all installed RPM packages.",
+      "description": "Retrieves all the installed RPM packages in the target Linux system.",
+      "value": "This, with the help of vulnerability feed, can help tell if a vulnerable application is installed.",
+      "version": "1.4.5",
       "snapshot": true,
       "platform": "centos"
     },
@@ -573,6 +679,22 @@ class DatabaseSeeder extends Seeder
       "description": "Display yum package manager sources.",
       "snapshot": true,
       "platform": "centos"
+    },
+    "unauthenticated_sparkle_feeds": {
+      "query": "select feeds.*, p2.value as sparkle_version from (select a.name as app_name, a.path as app_path, a.bundle_identifier as bundle_id, p.value as feed_url from (select name, path, bundle_identifier from apps) a, plist p where p.path = a.path || '/Contents/Info.plist' and p.key = 'SUFeedURL' and feed_url like 'http://%') feeds left outer join plist p2 on p2.path = app_path || '/Contents/Frameworks/Sparkle.framework/Resources/Info.plist' where (p2.key = 'CFBundleShortVersionString' OR coalesce(p2.key, '') = '');",
+      "interval": 86400,
+      "platform": "darwin",
+      "version": "1.4.5",
+      "description": "Retrieves all application bundles using unauthenticated Sparkle update feeds. See (https://vulnsec.com/2016/osx-apps-vulnerabilities/) for details.",
+      "value": "Tracking vulnerable applications updates may allow blocking of DNS or removal by BundleID."
+    },
+    "backdoored_python_packages": {
+      "query": "select name as package_name, version as package_version, path as package_path from python_packages where package_name = 'acqusition' or package_name = 'apidev-coop' or package_name = 'bzip' or package_name = 'crypt' or package_name = 'django-server' or package_name = 'pwd' or package_name = 'setup-tools' or package_name = 'telnet' or package_name = 'urlib3' or package_name = 'urllib';",
+      "interval": 86400,
+      "platform": "posix",
+      "version": "1.4.5",
+      "description": "Watches for the backdoored Python packages installed on system. See (http://www.nbu.gov.sk/skcsirt-sa-20170909-pypi/index.html)",
+      "value": "Gives some assurances that no bad Python packages are installed on the system."
     }
   },
   "file_paths": {

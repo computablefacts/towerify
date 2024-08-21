@@ -15,10 +15,10 @@
         <th>
           <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
         </th>
+        <th>{{ __('Version') }}</th>
         <th>{{ __('Interval') }}</th>
         <th>{{ __('Platform') }}</th>
         <th>{{ __('Snapshot') }}</th>
-        <th>{{ __('Removed') }}</th>
       </tr>
       </thead>
       <tbody>
@@ -31,6 +31,14 @@
           <div class="text-muted">
             {{ $rule->description }}
           </div>
+          @if($rule->value)
+          <div class="text-muted">
+            {{ $rule->value }}
+          </div>
+          @endif
+        </td>
+        <td>
+          {{ $rule->version ? $rule->version : '-' }}
         </td>
         <td>
           {{ \Carbon\CarbonInterval::seconds($rule->interval)->cascade()->forHumans(); }}
@@ -42,9 +50,6 @@
         </td>
         <td>
           {{ $rule->snapshot ? 'YES' : 'NO' }}
-        </td>
-        <td>
-          {{ $rule->removed ? 'YES' : 'NO' }}
         </td>
       </tr>
       @endforeach

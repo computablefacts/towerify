@@ -22,7 +22,9 @@ return new class extends Migration {
             // See https://osquery.readthedocs.io/en/stable/deployment/configuration/ for details
             $table->string('name');
             $table->string('description', 255);
+            $table->string('value', 255)->nullable();
             $table->string('query', 1000);
+            $table->string('version', 10)->nullable();
             $table->integer('interval')->default(3600);
             $table->boolean('removed')->default(true);
             $table->boolean('snapshot')->default(false);

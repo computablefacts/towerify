@@ -66,6 +66,9 @@ class YnhOsquery extends Model
                     'snapshot' => $rule->snapshot,
                     'platform' => $rule->platform->value,
                 ];
+                if ($rule->version) {
+                    $schedule[$rule->name]['version'] = $rule->version;
+                }
             });
         return [
             "options" => [

@@ -15,6 +15,8 @@ class YnhOsqueryRule extends Model
     protected $fillable = [
         'name',
         'description',
+        'value',
+        'version',
         'query',
         'interval',
         'removed',
