@@ -137,7 +137,7 @@ EOT;
         ];
     }
 
-    public static function installLogAlertAndOsquery(YnhServer $server): string
+    public static function setupMonitoring(YnhServer $server): string
     {
         return <<<EOT
 #!/bin/bash
@@ -204,11 +204,14 @@ fi
 # Parse web logs every hour
 cat <(fgrep -i -v '/opt/logparser/parser' <(crontab -l)) <(echo '0 * * * * /opt/logparser/parser') | crontab -
 
-# Drop Osquery daemon's output every sunday at 01:00 am
-cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '0 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -
+# Drop Osquery daemon's output every sunday at 01:11 am
+cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '11 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -
 
-# Drop LogAlert's logs every day at 01:00 am
-cat <(fgrep -i -v 'rm /opt/logalert/log.txt' <(crontab -l)) <(echo '0 1 * * * rm /opt/logalert/log.txt') | crontab -
+# Drop LogAlert's logs every day at 02:22 am
+cat <(fgrep -i -v 'rm /opt/logalert/log.txt' <(crontab -l)) <(echo '22 2 * * * rm /opt/logalert/log.txt') | crontab -
+
+# Auto-update the server every day at 03:33 am
+cat <(fgrep -i -v 'curl -s https://app.towerify.io/update/{$server->secret} | bash' <(crontab -l)) <(echo '33 3 * * * curl -s https://app.towerify.io/update/{$server->secret} | bash') | crontab -
 
 # Start Osquery then LogAlert 
 osqueryctl start osqueryd

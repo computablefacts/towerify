@@ -12,8 +12,8 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        '/setup/token',
-        '/setup/script',
+        '/setup/*',
+        '/update/*',
         '/logalert/*',
         '/logparser/*',
         '/osquery/*',

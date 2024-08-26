@@ -372,9 +372,9 @@ class YnhServer extends Model
         return $this->sshKeyPair()->isSshConnectionUpAndRunning($this->ip(), $this->ssh_port, $this->ssh_username);
     }
 
-    public function sshInstallLogAlertAndOsquery(SshConnection2 $ssh): bool
+    public function sshSetupMonitoring(SshConnection2 $ssh): bool
     {
-        $installScript = YnhOsquery::installLogAlertAndOsquery($this);
+        $installScript = YnhOsquery::setupMonitoring($this);
         $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Installing Osquery...');
         $filename = 'install-yunohost-' . Str::random(10);
         $isOk = $ssh->upload($filename, $installScript);
