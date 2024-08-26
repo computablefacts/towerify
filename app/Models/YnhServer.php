@@ -55,6 +55,15 @@ class YnhServer extends Model
 
     private ?ServerStatusEnum $statusCached = null;
 
+    public static function expandIp(string $ip): string
+    {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $hex = unpack("H*hex", inet_pton($ip));
+            return substr(preg_replace("/([A-f0-9]{4})/", "$1:", $hex['hex']), 0, -1);
+        }
+        return $ip;
+    }
+
     public static function forUser(User $user, bool $readyOnly = false): Collection
     {
         if (!$user) {
@@ -730,24 +739,6 @@ EOT;
         return '<unavailable>';
     }
 
-    public function sshNginxRequestClientIpAddresses(SshConnection2 $ssh): Collection
-    {
-        $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Retrieving nginx request client IP addresses...');
-        $ips = $this->executeSshCommandReturnsCollection($ssh, '(sudo find /var/log/nginx \'(\' -name \'access.log\' -o -name \'*-access.log\' -o -name \'*-access.log.1\' \')\' -type f -exec awk \'function basename(file,a,n){n=split(file,a,"/");return a[n]}BEGIN{fname=basename(ARGV[1]);if(fname=="access.log"){sub(/.log/,"",fname)}else{sub(/-access.*/,"",fname)}}{print fname" "$1}\' {} \; ; while read file; do sudo zcat "$file" | awk -v fname="$file" \'function basename(file,a,n){n=split(file,a,"/");return a[n]}BEGIN{fname=basename(fname);if(fname=="access.log"){sub(/.log/,"",fname)}else{sub(/-access.*/,"",fname)}}{print fname" "$1}\'; done< <(sudo find /var/log/nginx -type f -name \'*-access.*.gz\')) | sort | uniq -c | awk \'$1 >= 10\' | sort -nr')
-            ->map(fn(string $countServiceAndIp) => Str::of($countServiceAndIp)->split('/\s+/'))
-            ->filter(fn(Collection $countServiceAndIp) => $countServiceAndIp->count() === 3 && filter_var($countServiceAndIp->last(), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6))
-            ->map(fn(Collection $countServiceAndIp) => [
-                'count' => $countServiceAndIp->first(),
-                'service' => $countServiceAndIp->get(1),
-                'ip' => $this->expandIp($countServiceAndIp->last()),
-            ]);
-        if ($ips->isNotEmpty()) {
-            $ssh->newTrace(SshTraceStateEnum::DONE, 'Nginx request client IP addresses retrieved.');
-            return $ips;
-        }
-        return collect();
-    }
-
     public function addOsqueryEvents(array $events): int
     {
         $nbEvents = 0;
@@ -782,59 +773,9 @@ EOT;
 
         $ipv6 = $this->sshGetIpV6($ssh);
 
-        $this->ip_address_v6 = $this->expandIp($ipv6);
+        $this->ip_address_v6 = YnhServer::expandIp($ipv6);
         $this->save();
 
-        $nginx = $this->sshNginxRequestClientIpAddresses($ssh);
-
-        if ($nginx->isNotEmpty()) {
-
-            $toId = $this->id;
-            $toIp = $this->ip();
-            $fromId = [];
-
-            foreach ($nginx as $countServiceAndIp) {
-
-                $count = $countServiceAndIp['count'];
-                $service = $countServiceAndIp['service'];
-                $fromIp = $countServiceAndIp['ip'];
-
-                if (!array_key_exists($fromIp, $fromId)) {
-                    $fromServer = YnhServer::where('ip_address', $fromIp)->first();
-                    if ($fromServer) {
-                        $fromId[$fromIp] = $fromServer->id;
-                    } else {
-                        $fromServer = YnhServer::where('ip_address_v6', $fromIp)->first();
-                        if ($fromServer) {
-                            $fromId[$fromIp] = $fromServer->id;
-                        }
-                    }
-                }
-
-                YnhNginxLogs::updateOrCreate([
-                    'from_ip_address' => $fromIp,
-                    'to_ynh_server_id' => $toId,
-                    'service' => $service,
-                ], [
-                    'from_ynh_server_id' => $fromId[$fromIp] ?? null,
-                    'to_ynh_server_id' => $toId,
-                    'from_ip_address' => $fromIp,
-                    'to_ip_address' => $toIp,
-                    'service' => $service,
-                    'weight' => $count,
-                    'updated' => true,
-                ]);
-            }
-            DB::transaction(function () {
-                YnhNginxLogs::where('to_ynh_server_id', $this->id)
-                    ->where('updated', false)
-                    ->delete();
-                YnhNginxLogs::where('to_ynh_server_id', $this->id)
-                    ->update(['updated' => false]);
-            });
-        }
-
-        $nginx = null;
         $apps = $this->sshListApplications($ssh);
 
         if (isset($apps['apps'])) {
@@ -1090,14 +1031,5 @@ EOT;
         $script = preg_replace('/{ADMIN_USERNAME}/', $username, $script);
         $script = preg_replace('/{ADMIN_PASSWORD}/', $password, $script);
         return $script;
-    }
-
-    private function expandIp(string $ip): string
-    {
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            $hex = unpack("H*hex", inet_pton($ip));
-            return substr(preg_replace("/([A-f0-9]{4})/", "$1:", $hex['hex']), 0, -1);
-        }
-        return $ip;
     }
 }

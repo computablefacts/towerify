@@ -12,10 +12,13 @@
 */
 
 use App\Helpers\SshKeyPair;
+use App\Models\YnhNginxLogs;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -255,6 +258,103 @@ Route::get('/osquery/{secret}', function (string $secret, \Illuminate\Http\Reque
     $config = json_encode(\App\Models\YnhOsquery::configOsquery());
 
     return response($config, 200)
+        ->header('Content-Type', 'text/plain');
+});
+
+Route::get('/logparser/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+    if (!$server) {
+        return response('Unknown server', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $config = \App\Models\YnhOsquery::configLogParser($server);
+
+    return response($config, 200)
+        ->header('Content-Type', 'text/plain');
+});
+
+Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    if (!$request->hasFile('data')) {
+        return response('Missing attachment', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $file = $request->file('data');
+
+    if (!$file->isValid()) {
+        return response('Invalid attachment', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+    if (!$server) {
+        return response('Unknown server', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $logs = collect(gzfile($file->getRealPath()))
+        ->map(fn(string $line) => Str::of(trim($line))->split('/\s+/'))
+        ->filter(fn(Collection $lines) => $lines->count() === 3 && filter_var($lines->last(), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6))
+        ->map(fn(Collection $lines) => [
+            'count' => $lines->first(),
+            'service' => $lines->get(1),
+            'ip' => YnhServer::expandIp($lines->last()),
+        ]);
+
+    if ($logs->isEmpty()) {
+        return response('ok (empty file)', 200)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $toId = $server->id;
+    $toIp = $server->ip();
+    $fromId = [];
+
+    foreach ($logs as $countServiceAndIp) {
+
+        $count = $countServiceAndIp['count'];
+        $service = $countServiceAndIp['service'];
+        $fromIp = $countServiceAndIp['ip'];
+
+        if (!array_key_exists($fromIp, $fromId)) {
+            $fromServer = YnhServer::where('ip_address', $fromIp)->first();
+            if ($fromServer) {
+                $fromId[$fromIp] = $fromServer->id;
+            } else {
+                $fromServer = YnhServer::where('ip_address_v6', $fromIp)->first();
+                if ($fromServer) {
+                    $fromId[$fromIp] = $fromServer->id;
+                }
+            }
+        }
+
+        YnhNginxLogs::updateOrCreate([
+            'from_ip_address' => $fromIp,
+            'to_ynh_server_id' => $toId,
+            'service' => $service,
+        ], [
+            'from_ynh_server_id' => $fromId[$fromIp] ?? null,
+            'to_ynh_server_id' => $toId,
+            'from_ip_address' => $fromIp,
+            'to_ip_address' => $toIp,
+            'service' => $service,
+            'weight' => $count,
+            'updated' => true,
+        ]);
+    }
+    DB::transaction(function () use ($server) {
+        YnhNginxLogs::where('to_ynh_server_id', $server->id)
+            ->where('updated', false)
+            ->delete();
+        YnhNginxLogs::where('to_ynh_server_id', $server->id)
+            ->update(['updated' => false]);
+    });
+    return response("ok ({$logs->count()} rows in file)", 200)
         ->header('Content-Type', 'text/plain');
 });
 

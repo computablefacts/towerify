@@ -36,6 +36,28 @@ class YnhOsquery extends Model
         'packed' => 'boolean',
     ];
 
+    public static function configLogParser(YnhServer $server): string
+    {
+        return <<< EOT
+#!/bin/bash
+
+if [ -d /var/log/nginx ]; then
+  while read file; do
+    if [[ "\$file" == *.gz ]]; then
+      zcat "\$file" | awk -v fname="\$file" 'function basename(file,a,n){n=split(file,a,"/");return a[n]}BEGIN{fname=basename(fname);if(fname=="access.log"){sub(/.log/,"",fname)}else{sub(/-access.*/,"",fname)}}{print fname" "$1}'
+    else
+      cat "\$file" | awk -v fname="\$file" 'function basename(file,a,n){n=split(file,a,"/");return a[n]}BEGIN{fname=basename(fname);if(fname=="access.log"){sub(/.log/,"",fname)}else{sub(/-access.*/,"",fname)}}{print fname" "$1}'
+    fi
+  done< <(find /var/log/nginx -type f -name '*-access.log*') | sort | uniq -c | awk '$1 >= 3' | sort -nr | gzip -c >/opt/logparser/nginx.txt.gz
+  curl -X POST \
+    -H "Content-Type: multipart/form-data" \
+    -F "data=@/opt/logparser/nginx.txt.gz" \
+    https://app.towerify.io/logparser/{$server->secret}
+fi
+
+EOT;
+    }
+
     public static function configLogAlert(YnhServer $server): array
     {
         return ["monitors" => [
@@ -129,6 +151,11 @@ if [ ! -f /etc/osquery/osquery.conf ]; then
     rm osquery_5.11.0-1.linux_amd64.deb
 fi
 
+# Install LogParser
+if [ ! -f /opt/logparser/parser ]; then 
+  mkdir -p /opt/logparser
+fi
+
 # Install LogAlert
 if [ ! -f /opt/logalert/config.json ]; then 
   mkdir -p /opt/logalert
@@ -159,12 +186,23 @@ if jq empty /opt/logalert/config2.json; then
   mv -f /opt/logalert/config2.json /opt/logalert/config.json
 fi
 
+# Update LogParser configuration
+wget -O /opt/logparser/parser2 https://app.towerify.io/logparser/{$server->secret}
+
+if { bash -n /opt/logparser/parser2; } then
+  mv -f /opt/logparser/parser2 /opt/logparser/parser
+  chmod +x /opt/logparser/parser
+fi
+
 # Update Osquery configuration
 wget -O /etc/osquery/osquery2.conf https://app.towerify.io/osquery/{$server->secret}
 
 if jq empty /etc/osquery/osquery2.conf; then
   mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
 fi
+
+# Parse web logs every hour
+cat <(fgrep -i -v '/opt/logparser/parser' <(crontab -l)) <(echo '0 * * * * /opt/logparser/parser') | crontab -
 
 # Drop Osquery daemon's output every sunday at 01:00 am
 cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log' <(crontab -l)) <(echo '0 1 * * 0 rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osqueryd.snapshots.log') | crontab -

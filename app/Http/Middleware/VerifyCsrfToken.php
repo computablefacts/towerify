@@ -15,6 +15,7 @@ class VerifyCsrfToken extends Middleware
         '/setup/token',
         '/setup/script',
         '/logalert/*',
+        '/logparser/*',
         '/osquery/*',
         '/metrics',
     ];
