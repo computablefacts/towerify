@@ -42,7 +42,7 @@ Route::get('catalog', function () {
         })
         ->values();
     return new JsonResponse($apps, 200, ['Access-Control-Allow-Origin' => '*']);
-});
+})->middleware('throttle:30,1');
 
 Route::get('/setup/token', function (\Illuminate\Http\Request $request) {
 
@@ -91,7 +91,7 @@ Route::get('/setup/token', function (\Illuminate\Http\Request $request) {
         'message' => 'The \'system\' token has been generated.',
         'token' => $plainTextToken,
     ], 200, ['Access-Control-Allow-Origin' => '*']);
-})->middleware('auth');
+})->middleware(['auth', 'throttle:6,1']);
 
 Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
 
@@ -177,7 +177,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
-});
+})->middleware(['auth', 'throttle:6,1']);
 
 Route::get('/update/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
 
@@ -192,7 +192,7 @@ Route::get('/update/{secret}', function (string $secret, \Illuminate\Http\Reques
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
-});
+})->middleware('throttle:6,1');
 
 Route::post('/logalert/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
 
@@ -259,7 +259,7 @@ Route::get('/logalert/{secret}', function (string $secret, \Illuminate\Http\Requ
 
     return response($config, 200)
         ->header('Content-Type', 'text/plain');
-});
+})->middleware('throttle:6,1');
 
 Route::get('/osquery/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
 
@@ -274,7 +274,7 @@ Route::get('/osquery/{secret}', function (string $secret, \Illuminate\Http\Reque
 
     return response($config, 200)
         ->header('Content-Type', 'text/plain');
-});
+})->middleware('throttle:6,1');
 
 Route::get('/logparser/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
 
@@ -289,7 +289,7 @@ Route::get('/logparser/{secret}', function (string $secret, \Illuminate\Http\Req
 
     return response($config, 200)
         ->header('Content-Type', 'text/plain');
-});
+})->middleware('throttle:6,1');
 
 Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
 
