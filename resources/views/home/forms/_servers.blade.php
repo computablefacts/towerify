@@ -130,7 +130,7 @@
       @endif
       @if(Auth::user()->canManageServers() && !$server->addedWithCurl())
       <button type="button" onclick="installOsquery()" class="btn btn-outline-primary mx-4">
-        {{ __('Install Osquery') }}
+        {{ __('Setup Monitoring') }}
       </button>
       @endif
     </div>
