@@ -173,7 +173,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
     //    3.2 chmod +x install.sh
     //    3.3 ./install.sh
     //    3.4 rm install.sh
-    $installScript = \App\Models\YnhOsquery::setupMonitoring($server);
+    $installScript = \App\Models\YnhOsquery::monitorServer($server);
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
@@ -188,7 +188,7 @@ Route::get('/update/{secret}', function (string $secret, \Illuminate\Http\Reques
             ->header('Content-Type', 'text/plain');
     }
 
-    $installScript = \App\Models\YnhOsquery::setupMonitoring($server);
+    $installScript = \App\Models\YnhOsquery::monitorServer($server);
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
@@ -469,7 +469,7 @@ Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
         Route::post('{server}/pull-server-infos', 'YnhServerController@pullServerInfos')->name('pull-server-infos');
         Route::post('{server}/test-ssh-connection', 'YnhServerController@testSshConnection')->name('test-ssh-connection');
         Route::post('{server}/configure', 'YnhServerController@configure')->name('configure');
-        Route::post('{server}/install-osquery', 'YnhServerController@installOsquery')->name('install-osquery');
+        Route::post('{server}/monitor-server', 'YnhServerController@monitorServer')->name('monitor-server');
         Route::post('{server}/backup', 'YnhServerController@createBackup')->name('create-backup');
         Route::get('{server}/backup/{backup}', 'YnhServerController@downloadBackup')->name('download-backup');
         Route::post('{server}/execute-shell-command', 'YnhServerController@executeShellCommand')->name('execute-shell-command');

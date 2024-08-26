@@ -137,7 +137,7 @@ EOT;
         ];
     }
 
-    public static function setupMonitoring(YnhServer $server): string
+    public static function monitorServer(YnhServer $server): string
     {
         return <<<EOT
 #!/bin/bash

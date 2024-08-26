@@ -42,7 +42,7 @@ class ConfigureHostListener extends AbstractListener
                 $server->save();
 
                 $ssh = $server->sshConnection($uid, $user);
-                $isOk = $isOk && $server->sshSetupMonitoring($ssh);
+                $isOk = $isOk && $server->sshMonitorServer($ssh);
             }
 
             // $ports = [25 /* email */, 389 /* ldap */, 587 /* email */, 853 /* ? */, 993 /* email */, 5222 /* xmpp client */, 5269 /* xmpp server */];

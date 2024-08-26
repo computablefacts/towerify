@@ -129,8 +129,8 @@
       </button>
       @endif
       @if(Auth::user()->canManageServers() && !$server->addedWithCurl())
-      <button type="button" onclick="installOsquery()" class="btn btn-outline-primary mx-4">
-        {{ __('Setup Monitoring') }}
+      <button type="button" onclick="monitorHost()" class="btn btn-outline-primary mx-4">
+        {{ __('Monitor Host') }}
       </button>
       @endif
     </div>
@@ -234,7 +234,7 @@
     });
   }
 
-  function installOsquery() {
+  function monitorHost() {
 
     const name = document.querySelector('[name="name"]').value;
     const ip = document.querySelector('[name="ip_address"]').value;
@@ -244,7 +244,7 @@
     const resultDiv = document.getElementById('result-3');
     const messageSpan = document.getElementById('result-message-3');
 
-    axios.post("{{ route('ynh.servers.install-osquery', $server) }}", {})
+    axios.post("{{ route('ynh.servers.monitor-server', $server) }}", {})
     .then(function (response) {
       resultDiv.className = 'alert alert-dismissible fade show m-2';
       resultDiv.style.display = 'block';

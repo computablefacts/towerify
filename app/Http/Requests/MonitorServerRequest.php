@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-class InstallOsqueryRequest extends FormRequest implements \App\Contracts\Requests\InstallOsquery
+class MonitorServerRequest extends FormRequest implements \App\Contracts\Requests\MonitorServer
 {
     /**
      * Determine if the user is authorized to make this request.
