@@ -153,6 +153,7 @@
     @yield('content')
   </main>
 </div>
+<div id="toaster"></div>
 <div id="drawer-25"></div>
 
 <!-- Scripts -->
@@ -174,16 +175,26 @@
 <script src="{{ asset('adversary_meter/src/blueprintjs/main.min.js') }}"></script>
 <script>
 
+  const toaster = {
+    el: new com.computablefacts.blueprintjs.MinimalToaster(document.getElementById('toaster')),
+    toast: (msg, intent) => toaster.el.toast(msg, intent)
+  };
   const drawer25 = {
-    el: new com.computablefacts.blueprintjs.MinimalDrawer(document.getElementById('drawer-25'), '25%'), render: null
+    el: new com.computablefacts.blueprintjs.MinimalDrawer(document.getElementById('drawer-25'), '25%'),
+    redraw: null,
+    render: null
   };
   drawer25.el.onOpen(el => {
     // console.log(drawer);
     const div = document.createElement('div');
     div.innerHTML = drawer25.render ? drawer25.render() : '';
     el.appendChild(div);
+    drawer25.redraw = () => div.innerHTML = drawer25.render ? drawer25.render() : '';
   });
-  drawer25.el.onClose(() => drawer25.render = null);
+  drawer25.el.onClose(() => {
+    drawer25.redraw = null;
+    drawer25.render = null;
+  });
 
 </script>
 </body>

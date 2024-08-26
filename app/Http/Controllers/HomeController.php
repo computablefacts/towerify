@@ -133,7 +133,14 @@ class HomeController extends Controller
             $orders = YnhOrder::forUser($user);
         }
 
-        $notifications = []; // TODO : load notifications from database
+        $notifications = $user->unreadNotifications
+            ->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'data' => $notification->data,
+                ];
+            })
+            ->all();
 
         return view('home.index', compact(
             'tab',

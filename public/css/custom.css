@@ -121,3 +121,7 @@ body {
 .refresh {
   font-family: Lucida Sans Unicode
 }
+
+.text-right {
+  text-align: right;
+}

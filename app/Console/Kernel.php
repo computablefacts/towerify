@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\AgeOffOsqueryEvents;
+use App\Jobs\CheckServersHealth;
 use App\Jobs\PullServersInfos;
 use App\Jobs\UpdateShadowIt;
 use Illuminate\Console\Scheduling\Schedule;
@@ -29,6 +30,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->job(new PullServersInfos())->hourly();
         $schedule->job(new AgeOffOsqueryEvents())->hourly();
+        $schedule->job(new CheckServersHealth())->everyFifteenMinutes();
         $schedule->command('telescope:prune --hours=48')->daily();
     }
 

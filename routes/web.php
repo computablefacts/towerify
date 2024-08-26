@@ -341,6 +341,10 @@ Route::post('/reset-password', function () {
     return view('auth.passwords.email', compact('email'));
 })->middleware('auth')->name('reset-password');
 
+Route::get('/notification/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
+    $notification->markAsRead();
+})->middleware('auth');
+
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
         Route::get('', 'YnhServerController@create')->name('create');
