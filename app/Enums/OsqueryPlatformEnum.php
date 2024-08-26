@@ -10,5 +10,6 @@ enum OsqueryPlatformEnum: string
     case WINDOWS = 'windows';
     case UBUNTU = 'ubuntu';
     case CENTOS = 'centos';
+    case GENTOO = 'gentoo';
     case ALL = 'all';
 }

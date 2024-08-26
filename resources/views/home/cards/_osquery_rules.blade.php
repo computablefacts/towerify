@@ -18,7 +18,7 @@
         <th>{{ __('Version') }}</th>
         <th>{{ __('Interval') }}</th>
         <th>{{ __('Platform') }}</th>
-        <th>{{ __('Snapshot') }}</th>
+        <!-- <th>{{ __('Snapshot') }}</th> -->
       </tr>
       </thead>
       <tbody>
@@ -26,7 +26,7 @@
       <tr>
         <td>
           <span class="font-lg mb-3 fw-bold">
-            {{ $rule->name }}
+            {{ $rule->name }}&nbsp;{!! $rule->category ? '<span style="color:#ff9704">/</span>&nbsp;' . $rule->category : '' !!}
           </span>
           <div class="text-muted">
             {{ $rule->description }}
@@ -48,9 +48,9 @@
             {{ $rule->platform->value }}
           </span>
         </td>
-        <td>
+        <!-- <td>
           {{ $rule->snapshot ? 'YES' : 'NO' }}
-        </td>
+        </td> -->
       </tr>
       @endforeach
       </tbody>

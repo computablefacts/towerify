@@ -35,6 +35,7 @@ return new class extends Migration {
                 \App\Enums\OsqueryPlatformEnum::WINDOWS->value,
                 \App\Enums\OsqueryPlatformEnum::UBUNTU->value,
                 \App\Enums\OsqueryPlatformEnum::CENTOS->value,
+                \App\Enums\OsqueryPlatformEnum::GENTOO->value,
                 \App\Enums\OsqueryPlatformEnum::ALL->value,
             ])->default(\App\Enums\OsqueryPlatformEnum::ALL->value);
         });

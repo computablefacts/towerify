@@ -22,6 +22,7 @@ class YnhOsqueryRule extends Model
         'removed',
         'snapshot',
         'platform',
+        'category',
     ];
 
     protected $casts = [
