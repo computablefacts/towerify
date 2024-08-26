@@ -405,6 +405,15 @@ class DatabaseSeeder extends Seeder
             "interval" => 86400,
             "description" => "Various Linux kernel integrity checked attributes."
         ], [
+            'name' => "kernel_modules_snapshot",
+            "query" => "SELECT * FROM kernel_modules;",
+            "interval" => 86400,
+            "platform" => "linux",
+            "version" => "1.4.5",
+            "description" => "Retrieves the current list of loaded kernel modules in the target Linux system.",
+            "value" => "General security posture.",
+            "snapshot" => true
+        ], [
             'name' => 'ld_preload',
             "query" => "SELECT process_envs.pid, process_envs.key, process_envs.value, processes.name, processes.path, processes.cmdline, processes.cwd FROM process_envs JOIN processes USING (pid) WHERE KEY = 'LD_PRELOAD';",
             "interval" => 60,
