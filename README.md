@@ -98,6 +98,7 @@ file. Adjust these values to your desired credentials.
 * __Resources Usage.__ Provides a detailed breakdown of how much memory and storage is being utilized by each server.
 * __Security.__ Offers a comprehensive overview of system events that could affect server security, including changes to
   access keys, system logins and logouts, user modifications, and alterations in kernel modules.
+* __Security Rules.__ Display the list of Osquery rules deployed on your servers.
 * __Orders.__ Serves as a comprehensive inventory of all the applications that have been deployed, tracking their
   statuses and relevant details.
 * __Users.__ Provides a comprehensive inventory of all users who have been added and who have access to specific servers
@@ -114,12 +115,17 @@ file. Adjust these values to your desired credentials.
 * __Backups.__ Trigger a full backup of the system configuration and application data, which can then be transferred to
   S3 or another storage service. You have the flexibility to download these backups as needed for recovery or archival
   purposes.
-* __Traces.__ Provides you with the ability to audit the latest actions performed on the server, including commands that
-  have been executed, those currently running, and upcoming commands.
 * __Domains.__ Displays all the domains managed by the current server, providing a comprehensive overview of the
   server's domain handling capabilities.
 * __Applications.__ Displays all applications currently installed on the server, allowing you to effectively manage them
   by installing new applications or uninstalling existing ones.
+* __Traces.__ Provides you with the ability to audit the latest actions performed on the server, including commands that
+  have been executed, those currently running, and upcoming commands.
+* __Interdependencies.__ Display the list of servers and services that interact with the server. Constructed by
+  analyzing nginx logs.
+* __Resources Usage.__ Provides a detailed breakdown of how much memory and storage is being utilized the server.
+* __Security.__ Offers a comprehensive overview of system events that could affect the server security, including
+  changes to access keys, system logins and logouts, user modifications, and alterations in kernel modules.
 * __Users.__ Enables you to review who has access to the server and manage their permissions, ensuring control over
   the security perimeter.
 * __Shell.__ Provides a straightforward web interface through which you can execute simple and non-interactive commands
