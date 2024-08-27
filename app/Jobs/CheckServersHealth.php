@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Enums\NotificationLevelEnum;
+use App\Enums\NotificationTypeEnum;
 use App\Enums\ServerStatusEnum;
 use App\Models\YnhServer;
 use App\Notifications\HealthCheckIssue;
@@ -45,6 +47,13 @@ class CheckServersHealth implements ShouldQueue
                 $users = User::where('tenant_id', $server->tenant()?->id)
                     ->get()
                     ->filter(fn(User $user) => $user->canManageServers())
+                    ->filter(function (User $user) use ($server) {
+                        return !$user->unreadNotifications()
+                            ->whereJsonContains('data->type', NotificationTypeEnum::HEALTHCHECK_ISSUE->value)
+                            ->whereJsonContains('data->level', NotificationLevelEnum::DANGER->value)
+                            ->whereJsonContains('data->details->server_name', $server->name)
+                            ->exists();
+                    })
                     ->all();
                 Notification::send($users, new HealthCheckIssue($server));
             });
