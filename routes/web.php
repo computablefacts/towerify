@@ -169,7 +169,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
     // 1. In the browser, go to "https://app.towerify.io" and login using your user account.
     // 2. In the browser, go to "https://app.towerify.io/setup/token" to get a user-specific cURL token.
     // 3. On the server, run:
-    //    3.1 curl -s 'https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name>' >install.sh
+    //    3.1 curl -s https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name> >install.sh
     //    3.2 chmod +x install.sh
     //    3.3 ./install.sh
     //    3.4 rm install.sh
