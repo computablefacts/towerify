@@ -57,7 +57,7 @@ class HealthCheckIssue extends Notification
                 'server_name' => $this->server->name,
                 'principal_domain' => $this->server->domain()?->name,
                 'ip_v4' => $this->server->ip(),
-                'ip_v6' => $this->server->ipv6(),
+                'ip_v6' => !$this->server->ipv6() || $this->server->ipv6() === '<unavailable>' ? null : $this->server->ipv6(),
                 'last_heartbeat' => $this->server->lastHeartbeat() ? $this->server->lastHeartbeat()->format('Y-m-d H:i:s') . ' UTC' : null,
             ],
             'action' => [
