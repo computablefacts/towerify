@@ -26,7 +26,7 @@ class ExecuteShellCommandRequest extends FormRequest implements \App\Contracts\R
     public function rules()
     {
         return [
-            'cmd' => 'required|string|max:256'
+            'cmd' => 'required|string|max:800'
         ];
     }
 }
