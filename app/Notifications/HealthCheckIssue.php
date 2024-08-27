@@ -62,7 +62,7 @@ class HealthCheckIssue extends Notification
             ],
             'action' => [
                 'name' => 'resources usage',
-                'url' => url("/ynh/servers/{$this->server->id}/edit?tab=resources_usage"),
+                'url' => "/ynh/servers/{$this->server->id}/edit?tab=resources_usage",
             ],
         ];
     }
