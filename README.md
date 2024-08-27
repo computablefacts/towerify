@@ -42,6 +42,12 @@ means that even if you have YunoHost instances that were installed before integr
 Towerify to manage these servers. This capability allows for seamless integration and management without the need to set
 up new servers, making it convenient for users to adopt Towerify for existing setups.
 
+> [!NOTE]
+> Metrics and security event collection no longer depend on the server being YunoHost-based, as any Linux server can now
+> be configured for automatic collection by running
+> `curl -s https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name>; | bash` as root on
+> the target server.
+
 ## Contents
 
 * [Getting Started](#getting-started)
