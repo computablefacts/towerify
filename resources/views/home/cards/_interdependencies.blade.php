@@ -1,8 +1,8 @@
 @if(Auth::user()->canListServers())
 @once
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.29.2/cytoscape.min.js"></script>
+<script src="https://unpkg.com/cytoscape@3/dist/cytoscape.min.js"></script>
 <script src="https://unpkg.com/@popperjs/core@2"></script>
-<script src="https://cytoscape.org/cytoscape.js-popper/cytoscape-popper.js"></script>
+<script src="https://unpkg.com/cytoscape-popper@2/cytoscape-popper.js"></script>
 @endonce
 <div class="card card-accent-secondary tw-card mt-4">
   <div class="card-header">
@@ -25,12 +25,10 @@
 </style>
 <script>
 
-  const data = <?php echo json_encode($interdependencies) ?>;
+  const data = @json($interdependencies)
 
   const cy = cytoscape({
-    container: document.getElementById('cy'), elements: data,
-
-    style: [{
+    container: document.getElementById('cy'), elements: data, style: [{
       selector: 'node', style: {
         'background-color': 'data(color)', 'label': 'data(label)'
       }
