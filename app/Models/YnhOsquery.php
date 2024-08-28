@@ -163,18 +163,6 @@ if [ ! -f /opt/logalert/config.json ]; then
   chmod 755 /opt/logalert/logalert.bin
 fi
 
-# LEGACY CODE BEGINS HERE
-sudo -H -u root bash -c 'tmux kill-ses -t forward-results'
-sudo -H -u root bash -c 'tmux kill-ses -t forward-snapshots'
-
-if [ -f /etc/osquery/forward-results.sh ]; then
-  rm -f /etc/osquery/forward-results.sh
-fi
-if [ -f /etc/osquery/forward-snapshots.sh ]; then
-  rm -f /etc/osquery/forward-snapshots.sh
-fi
-# LEGACY CODE ENDS HERE
-
 # Stop LogAlert then Osquery
 sudo -H -u root bash -c 'tmux kill-ses -t logalert'
 osqueryctl stop osqueryd
