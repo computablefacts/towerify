@@ -182,23 +182,35 @@ osqueryctl stop osqueryd
 # Update LogAlert configuration
 wget -O /opt/logalert/config2.json https://app.towerify.io/logalert/{$server->secret}
 
-if jq empty /opt/logalert/config2.json; then
-  mv -f /opt/logalert/config2.json /opt/logalert/config.json
+if [ -s /opt/logalert/config2.json ]; then
+  if jq empty /opt/logalert/config2.json; then
+    mv -f /opt/logalert/config2.json /opt/logalert/config.json
+  fi
+else
+  rm /opt/logalert/config2.json
 fi
 
 # Update LogParser configuration
 wget -O /opt/logparser/parser2 https://app.towerify.io/logparser/{$server->secret}
 
-if { bash -n /opt/logparser/parser2; } then
-  mv -f /opt/logparser/parser2 /opt/logparser/parser
-  chmod +x /opt/logparser/parser
+if [ -s /opt/logparser/parser2 ]; then
+  if { bash -n /opt/logparser/parser2; } then
+    mv -f /opt/logparser/parser2 /opt/logparser/parser
+    chmod +x /opt/logparser/parser
+  fi
+else
+    rm /opt/logparser/parser2
 fi
 
 # Update Osquery configuration
 wget -O /etc/osquery/osquery2.conf https://app.towerify.io/osquery/{$server->secret}
 
-if jq empty /etc/osquery/osquery2.conf; then
-  mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
+if [ -s /etc/osquery/osquery2.conf ]; then
+  if jq empty /etc/osquery/osquery2.conf; then
+    mv -f /etc/osquery/osquery2.conf /etc/osquery/osquery.conf
+  fi
+else
+  rm /etc/osquery/osquery2.conf
 fi
 
 # Parse web logs every hour
