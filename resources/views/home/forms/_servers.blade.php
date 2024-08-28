@@ -1,3 +1,17 @@
+@if(Auth::user()->canManageServers() && $server->secret)
+<div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+  <div class="card-body">
+    <div class="row">
+      <pre class="m-0">To configure or restore metrics and security event collection on this server, execute the following command with <b>root</b> privileges:
+
+https://app.towerify.io/update/{{ $server->secret }}
+
+The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional
+changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.</pre>
+    </div>
+  </div>
+</div>
+@endif
 @if(Auth::user()->canListServers())
 {!! Form::model($server, [
 'route' => ['ynh.servers.edit', $server],
