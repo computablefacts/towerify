@@ -17,6 +17,5 @@ class VerifyCsrfToken extends Middleware
         '/logalert/*',
         '/logparser/*',
         '/osquery/*',
-        '/metrics',
     ];
 }
