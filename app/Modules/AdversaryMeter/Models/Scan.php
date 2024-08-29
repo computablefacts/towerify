@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Modules\AdversaryMeter\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Scan extends Model
+{
+    use HasFactory;
+
+    protected $table = 'scans';
+    protected $connection = 'mysql_am';
+
+    protected $fillable = [
+        'ports_scan_id',
+        'vulns_scan_id',
+        'ports_scan_begins_at',
+        'ports_scan_ends_at',
+        'vulns_scan_begins_at',
+        'vulns_scan_ends_at',
+    ];
+
+    protected $casts = [
+        'ports_scan_begins_at' => 'datetime',
+        'ports_scan_ends_at' => 'datetime',
+        'vulns_scan_begins_at' => 'datetime',
+        'vulns_scan_ends_at' => 'datetime',
+    ];
+
+    public function portsScanIsRunning(): bool
+    {
+        return $this->ports_scan_id && $this->ports_scan_begins_at && !$this->ports_scan_ends_at;
+    }
+
+    public function portsScanHasEnded(): bool
+    {
+        return $this->ports_scan_id && $this->ports_scan_begins_at && $this->ports_scan_ends_at;
+    }
+
+    public function vulnsScanIsRunning(): bool
+    {
+        return $this->vulns_scan_id && $this->vulns_scan_begins_at && !$this->vulns_scan_ends_at;
+    }
+
+    public function vulnsScanHasEnded(): bool
+    {
+        return $this->vulns_scan_id && $this->vulns_scan_begins_at && $this->vulns_scan_ends_at;
+    }
+
+    public function markAssetScanAsFailed(): void
+    {
+        Scan::where('ports_scan_id', $this->ports_scan_id)->delete();
+    }
+
+    public function markAssetScanAsCompleted(): void
+    {
+        $remaining = Scan::where('ports_scan_id', $this->ports_scan_id)
+            ->whereNull('vulns_scan_ends_at')
+            ->count();
+        if ($remaining === 0) {
+            $asset = Asset::where('next_scan_id', $this->id)->first();
+            if ($asset) {
+                if ($asset->prev_scan_id) {
+                    Scan::where('id', $asset->prev_scan_id)->delete();
+                }
+                $asset->prev_scan_id = $asset->cur_scan_id;
+                $asset->cur_scan_id = $asset->next_scan_id;
+                $asset->next_scan_id = null;
+                $asset->save();
+            }
+        }
+    }
+}

@@ -9,6 +9,8 @@ use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
+use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
+use App\Modules\AdversaryMeter\Models\Asset;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +29,17 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
+        /** @var Asset $asset */
+        /* $asset = Asset::create([
+            'asset' => 'towerify.io',
+            'asset_type' => AssetTypesEnum::DNS,
+        ]); */
+        $asset = Asset::where('asset', 'towerify.io')->first();
+        $scan = $asset->beginScan('port_scan');
+        $scan = $asset->endScan();
+        $scan = $asset->beginScan('vuln_scan');
+        $scan = $asset->endScan();
+
         $tab = $request->input('tab', 'my-apps');
         $limit = $request->input('limit', 20);
         /** @var User $user */

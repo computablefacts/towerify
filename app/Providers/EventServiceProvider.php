@@ -7,9 +7,9 @@ use App\Events\AddUserPermission;
 use App\Events\ConfigureHost;
 use App\Events\CreateBackup;
 use App\Events\InstallApp;
+use App\Events\PullServerInfos;
 use App\Events\RemoveUserPermission;
 use App\Events\UninstallApp;
-use App\Events\PullServerInfos;
 use App\Listeners\AddTwrUserPermissionListener;
 use App\Listeners\AddUserPermissionListener;
 use App\Listeners\ConfigureHostListener;
@@ -20,6 +20,14 @@ use App\Listeners\RemoveUserPermissionListener;
 use App\Listeners\UninstallAppListener;
 use App\Listeners\UpdateServerInfosListener;
 use App\Listeners\UserInvitationUtilizedListener;
+use App\Modules\AdversaryMeter\Events\BeginPortsScan;
+use App\Modules\AdversaryMeter\Events\BeginVulnsScan;
+use App\Modules\AdversaryMeter\Events\EndPortsScan;
+use App\Modules\AdversaryMeter\Events\EndVulnsScan;
+use App\Modules\AdversaryMeter\Listeners\BeginPortsScanListener;
+use App\Modules\AdversaryMeter\Listeners\BeginVulnsScanListener;
+use App\Modules\AdversaryMeter\Listeners\EndPortsScanListener;
+use App\Modules\AdversaryMeter\Listeners\EndVulnsScanListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Konekt\User\Events\UserInvitationUtilized;
 use Vanilo\Order\Events\OrderWasCreated;
@@ -65,6 +73,18 @@ class EventServiceProvider extends ServiceProvider
         PullServerInfos::class => [
             UpdateServerInfosListener::class,
         ],
+        BeginPortsScan::class => [
+            BeginPortsScanListener::class,
+        ],
+        EndPortsScan::class => [
+            EndPortsScanListener::class,
+        ],
+        BeginVulnsScan::class => [
+            BeginVulnsScanListener::class,
+        ],
+        EndVulnsScan::class => [
+            EndVulnsScanListener::class,
+        ]
     ];
 
     /**

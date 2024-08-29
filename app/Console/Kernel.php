@@ -6,6 +6,7 @@ use App\Jobs\AgeOffOsqueryEvents;
 use App\Jobs\CheckServersHealth;
 use App\Jobs\PullServersInfos;
 use App\Jobs\UpdateShadowIt;
+use App\Modules\AdversaryMeter\Jobs\TriggerScan;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -31,6 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new PullServersInfos())->hourly();
         $schedule->job(new AgeOffOsqueryEvents())->hourly();
         $schedule->job(new CheckServersHealth())->everyFifteenMinutes();
+        $schedule->job(new TriggerScan())->everyMinute();
         $schedule->command('telescope:prune --hours=48')->daily();
     }
 

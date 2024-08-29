@@ -8,6 +8,7 @@ return [
         'url' => env('AM_URL'),
         'api_key' => env('AM_API_KEY'),
         'ip_addresses' => explode(',', env('AM_IP_ADDRESSES')),
+        'api' => env('AM_API'),
     ],
     'telescope' => [
         'whitelist' => [
