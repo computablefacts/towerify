@@ -125,7 +125,7 @@ changes or effects beyond the initial execution. This ensures consistency and pr
           </svg>
         </button>
       </div>
-      <textarea id="authorizedKey" class="form-control" rows="5" readonly>{{ $server->sshKeyPair()->echoAuthorizedKey() }}</textarea>
+      <textarea id="authorizedKey" class="form-control" rows="5" readonly>{{ $server->ssh_public_key ? $server->sshKeyPair()->echoAuthorizedKey() : '-' }}</textarea>
     </div>
   </div>
   <div id="result-3" class="alert alert-dismissible fade show m-2" style="display:none;">
