@@ -53,6 +53,9 @@ class CreateAssetsTable extends Migration
 
             $table->bigInteger('next_scan_id')->unsigned()->nullable();
             $table->foreign('next_scan_id')->references('id')->on('scans')->nullOnDelete();
+            
+            // The task id for the asset discovery task
+            $table->string('discovery_id')->nullable();
         });
         Schema::create('assets_tags', function (Blueprint $table) {
 

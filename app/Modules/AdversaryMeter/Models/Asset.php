@@ -21,6 +21,7 @@ class Asset extends Model
         'prev_scan_id',
         'cur_scan_id',
         'next_scan_id',
+        'discovery_id',
     ];
 
     protected $casts = [
@@ -61,6 +62,11 @@ class Asset extends Model
             }
         }
         return null;
+    }
+    
+    public function isDiscoveryRunning(): bool
+    {
+        return $this->discovery_id !== null;
     }
 
     public function tags(): BelongsToMany
