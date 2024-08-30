@@ -493,4 +493,121 @@ class ScansTest extends TestCase
         // Cleanup
         $asset->delete();
     }
+
+    public function testItProperlyEndsWhenVulnsScanMarkThePortAsClosed()
+    {
+        ApiUtils::shouldReceive('task_nmap_public')
+            ->once()
+            ->with('www.example.com')
+            ->andReturn([
+                'task_id' => '6409ae68ed42e11e31e5f19d',
+            ]);
+        ApiUtils::shouldReceive('task_status_public')
+            ->once()
+            ->with('6409ae68ed42e11e31e5f19d')
+            ->andReturn([
+                'task_status' => 'SUCCESS',
+            ]);
+        ApiUtils::shouldReceive('task_result_public')
+            ->once()
+            ->with('6409ae68ed42e11e31e5f19d')
+            ->andReturn([
+                'task_result' => [
+                    [
+                        'hostname' => 'www.example.com',
+                        'ip' => '93.184.215.14',
+                        'port' => 443,
+                        'protocol' => 'tcp',
+                    ]
+                ],
+            ]);
+        ApiUtils::shouldReceive('ip_geoloc_public')
+            ->once()
+            ->with('93.184.215.14')
+            ->andReturn([
+                'data' => [
+                    'country' => [
+                        'iso_code' => 'US',
+                    ],
+                ],
+            ]);
+        ApiUtils::shouldReceive('ip_whois_public')
+            ->once()
+            ->with('93.184.215.14')
+            ->andReturn([
+                'data' => [
+                    'asn_description' => null,
+                    'asn_registry' => null,
+                    'asn' => null,
+                    'asn_cidr' => null,
+                    'asn_country_code' => null,
+                    'asn_date' => null,
+                ],
+            ]);
+        ApiUtils::shouldReceive('task_start_scan_public')
+            ->once()
+            ->with('www.example.com', '93.184.215.14', 443, 'tcp', ['demo'])
+            ->andReturn([
+                'scan_id' => 'a9a5d877-abed-4a39-8b4a-8316d451730d',
+            ]);
+        ApiUtils::shouldReceive('task_get_scan_public')
+            ->once()
+            ->with('a9a5d877-abed-4a39-8b4a-8316d451730d')
+            ->andReturn([
+                'hostname' => 'www.example.com',
+                'ip' => '93.184.215.14',
+                'port' => 443,
+                'protocol' => 'tcp',
+                'service' => 'closed',
+                'product' => 'Cloudflare http proxy',
+                'ssl' => true,
+                'current_task' => 'alerter',
+                'current_task_status' => 'ERROR',
+                'tags' => ['Http', 'Cloudflare'],
+                'data' => [
+                    //
+                ],
+            ]);
+
+        $asset = Asset::firstOrCreate([
+            'asset' => 'www.example.com',
+            'asset_type' => AssetTypesEnum::DNS,
+        ]);
+        $asset->tags()->create(['tag' => 'demo']);
+
+        TriggerScan::dispatch();
+
+        $asset = Asset::find($asset->id); // reload from db
+
+        // Check the assets table
+        $this->assertNull($asset->prev_scan_id);
+        $this->assertEquals('6409ae68ed42e11e31e5f19d', $asset->cur_scan_id);
+        $this->assertNull($asset->next_scan_id);
+
+        // Check the assets_tags table
+        $assetTags = AssetTag::where('asset_id', $asset->id)->get();
+        $this->assertEquals(1, $assetTags->count());
+
+        // Check the scans table
+        $scans = Scan::where('asset_id', $asset->id)->get();
+        $this->assertEquals(1, $scans->count());
+
+        // Check the ports table
+        $ports = Port::whereIn('scan_id', $scans->pluck('id'))->get();
+        $this->assertEquals(1, $ports->count());
+
+        // Check the ports_tags table
+        $portsTags = PortTag::whereIn('port_id', $ports->pluck('id'))->get();
+        $this->assertEquals(0, $portsTags->count());
+
+        // Check the alerts table
+        $alerts = Alert::whereIn('port_id', $ports->pluck('id'))->get();
+        $this->assertEquals(0, $alerts->count());
+
+        // Cleanup
+        $asset->delete();
+
+        // Cleanup
+        $asset->delete();
+    }
 }
