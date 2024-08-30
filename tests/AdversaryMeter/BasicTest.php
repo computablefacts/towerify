@@ -202,7 +202,7 @@ class BasicTest extends TestCase
         $this->assertEquals(1, $assetTags->count());
 
         // Check the scans table
-        $scans = Scan::where('ports_scan_id', '6409ae68ed42e11e31e5f19d')->get();
+        $scans = Scan::where('asset_id', $asset->id)->get();
         $this->assertEquals(2, $scans->count());
 
         // Check the ports table
@@ -230,7 +230,7 @@ class BasicTest extends TestCase
         $this->assertEquals(0, $assetTags->count());
 
         // Check the scans table
-        $scans = Scan::where('ports_scan_id', '6409ae68ed42e11e31e5f19d')->get();
+        $scans = Scan::where('asset_id', $assetId)->get();
         $this->assertEquals(0, $scans->count());
 
         // Check the ports table
@@ -244,5 +244,37 @@ class BasicTest extends TestCase
         // Check the alerts table
         $alerts = Alert::whereIn('port_id', $ports->pluck('id'))->get();
         $this->assertEquals(0, $alerts->count());
+    }
+
+    public function testItDoesNotModifyTheDbWhenPortsScanFailsToStart()
+    {
+        ApiUtils::shouldReceive('task_nmap_public')
+            ->once()
+            ->with('www.example.com')
+            ->andReturn([
+                'task_id' => null,
+            ]);
+
+        $asset = Asset::firstOrCreate([
+            'asset' => 'www.example.com',
+            'asset_type' => AssetTypesEnum::DNS,
+        ]);
+        $asset->tags()->create(['tag' => 'demo']);
+
+        TriggerScan::dispatch();
+
+        $asset = Asset::find($asset->id); // reload from db
+
+        // Check the assets table
+        $this->assertNull($asset->prev_scan_id);
+        $this->assertNull($asset->cur_scan_id);
+        $this->assertNull($asset->next_scan_id);
+
+        // Check the scans table
+        $scans = Scan::where('asset_id', $asset->id)->get();
+        $this->assertEquals(0, $scans->count());
+
+        // Cleanup
+        $asset->delete();
     }
 }
