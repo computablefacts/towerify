@@ -34,21 +34,21 @@ jobs:
       - name: Start MySQL
         run: sudo /etc/init.d/mysql start
       - name: Create TWR database
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "CREATE DATABASE tw_testdb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        run: mysql -e "CREATE DATABASE tw_testdb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
       - name: Check TWR database exists
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "SHOW DATABASES LIKE 'tw_testdb';"
+        run: mysql -e "SHOW DATABASES LIKE 'tw_testdb';"
       - name: Create TWR database user
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "CREATE USER 'tw_testuser'@'localhost' IDENTIFIED BY 'z0rglub';"
+        run: mysql -e "CREATE USER 'tw_testuser'@'localhost' IDENTIFIED BY 'z0rglub';"
       - name: Grant TWR database user privileges
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "GRANT ALL ON tw_testdb.* TO 'tw_testuser'@'localhost';"
+        run: mysql -e "GRANT ALL ON tw_testdb.* TO 'tw_testuser'@'localhost';"
       - name: Create AM database
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "CREATE DATABASE tw_testdb_am DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+        run: mysql -e "CREATE DATABASE tw_testdb_am DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
       - name: Check AM database exists
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "SHOW DATABASES LIKE 'tw_testdb_am';"
+        run: mysql -e "SHOW DATABASES LIKE 'tw_testdb_am';"
       - name: Create TWR database user
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "CREATE USER 'tw_testuser_am'@'localhost' IDENTIFIED BY 'tapa2$';"
+        run: mysql -e "CREATE USER 'tw_testuser_am'@'localhost' IDENTIFIED BY 'tapa2$';"
       - name: Grant TWR database user privileges
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -e "GRANT ALL ON tw_testdb_am.* TO 'tw_testuser_am'@'localhost';"
+        run: mysql -e "GRANT ALL ON tw_testdb_am.* TO 'tw_testuser_am'@'localhost';"
       - name: Run Tests
         run: php vendor/bin/phpunit --testdox
         env:
