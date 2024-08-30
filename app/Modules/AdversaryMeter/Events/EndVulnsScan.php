@@ -13,10 +13,12 @@ class EndVulnsScan
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public int $scanId;
+    public int $iteration;
 
-    public function __construct(Scan $scan)
+    public function __construct(Scan $scan, int $iteration)
     {
         $this->scanId = $scan->id;
+        $this->iteration = $iteration;
     }
 
     public function broadcastOn()

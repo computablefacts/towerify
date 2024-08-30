@@ -6,8 +6,11 @@ use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\EndVulnsScan;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Alert;
+use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Port;
+use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class EndVulnsScanListener extends AbstractListener
@@ -19,6 +22,7 @@ class EndVulnsScanListener extends AbstractListener
         }
 
         $scan = $event->scan();
+        $iteration = $event->iteration;
 
         if (!$scan->vulnsScanIsRunning()) {
             return;
@@ -36,18 +40,20 @@ class EndVulnsScanListener extends AbstractListener
             if (!$isCsc) {
 
                 if ($currentTaskStatus && Str::startsWith($currentTaskStatus, 'DONE_')) {
-                    event(new EndVulnsScan($scan));
+                    event(new EndVulnsScan($scan, $iteration + 1));
                     return;
                 }
 
                 $service = $task['service'] ?? null;
 
                 if ($service !== 'closed') {
-                    event(new EndVulnsScan($scan));
+                    if ($iteration < 100) {
+                        event(new EndVulnsScan($scan, $iteration + 1));
+                    } else { // Drop event after 100 iterations
+                        $scan->markAssetScanAsFailed();
+                    }
                 } else { // End the scan!
-                    $scan->vulns_scan_ends_at = Carbon::now();
-                    $scan->save();
-                    $scan->markAssetScanAsCompleted();
+                    $this->markAssetScanAsCompleted($scan);
                 }
                 return;
             }
@@ -73,9 +79,7 @@ class EndVulnsScanListener extends AbstractListener
 
         // TODO : deal with screenshot
 
-        $scan->vulns_scan_ends_at = Carbon::now();
-        $scan->save();
-        $scan->markAssetScanAsCompleted();
+        $this->markAssetScanAsCompleted($scan);
     }
 
     private function setAlertsV1(Port $port, array $task): void
@@ -136,6 +140,41 @@ class EndVulnsScanListener extends AbstractListener
                     'flarum_slug' => null, // TODO : remove?
                 ]);
             });
+    }
+
+    private function markAssetScanAsCompleted(Scan $scan): void
+    {
+        DB::transaction(function () use ($scan) {
+
+            $scan->vulns_scan_ends_at = Carbon::now();
+            $scan->save();
+
+            $remaining = Scan::where('asset_id', $scan->asset_id)
+                ->where('ports_scan_id', $scan->ports_scan_id)
+                ->whereNull('vulns_scan_ends_at')
+                ->count();
+
+            if ($remaining === 0) {
+
+                $asset = Asset::where('id', $scan->asset_id)->first();
+
+                if ($asset) {
+                    if ($asset->cur_scan_id === $scan->ports_scan_id) {
+                        return; // late arrival, ex. when events are processed synchronously
+                    }
+                    if ($asset->prev_scan_id) {
+                        Scan::where('asset_id', $scan->asset_id)
+                            ->where('id', $asset->prev_scan_id)
+                            ->delete();
+                    }
+
+                    $asset->prev_scan_id = $asset->cur_scan_id;
+                    $asset->cur_scan_id = $asset->next_scan_id;
+                    $asset->next_scan_id = null;
+                    $asset->save();
+                }
+            }
+        });
     }
 
     private function taskOutput(string $taskId): array

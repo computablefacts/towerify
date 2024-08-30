@@ -14,7 +14,7 @@ use App\Modules\AdversaryMeter\Models\Scan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class BasicTest extends TestCase
+class ScansTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -371,6 +371,104 @@ class BasicTest extends TestCase
             ->with('www.example.com', '93.184.215.14', 443, 'tcp', ['demo'])
             ->andReturn([
                 'scan_id' => null,
+            ]);
+
+        $asset = Asset::firstOrCreate([
+            'asset' => 'www.example.com',
+            'asset_type' => AssetTypesEnum::DNS,
+        ]);
+        $asset->tags()->create(['tag' => 'demo']);
+
+        TriggerScan::dispatch();
+
+        $asset = Asset::find($asset->id); // reload from db
+
+        // Check the assets table
+        $this->assertNull($asset->prev_scan_id);
+        $this->assertNull($asset->cur_scan_id);
+        $this->assertNull($asset->next_scan_id);
+
+        // Check the scans table
+        $scans = Scan::where('asset_id', $asset->id)->get();
+        $this->assertEquals(0, $scans->count());
+
+        // Cleanup
+        $asset->delete();
+    }
+
+    public function testItDoesNotModifyTheDbWhenVulnsScanFailsToComplete()
+    {
+        ApiUtils::shouldReceive('task_nmap_public')
+            ->once()
+            ->with('www.example.com')
+            ->andReturn([
+                'task_id' => '6409ae68ed42e11e31e5f19d',
+            ]);
+        ApiUtils::shouldReceive('task_status_public')
+            ->once()
+            ->with('6409ae68ed42e11e31e5f19d')
+            ->andReturn([
+                'task_status' => 'SUCCESS',
+            ]);
+        ApiUtils::shouldReceive('task_result_public')
+            ->once()
+            ->with('6409ae68ed42e11e31e5f19d')
+            ->andReturn([
+                'task_result' => [
+                    [
+                        'hostname' => 'www.example.com',
+                        'ip' => '93.184.215.14',
+                        'port' => 443,
+                        'protocol' => 'tcp',
+                    ]
+                ],
+            ]);
+        ApiUtils::shouldReceive('ip_geoloc_public')
+            ->once()
+            ->with('93.184.215.14')
+            ->andReturn([
+                'data' => [
+                    'country' => [
+                        'iso_code' => 'US',
+                    ],
+                ],
+            ]);
+        ApiUtils::shouldReceive('ip_whois_public')
+            ->once()
+            ->with('93.184.215.14')
+            ->andReturn([
+                'data' => [
+                    'asn_description' => null,
+                    'asn_registry' => null,
+                    'asn' => null,
+                    'asn_cidr' => null,
+                    'asn_country_code' => null,
+                    'asn_date' => null,
+                ],
+            ]);
+        ApiUtils::shouldReceive('task_start_scan_public')
+            ->once()
+            ->with('www.example.com', '93.184.215.14', 443, 'tcp', ['demo'])
+            ->andReturn([
+                'scan_id' => 'a9a5d877-abed-4a39-8b4a-8316d451730d',
+            ]);
+        ApiUtils::shouldReceive('task_get_scan_public')
+            ->times(100)
+            ->with('a9a5d877-abed-4a39-8b4a-8316d451730d')
+            ->andReturn([
+                'hostname' => 'www.example.com',
+                'ip' => '93.184.215.14',
+                'port' => 443,
+                'protocol' => 'tcp',
+                'service' => 'http',
+                'product' => 'Cloudflare http proxy',
+                'ssl' => true,
+                'current_task' => 'alerter',
+                'current_task_status' => 'ERROR',
+                'tags' => ['Http', 'Cloudflare'],
+                'data' => [
+                    //
+                ],
             ]);
 
         $asset = Asset::firstOrCreate([

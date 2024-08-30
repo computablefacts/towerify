@@ -43,7 +43,7 @@ class BeginVulnsScanListener extends AbstractListener
             $scan->vulns_scan_begins_at = Carbon::now();
             $scan->save();
 
-            event(new EndVulnsScan($scan));
+            event(new EndVulnsScan($scan, 1));
         }
     }
 
