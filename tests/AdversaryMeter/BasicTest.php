@@ -278,6 +278,44 @@ class BasicTest extends TestCase
         $asset->delete();
     }
 
+    public function testItDoesNotModifyTheDbWhenPortsScanFailsToComplete()
+    {
+        ApiUtils::shouldReceive('task_nmap_public')
+            ->once()
+            ->with('www.example.com')
+            ->andReturn([
+                'task_id' => '6409ae68ed42e11e31e5f19d',
+            ]);
+        ApiUtils::shouldReceive('task_status_public')
+            ->once()
+            ->with('6409ae68ed42e11e31e5f19d')
+            ->andReturn([
+                'task_status' => 'ERROR',
+            ]);
+
+        $asset = Asset::firstOrCreate([
+            'asset' => 'www.example.com',
+            'asset_type' => AssetTypesEnum::DNS,
+        ]);
+        $asset->tags()->create(['tag' => 'demo']);
+
+        TriggerScan::dispatch();
+
+        $asset = Asset::find($asset->id); // reload from db
+
+        // Check the assets table
+        $this->assertNull($asset->prev_scan_id);
+        $this->assertNull($asset->cur_scan_id);
+        $this->assertNull($asset->next_scan_id);
+
+        // Check the scans table
+        $scans = Scan::where('asset_id', $asset->id)->get();
+        $this->assertEquals(0, $scans->count());
+
+        // Cleanup
+        $asset->delete();
+    }
+
     public function testItDoesNotModifyTheDbWhenVulnsScanFailsToStart()
     {
         ApiUtils::shouldReceive('task_nmap_public')
