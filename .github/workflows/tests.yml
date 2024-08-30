@@ -37,32 +37,48 @@ jobs:
           DB_PORT_AM: 3000
           DB_USERNAME_AM: root
           DB_PASSWORD_AM: ""
-      - name: Create TWR database
-        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "CREATE DATABASE tw_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-      - name: Check TWR database exists
-        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "SHOW DATABASES LIKE 'tw_db';"
-      - name: Create AM database
-        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "CREATE DATABASE tw_db_am DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-      - name: Check AM database exists
-        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "SHOW DATABASES LIKE 'tw_db_am';"
+      - name: Create TWR database [mysql 5.7]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "CREATE DATABASE tw_testdb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+      - name: Check TWR database exists [mysql 5.7]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "SHOW DATABASES LIKE 'tw_testdb';"
+      - name: Create TWR database user [mysql 5.7]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "CREATE USER 'tw_testuser'@'localhost' IDENTIFIED BY 'z0rglub';"
+      - name: Grant TWR database user privileges [mysql 5.7]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "GRANT ALL ON tw_testdb.* TO 'tw_testuser'@'localhost';"
+      - name: Create AM database [mysql 5.7]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "CREATE DATABASE tw_testdb_am DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+      - name: Check AM database exists [mysql 5.7]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "SHOW DATABASES LIKE 'tw_testdb_am';"
+      - name: Create TWR database user [mysql 5.7]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "CREATE USER 'tw_testuser_am'@'localhost' IDENTIFIED BY 'tapa2$';"
+      - name: Grant TWR database user privileges [mysql 5.7]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "GRANT ALL ON tw_testdb_am.* TO 'tw_testuser_am'@'localhost';"
       - name: Run Tests [mysql 5.7]
         run: php vendor/bin/phpunit --testdox
         env:
           DB_PORT: ${{ job.services.mysql.ports[3306] }}
-          DB_USERNAME: root
-          DB_PASSWORD: ""
           DB_PORT_AM: ${{ job.services.mysql.ports[3306] }}
-          DB_USERNAME_AM: root
-          DB_PASSWORD_AM: ""
+      - name: Create TWR database [mysql 8.0]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "CREATE DATABASE tw_testdb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+      - name: Check TWR database exists [mysql 8.0]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "SHOW DATABASES LIKE 'tw_testdb';"
+      - name: Create TWR database user [mysql 8.0]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "CREATE USER 'tw_testuser'@'localhost' IDENTIFIED BY 'z0rglub';"
+      - name: Grant TWR database user privileges [mysql 8.0]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "GRANT ALL ON tw_testdb.* TO 'tw_testuser'@'localhost';"
+      - name: Create AM database [mysql 8.0]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "CREATE DATABASE tw_testdb_am DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+      - name: Check AM database exists [mysql 8.0]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "SHOW DATABASES LIKE 'tw_testdb_am';"
+      - name: Create TWR database user [mysql 8.0]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "CREATE USER 'tw_testuser_am'@'localhost' IDENTIFIED BY 'tapa2$';"
+      - name: Grant TWR database user privileges [mysql 8.0]
+        run: mysql --host 127.0.0.1 --port ${{ job.services.mysql8.ports[3306] }} -uroot -e "GRANT ALL ON tw_testdb_am.* TO 'tw_testuser_am'@'localhost';"
       - name: Run Tests [mysql 8.0]
         run: php vendor/bin/phpunit --testdox
         env:
           DB_PORT: ${{ job.services.mysql8.ports[3306] }}
-          DB_USERNAME: root
-          DB_PASSWORD: ""
           DB_PORT_AM: ${{ job.services.mysql8.ports[3306] }}
-          DB_USERNAME_AM: root
-          DB_PASSWORD_AM: ""
     services:
       mysql:
         image: mysql:5.7
