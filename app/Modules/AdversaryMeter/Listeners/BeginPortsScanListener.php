@@ -5,9 +5,7 @@ namespace App\Modules\AdversaryMeter\Listeners;
 use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\BeginPortsScan;
 use App\Modules\AdversaryMeter\Events\EndPortsScan;
-use App\Modules\AdversaryMeter\Helpers\ApiUtils;
-use App\Modules\AdversaryMeter\Models\Asset;
-use App\Modules\AdversaryMeter\Models\Scan;
+use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -19,22 +17,24 @@ class BeginPortsScanListener extends AbstractListener
             throw new \Exception('Invalid event type!');
         }
 
-        /** @var Asset $asset */
-        $asset = $event->asset;
-        $task = $this->beginTask($asset);
+        $asset = $event->asset();
+        $task = $this->beginTask($asset->asset);
         $taskId = $task['task_id'] ?? null;
 
         if (!$taskId) {
             Log::error('Ports scan cannot be started: ' . json_encode($task));
         } else {
 
-            $scan = Scan::create([
+            $scan = $asset->nextScan()->create([
+                'asset_id' => $asset->id,
                 'ports_scan_id' => $taskId,
                 'ports_scan_begins_at' => Carbon::now(),
             ]);
-            $asset->nextScan()->attach($scan);
 
-            event(new EndPortsScan($scan));
+            $asset->next_scan_id = $taskId;
+            $asset->save();
+
+            event(new EndPortsScan($asset, $scan));
         }
     }
 

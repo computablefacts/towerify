@@ -4,7 +4,7 @@ namespace App\Modules\AdversaryMeter\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Port extends Model
 {
@@ -35,8 +35,8 @@ class Port extends Model
         'ssl' => 'boolean',
     ];
 
-    public function tags(): BelongsToMany
+    public function tags(): HasMany
     {
-        return $this->belongsToMany(PortTag::class, 'ports_tags', 'port_id', 'id');
+        return $this->hasMany(PortTag::class, 'port_id', 'id');
     }
 }

@@ -5,11 +5,9 @@ namespace App\Modules\AdversaryMeter\Listeners;
 use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\BeginVulnsScan;
 use App\Modules\AdversaryMeter\Events\EndVulnsScan;
-use App\Modules\AdversaryMeter\Helpers\ApiUtils;
+use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
-use App\Modules\AdversaryMeter\Models\Port;
-use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -21,20 +19,18 @@ class BeginVulnsScanListener extends AbstractListener
             throw new \Exception('Invalid event type!');
         }
 
-        /** @var Scan $scan */
-        $scan = $event->scan;
-        /** @var Port $port */
-        $port = $event->port;
+        $scan = $event->scan();
+        $port = $event->port();
 
         if (!$scan->portsScanHasEnded()) {
             return;
         }
 
-        $tags = Asset::where('next_scan_id', $scan->id)
+        $tags = Asset::where('id', $scan->asset_id)
             ->get()
             ->flatMap(fn(Asset $asset) => $asset->tags()->get())
             ->map(fn(AssetTag $tag) => $tag->tag)
-            ->values();
+            ->toArray();
         $task = $this->beginTask($port->hostname, $port->ip, $port->port, $port->protocol, $tags);
         $taskId = $task['scan_id'] ?? null;
 

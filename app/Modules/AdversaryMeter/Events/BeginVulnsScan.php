@@ -13,17 +13,27 @@ class BeginVulnsScan
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public Scan $scan;
-    public Port $port;
+    public int $scanId;
+    public int $portId;
 
-    public function __construct($scan, Port $port)
+    public function __construct(Scan $scan, Port $port)
     {
-        $this->scan = $scan;
-        $this->port = $port;
+        $this->scanId = $scan->id;
+        $this->portId = $port->id;
     }
 
     public function broadcastOn()
     {
         return new PrivateChannel('channel-name');
+    }
+
+    public function scan(): Scan
+    {
+        return Scan::find($this->scanId);
+    }
+
+    public function port(): Port
+    {
+        return Port::find($this->portId);
     }
 }

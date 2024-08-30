@@ -5,7 +5,7 @@ namespace App\Modules\AdversaryMeter\Models;
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Asset extends Model
 {
@@ -63,29 +63,24 @@ class Asset extends Model
         }
         return null;
     }
-    
+
     public function isDiscoveryRunning(): bool
     {
         return $this->discovery_id !== null;
     }
 
-    public function tags(): BelongsToMany
+    public function tags(): HasMany
     {
-        return $this->belongsToMany(AssetTag::class, 'assets_tags', 'asset_id', 'id');
+        return $this->hasMany(AssetTag::class, 'asset_id', 'id');
     }
 
-    public function prevScan(): BelongsToMany
+    public function curScan(): HasMany
     {
-        return $this->belongsToMany(Scan::class, 'scans', 'prev_scan_id', 'id');
+        return $this->hasMany(Scan::class, 'id', 'cur_scan_id');
     }
 
-    public function curScan(): BelongsToMany
+    public function nextScan(): HasMany
     {
-        return $this->belongsToMany(Scan::class, 'scans', 'cur_scan_id', 'id');
-    }
-
-    public function nextScan(): BelongsToMany
-    {
-        return $this->belongsToMany(Scan::class, 'scans', 'next_scan_id', 'id');
+        return $this->hasMany(Scan::class, 'id', 'next_scan_id');
     }
 }

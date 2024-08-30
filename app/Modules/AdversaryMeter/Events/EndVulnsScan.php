@@ -12,15 +12,20 @@ class EndVulnsScan
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public Scan $scan;
+    public int $scanId;
 
     public function __construct(Scan $scan)
     {
-        $this->scan = $scan;
+        $this->scanId = $scan->id;
     }
 
     public function broadcastOn()
     {
         return new PrivateChannel('channel-name');
+    }
+
+    public function scan(): Scan
+    {
+        return Scan::find($this->scanId);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Modules\AdversaryMeter\Listeners;
 use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\BeginVulnsScan;
 use App\Modules\AdversaryMeter\Events\EndPortsScan;
-use App\Modules\AdversaryMeter\Helpers\ApiUtils;
+use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
@@ -19,8 +19,8 @@ class EndPortsScanListener extends AbstractListener
             throw new \Exception('Invalid event type!');
         }
 
-        /** @var Scan $scan */
-        $scan = $event->scan;
+        $asset = $event->asset();
+        $scan = $event->scan();
 
         if (!$scan->portsScanIsRunning()) {
             return;
@@ -32,7 +32,7 @@ class EndPortsScanListener extends AbstractListener
 
         // The task is running: try again later
         if (!$taskStatus) {
-            event(new EndPortsScan($scan));
+            event(new EndPortsScan($asset, $scan));
             return;
         }
 
@@ -45,7 +45,7 @@ class EndPortsScanListener extends AbstractListener
 
         $taskOutput = $this->taskOutput($taskId);
         $ports = collect($taskOutput['task_result'] ?? []);
-        $ports->each(function (array $port, int $pos) use ($scan) {
+        $ports->each(function (array $port, int $pos) use ($asset, $scan) {
 
             $hostname = $port['hostname'] ?? null;
             $ip = $port['ip'] ?? null;
@@ -69,6 +69,7 @@ class EndPortsScanListener extends AbstractListener
                 $newScan = $scan;
             } else {
                 $newScan = Scan::create([
+                    'asset_id' => $scan->asset_id,
                     'ports_scan_id' => $scan->ports_scan_id,
                     'ports_scan_begins_at' => $scan->ports_scan_begins_at,
                     'ports_scan_ends_at' => $scan->ports_scan_ends_at,

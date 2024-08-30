@@ -5,7 +5,7 @@ namespace App\Modules\AdversaryMeter\Listeners;
 use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\BeginDiscovery;
 use App\Modules\AdversaryMeter\Events\EndDiscovery;
-use App\Modules\AdversaryMeter\Helpers\ApiUtils;
+use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Asset;
 use Illuminate\Support\Facades\Log;
 

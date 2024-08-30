@@ -12,15 +12,20 @@ class BeginPortsScan
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public Asset $asset;
+    public int $assetId;
 
     public function __construct(Asset $asset)
     {
-        $this->asset = $asset;
+        $this->assetId = $asset->id;
     }
 
     public function broadcastOn()
     {
         return new PrivateChannel('channel-name');
+    }
+
+    public function asset(): Asset
+    {
+        return Asset::find($this->assetId);
     }
 }

@@ -4,11 +4,9 @@ namespace App\Modules\AdversaryMeter\Listeners;
 
 use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\EndVulnsScan;
-use App\Modules\AdversaryMeter\Helpers\ApiUtils;
+use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Port;
-use App\Modules\AdversaryMeter\Models\PortTag;
-use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -20,8 +18,7 @@ class EndVulnsScanListener extends AbstractListener
             throw new \Exception('Invalid event type!');
         }
 
-        /** @var Scan $scan */
-        $scan = $event->scan;
+        $scan = $event->scan();
 
         if (!$scan->vulnsScanIsRunning()) {
             return;
@@ -60,19 +57,15 @@ class EndVulnsScanListener extends AbstractListener
         $product = $task['product'] ?? null;
         $ssl = isset($task['ssl']) ? var_export($task['ssl'], true) : false;
 
-        $port = Port::where('scan_id')->first();
+        $port = Port::where('scan_id', $scan->id)->first();
         $port->service = $service;
         $port->product = $product;
-        $port->ssl = $ssl;
+        $port->ssl = $ssl ? 1 : 0;
         $port->save();
 
         $tags = collect($task['tags'] ?? []);
         $tags->each(function (string $label) use ($port) {
-            $tag = PortTag::create([
-                'port_id' => $port->id,
-                'tag' => Str::lower($label),
-            ]);
-            $port->tags()->attach($tag);
+            $port->tags()->create(['tag' => Str::lower($label)]);
         });
 
         $this->setAlertsV1($port, $task);

@@ -13,6 +13,7 @@ class Scan extends Model
     protected $connection = 'mysql_am';
 
     protected $fillable = [
+        'asset_id',
         'ports_scan_id',
         'vulns_scan_id',
         'ports_scan_begins_at',
@@ -50,19 +51,29 @@ class Scan extends Model
 
     public function markAssetScanAsFailed(): void
     {
-        Scan::where('ports_scan_id', $this->ports_scan_id)->delete();
+        Scan::where('asset_id', $this->asset_id)
+            ->where('ports_scan_id', $this->ports_scan_id)
+            ->delete();
     }
 
     public function markAssetScanAsCompleted(): void
     {
-        $remaining = Scan::where('ports_scan_id', $this->ports_scan_id)
+        $remaining = Scan::where('asset_id', $this->asset_id)
+            ->where('ports_scan_id', $this->ports_scan_id)
             ->whereNull('vulns_scan_ends_at')
             ->count();
         if ($remaining === 0) {
-            $asset = Asset::where('next_scan_id', $this->id)->first();
+            $asset = Asset::where('id', $this->asset_id)->first();
             if ($asset) {
+                if ($asset->cur_scan_id === $this->ports_scan_id) {
+                    return; // late arrival, ex. when events are processed synchronously
+                }
                 if ($asset->prev_scan_id) {
-                    Scan::where('id', $asset->prev_scan_id)->delete();
+                    Scan::where('asset_id', $this->asset_id)
+                        ->where('id', $asset->prev_scan_id)
+                        ->delete();
+                    $asset->prev_scan_id = null;
+                    $asset->save();
                 }
                 $asset->prev_scan_id = $asset->cur_scan_id;
                 $asset->cur_scan_id = $asset->next_scan_id;
