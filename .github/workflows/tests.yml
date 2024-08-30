@@ -51,6 +51,3 @@ jobs:
         run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "GRANT ALL ON tw_testdb_am.* TO 'tw_testuser_am'@'localhost';"
       - name: Run Tests
         run: php vendor/bin/phpunit --testdox
-        env:
-          DB_PORT: 3306
-          DB_PORT_AM: 3306
