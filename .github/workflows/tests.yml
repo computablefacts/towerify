@@ -40,18 +40,22 @@ jobs:
       - name: Run Tests [mysql 5.7]
         run: php vendor/bin/phpunit --testdox
         env:
+          DB_DATABASE: "tw_testdb"
           DB_PORT: ${{ job.services.mysql.ports[3306] }}
           DB_USERNAME: root
           DB_PASSWORD: ""
+          DB_DATABASE_AM: "tw_testdb_am"
           DB_PORT_AM: ${{ job.services.mysql.ports[3306] }}
           DB_USERNAME_AM: root
           DB_PASSWORD_AM: ""
       - name: Run Tests [mysql 8.0]
         run: php vendor/bin/phpunit --testdox
         env:
+          DB_DATABASE: "tw_testdb"
           DB_PORT: ${{ job.services.mysql8.ports[3306] }}
           DB_USERNAME: root
           DB_PASSWORD: ""
+          DB_DATABASE_AM: "tw_testdb_am"
           DB_PORT_AM: ${{ job.services.mysql8.ports[3306] }}
           DB_USERNAME_AM: root
           DB_PASSWORD_AM: ""
