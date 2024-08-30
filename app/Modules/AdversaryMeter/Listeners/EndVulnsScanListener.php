@@ -86,14 +86,8 @@ class EndVulnsScanListener extends AbstractListener
     private function setAlertsV1(Port $port, array $task): void
     {
         collect($task['data'] ?? [])
-            ->filter(function (array $data) {
-                $tool = $data['tool'] ?? null;
-                $output = $data['rawOutput'] ?? null;
-                return $tool === 'alerter' && $output;
-            })
-            ->flatMap(fn(array $data) => collect($data['alerts'] ?? []))
-            ->filter(fn($alert) => $alert !== '')
-            ->flatMap(fn(array $alert) => collect(preg_split('/\r\n|\r|\n/', $alert['rawOutput'])))
+            ->filter(fn(array $data) => $data['tool'] === 'alerter' && $data['rawOutput'])
+            ->flatMap(fn(array $data) => collect(preg_split('/\r\n|\r|\n/', $data['rawOutput'])))
             ->filter(fn(string $alert) => $alert !== '')
             ->map(fn(string $alert) => json_decode($alert, true))
             ->each(function (array $alert) use ($port) {
