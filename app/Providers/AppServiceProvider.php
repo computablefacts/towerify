@@ -41,6 +41,7 @@ use App\Models\YnhBackup;
 use App\Models\YnhServer;
 use App\Models\Zone;
 use App\Models\ZoneMember;
+use App\Modules\AdversaryMeter\Helpers\ApiUtils;
 use App\Observers\AddressObserver;
 use App\Observers\AdjustmentObserver;
 use App\Observers\BillpayerObserver;
@@ -203,6 +204,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind('am_api_utils', function () {
+            return new ApiUtils();
+        });
     }
 }

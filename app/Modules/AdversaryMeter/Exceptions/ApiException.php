@@ -4,7 +4,7 @@ namespace App\Modules\AdversaryMeter\Exceptions;
 
 use Exception;
 
-class SentinelApiException extends Exception
+class ApiException extends Exception
 {
     //
 }

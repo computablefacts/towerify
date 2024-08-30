@@ -2,7 +2,7 @@
 
 namespace App\Modules\AdversaryMeter\Helpers;
 
-use App\Modules\AdversaryMeter\Exceptions\SentinelApiException;
+use App\Modules\AdversaryMeter\Exceptions\ApiException;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -16,41 +16,41 @@ class ApiUtils
 {
     const REQUEST_TIMEOUT = 300; // 5 minutes
 
-    public static function checkport_public($host, $port, $protocol)
+    public function checkport_public($host, $port, $protocol)
     {
-        $cacheKey = 'sentinelapi:checkport:' . $host . ':' . $port . ':' . $protocol;
+        $cacheKey = 'am_api:checkport:' . $host . ':' . $port . ':' . $protocol;
         if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str(self::checkport_private($host, $port, $protocol)), 6 * 60 * 60 /* 6 hours */);
+            Cache::put($cacheKey, Psr7\str($this->checkport_private($host, $port, $protocol)), 6 * 60 * 60 /* 6 hours */);
         }
-        return self::json(Psr7\parse_response(Cache::get($cacheKey)));
+        return $this->json(Psr7\parse_response(Cache::get($cacheKey)));
     }
 
-    private static function checkport_private($host, $port, $protocol)
+    private function checkport_private($host, $port, $protocol)
     {
         $json = [
             'host' => $host,
             'port' => $port,
             'protocol' => $protocol
         ];
-        return self::post('/checkport', $json);
+        return $this->post('/checkport', $json);
     }
 
-    private static function post($endpoint, $json)
+    private function post($endpoint, $json)
     {
         $url = Config::get('towerify.adversarymeter.api') . $endpoint;
         try {
             $client = new Client([
-                RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT,
+                RequestOptions::TIMEOUT => $this->REQUEST_TIMEOUT,
             ]);
-            return $client->post($url, self::httpHeaders($json));
+            return $client->post($url, $this->httpHeaders($json));
         } catch (ClientException $exception) {
-            throw new SentinelApiException('Sentinel API Client problem (code: ' . $exception->getCode() . ', url: ' . $url . ')', $exception->getCode(), $exception);
+            throw new ApiException('API client problem (code: ' . $exception->getCode() . ', url: ' . $url . ')', $exception->getCode(), $exception);
         } catch (Exception $exception) {
-            throw new SentinelApiException('Sentinel API problem: ' . $exception->getMessage(), $exception->getCode(), $exception);
+            throw new ApiException('API problem: ' . $exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
-    private static function httpHeaders($json)
+    private function httpHeaders($json)
     {
         return [
 
@@ -69,13 +69,13 @@ class ApiUtils
         ];
     }
 
-    private static function json($response, $dataset = null)
+    private function json($response, $dataset = null)
     {
-        $body = self::body($response);
-        return self::isOk($response, $body) ? self::results($response, $body, $dataset) : [];
+        $body = $this->body($response);
+        return $this->isOk($response, $body) ? $this->results($response, $body, $dataset) : [];
     }
 
-    public static function body($response)
+    public function body($response)
     {
         ini_set("memory_limit", "-1");
         if (version_compare(PHP_VERSION, '5.4.0', '>=')
@@ -99,61 +99,61 @@ class ApiUtils
         return json_decode($json_without_bigints, true);
     }
 
-    public static function isOk($response, $body)
+    public function isOk($response, $body)
     {
         if ($response->getStatusCode() === 200) {
             return true;
         }
-        throw new SentinelApiException('Fast API problem: ' . (isset($body['message']) ? $body['message'] : 'unknown'));
+        throw new ApiException('Fast API problem: ' . (isset($body['message']) ? $body['message'] : 'unknown'));
     }
 
-    private static function results($response, $body, $dataset = null)
+    private function results($response, $body, $dataset = null)
     {
-        return self::isOk($response, $body) && !empty($body) ? $body : [];
+        return $this->isOk($response, $body) && !empty($body) ? $body : [];
     }
 
-    public static function discover_public(string $domain)
+    public function discover_public(string $domain)
     {
-        $cacheKey = 'sentinelapi:discovery:' . $domain;
+        $cacheKey = 'am_api:discovery:' . $domain;
         if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str(self::discover_private($domain)), 12 * 60 * 60 /* 12 hours */);
+            Cache::put($cacheKey, Psr7\str($this->discover_private($domain)), 12 * 60 * 60 /* 12 hours */);
         }
-        return self::json(Psr7\parse_response(Cache::get($cacheKey)), $domain);
+        return $this->json(Psr7\parse_response(Cache::get($cacheKey)), $domain);
     }
 
-    private static function discover_private(string $domain)
+    private function discover_private(string $domain)
     {
         $json = array_merge(
             [
                 'domain' => $domain,
             ]
         );
-        return self::post('/discover', $json);
+        return $this->post('/discover', $json);
     }
 
-    public static function screenshot_public(string $domain)
+    public function screenshot_public(string $domain)
     {
-        $response = self::screenshot_private($domain);
-        return self::json($response, $domain);
+        $response = $this->screenshot_private($domain);
+        return $this->json($response, $domain);
     }
 
-    private static function screenshot_private(string $domain)
+    private function screenshot_private(string $domain)
     {
         $json = array_merge(
             [
                 'url' => $domain,
             ]
         );
-        return self::post('/screenshot', $json);
+        return $this->post('/screenshot', $json);
     }
 
-    public static function start_scan_public($asset, $ip, $port, $protocol)
+    public function start_scan_public($asset, $ip, $port, $protocol)
     {
-        $response = self::start_scan_private($asset, $ip, $port, $protocol);
-        return self::json($response, $asset);
+        $response = $this->start_scan_private($asset, $ip, $port, $protocol);
+        return $this->json($response, $asset);
     }
 
-    private static function start_scan_private($asset, $ip, $port, $protocol)
+    private function start_scan_private($asset, $ip, $port, $protocol)
     {
         $json = array_merge(
             [
@@ -166,85 +166,85 @@ class ApiUtils
                 'tests' => [],
             ]
         );
-        return self::post('/start_scan', $json);
+        return $this->post('/start_scan', $json);
     }
 
-    public static function task_masscan_public(string $host)
+    public function task_masscan_public(string $host)
     {
-        $response = self::task_masscan_private($host);
-        return self::json($response, $host);
+        $response = $this->task_masscan_private($host);
+        return $this->json($response, $host);
     }
 
-    private static function task_masscan_private(string $host)
-    {
-        $json = [
-            'input' => [
-                $host
-            ]
-        ];
-        return self::post('/task-masscan', $json);
-    }
-
-    public static function task_nmap_public(string $host)
-    {
-        $response = self::task_nmap_private($host);
-        return self::json($response, $host);
-    }
-
-    private static function task_nmap_private(string $host)
+    private function task_masscan_private(string $host)
     {
         $json = [
             'input' => [
                 $host
             ]
         ];
-        return self::post('/task-nmap', $json);
+        return $this->post('/task-masscan', $json);
     }
 
-    public static function task_status_public(string $id)
+    public function task_nmap_public(string $host)
     {
-        $response = self::task_status_private($id);
-        return self::json($response, $id);
+        $response = $this->task_nmap_private($host);
+        return $this->json($response, $host);
     }
 
-    private static function task_status_private(string $id)
+    private function task_nmap_private(string $host)
     {
-        return self::get('/task_status/' . $id, []);
+        $json = [
+            'input' => [
+                $host
+            ]
+        ];
+        return $this->post('/task-nmap', $json);
     }
 
-    private static function get($endpoint, $json)
+    public function task_status_public(string $id)
+    {
+        $response = $this->task_status_private($id);
+        return $this->json($response, $id);
+    }
+
+    private function task_status_private(string $id)
+    {
+        return $this->get('/task_status/' . $id, []);
+    }
+
+    private function get($endpoint, $json)
     {
         $url = Config::get('towerify.adversarymeter.api') . $endpoint;
         try {
             $client = new Client([
-                RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT,
+                RequestOptions::TIMEOUT => $this->REQUEST_TIMEOUT,
             ]);
-            return $client->get($url, self::httpHeaders($json));
+            return $client->get($url, $this->httpHeaders($json));
         } catch (ClientException $exception) {
-            throw new SentinelApiException('Sentinel API Client problem (code: ' . $exception->getCode() . ', url: ' . $url . ')', $exception->getCode(), $exception);
+            throw new ApiException('API client problem (code: ' . $exception->getCode() . ', url: ' . $url . ')', $exception->getCode(), $exception);
         } catch (Exception $exception) {
-            throw new SentinelApiException('Sentinel API problem: ' . $exception->getMessage(), $exception->getCode(), $exception);
+            throw new ApiException('API problem: ' . $exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
-    public static function task_result_public(string $id)
+    public function task_result_public(string $id)
     {
-        $response = self::task_result_private($id);
-        return self::json($response, $id);
+        $response = $this->task_result_private($id);
+        return $this->json($response, $id);
     }
 
-    private static function task_result_private(string $id)
+    private function task_result_private(string $id)
     {
-        return self::get('/task_result/' . $id, []);
+        return $this->get('/task_result/' . $id, []);
     }
 
-    public static function task_start_scan_public($hostname, $ip, $port, $protocol, $tags)
+    public function task_start_scan_public($hostname, $ip, $port, $protocol, $tags)
     {
-        $response = self::task_start_scan_private($hostname, $ip, $port, $protocol, $tags);
-        return self::json($response, $hostname);
+        $response = $this->task_start_scan_private($hostname, $ip, $port, $protocol, $tags);
+        return $this->json($response, $hostname);
     }
 
-    private static function task_start_scan_private($hostName, $ip, $port, $protocol, $tags)
+    private function task_start_scan_private($hostName, $ip, $port, $protocol, $tags)
     {
         $json = [
             "hostname" => $hostName,
@@ -254,106 +254,106 @@ class ApiUtils
             "client" => "",
             "tags" => $tags
         ];
-        return self::post('/start_scan', $json);
+        return $this->post('/start_scan', $json);
     }
 
-    public static function task_get_scan_public(string $scanId)
+    public function task_get_scan_public(string $scanId)
     {
-        $response = self::task_get_scan_private($scanId);
-        return self::json($response, $scanId);
+        $response = $this->task_get_scan_private($scanId);
+        return $this->json($response, $scanId);
     }
 
-    private static function task_get_scan_private(string $scanId)
+    private function task_get_scan_private(string $scanId)
     {
-        return self::get('/get_scan/' . $scanId, []);
+        return $this->get('/get_scan/' . $scanId, []);
     }
 
-    public static function ip_geoloc_public(string $ip)
+    public function ip_geoloc_public(string $ip)
     {
-        $cacheKey = 'sentinelapi:geoloc:' . $ip;
+        $cacheKey = 'am_api:geoloc:' . $ip;
         if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str(self::ip_geoloc_private($ip)), 72 * 60 * 60 /* 72 hours */);
+            Cache::put($cacheKey, Psr7\str($this->ip_geoloc_private($ip)), 72 * 60 * 60 /* 72 hours */);
         }
-        return self::json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
+        return $this->json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
     }
 
-    private static function ip_geoloc_private(string $ip)
+    private function ip_geoloc_private(string $ip)
     {
         $json = [
             'input' => $ip
         ];
-        return self::post('/ipgeoloc', $json);
+        return $this->post('/ipgeoloc', $json);
     }
 
-    public static function ip_whois_public(string $ip)
+    public function ip_whois_public(string $ip)
     {
-        $cacheKey = 'sentinelapi:whois:' . $ip;
+        $cacheKey = 'am_api:whois:' . $ip;
         if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str(self::ip_whois_private($ip)), 72 * 60 * 60 /* 72 hours */);
+            Cache::put($cacheKey, Psr7\str($this->ip_whois_private($ip)), 72 * 60 * 60 /* 72 hours */);
         }
-        return self::json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
+        return $this->json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
     }
 
-    private static function ip_whois_private(string $ip)
+    private function ip_whois_private(string $ip)
     {
         $json = [
             'input' => $ip
         ];
-        return self::post('/ipwhois', $json);
+        return $this->post('/ipwhois', $json);
     }
 
-    public static function task_discover_full_public(array $urls)
+    public function task_discover_full_public(array $urls)
     {
-        $response = self::task_discover_full_private($urls);
-        return self::json($response);
+        $response = $this->task_discover_full_private($urls);
+        return $this->json($response);
     }
 
-    private static function task_discover_full_private(array $urls)
+    private function task_discover_full_private(array $urls)
     {
         $json = [
             'input' => $urls
         ];
-        return self::post('/discover-full-task', $json);
+        return $this->post('/discover-full-task', $json);
     }
 
-    public static function discover_from_ip_public(string $ip)
+    public function discover_from_ip_public(string $ip)
     {
-        $cacheKey = 'sentinelapi:discovery:' . $ip;
+        $cacheKey = 'am_api:discovery:' . $ip;
         if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str(self::discover_from_ip_private($ip)), 12 * 60 * 60 /* 12 hours */);
+            Cache::put($cacheKey, Psr7\str($this->discover_from_ip_private($ip)), 12 * 60 * 60 /* 12 hours */);
         }
-        return self::json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
+        return $this->json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
     }
 
-    private static function discover_from_ip_private(string $ip)
+    private function discover_from_ip_private(string $ip)
     {
         $json = [
             'input' => $ip
         ];
-        return self::post('/rapid_reverse_ip', $json);
+        return $this->post('/rapid_reverse_ip', $json);
     }
 
-    public static function sentinel_external_ips()
+    public function external_ips()
     {
-        $response = self::sentinel_external_ips_private();
-        return self::json($response);
+        $response = $this->external_ips_private();
+        return $this->json($response);
     }
 
-    public static function sentinel_matched_cves()
+    public function matched_cves()
     {
-        $response = self::sentinel_matched_cves_private();
-        return self::json($response);
+        $response = $this->matched_cves_private();
+        return $this->json($response);
     }
 
-    private static function sentinel_external_ips_private()
-    {
-        // ../.. to remove /api/v1/ so go back to root.
-        return self::get('/../../sentinel_external_ips', []);
-    }
-
-    private static function sentinel_matched_cves_private()
+    private function external_ips_private()
     {
         // ../.. to remove /api/v1/ so go back to root.
-        return self::get('/../../cves-list', []);
+        return $this->get('/../../sentinel_external_ips', []);
+    }
+
+    private function matched_cves_private()
+    {
+        // ../.. to remove /api/v1/ so go back to root.
+        return $this->get('/../../cves-list', []);
     }
 }
