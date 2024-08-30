@@ -62,8 +62,11 @@ class Scan extends Model
             ->where('ports_scan_id', $this->ports_scan_id)
             ->whereNull('vulns_scan_ends_at')
             ->count();
+
         if ($remaining === 0) {
+
             $asset = Asset::where('id', $this->asset_id)->first();
+
             if ($asset) {
                 if ($asset->cur_scan_id === $this->ports_scan_id) {
                     return; // late arrival, ex. when events are processed synchronously
@@ -72,9 +75,8 @@ class Scan extends Model
                     Scan::where('asset_id', $this->asset_id)
                         ->where('id', $asset->prev_scan_id)
                         ->delete();
-                    $asset->prev_scan_id = null;
-                    $asset->save();
                 }
+
                 $asset->prev_scan_id = $asset->cur_scan_id;
                 $asset->cur_scan_id = $asset->next_scan_id;
                 $asset->next_scan_id = null;
