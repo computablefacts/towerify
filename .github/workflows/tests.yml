@@ -45,9 +45,9 @@ jobs:
         run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "CREATE DATABASE tw_testdb_am DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
       - name: Check AM database exists
         run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "SHOW DATABASES LIKE 'tw_testdb_am';"
-      - name: Create TWR database user
+      - name: Create AM database user
         run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "CREATE USER 'tw_testuser_am'@'localhost' IDENTIFIED BY 'tapa2$';"
-      - name: Grant TWR database user privileges
+      - name: Grant AM database user privileges
         run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "GRANT ALL ON tw_testdb_am.* TO 'tw_testuser_am'@'localhost';"
       - name: Run Tests
         run: php vendor/bin/phpunit --testdox
