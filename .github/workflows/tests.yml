@@ -31,12 +31,6 @@ jobs:
           DB_PORT: 3000
           DB_USERNAME: root
           DB_PASSWORD: ""
-          DB_CONNECTION_AM: sqlite
-          DB_HOST_AM: 127.0.0.1
-          DB_DATABASE_AM: ":memory_am:"
-          DB_PORT_AM: 3000
-          DB_USERNAME_AM: root
-          DB_PASSWORD_AM: ""
       - name: Create TWR database [mysql 5.7]
         run: mysql --host 127.0.0.1 --port ${{ job.services.mysql.ports[3306] }} -uroot -e "CREATE DATABASE tw_testdb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
       - name: Check TWR database exists [mysql 5.7]
@@ -84,11 +78,13 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_HOST: "%"
         ports:
           - 3306
       mysql8:
         image: mysql:8.0
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_HOST: "%"
         ports:
           - 3306
