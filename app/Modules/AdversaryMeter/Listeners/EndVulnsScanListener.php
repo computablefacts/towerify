@@ -11,6 +11,7 @@ use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EndVulnsScanListener extends AbstractListener
@@ -84,61 +85,72 @@ class EndVulnsScanListener extends AbstractListener
 
     private function setAlertsV1(Port $port, array $task): void
     {
-        $tool = $task['tool'] ?? null;
-        $output = $task['rawOutput'] ?? null;
-
-        if ($tool !== 'alerter' || !$output) {
-            return;
-        }
-
-        $alerts = preg_split('/\r\n|\r|\n/', $output);
-        collect($alerts)
+        collect($task['data'] ?? [])
+            ->filter(function (array $data) {
+                $tool = $data['tool'] ?? null;
+                $output = $data['rawOutput'] ?? null;
+                return $tool === 'alerter' && $output;
+            })
+            ->flatMap(fn(array $data) => collect($data['alerts'] ?? []))
+            ->filter(fn($alert) => $alert !== '')
+            ->flatMap(fn(array $alert) => collect(preg_split('/\r\n|\r|\n/', $alert['rawOutput'])))
             ->filter(fn(string $alert) => $alert !== '')
             ->map(fn(string $alert) => json_decode($alert, true))
             ->each(function (array $alert) use ($port) {
-                Alert::create([
-                    'port_id' => $port->id,
-                    'type' => trim($alert['type']),
-                    'vulnerability' => trim($alert['values'][4]),
-                    'remediation' => trim($alert['values'][5]),
-                    'level' => trim($alert['values'][6]),
-                    'uid' => trim($alert['values'][7]),
-                    'cve_id' => trim($alert['values'][8]),
-                    'cve_cvss' => trim($alert['values'][9]),
-                    'cve_vendor' => trim($alert['values'][10]),
-                    'cve_product' => trim($alert['values'][11]),
-                    'title' => trim($alert['values'][12]),
-                    'flarum_slug' => null, // TODO : remove?
-                ]);
+                try {
+                    Alert::create([
+                        'port_id' => $port->id,
+                        'type' => trim($alert['type']),
+                        'vulnerability' => trim($alert['values'][4]),
+                        'remediation' => trim($alert['values'][5]),
+                        'level' => trim($alert['values'][6]),
+                        'uid' => trim($alert['values'][7]),
+                        'cve_id' => trim($alert['values'][8]),
+                        'cve_cvss' => trim($alert['values'][9]),
+                        'cve_vendor' => trim($alert['values'][10]),
+                        'cve_product' => trim($alert['values'][11]),
+                        'title' => trim($alert['values'][12]),
+                        'flarum_slug' => null, // TODO : remove?
+                    ]);
+                } catch (\Exception $exception) {
+                    Log::error($exception);
+                    Log::error($alert);
+                }
             });
     }
 
     private function setAlertsV2(Port $port, array $task): void
     {
-        collect($task['alerts'] ?? [])
-            ->filter(fn(array|string $alert) => $alert !== '')
+        collect($task['data'] ?? [])
+            ->filter(fn(array $data) => isset($data['alerts']) && count($data['alerts']))
+            ->flatMap(fn(array $data) => collect($data['alerts'] ?? []))
+            ->filter(fn($alert) => $alert !== '')
             ->each(function (array $alert) use ($port) {
+                try {
+                    $type = trim($alert['type']);
 
-                $type = trim($alert['type']);
+                    if (!str_ends_with($type, '_alert')) {
+                        $type .= '_v3_alert';
+                    }
 
-                if (!str_ends_with($type, '_alert')) {
-                    $type .= '_v3_alert';
+                    Alert::create([
+                        'port_id' => $port->id,
+                        'type' => $type,
+                        'vulnerability' => trim($alert['vulnerability']),
+                        'remediation' => trim($alert['remediation']),
+                        'level' => trim($alert['level']),
+                        'uid' => trim($alert['uid']),
+                        'cve_id' => trim($alert['cve_id']),
+                        'cve_cvss' => trim($alert['cve_cvss']),
+                        'cve_vendor' => trim($alert['cve_vendor']),
+                        'cve_product' => trim($alert['cve_product']),
+                        'title' => trim($alert['title']),
+                        'flarum_slug' => null, // TODO : remove?
+                    ]);
+                } catch (\Exception $exception) {
+                    Log::error($exception);
+                    Log::error($alert);
                 }
-
-                Alert::create([
-                    'port_id' => $port->id,
-                    'type' => $type,
-                    'vulnerability' => trim($alert['vulnerability']),
-                    'remediation' => trim($alert['remediation']),
-                    'level' => trim($alert['level']),
-                    'uid' => trim($alert['uid']),
-                    'cve_id' => trim($alert['cve_id']),
-                    'cve_cvss' => trim($alert['cve_cvss']),
-                    'cve_vendor' => trim($alert['cve_vendor']),
-                    'cve_product' => trim($alert['cve_product']),
-                    'title' => trim($alert['title']),
-                    'flarum_slug' => null, // TODO : remove?
-                ]);
             });
     }
 

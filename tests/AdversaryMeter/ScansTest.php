@@ -178,7 +178,36 @@ class ScansTest extends TestCase
                 'current_task_status' => 'DONE',
                 'tags' => ['Http', 'Cloudflare'],
                 'data' => [
-                    //
+                    [
+                        "fromCache" => false,
+                        "cacheTimestamp" => "",
+                        "commandExecuted" => "/usr/local/bin/wpscan --api-token xxx --random-user-agent --detection-mode aggressive --disable-tls-checks -f json --url https://www.example.com",
+                        "timestamp" => "2023-03-09T10:44:39.428704",
+                        "execDuration" => 29.054311990737915,
+                        "summary" => "Ran tool wpscan",
+                        "tool" => "wpscan",
+                        "toolVersion" => "0.0.1a",
+                        "error" => "",
+                        "alerts" => [
+                            '', // edge case...
+                            [
+                                "asset" => "www.example.com",
+                                "port" => 443,
+                                "protocol" => "tcp",
+                                "tool" => "wpscan",
+                                "type" => "wordpress_vuln",
+                                "title" => "Wordpress core issue",
+                                "level" => "Low",
+                                "vulnerability" => "WP <= 6.1.1 - Unauthenticated Blind SSRF via DNS Rebinding",
+                                "remediation" => "Update Wordpress if possible.\nGet more information about the vulnerability at https://wpscan.com/vulnerability/c8814e6e-78b3-4f63-a1d3-6906a84c1f11\nMore references:\nhttps://blog.sonarsource.com/wordpress-core-unauthenticated-blind-ssrf/",
+                                "cve_id" => "",
+                                "cve_cvss" => "",
+                                "cve_vendor" => "",
+                                "cve_product" => "",
+                                "uid" => "3ee22091822f95e8b2095c228f397a63"
+                            ]
+                        ]
+                    ]
                 ],
             ]);
 
@@ -215,7 +244,7 @@ class ScansTest extends TestCase
 
         // Check the alerts table
         $alerts = Alert::whereIn('port_id', $ports->pluck('id'))->get();
-        $this->assertEquals(0, $alerts->count());
+        $this->assertEquals(1, $alerts->count());
 
         // Cleanup
         $asset->delete();
