@@ -92,7 +92,10 @@ class EndVulnsScanListener extends AbstractListener
             ->map(fn(string $alert) => json_decode($alert, true))
             ->each(function (array $alert) use ($port) {
                 try {
-                    Alert::create([
+                    Alert::updateOrCreate([
+                        'port_id' => $port->id,
+                        'uid' => trim($alert['values'][7])
+                    ], [
                         'port_id' => $port->id,
                         'type' => trim($alert['type']),
                         'vulnerability' => trim($alert['values'][4]),
@@ -127,7 +130,10 @@ class EndVulnsScanListener extends AbstractListener
                         $type .= '_v3_alert';
                     }
 
-                    Alert::create([
+                    Alert::updateOrCreate([
+                        'port_id' => $port->id,
+                        'uid' => trim($alert['uid'])
+                    ], [
                         'port_id' => $port->id,
                         'type' => $type,
                         'vulnerability' => trim($alert['vulnerability']),
