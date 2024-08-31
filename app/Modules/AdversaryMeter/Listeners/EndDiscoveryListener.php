@@ -57,11 +57,10 @@ class EndDiscoveryListener extends AbstractListener
             return;
         }
         foreach ($assets as $asset) {
-            Asset::create([ // TODO : backport confidence score $asset['score'] / 100
-                'asset' => $asset['domain'],
-                'asset_type' => AssetTypesEnum::DNS,
-                'tld' => $tld,
-            ]);
+            Asset::updateOrCreate( // TODO : backport confidence score $asset['score'] / 100
+                ['asset' => $asset['domain']],
+                ['asset' => $asset['domain'], 'asset_type' => AssetTypesEnum::DNS, 'tld' => $tld]
+            );
         }
 
         Asset::where('discovery_id', $taskId)->update(['discovery_id', null]);
