@@ -62,7 +62,7 @@ class EndVulnsScanListener extends AbstractListener
 
         $service = $task['service'] ?? null;
         $product = $task['product'] ?? null;
-        $ssl = isset($task['ssl']) ? var_export($task['ssl'], true) : false;
+        $ssl = $task['ssl'] ?? null;
 
         $port = Port::where('scan_id', $scan->id)->first();
         $port->service = $service;
@@ -99,10 +99,10 @@ class EndVulnsScanListener extends AbstractListener
                         'remediation' => trim($alert['values'][5]),
                         'level' => trim($alert['values'][6]),
                         'uid' => trim($alert['values'][7]),
-                        'cve_id' => trim($alert['values'][8]),
-                        'cve_cvss' => trim($alert['values'][9]),
-                        'cve_vendor' => trim($alert['values'][10]),
-                        'cve_product' => trim($alert['values'][11]),
+                        'cve_id' => empty($alert['values'][8]) ? null : $alert['values'][8],
+                        'cve_cvss' => empty($alert['values'][9]) ? null : $alert['values'][9],
+                        'cve_vendor' => empty($alert['values'][10]) ? null : $alert['values'][10],
+                        'cve_product' => empty($alert['values'][11]) ? null : $alert['values'][11],
                         'title' => trim($alert['values'][12]),
                         'flarum_slug' => null, // TODO : remove?
                     ]);
@@ -134,10 +134,10 @@ class EndVulnsScanListener extends AbstractListener
                         'remediation' => trim($alert['remediation']),
                         'level' => trim($alert['level']),
                         'uid' => trim($alert['uid']),
-                        'cve_id' => trim($alert['cve_id']),
-                        'cve_cvss' => trim($alert['cve_cvss']),
-                        'cve_vendor' => trim($alert['cve_vendor']),
-                        'cve_product' => trim($alert['cve_product']),
+                        'cve_id' => empty($alert['cve_id']) ? null : $alert['cve_id'],
+                        'cve_cvss' => empty($alert['cve_cvss']) ? null : $alert['cve_cvss'],
+                        'cve_vendor' => empty($alert['cve_vendor']) ? null : $alert['cve_vendor'],
+                        'cve_product' => empty($alert['cve_product']) ? null : $alert['cve_product'],
                         'title' => trim($alert['title']),
                         'flarum_slug' => null, // TODO : remove?
                     ]);

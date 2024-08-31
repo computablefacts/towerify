@@ -163,7 +163,7 @@ class ScansTest extends TestCase
                     [ // Alert V1
                         "tool" => "alerter",
                         "rawOutput" => json_encode([
-                            "type" => "wordpress_vuln",
+                            "type" => "wordpress_vuln_v2_alert",
                             "values" => [
                                 "www.example.com",
                                 '93.184.215.14',
@@ -177,8 +177,7 @@ class ScansTest extends TestCase
                                 "",
                                 "",
                                 "",
-                                "title" => "Wordpress core issue",
-                                null,
+                                "Wordpress core issue"
                             ],
                         ]),
                     ]
@@ -250,23 +249,86 @@ class ScansTest extends TestCase
 
         // Check the assets_tags table
         $assetTags = AssetTag::where('asset_id', $asset->id)->get();
-        $this->assertEquals(1, $assetTags->count());
+        $this->assertEquals(['demo'], $assetTags->pluck('tag')->toArray());
 
         // Check the scans table
         $scans = Scan::where('asset_id', $asset->id)->get();
         $this->assertEquals(2, $scans->count());
+        $this->assertEquals(2, $scans->filter(fn(Scan $scan) => $scan->portsScanHasEnded() && $scan->vulnsScanHasEnded())->count());
 
         // Check the ports table
         $ports = Port::whereIn('scan_id', $scans->pluck('id'))->get();
         $this->assertEquals(2, $ports->count());
+        $this->assertEquals(1, $ports->filter(function (Port $port) {
+            return $port->hostname === 'www.example.com'
+                && $port->ip === '93.184.215.14'
+                && $port->port === 443
+                && $port->protocol === 'tcp'
+                && $port->country === 'US'
+                && $port->hosting_service_description === null
+                && $port->hosting_service_registry === null
+                && $port->hosting_service_asn === null
+                && $port->hosting_service_cidr === null
+                && $port->hosting_service_country_code === null
+                && $port->hosting_service_date === null
+                && $port->service === 'http'
+                && $port->product === 'Cloudflare http proxy'
+                && $port->ssl === true;
+        })->count());
+        $this->assertEquals(1, $ports->filter(function (Port $port) {
+            return $port->hostname === 'www.example.com'
+                && $port->ip === '93.184.215.14'
+                && $port->port === 80
+                && $port->protocol === 'tcp'
+                && $port->country === 'US'
+                && $port->hosting_service_description === null
+                && $port->hosting_service_registry === null
+                && $port->hosting_service_asn === null
+                && $port->hosting_service_cidr === null
+                && $port->hosting_service_country_code === null
+                && $port->hosting_service_date === null
+                && $port->service === 'http'
+                && $port->product === 'Cloudflare http proxy'
+                && $port->ssl === false;
+        })->count());
 
         // Check the ports_tags table
         $portsTags = PortTag::whereIn('port_id', $ports->pluck('id'))->get();
         $this->assertEquals(4, $portsTags->count());
 
+        $portsTagsByPort = $portsTags->groupBy('port_id');
+        $this->assertEquals(['cloudflare', 'http'], $portsTagsByPort[$ports->first()->id]->sortBy('tag')->pluck('tag')->toArray());
+        $this->assertEquals(['cloudflare', 'http'], $portsTagsByPort[$ports->last()->id]->sortBy('tag')->pluck('tag')->toArray());
+
         // Check the alerts table
         $alerts = Alert::whereIn('port_id', $ports->pluck('id'))->get();
         $this->assertEquals(2, $alerts->count());
+        $this->assertEquals(1, $alerts->filter(function (Alert $alert) {
+            return $alert->type === 'wordpress_vuln_v3_alert'
+                && $alert->vulnerability === 'WP <= 6.1.1 - Unauthenticated Blind SSRF via DNS Rebinding'
+                && $alert->remediation === "Update Wordpress if possible.\nGet more information about the vulnerability at https://wpscan.com/vulnerability/c8814e6e-78b3-4f63-a1d3-6906a84c1f11\nMore references:\nhttps://blog.sonarsource.com/wordpress-core-unauthenticated-blind-ssrf/"
+                && $alert->level === 'Low'
+                && $alert->uid === '3ee22091822f95e8b2095c228f397a63'
+                && $alert->cve_id === null
+                && $alert->cve_cvss === null
+                && $alert->cve_vendor === null
+                && $alert->cve_product === null
+                && $alert->title === 'Wordpress core issue'
+                && $alert->flarum_slug === null;
+        })->count());
+        $this->assertEquals(1, $alerts->filter(function (Alert $alert) {
+            return $alert->type === 'wordpress_vuln_v2_alert'
+                && $alert->vulnerability === 'WP <= 6.1.1 - Unauthenticated Blind SSRF via DNS Rebinding'
+                && $alert->remediation === "Update Wordpress if possible.\nGet more information about the vulnerability at https://wpscan.com/vulnerability/c8814e6e-78b3-4f63-a1d3-6906a84c1f11\nMore references:\nhttps://blog.sonarsource.com/wordpress-core-unauthenticated-blind-ssrf/"
+                && $alert->level === 'Low'
+                && $alert->uid === '3ee22091822f95e8b2095c228f397a63'
+                && $alert->cve_id === null
+                && $alert->cve_cvss === null
+                && $alert->cve_vendor === null
+                && $alert->cve_product === null
+                && $alert->title === 'Wordpress core issue'
+                && $alert->flarum_slug === null;
+        })->count());
 
         // Cleanup
         $asset->delete();
@@ -637,15 +699,32 @@ class ScansTest extends TestCase
 
         // Check the assets_tags table
         $assetTags = AssetTag::where('asset_id', $asset->id)->get();
-        $this->assertEquals(1, $assetTags->count());
+        $this->assertEquals(['demo'], $assetTags->pluck('tag')->toArray());
 
         // Check the scans table
         $scans = Scan::where('asset_id', $asset->id)->get();
         $this->assertEquals(1, $scans->count());
+        $this->assertEquals(1, $scans->filter(fn(Scan $scan) => $scan->portsScanHasEnded() && $scan->vulnsScanHasEnded())->count());
 
         // Check the ports table
         $ports = Port::whereIn('scan_id', $scans->pluck('id'))->get();
         $this->assertEquals(1, $ports->count());
+        $this->assertEquals(1, $ports->filter(function (Port $port) {
+            return $port->hostname === 'www.example.com'
+                && $port->ip === '93.184.215.14'
+                && $port->port === 443
+                && $port->protocol === 'tcp'
+                && $port->country === 'US'
+                && $port->hosting_service_description === null
+                && $port->hosting_service_registry === null
+                && $port->hosting_service_asn === null
+                && $port->hosting_service_cidr === null
+                && $port->hosting_service_country_code === null
+                && $port->hosting_service_date === null
+                && $port->service === null
+                && $port->product === null
+                && $port->ssl === null;
+        })->count());
 
         // Check the ports_tags table
         $portsTags = PortTag::whereIn('port_id', $ports->pluck('id'))->get();

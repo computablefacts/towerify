@@ -82,13 +82,13 @@ class EndPortsScanListener extends AbstractListener
                 'ip' => trim($ip),
                 'port' => $portNumber,
                 'protocol' => trim($protocol),
-                'country' => trim($country),
-                'hosting_service_description' => trim($description),
-                'hosting_service_registry' => trim($registry),
-                'hosting_service_asn' => trim($asn),
-                'hosting_service_cidr' => trim($cidr),
-                'hosting_service_country_code' => trim($countryCode),
-                'hosting_service_date' => trim($date),
+                'country' => $country,
+                'hosting_service_description' => $description,
+                'hosting_service_registry' => $registry,
+                'hosting_service_asn' => $asn,
+                'hosting_service_cidr' => $cidr,
+                'hosting_service_country_code' => $countryCode,
+                'hosting_service_date' => $date,
             ]);
 
             event(new BeginVulnsScan($newScan, $newPort));
