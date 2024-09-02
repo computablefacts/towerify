@@ -22,10 +22,12 @@ use App\Listeners\UpdateServerInfosListener;
 use App\Listeners\UserInvitationUtilizedListener;
 use App\Modules\AdversaryMeter\Events\BeginPortsScan;
 use App\Modules\AdversaryMeter\Events\BeginVulnsScan;
+use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Events\EndPortsScan;
 use App\Modules\AdversaryMeter\Events\EndVulnsScan;
 use App\Modules\AdversaryMeter\Listeners\BeginPortsScanListener;
 use App\Modules\AdversaryMeter\Listeners\BeginVulnsScanListener;
+use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
 use App\Modules\AdversaryMeter\Listeners\EndPortsScanListener;
 use App\Modules\AdversaryMeter\Listeners\EndVulnsScanListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -84,7 +86,10 @@ class EventServiceProvider extends ServiceProvider
         ],
         EndVulnsScan::class => [
             EndVulnsScanListener::class,
-        ]
+        ],
+        CreateAsset::class => [
+            CreateAssetListener::class,
+        ],
     ];
 
     /**

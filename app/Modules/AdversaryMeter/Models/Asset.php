@@ -22,6 +22,9 @@ class Asset extends Model
         'cur_scan_id',
         'next_scan_id',
         'discovery_id',
+        'user_id',
+        'customer_id',
+        'tenant_id',
     ];
 
     protected $casts = [
@@ -36,6 +39,11 @@ class Asset extends Model
     public function isIp(): bool
     {
         return $this->asset_type === AssetTypesEnum::IP;
+    }
+
+    public function isRange(): bool
+    {
+        return $this->asset_type === AssetTypesEnum::RANGE;
     }
 
     public function tld(): ?string

@@ -3,7 +3,7 @@
 namespace App\Modules\AdversaryMeter\Listeners;
 
 use App\Listeners\AbstractListener;
-use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
+use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Events\EndDiscovery;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Asset;
@@ -56,12 +56,18 @@ class EndDiscoveryListener extends AbstractListener
             Asset::where('discovery_id', $taskId)->update(['discovery_id', null]);
             return;
         }
-        foreach ($assets as $asset) {
-            Asset::updateOrCreate( // TODO : backport confidence score $asset['score'] / 100
-                ['asset' => $asset['domain']],
-                ['asset' => $asset['domain'], 'asset_type' => AssetTypesEnum::DNS, 'tld' => $tld]
-            );
-        }
+
+        collect($assets)
+            ->map(fn(array $asset) => $asset['domain'])
+            ->filter(fn(string $domain) => !empty($domain))
+            ->each(function (string $domain) use ($tld, $taskId) {
+                // TODO : backport confidence score $asset['score'] / 100
+                Asset::where('tld', $tld)
+                    ->get()
+                    ->each(function (Asset $asset) use ($domain) {
+                        event(new CreateAsset($domain, $asset->user_id, $asset->customer_id, $asset->tenant_id));
+                    });
+            });
 
         Asset::where('discovery_id', $taskId)->update(['discovery_id', null]);
     }

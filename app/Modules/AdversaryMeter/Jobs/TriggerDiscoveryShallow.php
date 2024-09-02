@@ -3,6 +3,7 @@
 namespace App\Modules\AdversaryMeter\Jobs;
 
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
+use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Asset;
 use Illuminate\Bus\Queueable;
@@ -31,15 +32,21 @@ class TriggerDiscoveryShallow implements ShouldQueue
             ->get()
             ->map(fn(Asset $asset) => $asset->tld())
             ->unique()
-            ->map(fn(string $tld) => $this->discover($tld))
-            ->filter(fn(array $discoveries) => isset($discoveries['subdomains']) && count($discoveries['subdomains']))
-            ->flatMap(fn(array $discoveries) => collect($discoveries['subdomains'] ?? []))
-            ->filter(fn(string $subdomain) => $subdomain !== '')
-            ->each(function (string $subdomain) {
-                Asset::updateOrCreate(
-                    ['asset' => $subdomain],
-                    ['asset' => $subdomain, 'asset_type' => AssetTypesEnum::DNS]
-                );
+            ->each(function (string $tld) {
+
+                $discovered = $this->discover($tld);
+
+                if (isset($discovered['subdomains']) && count($discovered['subdomains'])) {
+                    collect($discovered['subdomains'])
+                        ->filter(fn(string $domain) => !empty($domain))
+                        ->each(function (string $domain) use ($tld) {
+                            Asset::where('tld', $tld)
+                                ->get()
+                                ->each(function (Asset $asset) use ($domain) {
+                                    event(new CreateAsset($domain, $asset->user_id, $asset->customer_id, $asset->tenant_id));
+                                });
+                        });
+                }
             });
     }
 
