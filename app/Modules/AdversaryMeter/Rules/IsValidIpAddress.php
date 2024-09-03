@@ -7,9 +7,9 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class IsValidIpAddress implements ValidationRule
 {
-    public static function test(string $asset): bool
+    public static function test(?string $asset): bool
     {
-        return filter_var($asset, FILTER_VALIDATE_IP) !== false;
+        return $asset && filter_var($asset, FILTER_VALIDATE_IP) !== false;
     }
 
     /**

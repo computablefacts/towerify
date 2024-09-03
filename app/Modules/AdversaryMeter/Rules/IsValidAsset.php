@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class IsValidAsset implements ValidationRule
 {
-    public static function test(string $asset): bool
+    public static function test(?string $asset): bool
     {
         return IsValidDomain::test($asset)
             || IsValidIpAddress::test($asset)

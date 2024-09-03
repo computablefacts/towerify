@@ -7,17 +7,20 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class IsValidRange implements ValidationRule
 {
-    public static function test(string $asset): bool
+    public static function test(?string $asset): bool
     {
-        $parts = explode('/', $asset);
+        if ($asset) {
 
-        if (count($parts) === 2) {
+            $parts = explode('/', $asset);
 
-            $ip = $parts[0];
-            $subnet = $parts[1];
+            if (count($parts) === 2) {
 
-            if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
-                return is_numeric($subnet) && $subnet >= 0 && $subnet <= 32;
+                $ip = $parts[0];
+                $subnet = $parts[1];
+
+                if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+                    return is_numeric($subnet) && $subnet >= 0 && $subnet <= 32;
+                }
             }
         }
         return false;

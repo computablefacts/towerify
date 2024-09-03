@@ -7,10 +7,10 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class IsValidDomain implements ValidationRule
 {
-    public static function test(string $asset): bool
+    public static function test(?string $asset): bool
     {
         $domainRegex = '/^(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}\.?|[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)$/';
-        return preg_match($domainRegex, $asset) > 0;
+        return $asset && preg_match($domainRegex, $asset) > 0;
     }
 
     /**
