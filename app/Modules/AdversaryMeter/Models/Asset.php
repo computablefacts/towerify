@@ -25,10 +25,12 @@ class Asset extends Model
         'user_id',
         'customer_id',
         'tenant_id',
+        'is_monitored',
     ];
 
     protected $casts = [
-        'asset_type' => AssetTypesEnum::class
+        'asset_type' => AssetTypesEnum::class,
+        'is_monitored' => 'boolean',
     ];
 
     public function isDns(): bool

@@ -5,19 +5,10 @@ namespace AdversaryMeter;
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Models\Asset;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\AdversaryMeter\AdversaryMeterTestCase;
 
-class CreateAssetTest extends TestCase
+class CreateAssetTest extends AdversaryMeterTestCase
 {
-    use RefreshDatabase;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->artisan("migrate --path=database/migrations/am --database=mysql_am");
-    }
-
     public function testItCreatesAnIpAddress()
     {
         event(new CreateAsset('93.184.215.14', 1, 2, 3));
@@ -30,8 +21,6 @@ class CreateAssetTest extends TestCase
         $this->assertEquals(1, $asset->user_id);
         $this->assertEquals(2, $asset->customer_id);
         $this->assertEquals(3, $asset->tenant_id);
-
-        $asset->delete(); // cleanup
     }
 
     public function testItCreatesADomain()
@@ -46,8 +35,6 @@ class CreateAssetTest extends TestCase
         $this->assertEquals(1, $asset->user_id);
         $this->assertEquals(2, $asset->customer_id);
         $this->assertEquals(3, $asset->tenant_id);
-
-        $asset->delete(); // cleanup
     }
 
     public function testItCreatesARange()
@@ -62,8 +49,6 @@ class CreateAssetTest extends TestCase
         $this->assertEquals(1, $asset->user_id);
         $this->assertEquals(2, $asset->customer_id);
         $this->assertEquals(3, $asset->tenant_id);
-
-        $asset->delete(); // cleanup
     }
 
     public function testItDoesNotCreateDuplicates()
@@ -77,7 +62,5 @@ class CreateAssetTest extends TestCase
         $this->assertEquals(2, $assets->count());
         $this->assertEquals(1, $assets->filter(fn(Asset $asset) => $asset->user_id === null)->count());
         $this->assertEquals(1, $assets->filter(fn(Asset $asset) => $asset->user_id === 1)->count());
-        
-        $assets->each(fn(Asset $asset) => $asset->delete()); // cleanup
     }
 }

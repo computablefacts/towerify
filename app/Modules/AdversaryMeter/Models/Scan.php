@@ -4,6 +4,7 @@ namespace App\Modules\AdversaryMeter\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Scan extends Model
 {
@@ -28,6 +29,11 @@ class Scan extends Model
         'vulns_scan_begins_at' => 'datetime',
         'vulns_scan_ends_at' => 'datetime',
     ];
+
+    public function ports(): HasMany
+    {
+        return $this->hasMany(Port::class, 'scan_id');
+    }
 
     public function portsScanIsRunning(): bool
     {

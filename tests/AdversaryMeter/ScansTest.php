@@ -11,19 +11,10 @@ use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\PortTag;
 use App\Modules\AdversaryMeter\Models\Scan;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\AdversaryMeter\AdversaryMeterTestCase;
 
-class ScansTest extends TestCase
+class ScansTest extends AdversaryMeterTestCase
 {
-    use RefreshDatabase;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->artisan("migrate --path=database/migrations/am --database=mysql_am");
-    }
-
     public function testItUpdatesTld()
     {
         $asset = Asset::firstOrCreate([
@@ -47,8 +38,6 @@ class ScansTest extends TestCase
         $asset = Asset::find($asset->id); // reload from db
 
         $this->assertEquals($asset->tld, 'example.com'); // ensure TLD has been persisted
-
-        $asset->delete(); // cleanup
     }
 
     public function testItDoesNotUpdateTld()
@@ -74,8 +63,6 @@ class ScansTest extends TestCase
         $asset = Asset::find($asset->id); // reload from db
 
         $this->assertNull($asset->tld); // ensure TLD has been persisted
-
-        $asset->delete(); // cleanup
     }
 
     public function testItTriggersAnAssetScan()
@@ -265,6 +252,7 @@ class ScansTest extends TestCase
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
             'asset_type' => AssetTypesEnum::DNS,
+            'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
 
@@ -401,6 +389,7 @@ class ScansTest extends TestCase
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
             'asset_type' => AssetTypesEnum::DNS,
+            'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
 
@@ -416,9 +405,6 @@ class ScansTest extends TestCase
         // Check the scans table
         $scans = Scan::where('asset_id', $asset->id)->get();
         $this->assertEquals(0, $scans->count());
-
-        // Cleanup
-        $asset->delete();
     }
 
     public function testItDoesNotModifyTheDbWhenPortsScanFailsToComplete()
@@ -439,6 +425,7 @@ class ScansTest extends TestCase
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
             'asset_type' => AssetTypesEnum::DNS,
+            'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
 
@@ -454,9 +441,6 @@ class ScansTest extends TestCase
         // Check the scans table
         $scans = Scan::where('asset_id', $asset->id)->get();
         $this->assertEquals(0, $scans->count());
-
-        // Cleanup
-        $asset->delete();
     }
 
     public function testItDoesNotModifyTheDbWhenVulnsScanFailsToStart()
@@ -519,6 +503,7 @@ class ScansTest extends TestCase
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
             'asset_type' => AssetTypesEnum::DNS,
+            'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
 
@@ -534,9 +519,6 @@ class ScansTest extends TestCase
         // Check the scans table
         $scans = Scan::where('asset_id', $asset->id)->get();
         $this->assertEquals(0, $scans->count());
-
-        // Cleanup
-        $asset->delete();
     }
 
     public function testItDoesNotModifyTheDbWhenVulnsScanFailsToComplete()
@@ -617,6 +599,7 @@ class ScansTest extends TestCase
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
             'asset_type' => AssetTypesEnum::DNS,
+            'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
 
@@ -632,9 +615,6 @@ class ScansTest extends TestCase
         // Check the scans table
         $scans = Scan::where('asset_id', $asset->id)->get();
         $this->assertEquals(0, $scans->count());
-
-        // Cleanup
-        $asset->delete();
     }
 
     public function testItProperlyEndsWhenVulnsScanMarkThePortAsClosed()
@@ -715,6 +695,7 @@ class ScansTest extends TestCase
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
             'asset_type' => AssetTypesEnum::DNS,
+            'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
 
@@ -763,11 +744,5 @@ class ScansTest extends TestCase
         // Check the alerts table
         $alerts = Alert::whereIn('port_id', $ports->pluck('id'))->get();
         $this->assertEquals(0, $alerts->count());
-
-        // Cleanup
-        $asset->delete();
-
-        // Cleanup
-        $asset->delete();
     }
 }

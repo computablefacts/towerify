@@ -6,19 +6,10 @@ use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Models\Asset;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\AdversaryMeter\AdversaryMeterTestCase;
 
-class DiscoveryShallowTest extends TestCase
+class DiscoveryShallowTest extends AdversaryMeterTestCase
 {
-    use RefreshDatabase;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->artisan("migrate --path=database/migrations/am --database=mysql_am");
-    }
-
     public function testItCreatesAnAssetAfterDiscovery()
     {
         ApiUtils::shouldReceive('discover_public')
@@ -46,9 +37,5 @@ class DiscoveryShallowTest extends TestCase
 
         $this->assertEquals(1, $assetsDiscovered->filter(fn(Asset $asset) => $asset->asset === 'www1.example.com' && $asset->user_id === 1 && $asset->customer_id === 2 && $asset->tenant_id === 3)->count());
         $this->assertEquals(1, $assetsDiscovered->filter(fn(Asset $asset) => $asset->asset === 'www2.example.com' && $asset->user_id === 1 && $asset->customer_id === 2 && $asset->tenant_id === 3)->count());
-
-        // Cleanup
-        $assetsOriginal->each(fn(Asset $asset) => $asset->delete());
-        $assetsDiscovered->each(fn(Asset $asset) => $asset->delete());
     }
 }

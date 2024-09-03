@@ -13,20 +13,11 @@ use Illuminate\Support\Facades\Log;
 
 class CreateAssetListener extends AbstractListener
 {
-    protected function handle2($event)
+    public static function execute(string $asset, ?int $userId = null, ?int $customerId = null, ?int $tenantId = null): ?Asset
     {
-        if (!($event instanceof CreateAsset)) {
-            throw new \Exception('Invalid event type!');
-        }
-
-        $asset = $event->asset;
-        $userId = $event->userId;
-        $customerId = $event->customerId;
-        $tenantId = $event->tenantId;
-
         if (!IsValidAsset::test($asset)) {
             Log::error("Invalid asset : {$asset}");
-            return;
+            return null;
         }
         if (IsValidDomain::test($asset)) {
             $assetType = AssetTypesEnum::DNS;
@@ -35,8 +26,7 @@ class CreateAssetListener extends AbstractListener
         } else {
             $assetType = AssetTypesEnum::RANGE;
         }
-
-        Asset::updateOrCreate(
+        return Asset::updateOrCreate(
             [
                 'asset' => $asset,
                 'user_id' => $userId,
@@ -51,5 +41,13 @@ class CreateAssetListener extends AbstractListener
                 'tenant_id' => $tenantId,
             ]
         );
+    }
+
+    protected function handle2($event)
+    {
+        if (!($event instanceof CreateAsset)) {
+            throw new \Exception('Invalid event type!');
+        }
+        self::execute($event->asset, $event->userId, $event->customerId, $event->tenantId);
     }
 }

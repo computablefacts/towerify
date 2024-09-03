@@ -28,6 +28,7 @@ class TriggerScan implements ShouldQueue
     {
         $minDate = Carbon::now()->subDays(5);
         Asset::whereNull('next_scan_id')
+            ->where('is_monitored', true)
             ->get()
             ->filter(function (Asset $asset) use ($minDate) {
                 return $asset->curScan()->max('vulns_scan_ends_at') <= $minDate;

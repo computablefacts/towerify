@@ -5,19 +5,10 @@ namespace AdversaryMeter;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\Modules\AdversaryMeter\Models\Asset;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\AdversaryMeter\AdversaryMeterTestCase;
 
-class DeleteAssetTest extends TestCase
+class DeleteAssetTest extends AdversaryMeterTestCase
 {
-    use RefreshDatabase;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->artisan("migrate --path=database/migrations/am --database=mysql_am");
-    }
-
     public function testItDeletesAllAssets()
     {
         event(new CreateAsset('93.184.215.14'));
