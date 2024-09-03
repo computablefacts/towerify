@@ -51,3 +51,6 @@ jobs:
         run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "GRANT ALL ON tw_testdb_am.* TO 'tw_testuser_am'@'localhost';"
       - name: Run Tests
         run: php vendor/bin/phpunit --testdox
+        env:
+          DROP_SCAN_EVENTS_AFTER_X_MINUTES: 0.5
+          DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES: 0.5
