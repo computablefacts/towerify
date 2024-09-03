@@ -596,7 +596,7 @@ class ScansTest extends TestCase
                 'scan_id' => 'a9a5d877-abed-4a39-8b4a-8316d451730d',
             ]);
         ApiUtils::shouldReceive('task_get_scan_public')
-            ->times(100)
+            ->atLeast()
             ->with('a9a5d877-abed-4a39-8b4a-8316d451730d')
             ->andReturn([
                 'hostname' => 'www.example.com',

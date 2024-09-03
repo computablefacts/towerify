@@ -27,12 +27,12 @@ class BeginVulnsScan
         return new PrivateChannel('channel-name');
     }
 
-    public function scan(): Scan
+    public function scan(): ?Scan
     {
         return Scan::find($this->scanId);
     }
 
-    public function port(): Port
+    public function port(): ?Port
     {
         return Port::find($this->portId);
     }

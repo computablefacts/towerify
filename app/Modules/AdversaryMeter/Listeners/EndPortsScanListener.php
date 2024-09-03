@@ -19,10 +19,26 @@ class EndPortsScanListener extends AbstractListener
             throw new \Exception('Invalid event type!');
         }
 
-        $asset = $event->asset();
         $scan = $event->scan();
+        $asset = $event->asset();
+        $dropEvent = $event->drop();
 
+        if (!$scan) {
+            Log::warning("Ports scan has been removed : {$event->scanId}");
+            return;
+        }
+        if (!$asset) {
+            Log::warning("Asset has been removed : {$event->assetId}");
+            return;
+        }
+        if ($dropEvent) {
+            Log::error("Ports scan event is too old : {$event->scanId}");
+            $scan->markAsFailed();
+            return;
+        }
         if (!$scan->portsScanIsRunning()) {
+            Log::warning("Ports scan is not running anymore : {$event->scanId}");
+            $scan->markAsFailed();
             return;
         }
 
@@ -32,14 +48,14 @@ class EndPortsScanListener extends AbstractListener
 
         // The task is running: try again later
         if (!$taskStatus) {
-            event(new EndPortsScan($asset, $scan));
+            $event->sink();
             return;
         }
 
         // The task ended with an error
         if ($taskStatus !== 'SUCCESS') {
-            Log::error('Ports scan failed: ' . json_encode($task));
-            $scan->markAssetScanAsFailed();
+            Log::error('Ports scan failed : ' . json_encode($task));
+            $scan->markAsFailed();
             return;
         }
 

@@ -23,9 +23,20 @@ class EndVulnsScanListener extends AbstractListener
         }
 
         $scan = $event->scan();
-        $iteration = $event->iteration;
+        $dropEvent = $event->drop();
 
+        if (!$scan) {
+            Log::warning("Vulns scan has been removed : {$event->scanId}");
+            return;
+        }
+        if ($dropEvent) {
+            Log::error("Vulns scan event is too old : {$event->scanId}");
+            $scan->markAsFailed();
+            return;
+        }
         if (!$scan->vulnsScanIsRunning()) {
+            Log::warning("Vulns scan is not running anymore : {$event->scanId}");
+            $scan->markAsFailed();
             return;
         }
 
@@ -41,18 +52,14 @@ class EndVulnsScanListener extends AbstractListener
             if (!$isCsc) {
 
                 if ($currentTaskStatus && Str::startsWith($currentTaskStatus, 'DONE_')) {
-                    event(new EndVulnsScan($scan, $iteration + 1));
+                    $event->sink();
                     return;
                 }
 
                 $service = $task['service'] ?? null;
 
                 if ($service !== 'closed') {
-                    if ($iteration < 100) {
-                        event(new EndVulnsScan($scan, $iteration + 1));
-                    } else { // Drop event after 100 iterations
-                        $scan->markAssetScanAsFailed();
-                    }
+                    $event->sink();
                 } else { // End the scan!
                     $this->markAssetScanAsCompleted($scan);
                 }

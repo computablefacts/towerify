@@ -40,6 +40,8 @@
     <env name="DB_USERNAME_AM" value="tw_testuser_am"/>
     <env name="DB_PASSWORD_AM" value="tapa2$"/>
     <env name="USE_SCHEMA_DUMP" value="true"/>
+    <env name="DROP_SCAN_EVENTS_AFTER_X_MINUTES" value="1"/>
+    <env name="DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES" value="1"/>
   </php>
   <source>
     <include>

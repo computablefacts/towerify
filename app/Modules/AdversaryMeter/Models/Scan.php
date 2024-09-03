@@ -49,7 +49,7 @@ class Scan extends Model
         return $this->vulns_scan_id && $this->vulns_scan_begins_at && $this->vulns_scan_ends_at;
     }
 
-    public function markAssetScanAsFailed(): void
+    public function markAsFailed(): void
     {
         Scan::where('asset_id', $this->asset_id)
             ->where('ports_scan_id', $this->ports_scan_id)

@@ -18,11 +18,17 @@ class BeginPortsScanListener extends AbstractListener
         }
 
         $asset = $event->asset();
+
+        if (!$asset) {
+            Log::warning("Asset has been removed : {$event->assetId}");
+            return;
+        }
+
         $task = $this->beginTask($asset->asset);
         $taskId = $task['task_id'] ?? null;
 
         if (!$taskId) {
-            Log::error('Ports scan cannot be started: ' . json_encode($task));
+            Log::error('Ports scan cannot be started : ' . json_encode($task));
         } else {
 
             $scan = $asset->nextScan()->create([
@@ -34,7 +40,7 @@ class BeginPortsScanListener extends AbstractListener
             $asset->next_scan_id = $taskId;
             $asset->save();
 
-            event(new EndPortsScan($asset, $scan));
+            event(new EndPortsScan(Carbon::now(), $asset, $scan));
         }
     }
 

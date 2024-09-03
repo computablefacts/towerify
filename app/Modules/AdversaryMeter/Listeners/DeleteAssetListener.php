@@ -4,18 +4,18 @@ namespace App\Modules\AdversaryMeter\Listeners;
 
 use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
-use App\Modules\AdversaryMeter\Events\CreateAsset;
+use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
 use Illuminate\Support\Facades\Log;
 
-class CreateAssetListener extends AbstractListener
+class DeleteAssetListener extends AbstractListener
 {
     protected function handle2($event)
     {
-        if (!($event instanceof CreateAsset)) {
+        if (!($event instanceof DeleteAsset)) {
             throw new \Exception('Invalid event type!');
         }
 
@@ -36,20 +36,18 @@ class CreateAssetListener extends AbstractListener
             $assetType = AssetTypesEnum::RANGE;
         }
 
-        Asset::updateOrCreate(
-            [
-                'asset' => $asset,
-                'user_id' => $userId,
-                'customer_id' => $customerId,
-                'tenant_id' => $tenantId,
-            ],
-            [
-                'asset' => $asset,
-                'asset_type' => $assetType,
-                'user_id' => $userId,
-                'customer_id' => $customerId,
-                'tenant_id' => $tenantId,
-            ]
-        );
+        $query = Asset::where('asset', $asset)->where('asset_type', $assetType);
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        if ($customerId) {
+            $query->where('customer_id', $customerId);
+        }
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
+
+        $query->delete();
     }
 }

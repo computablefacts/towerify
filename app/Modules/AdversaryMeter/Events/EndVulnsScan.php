@@ -3,6 +3,7 @@
 namespace App\Modules\AdversaryMeter\Events;
 
 use App\Modules\AdversaryMeter\Models\Scan;
+use Carbon\Carbon;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -12,13 +13,13 @@ class EndVulnsScan
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public Carbon $start;
     public int $scanId;
-    public int $iteration;
 
-    public function __construct(Scan $scan, int $iteration)
+    public function __construct(Carbon $start, Scan $scan)
     {
+        $this->start = $start;
         $this->scanId = $scan->id;
-        $this->iteration = $iteration;
     }
 
     public function broadcastOn()
@@ -26,8 +27,19 @@ class EndVulnsScan
         return new PrivateChannel('channel-name');
     }
 
-    public function scan(): Scan
+    public function scan(): ?Scan
     {
         return Scan::find($this->scanId);
+    }
+
+    public function sink(): void
+    {
+        event(new EndVulnsScan($this->start, $this->scan()));
+    }
+
+    public function drop(): bool
+    {
+        $dropAfter = config('towerify.adversarymeter.drop_scan_events_after_x_minutes');
+        return Carbon::now()->diffInMinutes($this->start, true) > $dropAfter;
     }
 }

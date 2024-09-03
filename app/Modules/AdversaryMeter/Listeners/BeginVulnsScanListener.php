@@ -22,7 +22,16 @@ class BeginVulnsScanListener extends AbstractListener
         $scan = $event->scan();
         $port = $event->port();
 
+        if (!$scan) {
+            Log::warning("Scan has been removed : {$event->scanId}");
+            return;
+        }
+        if (!$port) {
+            Log::warning("Port has been removed : {$event->portId}");
+            return;
+        }
         if (!$scan->portsScanHasEnded()) {
+            Log::warning("Ports scan is running : {$event->scanId}");
             return;
         }
 
@@ -35,15 +44,15 @@ class BeginVulnsScanListener extends AbstractListener
         $taskId = $task['scan_id'] ?? null;
 
         if (!$taskId) {
-            Log::error('Vulns scan cannot be started: ' . json_encode($task));
-            $scan->markAssetScanAsFailed();
+            Log::error('Vulns scan cannot be started : ' . json_encode($task));
+            $scan->markAsFailed();
         } else {
 
             $scan->vulns_scan_id = $taskId;
             $scan->vulns_scan_begins_at = Carbon::now();
             $scan->save();
 
-            event(new EndVulnsScan($scan, 1));
+            event(new EndVulnsScan(Carbon::now(), $scan));
         }
     }
 
