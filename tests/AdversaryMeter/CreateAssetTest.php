@@ -77,5 +77,7 @@ class CreateAssetTest extends TestCase
         $this->assertEquals(2, $assets->count());
         $this->assertEquals(1, $assets->filter(fn(Asset $asset) => $asset->user_id === null)->count());
         $this->assertEquals(1, $assets->filter(fn(Asset $asset) => $asset->user_id === 1)->count());
+        
+        $assets->each(fn(Asset $asset) => $asset->delete()); // cleanup
     }
 }

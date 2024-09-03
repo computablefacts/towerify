@@ -37,6 +37,7 @@ class DiscoveryShallowTest extends TestCase
         $assetsDiscovered = Asset::whereLike('asset', 'www%.example.com')->get();
 
         // Ensure no duplicate in DB but a new asset for each tuple (user_id, customer_id, tenant_id)
+        $this->assertEquals(2, $assetsOriginal->count());
         $this->assertEquals(4, $assetsDiscovered->count());
 
         // Check that a new asset is associated to each tuple (user_id, customer_id, tenant_id)
