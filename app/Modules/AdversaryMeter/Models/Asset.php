@@ -84,13 +84,13 @@ class Asset extends Model
         return $this->hasMany(AssetTag::class, 'asset_id', 'id');
     }
 
-    public function curScan(): HasMany
+    public function scanCompleted(): HasMany
     {
-        return $this->hasMany(Scan::class, 'id', 'cur_scan_id');
+        return $this->hasMany(Scan::class, 'ports_scan_id', 'cur_scan_id');
     }
 
-    public function nextScan(): HasMany
+    public function scanInProgress(): HasMany
     {
-        return $this->hasMany(Scan::class, 'id', 'next_scan_id');
+        return $this->hasMany(Scan::class, 'ports_scan_id', 'next_scan_id');
     }
 }

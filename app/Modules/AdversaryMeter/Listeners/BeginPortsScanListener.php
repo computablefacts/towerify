@@ -6,6 +6,7 @@ use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\BeginPortsScan;
 use App\Modules\AdversaryMeter\Events\EndPortsScan;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
+use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +32,7 @@ class BeginPortsScanListener extends AbstractListener
             Log::error('Ports scan cannot be started : ' . json_encode($task));
         } else {
 
-            $scan = $asset->nextScan()->create([
+            $scan = Scan::create([
                 'asset_id' => $asset->id,
                 'ports_scan_id' => $taskId,
                 'ports_scan_begins_at' => Carbon::now(),

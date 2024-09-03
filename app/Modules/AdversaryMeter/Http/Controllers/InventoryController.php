@@ -7,6 +7,7 @@ use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Models\Port;
+use App\Modules\AdversaryMeter\Models\PortTag;
 use App\Modules\AdversaryMeter\Models\Scan;
 use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
@@ -109,20 +110,30 @@ class InventoryController extends Controller
         $assets = $query->orderBy('asset')
             ->get()
             ->map(function (Asset $asset) {
-                $tags = $asset->curScan()
+                $tags = $asset->scanCompleted()
                     ->get()
                     ->flatMap(function (Scan $scan) use ($asset) {
                         return $scan->ports()
+                            ->orderBy('port')
                             ->get()
                             ->flatMap(function (Port $port) use ($asset) {
                                 return $port->tags()
+                                    ->orderBy('tag')
                                     ->get()
-                                    ->map(function (AssetTag $tag) use ($port, $asset) {
+                                    ->map(function (PortTag $tag) use ($port, $asset) {
+                                        if ($asset->isRange()) {
+                                            return [
+                                                'asset' => $port->ip,
+                                                'port' => $port->port,
+                                                'tag' => Str::lower($tag->tag),
+                                                'is_range' => true,
+                                            ];
+                                        }
                                         return [
-                                            'asset' => $asset->ip,
+                                            'asset' => $asset->asset,
                                             'port' => $port->port,
                                             'tag' => Str::lower($tag->tag),
-                                            'is_range' => $asset->isRange(),
+                                            'is_range' => false,
                                         ];
                                     });
                             });

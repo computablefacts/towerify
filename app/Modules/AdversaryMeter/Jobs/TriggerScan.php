@@ -31,7 +31,7 @@ class TriggerScan implements ShouldQueue
             ->where('is_monitored', true)
             ->get()
             ->filter(function (Asset $asset) use ($minDate) {
-                return $asset->curScan()->max('vulns_scan_ends_at') <= $minDate;
+                return $asset->scanCompleted()->max('vulns_scan_ends_at') <= $minDate;
             })
             ->each(fn(Asset $asset) => event(new BeginPortsScan($asset)));
     }
