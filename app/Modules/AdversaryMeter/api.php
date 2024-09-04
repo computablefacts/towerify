@@ -23,3 +23,10 @@ Route::group([
 ], function () {
     Route::get('screenshot/{id}', 'InventoryController@screenshot');
 });
+
+Route::group([
+    'prefix' => 'facts',
+], function () {
+    Route::post('{asset}/metadata', 'InventoryController@addTag');
+    Route::delete('{asset}/metadata/{assetTag}', 'InventoryController@removeTag');
+});

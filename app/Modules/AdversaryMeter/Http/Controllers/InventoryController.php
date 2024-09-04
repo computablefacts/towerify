@@ -12,8 +12,10 @@ use App\Modules\AdversaryMeter\Models\Scan;
 use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
+use App\Modules\AdversaryMeter\Rules\IsValidTag;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -213,5 +215,29 @@ class InventoryController extends Controller
         return [
             "screenshot" => null,
         ];
+    }
+
+    public function addTag(Asset $asset, Request $request): Collection
+    {
+        $tag = Str::lower($request->string('key', ''));
+
+        if (!IsValidTag::test($tag)) {
+            abort(500, "Invalid tag : {$tag}");
+        }
+
+        $obj = $asset->tags()->create(['tag' => $tag]);
+
+        if (!$obj) {
+            abort(500, "The tag could not be created : {$tag}");
+        }
+        return collect([[
+            'id' => $obj->id,
+            'key' => $obj->tag,
+        ]]);
+    }
+
+    public function removeTag(Asset $asset, AssetTag $assetTag): void
+    {
+        $assetTag->delete();
     }
 }

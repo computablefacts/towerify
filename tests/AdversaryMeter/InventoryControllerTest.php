@@ -2,9 +2,11 @@
 
 namespace AdversaryMeter;
 
+use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Jobs\TriggerScan;
 use App\Modules\AdversaryMeter\Models\Asset;
+use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\User;
 use Tests\AdversaryMeter\AdversaryMeterTestCase;
 
@@ -408,5 +410,40 @@ class InventoryControllerTest extends AdversaryMeterTestCase
                     ]
                 ]
             ]);
+    }
+
+    public function testFirstAddThenRemoveAnAssetTag(): void
+    {
+        $asset = Asset::firstOrCreate([
+            'asset' => 'www.example.com',
+            'asset_type' => AssetTypesEnum::DNS,
+        ]);
+
+        $response = $this->withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$this->token}",
+        ])->post("/am/api/facts/{$asset->id}/metadata", [
+            'key' => 'DEMO', // check it will be automatically lowercased
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                0 => [
+                    'key' => 'demo',
+                ]
+            ]);
+
+        $tags = AssetTag::where('asset_id', $asset->id)->get();
+        $this->assertCount(1, $tags);
+
+        $response = $this->withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$this->token}",
+        ])->delete("/am/api/facts/{$asset->id}/metadata/{$response[0]['id']}");
+
+        $response->assertStatus(200);
+
+        $tags = AssetTag::where('asset_id', $asset->id)->get();
+        $this->assertCount(0, $tags);
     }
 }
