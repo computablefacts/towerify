@@ -17,3 +17,9 @@ Route::group([
     Route::post('asset/{id}/monitoring/begin', 'InventoryController@assetMonitoringBegins');
     Route::post('asset/{id}/monitoring/end', 'InventoryController@assetMonitoringEnds');
 });
+
+Route::group([
+    'prefix' => 'inbox',
+], function () {
+    Route::get('screenshot/{id}', 'InventoryController@screenshot');
+});

@@ -206,4 +206,12 @@ class InventoryController extends Controller
                 ->all(),
         ];
     }
+
+    public function screenshot(int $id): array
+    {
+        // TODO : backport code
+        return [
+            "screenshot" => null,
+        ];
+    }
 }
