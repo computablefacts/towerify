@@ -10,23 +10,23 @@ Route::middleware('auth:api')->get('/user', function () {
 Route::group([
     'prefix' => 'inventory',
 ], function () {
-    Route::post('assets/discover', 'InventoryController@discover');
-    Route::post('assets/discover/from/ip', 'InventoryController@discoverFromIp');
-    Route::post('assets', 'InventoryController@saveAsset');
-    Route::get('assets', 'InventoryController@userAssets');
-    Route::post('asset/{asset}/monitoring/begin', 'InventoryController@assetMonitoringBegins');
-    Route::post('asset/{asset}/monitoring/end', 'InventoryController@assetMonitoringEnds');
+    Route::post('assets/discover', 'AssetController@discover');
+    Route::post('assets/discover/from/ip', 'AssetController@discoverFromIp');
+    Route::post('assets', 'AssetController@saveAsset');
+    Route::get('assets', 'AssetController@userAssets');
+    Route::post('asset/{asset}/monitoring/begin', 'AssetController@assetMonitoringBegins');
+    Route::post('asset/{asset}/monitoring/end', 'AssetController@assetMonitoringEnds');
 });
 
 Route::group([
     'prefix' => 'inbox',
 ], function () {
-    Route::get('screenshot/{id}', 'InventoryController@screenshot');
+    Route::get('screenshot/{id}', 'AssetController@screenshot');
 });
 
 Route::group([
     'prefix' => 'facts',
 ], function () {
-    Route::post('{asset}/metadata', 'InventoryController@addTag');
-    Route::delete('{asset}/metadata/{assetTag}', 'InventoryController@removeTag');
+    Route::post('{asset}/metadata', 'AssetController@addTag');
+    Route::delete('{asset}/metadata/{assetTag}', 'AssetController@removeTag');
 });

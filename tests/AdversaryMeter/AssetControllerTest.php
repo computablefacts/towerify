@@ -10,7 +10,7 @@ use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\User;
 use Tests\AdversaryMeter\AdversaryMeterTestCase;
 
-class InventoryControllerTest extends AdversaryMeterTestCase
+class AssetControllerTest extends AdversaryMeterTestCase
 {
     private User $user;
     private string $token;

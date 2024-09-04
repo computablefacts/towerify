@@ -19,7 +19,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class InventoryController extends Controller
+class AssetController extends Controller
 {
     private const BLACKLIST = [
         "amazonaws.com",
