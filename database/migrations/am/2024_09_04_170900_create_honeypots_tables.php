@@ -20,8 +20,8 @@ class CreateHoneypotsTables extends Migration
 
             // The attacker's attributes
             $table->string('name');
-            $table->string('first_contact');
-            $table->string('last_contact');
+            $table->datetime('first_contact');
+            $table->datetime('last_contact');
         });
         Schema::create('honeypots', function (Blueprint $table) {
 
@@ -70,7 +70,7 @@ class CreateHoneypotsTables extends Migration
             $table->string('uid');
             $table->string('human');
             $table->string('endpoint');
-            $table->string('timestamp');
+            $table->datetime('timestamp');
             $table->string('request_uri');
             $table->string('user_agent');
             $table->string('ip');

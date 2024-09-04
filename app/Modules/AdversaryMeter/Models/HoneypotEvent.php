@@ -37,5 +37,6 @@ class HoneypotEvent extends Model
     protected $casts = [
         'human' => 'boolean',
         'targeted' => 'boolean',
+        'timestamp' => 'datetime',
     ];
 }

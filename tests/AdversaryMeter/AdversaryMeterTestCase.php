@@ -3,6 +3,8 @@
 namespace Tests\AdversaryMeter;
 
 use App\Modules\AdversaryMeter\Models\Asset;
+use App\Modules\AdversaryMeter\Models\Attacker;
+use App\Modules\AdversaryMeter\Models\Honeypot;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,6 +22,8 @@ class AdversaryMeterTestCase extends TestCase
     protected function tearDown(): void
     {
         Asset::whereNotNull('id')->delete();
+        Honeypot::whereNotNull('id')->delete();
+        Attacker::whereNotNull('id')->delete();
         parent::tearDown();
     }
 }

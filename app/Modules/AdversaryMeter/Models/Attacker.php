@@ -18,7 +18,12 @@ class Attacker extends Model
         'first_contact',
         'last_contact',
     ];
-    
+
+    protected $casts = [
+        'first_contact' => 'datetime',
+        'last_contact' => 'datetime',
+    ];
+
     public function events(): HasMany
     {
         return $this->hasMany(HoneypotEvent::class, 'attacker_id', 'id');

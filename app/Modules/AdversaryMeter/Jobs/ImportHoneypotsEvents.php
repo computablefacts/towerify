@@ -50,17 +50,17 @@ class ImportHoneypotsEvents implements ShouldQueue
                 $feed = basename($file);
 
                 foreach ($events as $event) {
-                    $hp = $this->hostingProvider($event['ip'] ?? '');
+                    $hp = $this->hostingProvider($event['ip']);
                     $e = HoneypotEvent::create([
                         'honeypot_id' => $honeypot->id,
-                        'event' => $event['event'] ?? '',
+                        'event' => $event['event'],
                         'uid' => $event['uid'] ?? '',
                         'human' => $event['human'] == '1',
                         'endpoint' => $event['endpoint'] ?? '',
-                        'timestamp' => $event['timestamp'] ?? '',
-                        'request_uri' => $event['request_uri'] ?? '',
-                        'user_agent' => $event['user_agent'] ?? '',
-                        'ip' => $event['ip'] ?? '',
+                        'timestamp' => $event['timestamp'],
+                        'request_uri' => Str::limit(trim($event['request_uri'] ?? '', 191)),
+                        'user_agent' => Str::limit(trim($event['user_agent'] ?? '', 191)),
+                        'ip' => $event['ip'],
                         'details' => $event['details'],
                         'targeted' => $event['targeted'] == '1',
                         'feed_name' => $feed,
