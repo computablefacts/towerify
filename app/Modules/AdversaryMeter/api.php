@@ -14,8 +14,8 @@ Route::group([
     Route::post('assets/discover/from/ip', 'InventoryController@discoverFromIp');
     Route::post('assets', 'InventoryController@saveAsset');
     Route::get('assets', 'InventoryController@userAssets');
-    Route::post('asset/{id}/monitoring/begin', 'InventoryController@assetMonitoringBegins');
-    Route::post('asset/{id}/monitoring/end', 'InventoryController@assetMonitoringEnds');
+    Route::post('asset/{asset}/monitoring/begin', 'InventoryController@assetMonitoringBegins');
+    Route::post('asset/{asset}/monitoring/end', 'InventoryController@assetMonitoringEnds');
 });
 
 Route::group([

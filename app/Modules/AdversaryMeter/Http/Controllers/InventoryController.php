@@ -153,13 +153,8 @@ class InventoryController extends Controller
         ];
     }
 
-    public function assetMonitoringBegins(int $id): array
+    public function assetMonitoringBegins(Asset $asset): array
     {
-        $asset = Asset::find($id);
-
-        if (!$asset) {
-            abort(500, "Asset not found : {$id}");
-        }
         if ($asset->is_monitored) {
             abort(500, "Asset is already monitored : {$asset->asset}");
         }
@@ -172,13 +167,8 @@ class InventoryController extends Controller
         ];
     }
 
-    public function assetMonitoringEnds(int $id): array
+    public function assetMonitoringEnds(Asset $asset): array
     {
-        $asset = Asset::find($id);
-
-        if (!$asset) {
-            abort(500, "Asset not found : {$id}");
-        }
         if (!$asset->is_monitored) {
             abort(500, "Asset is not monitored : {$asset->asset}");
         }
