@@ -238,6 +238,8 @@ class InventoryController extends Controller
 
     public function removeTag(Asset $asset, AssetTag $assetTag): void
     {
-        $assetTag->delete();
+        if ($asset->id === $assetTag->asset_id) {
+            $assetTag->delete();
+        }
     }
 }
