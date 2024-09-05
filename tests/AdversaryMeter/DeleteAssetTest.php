@@ -12,16 +12,16 @@ class DeleteAssetTest extends AdversaryMeterTestCase
     public function testItDeletesAllAssets()
     {
         event(new CreateAsset('93.184.215.14'));
-        event(new CreateAsset('www.example.com', 1));
-        event(new CreateAsset('255.255.255.255/32', 1, 2));
+        event(new CreateAsset('www.example.com'));
+        event(new CreateAsset('255.255.255.255/32'));
 
         $asset1 = Asset::where('asset', '93.184.215.14')->firstOrFail();
         $asset2 = Asset::where('asset', 'www.example.com')->firstOrFail();
         $asset3 = Asset::where('asset', '255.255.255.255/32')->firstOrFail();
 
         event(new DeleteAsset('93.184.215.14'));
-        event(new DeleteAsset('www.example.com', 1));
-        event(new DeleteAsset('255.255.255.255/32', 1, 2));
+        event(new DeleteAsset('www.example.com'));
+        event(new DeleteAsset('255.255.255.255/32'));
 
         $asset1 = Asset::where('asset', '93.184.215.14')->first();
         $asset2 = Asset::where('asset', 'www.example.com')->first();

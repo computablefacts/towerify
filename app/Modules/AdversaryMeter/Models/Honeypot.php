@@ -21,9 +21,6 @@ class Honeypot extends Model
         'status',
         'cloud_provider',
         'cloud_sensor',
-        'user_id',
-        'customer_id',
-        'tenant_id',
     ];
 
     protected $casts = [

@@ -28,7 +28,7 @@ class TriggerDiscoveryShallow implements ShouldQueue
     public function handle()
     {
         Asset::whereNull('discovery_id')
-            ->where('asset_type', AssetTypesEnum::DNS)
+            ->where('type', AssetTypesEnum::DNS)
             ->get()
             ->map(fn(Asset $asset) => $asset->tld())
             ->unique()
@@ -43,7 +43,7 @@ class TriggerDiscoveryShallow implements ShouldQueue
                             Asset::where('tld', $tld)
                                 ->get()
                                 ->each(function (Asset $asset) use ($domain) {
-                                    event(new CreateAsset($domain, $asset->user_id, $asset->customer_id, $asset->tenant_id));
+                                    event(new CreateAsset($domain));
                                 });
                         });
                 }

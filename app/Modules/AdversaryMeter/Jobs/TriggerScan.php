@@ -26,12 +26,14 @@ class TriggerScan implements ShouldQueue
 
     public function handle()
     {
-        $minDate = Carbon::now()->subDays(5);
+        $frequency = config('towerify.adversarymeter.days_between_scans');
+        $minDate = Carbon::now()->subDays((int)$frequency);
         Asset::whereNull('next_scan_id')
             ->where('is_monitored', true)
             ->get()
             ->filter(function (Asset $asset) use ($minDate) {
-                return $asset->scanCompleted()->max('vulns_scan_ends_at') <= $minDate;
+                $scan = $asset->scanCompleted();
+                return !$scan || $scan->vulns_scan_ends_at <= $minDate;
             })
             ->each(fn(Asset $asset) => event(new BeginPortsScan($asset)));
     }

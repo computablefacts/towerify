@@ -12,16 +12,10 @@ class DeleteAsset
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public string $asset;
-    public ?int $userId;
-    public ?int $customerId;
-    public ?int $tenantId;
 
-    public function __construct(string $asset, ?int $userId = null, ?int $customerId = null, ?int $tenantId = null)
+    public function __construct(string $asset)
     {
         $this->asset = $asset;
-        $this->userId = $userId;
-        $this->customerId = $customerId;
-        $this->tenantId = $tenantId;
     }
 
     public function broadcastOn()

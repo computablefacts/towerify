@@ -4,16 +4,18 @@ namespace App\Modules\AdversaryMeter\Http\Controllers;
 
 use App\Modules\AdversaryMeter\Helpers\ApiUtils;
 use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
+use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
+use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\PortTag;
-use App\Modules\AdversaryMeter\Models\Scan;
 use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
 use App\Modules\AdversaryMeter\Rules\IsValidTag;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -71,7 +73,7 @@ class AssetController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        $obj = CreateAssetListener::execute($asset, $user->id, $user->customer_id, $user->tenant_id);
+        $obj = CreateAssetListener::execute($asset);
 
         if (!$obj) {
             abort(500, "The asset could not be created : {$asset}");
@@ -93,17 +95,8 @@ class AssetController extends Controller
         $valid = Str::lower($request->string('valid'));
         $hours = $request->integer('hours');
 
-        /** @var User $user */
-        $user = Auth::user();
         $query = Asset::where('is_monitored', $valid === 'true');
 
-        if ($user->user_id && !$user->customer_id && !$user->tenant_id) {
-            $query->where('user_id', $user->user_id);
-        } elseif ($user->customer_id && !$user->tenant_id) {
-            $query->where('customer_id', $user->customer_id);
-        } elseif ($user->tenant_id) {
-            $query->where('tenant_id', $user->tenant_id);
-        }
         if ($hours) {
             $cutOffTime = now()->subHours($hours);
             $query->where('created_at', '>=', $cutOffTime);
@@ -112,35 +105,30 @@ class AssetController extends Controller
         $assets = $query->orderBy('asset')
             ->get()
             ->map(function (Asset $asset) {
-                $tags = $asset->scanCompleted()
+                $tags = $asset->ports()
+                    ->orderBy('port')
                     ->get()
-                    ->flatMap(function (Scan $scan) use ($asset) {
-                        return $scan->ports()
-                            ->orderBy('port')
+                    ->flatMap(function (Port $port) use ($asset) {
+                        return $port->tags()
+                            ->orderBy('tag')
                             ->get()
-                            ->flatMap(function (Port $port) use ($asset) {
-                                return $port->tags()
-                                    ->orderBy('tag')
-                                    ->get()
-                                    ->map(function (PortTag $tag) use ($port, $asset) {
-                                        if ($asset->isRange()) {
-                                            return [
-                                                'asset' => $port->ip,
-                                                'port' => $port->port,
-                                                'tag' => Str::lower($tag->tag),
-                                                'is_range' => true,
-                                            ];
-                                        }
-                                        return [
-                                            'asset' => $asset->asset,
-                                            'port' => $port->port,
-                                            'tag' => Str::lower($tag->tag),
-                                            'is_range' => false,
-                                        ];
-                                    });
+                            ->map(function (PortTag $tag) use ($port, $asset) {
+                                if ($asset->isRange()) {
+                                    return [
+                                        'asset' => $port->ip,
+                                        'port' => $port->port,
+                                        'tag' => Str::lower($tag->tag),
+                                        'is_range' => true,
+                                    ];
+                                }
+                                return [
+                                    'asset' => $asset->asset,
+                                    'port' => $port->port,
+                                    'tag' => Str::lower($tag->tag),
+                                    'is_range' => false,
+                                ];
                             });
                     })
-                    ->values()
                     ->toArray();
                 return array_merge($this->convertAsset($asset), [
                     'tags_from_ports' => $tags
@@ -187,7 +175,7 @@ class AssetController extends Controller
             'uid' => $asset->id,
             'asset' => $asset->asset,
             'tld' => $asset->tld(),
-            'type' => $asset->asset_type->name,
+            'type' => $asset->type->name,
             'status' => $asset->is_monitored ? 'valid' : 'invalid',
             'tags' => $asset->tags()
                 ->get()
@@ -231,5 +219,122 @@ class AssetController extends Controller
         if ($asset->id === $assetTag->asset_id) {
             $assetTag->delete();
         }
+    }
+
+    public function infosFromAsset(string $assetBase64): array
+    {
+        $domainOrIpOrRange = base64_decode($assetBase64);
+        $asset = Asset::where('asset', $domainOrIpOrRange)->first();
+
+        if (!$asset) {
+
+            // The asset cannot be identified: check if it is an IP address from a known range
+            if (IsValidIpAddress::test($domainOrIpOrRange)) {
+                $asset = Asset::select('assets.*')
+                    ->join('scans', 'scans.ports_scan_id', '=', 'assets.cur_scan_id')
+                    ->join('ports', 'ports.scan_id', '=', 'scans.id')
+                    ->where('ports.ip', $domainOrIpOrRange)
+                    ->first();
+                if ($asset) {
+                    return $this->infosFromAsset(base64_encode($asset->asset));
+                }
+            }
+            return [];
+        }
+
+        // Load the asset's tags
+        $tags = $asset->tags()->get()->map(fn(AssetTag $tag) => $tag->tag)->toArray();
+
+        // Load the asset's open ports
+        $ports = $asset->ports()
+            ->get()
+            ->map(function (Port $port) {
+                return [
+                    'ip' => $port->ip,
+                    'port' => $port->port,
+                    'protocol' => $port->protocol,
+                    'products' => [$port->product],
+                    'services' => [$port->service],
+                    'tags' => $port->tags()->get()->map(fn(PortTag $tag) => $tag->tag)->toArray(),
+                    'screenshotId' => null,
+                ];
+            })
+            ->toArray();
+
+        // Load the asset's alerts
+        $alerts = $asset->alerts()
+            ->get()
+            ->map(function (Alert $alert) use ($asset) {
+
+                $isTested = HoneypotEvent::query()
+                    ->join('honeypots', 'honeypots.id', '=', 'honeypots_events.honeypot_id')
+                    ->where('honeypots_events.event', 'cve_tested')
+                    ->whereLike('honeypots_events.event', 'CVE-%')
+                    ->whereRaw("TRIM(UPPER(honeypots_events.details)) = TRIM(UPPER('{$alert->cve_id}'))")
+                    ->exists();
+                $port = $alert->port();
+
+                return [
+                    'id' => $alert->id,
+                    'ip' => $port->ip,
+                    'port' => $port->port,
+                    'protocol' => $port->protocol,
+                    'type' => $alert->type,
+                    'tested' => $isTested,
+                    'vulnerability' => $alert->vulnerability,
+                    'remediation' => $alert->remediation,
+                    'level' => Str::lower($alert->level),
+                    'uid' => $alert->uid,
+                    'cve_id' => $alert->cve_id,
+                    'cve_cvss' => $alert->cve_cvss,
+                    'cve_vendor' => $alert->cve_vendor,
+                    'cve_product' => $alert->cve_product,
+                    'title' => $alert->title,
+                    'flarum_url' => null,
+                    'start_date' => $alert->created_at,
+                ];
+            });
+
+        // Load the asset's scans
+        $scanInProgress = $asset->scanInProgress();
+
+        if ($scanInProgress) {
+            $scan = $scanInProgress;
+        } else {
+            $scan = $asset->scanCompleted();
+        }
+
+        $frequency = config('towerify.adversarymeter.days_between_scans');
+        $nextScanDate = $asset->is_monitored ? $scan ? Carbon::parse($scan->ports_scan_begins_at)->addDays((int)$frequency) : Carbon::now() : null;
+
+        // Load the identity of the user who created the asset
+        $user = null; // TODO : User::find($asset->user_id)->first();
+
+        return [
+            'asset' => $asset->asset,
+            'modifications' => [[
+                'asset_id' => $asset->id,
+                'asset_name' => $asset->asset,
+                'timestamp' => $asset->updated_at,
+                'user' => $user ? $user->email : 'unknown',
+            ]],
+            'tags' => $tags,
+            'ports' => $ports,
+            'vulnerabilities' => $alerts->filter(fn(Alert $alert) => !$alert->is_hidden)->toArray(),
+            'timeline' => [
+                'nmap' => [
+                    'id' => optional($scan)->ports_scan_id,
+                    'start' => optional($scan)->ports_scan_begins_at,
+                    'end' => optional($scan)->ports_scan_ends_at,
+                ],
+                'sentinel' => [
+                    'id' => optional($scan)->vulns_scan_id,
+                    'start' => optional($scan)->vulns_scan_begins_at,
+                    'end' => optional($scan)->vulns_scan_ends_at,
+                ],
+                'next_scan' => $nextScanDate,
+            ],
+            'hiddenAlerts' => $alerts->filter(fn(Alert $alert) => $alert->is_hidden)->toArray(),
+        ];
     }
 }

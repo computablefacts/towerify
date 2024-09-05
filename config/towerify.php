@@ -11,6 +11,7 @@ return [
         'api' => env('AM_API'),
         'drop_scan_events_after_x_minutes' => env('DROP_SCAN_EVENTS_AFTER_X_MINUTES', 60),
         'drop_discovery_events_after_x_minutes' => env('DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES', 60),
+        'days_between_scans' => env('DAYS_BETWEEN_SCANS', 5),
     ],
     'telescope' => [
         'whitelist' => [

@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class DeleteAssetListener extends AbstractListener
 {
-    public static function execute(string $asset, ?int $userId = null, ?int $customerId = null, ?int $tenantId = null): bool
+    public static function execute(string $asset): bool
     {
         if (!IsValidAsset::test($asset)) {
             Log::error("Invalid asset : {$asset}");
@@ -27,19 +27,7 @@ class DeleteAssetListener extends AbstractListener
             $assetType = AssetTypesEnum::RANGE;
         }
 
-        $query = Asset::where('asset', $asset)->where('asset_type', $assetType);
-
-        if ($userId) {
-            $query->where('user_id', $userId);
-        }
-        if ($customerId) {
-            $query->where('customer_id', $customerId);
-        }
-        if ($tenantId) {
-            $query->where('tenant_id', $tenantId);
-        }
-
-        $query->delete();
+        Asset::where('asset', $asset)->where('type', $assetType)->delete();
         return true;
     }
 
@@ -48,6 +36,6 @@ class DeleteAssetListener extends AbstractListener
         if (!($event instanceof DeleteAsset)) {
             throw new \Exception('Invalid event type!');
         }
-        self::execute($event->asset, $event->userId, $event->customerId, $event->tenantId);
+        self::execute($event->asset);
     }
 }

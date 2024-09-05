@@ -19,7 +19,7 @@ class ScansTest extends AdversaryMeterTestCase
     {
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
-            'asset_type' => AssetTypesEnum::DNS,
+            'type' => AssetTypesEnum::DNS,
         ]);
 
         $asset = Asset::find($asset->id); // reload all fields from db
@@ -44,7 +44,7 @@ class ScansTest extends AdversaryMeterTestCase
     {
         $asset = Asset::firstOrCreate([
             'asset' => '93.184.215.14',
-            'asset_type' => AssetTypesEnum::IP,
+            'type' => AssetTypesEnum::IP,
         ]);
 
         $asset = Asset::find($asset->id); // reload all fields from db
@@ -251,7 +251,7 @@ class ScansTest extends AdversaryMeterTestCase
 
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
-            'asset_type' => AssetTypesEnum::DNS,
+            'type' => AssetTypesEnum::DNS,
             'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
@@ -388,7 +388,7 @@ class ScansTest extends AdversaryMeterTestCase
 
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
-            'asset_type' => AssetTypesEnum::DNS,
+            'type' => AssetTypesEnum::DNS,
             'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
@@ -424,7 +424,7 @@ class ScansTest extends AdversaryMeterTestCase
 
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
-            'asset_type' => AssetTypesEnum::DNS,
+            'type' => AssetTypesEnum::DNS,
             'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
@@ -502,7 +502,7 @@ class ScansTest extends AdversaryMeterTestCase
 
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
-            'asset_type' => AssetTypesEnum::DNS,
+            'type' => AssetTypesEnum::DNS,
             'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
@@ -598,7 +598,7 @@ class ScansTest extends AdversaryMeterTestCase
 
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
-            'asset_type' => AssetTypesEnum::DNS,
+            'type' => AssetTypesEnum::DNS,
             'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);
@@ -694,7 +694,7 @@ class ScansTest extends AdversaryMeterTestCase
 
         $asset = Asset::firstOrCreate([
             'asset' => 'www.example.com',
-            'asset_type' => AssetTypesEnum::DNS,
+            'type' => AssetTypesEnum::DNS,
             'is_monitored' => true,
         ]);
         $asset->tags()->create(['tag' => 'demo']);

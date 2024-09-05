@@ -27,7 +27,7 @@ class TriggerDiscoveryDeep implements ShouldQueue
     public function handle()
     {
         Asset::whereNull('discovery_id')
-            ->where('asset_type', AssetTypesEnum::DNS)
+            ->where('type', AssetTypesEnum::DNS)
             ->get()
             ->map(fn(Asset $asset) => $asset->tld())
             ->unique()

@@ -3,9 +3,11 @@
 namespace App\Modules\AdversaryMeter\Models;
 
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Asset extends Model
 {
@@ -16,36 +18,33 @@ class Asset extends Model
 
     protected $fillable = [
         'asset',
-        'asset_type',
+        'type',
         'tld',
         'prev_scan_id',
         'cur_scan_id',
         'next_scan_id',
         'discovery_id',
-        'user_id',
-        'customer_id',
-        'tenant_id',
         'is_monitored',
     ];
 
     protected $casts = [
-        'asset_type' => AssetTypesEnum::class,
+        'type' => AssetTypesEnum::class,
         'is_monitored' => 'boolean',
     ];
 
     public function isDns(): bool
     {
-        return $this->asset_type === AssetTypesEnum::DNS;
+        return $this->type === AssetTypesEnum::DNS;
     }
 
     public function isIp(): bool
     {
-        return $this->asset_type === AssetTypesEnum::IP;
+        return $this->type === AssetTypesEnum::IP;
     }
 
     public function isRange(): bool
     {
-        return $this->asset_type === AssetTypesEnum::RANGE;
+        return $this->type === AssetTypesEnum::RANGE;
     }
 
     public function tld(): ?string
@@ -74,23 +73,55 @@ class Asset extends Model
         return null;
     }
 
-    public function isDiscoveryRunning(): bool
-    {
-        return $this->discovery_id !== null;
-    }
-
     public function tags(): HasMany
     {
         return $this->hasMany(AssetTag::class, 'asset_id', 'id');
     }
 
-    public function scanCompleted(): HasMany
+    public function ports(): Builder
     {
-        return $this->hasMany(Scan::class, 'ports_scan_id', 'cur_scan_id');
+        return Port::select('ports.*')
+            ->join('scans', 'scans.id', '=', 'ports.scan_id')
+            ->join('assets', 'assets.cur_scan_id', '=', 'scans.ports_scan_id')
+            ->where('assets.id', $this->id);
     }
 
-    public function scanInProgress(): HasMany
+    public function alerts(): Builder
     {
-        return $this->hasMany(Scan::class, 'ports_scan_id', 'next_scan_id');
+        $hiddenUids = HiddenAlert::whereNotNull('uid')
+            ->where('uid', '<>', '')
+            ->get()
+            ->map(fn(HiddenAlert $marker) => $marker->uid);
+        $hiddenTypes = HiddenAlert::whereNotNull('type')->where('type', '<>', '')
+            ->get()
+            ->map(fn(HiddenAlert $marker) => addslashes($marker->type));
+        $hiddenTitles = HiddenAlert::whereNotNull('title')->where('title', '<>', '')
+            ->get()
+            ->map(fn(HiddenAlert $marker) => addslashes($marker->title));
+
+        $ifUids = $hiddenUids->isEmpty() ? 'false' : "alerts.uid IN ('{$hiddenUids->join("','")}')";
+        $ifTypes = $hiddenTypes->isEmpty() ? 'false' : "alerts.type IN ('{$hiddenTypes->join("','")}')";
+        $ifTitles = $hiddenTitles->isEmpty() ? 'false' : "alerts.title IN ('{$hiddenTitles->join("','")}')";
+        $case = "CASE WHEN {$ifUids} OR {$ifTypes} OR {$ifTitles} THEN true ELSE false END AS is_hidden";
+
+        return Alert::select('alerts.*', DB::raw($case))
+            ->join('ports', 'ports.id', '=', 'alerts.port_id')
+            ->join('scans', 'scans.id', '=', 'ports.scan_id')
+            ->join('assets', 'assets.cur_scan_id', '=', 'scans.ports_scan_id')
+            ->where('assets.id', $this->id);
+    }
+
+    public function scanCompleted(): ?Scan
+    {
+        return Scan::where('asset_id', $this->id)
+            ->where('ports_scan_id', $this->cur_scan_id)
+            ->first();
+    }
+
+    public function scanInProgress(): ?Scan
+    {
+        return Scan::where('asset_id', $this->id)
+            ->where('ports_scan_id', $this->next_scan_id)
+            ->first();
     }
 }

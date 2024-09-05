@@ -30,3 +30,9 @@ Route::group([
     Route::post('{asset}/metadata', 'AssetController@addTag');
     Route::delete('{asset}/metadata/{assetTag}', 'AssetController@removeTag');
 });
+
+Route::group([
+    'prefix' => 'adversary',
+], function () {
+    Route::get('infos-from-asset/{asset}', 'AssetController@infosFromAsset');
+});

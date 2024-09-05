@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 class CreateAssetListener extends AbstractListener
 {
-    public static function execute(string $asset, ?int $userId = null, ?int $customerId = null, ?int $tenantId = null): ?Asset
+    public static function execute(string $asset): ?Asset
     {
         if (!IsValidAsset::test($asset)) {
             Log::error("Invalid asset : {$asset}");
@@ -29,16 +29,10 @@ class CreateAssetListener extends AbstractListener
         return Asset::updateOrCreate(
             [
                 'asset' => $asset,
-                'user_id' => $userId,
-                'customer_id' => $customerId,
-                'tenant_id' => $tenantId,
             ],
             [
                 'asset' => $asset,
-                'asset_type' => $assetType,
-                'user_id' => $userId,
-                'customer_id' => $customerId,
-                'tenant_id' => $tenantId,
+                'type' => $assetType,
             ]
         );
     }
@@ -48,6 +42,6 @@ class CreateAssetListener extends AbstractListener
         if (!($event instanceof CreateAsset)) {
             throw new \Exception('Invalid event type!');
         }
-        self::execute($event->asset, $event->userId, $event->customerId, $event->tenantId);
+        self::execute($event->asset);
     }
 }

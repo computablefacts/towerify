@@ -26,4 +26,9 @@ class Alert extends Model
         'title',
         'flarum_slug',
     ];
+
+    public function port(): ?Port
+    {
+        return Port::find($this->port_id)->first();
+    }
 }

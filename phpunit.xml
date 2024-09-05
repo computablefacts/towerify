@@ -42,6 +42,7 @@
     <env name="USE_SCHEMA_DUMP" value="true"/>
     <env name="DROP_SCAN_EVENTS_AFTER_X_MINUTES" value="1"/>
     <env name="DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES" value="1"/>
+    <env name="DAYS_BETWEEN_SCANS" value="5"/>
   </php>
   <source>
     <include>
