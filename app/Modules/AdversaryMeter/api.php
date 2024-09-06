@@ -54,6 +54,7 @@ Route::group([
     Route::get('hashes', 'HoneypotController@getHashes');
     Route::post('hashes', 'HoneypotController@createHash');
     Route::delete('hashes/{hash}', 'HoneypotController@deleteHash');
+    Route::post('hidden-alerts', 'HoneypotController@createHiddenAlert');
     Route::post('honeypots', 'HoneypotController@postHoneypots');
     Route::post('honeypots/set-next-step', 'HoneypotController@moveHoneypotsConfigurationToNextStep');
 });

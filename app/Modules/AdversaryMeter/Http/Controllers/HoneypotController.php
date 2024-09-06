@@ -11,6 +11,7 @@ use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Models\AssetTagHash;
 use App\Modules\AdversaryMeter\Models\Attacker;
+use App\Modules\AdversaryMeter\Models\HiddenAlert;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use App\Modules\Elements\Mail\HoneypotNotification;
@@ -402,5 +403,43 @@ class HoneypotController extends Controller
         $hash = AssetTagHash::where('hash', $hash)->firstOrFail();
         $hash->delete();
         return response()->json(['message' => 'Hash successfully deleted']);
+    }
+
+    public function createHiddenAlert(Request $request): array
+    {
+        $payload = $request->validate([
+            'uid' => 'nullable|string',
+            'type' => 'nullable|string',
+            'title' => 'nullable|string',
+        ]);
+
+        $uid = $request->string('uid');
+        $type = $request->string('type');
+        $title = $request->string('title');
+
+        if (!$uid && !$type && !$title) {
+            abort(500, 'At least one of uid, type or title must be present.');
+        }
+
+        $hiddenAlerts = HiddenAlert::query();
+
+        if ($uid) {
+            $hiddenAlerts->where('uid', $uid);
+        } else if ($type) {
+            $hiddenAlerts->where('type', $type);
+        } else if ($title) {
+            $hiddenAlerts->where('title', $title);
+        }
+
+        $hidden = $hiddenAlerts->first();
+
+        if (!$hidden) {
+            $hidden = HiddenAlert::create([
+                'uid' => $uid,
+                'type' => $type,
+                'title' => $title,
+            ]);
+        }
+        return $hidden;
     }
 }
