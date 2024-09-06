@@ -2,6 +2,7 @@
 
 namespace App\Modules\AdversaryMeter\Http\Controllers;
 
+use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Attacker;
@@ -266,5 +267,28 @@ class HoneypotController extends Controller
             ->groupBy('level')
             ->get()
             ->toArray();
+    }
+
+    public function honeypotsStatus(): array
+    {
+        $statuses = [
+            HoneypotStatusesEnum::SETUP_COMPLETE,
+            HoneypotStatusesEnum::HONEYPOT_SETUP,
+            HoneypotStatusesEnum::DNS_SETUP
+        ];
+
+        $honeypots = Honeypot::all();
+
+        $leastAdvancedStatus = $honeypots->reduce(function ($carry, $honeypot) use ($statuses) {
+            $currentStatusIndex = array_search($honeypot->status, $statuses);
+            $carryIndex = array_search($carry, $statuses);
+            return $currentStatusIndex < $carryIndex ? $honeypot->status : $carry;
+        }, 'dns_setup');
+
+        return [
+            'current_user' => 'unknown',
+            'honeypots' => $honeypots,
+            'integration_status' => $honeypots->count() ? $leastAdvancedStatus : 'inactive'
+        ];
     }
 }
