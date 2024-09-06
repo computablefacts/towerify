@@ -202,10 +202,13 @@ class AssetController extends Controller
             abort(500, "Invalid tag : {$tag}");
         }
 
-        $obj = $asset->tags()->create(['tag' => $tag]);
+        $obj = $asset->tags()->where('tag', $tag)->first();
 
         if (!$obj) {
-            abort(500, "The tag could not be created : {$tag}");
+            $obj = $asset->tags()->create(['tag' => $tag]);
+            if (!$obj) {
+                abort(500, "The tag could not be created : {$tag}");
+            }
         }
         return collect([[
             'id' => $obj->id,

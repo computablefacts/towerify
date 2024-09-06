@@ -9,6 +9,7 @@ use App\Modules\AdversaryMeter\Mail\HoneypotRequested;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
+use App\Modules\AdversaryMeter\Models\AssetTagHash;
 use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
@@ -375,5 +376,10 @@ class HoneypotController extends Controller
                 ->map(fn(AssetTag $tag) => $tag->tag)
                 ->toArray(),
         ];
+    }
+
+    public function getHashes(): array
+    {
+        return AssetTagHash::all()->toArray();
     }
 }
