@@ -50,4 +50,5 @@ Route::group([
     Route::get('honeypots/stats/{honeypotId}', 'HoneypotController@getHoneypotEventStats');
     Route::get('alerts/stats', 'HoneypotController@getAlertStats');
     Route::get('honeypots/status', 'HoneypotController@honeypotsStatus');
+    Route::post('honeypots', 'HoneypotController@postHoneypots');
 });

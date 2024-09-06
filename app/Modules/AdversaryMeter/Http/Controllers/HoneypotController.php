@@ -2,6 +2,8 @@
 
 namespace App\Modules\AdversaryMeter\Http\Controllers;
 
+use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
+use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
@@ -290,5 +292,41 @@ class HoneypotController extends Controller
             'honeypots' => $honeypots,
             'integration_status' => $honeypots->count() ? $leastAdvancedStatus : 'inactive'
         ];
+    }
+
+    public function postHoneypots(Request $request): array
+    {
+        $honeypots = $request->validate([
+            'honeypots' => [
+                'required',
+                'array',
+                'min:1',
+                'max:3',
+            ],
+            'honeypots.*.dns' => 'regex:/^(?!-)[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/',
+            'honeypots.*.cloud_provider' => 'string|required',
+            'honeypots.*.sensor' => 'string|required',
+        ])['honeypots'];
+
+        $count = Honeypot::count();
+
+        if ($count + count($honeypots) > 3) {
+            abort(500, 'You already have the maximum number of honeypots allowed : 3.');
+        }
+        foreach ($honeypots as $honeypot) {
+            if (Honeypot::where('dns', $honeypot['dns'])->exists()) {
+                abort(500, "HoneyPots {$honeypot['dns']} already exists");
+            }
+            Honeypot::create([
+                'dns' => $honeypot['dns'],
+                'status' => HoneypotStatusesEnum::DNS_SETUP,
+                'cloud_provider' => HoneypotCloudProvidersEnum::AWS,
+                'cloud_sensor' => HoneypotCloudSensorsEnum::from($honeypot['sensor']),
+            ]);
+        }
+        return Honeypot::query()
+            ->orderBy('dns')
+            ->get()
+            ->toArray();
     }
 }
