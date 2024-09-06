@@ -447,4 +447,12 @@ class HoneypotController extends Controller
     {
         $hiddenAlert->delete();
     }
+
+    public function deleteAsset(Asset $asset)
+    {
+        if ($asset->is_monitored) {
+            abort(500, 'Deletion not allowed, asset is monitored.');
+        }
+        $asset->delete();
+    }
 }

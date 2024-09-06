@@ -58,4 +58,5 @@ Route::group([
     Route::delete('hidden-alerts/{hiddenAlertId}', 'HoneypotController@deleteHiddenAlert');
     Route::post('honeypots', 'HoneypotController@postHoneypots');
     Route::post('honeypots/set-next-step', 'HoneypotController@moveHoneypotsConfigurationToNextStep');
+    Route::delete('assets/{assetId}', 'HoneypotController@deleteAsset');
 });
