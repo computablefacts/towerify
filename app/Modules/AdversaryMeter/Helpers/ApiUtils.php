@@ -40,7 +40,11 @@ class ApiUtils
         $url = Config::get('towerify.adversarymeter.api') . $endpoint;
         try {
             $client = new Client([
-                RequestOptions::TIMEOUT => $this->REQUEST_TIMEOUT,
+                RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT,
+                'auth' => [
+                    config('towerify.adversarymeter.api_username'),
+                    config('towerify.adversarymeter.api_password')
+                ]
             ]);
             return $client->post($url, $this->httpHeaders($json));
         } catch (ClientException $exception) {
@@ -217,7 +221,11 @@ class ApiUtils
         $url = Config::get('towerify.adversarymeter.api') . $endpoint;
         try {
             $client = new Client([
-                RequestOptions::TIMEOUT => $this->REQUEST_TIMEOUT,
+                RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT,
+                'auth' => [
+                    config('towerify.adversarymeter.api_username'),
+                    config('towerify.adversarymeter.api_password')
+                ]
             ]);
             return $client->get($url, $this->httpHeaders($json));
         } catch (ClientException $exception) {
