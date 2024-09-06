@@ -47,4 +47,5 @@ Route::group([
     Route::get('profile/competency/{attackerId}', 'HoneypotController@attackerCompetency');
     Route::get('last/events/{attackerId?}', 'HoneypotController@getMostRecentEvent');
     Route::get('last/honeypots', 'HoneypotController@lastHoneypots');
+    Route::get('honeypots/stats/{honeypotId}', 'HoneypotController@getHoneypotEventStats');
 });
