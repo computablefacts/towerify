@@ -5,13 +5,14 @@ namespace App\Modules\AdversaryMeter\Models;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
+use App\Traits\HasTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Honeypot extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTenant;
 
     protected $table = 'honeypots';
     protected $connection = 'mysql_am';
@@ -21,6 +22,7 @@ class Honeypot extends Model
         'status',
         'cloud_provider',
         'cloud_sensor',
+        'created_by',
     ];
 
     protected $casts = [

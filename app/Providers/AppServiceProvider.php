@@ -42,6 +42,14 @@ use App\Models\YnhServer;
 use App\Models\Zone;
 use App\Models\ZoneMember;
 use App\Modules\AdversaryMeter\Helpers\ApiUtils;
+use App\Modules\AdversaryMeter\Models\Asset;
+use App\Modules\AdversaryMeter\Models\AssetTag;
+use App\Modules\AdversaryMeter\Models\AssetTagHash;
+use App\Modules\AdversaryMeter\Models\Honeypot;
+use App\Modules\AdversaryMeter\Observers\AssetObserver;
+use App\Modules\AdversaryMeter\Observers\AssetTagHashObserver;
+use App\Modules\AdversaryMeter\Observers\AssetTagObserver;
+use App\Modules\AdversaryMeter\Observers\HoneypotObserver;
 use App\Observers\AddressObserver;
 use App\Observers\AdjustmentObserver;
 use App\Observers\BillpayerObserver;
@@ -195,6 +203,11 @@ class AppServiceProvider extends ServiceProvider
         YnhServer::observe(YnhServerObserver::class);
         ZoneMember::observe(ZoneMemberObserver::class);
         Zone::observe(ZoneObserver::class);
+        
+        Asset::observe(AssetObserver::class);
+        AssetTag::observe(AssetTagObserver::class);
+        AssetTagHash::observe(AssetTagHashObserver::class);
+        Honeypot::observe(HoneypotObserver::class);
     }
 
     /**

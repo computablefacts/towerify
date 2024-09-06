@@ -3,6 +3,7 @@
 namespace App\Modules\AdversaryMeter\Models;
 
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
+use App\Traits\HasTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class Asset extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTenant;
 
     protected $table = 'assets';
     protected $connection = 'mysql_am';
@@ -25,6 +26,7 @@ class Asset extends Model
         'next_scan_id',
         'discovery_id',
         'is_monitored',
+        'created_by',
     ];
 
     protected $casts = [
