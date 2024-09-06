@@ -5,13 +5,18 @@ namespace App\Modules\AdversaryMeter\Http\Controllers;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
+use App\Modules\AdversaryMeter\Mail\HoneypotRequested;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
+use App\Modules\Elements\Mail\HoneypotNotification;
+use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class HoneypotController extends Controller
 {
@@ -328,5 +333,36 @@ class HoneypotController extends Controller
             ->orderBy('dns')
             ->get()
             ->toArray();
+    }
+
+    public function moveHoneypotsConfigurationToNextStep(): array
+    {
+        $statuses = [
+            HoneypotStatusesEnum::SETUP_COMPLETE,
+            HoneypotStatusesEnum::HONEYPOT_SETUP,
+            HoneypotStatusesEnum::DNS_SETUP
+        ];
+
+        $honeypots = Honeypot::where('status', '!=', HoneypotStatusesEnum::SETUP_COMPLETE)
+            ->get()
+            ->each(function (Honeypot $honeypot) use ($statuses) {
+
+                $nextIdx = array_search($honeypot->status, $statuses) + 1;
+                $honeypot->status = $statuses[$nextIdx];
+                $honeypot->save();
+
+                if ($statuses[$nextIdx] === HoneypotStatusesEnum::HONEYPOT_SETUP) {
+                    /** @var User $user */
+                    $user = Auth::user();
+                    $subject = "Setup of honeypot {$honeypot->dns} requested";
+                    $body = [
+                        'id' => $honeypot->id,
+                        'sensor' => $honeypot->cloud_sensor,
+                        'provider' => $honeypot->cloud_provider,
+                        'query' => "UPDATE honeypots SET status = 'setup_complete' WHERE id = {$honeypot->id};",
+                    ];
+                    Mail::to('support@computablefacts.freshdesk.com')->send(new HoneypotRequested($user, $subject, $body));
+                }
+            });
     }
 }
