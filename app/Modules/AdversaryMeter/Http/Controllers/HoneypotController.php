@@ -215,4 +215,22 @@ class HoneypotController extends Controller
             ->unique()
             ->toArray();
     }
+
+    public function attackerCompetency(Attacker $attacker): array
+    {
+        $tools = $attacker->events()->where('event', 'tool_detected')->count();
+        $cves = $attacker->events()->where('event', 'cve_tested')->count();
+        $humans = $attacker->events()->where('human', true)->count();
+        $ips = $attacker->events()->get()->pluck('ip')->unique()->count();
+        $targetedWordlists = $attacker->events()->where('event', 'curated_wordlist')->count();
+        $targetedPasswords = $attacker->events()->where('event', 'manual_actions_password_targeted')->count();
+        return [
+            'toolbox' => min($tools * 1, 10),
+            'cve_collection' => min($cves / 1000 * 100, 10),
+            'manual_testing' => min($humans / 50 * 100, 10),
+            'stealth_tech' => min($ips / 5 * 10, 10),
+            'curated_wordlist' => $targetedPasswords ? 10 : min($targetedWordlists / 50 * 100, 10),
+            'persistence' => min($attacker->first_contact->diffInDays($attacker->last_contact) / 10 * 10, 10),
+        ];
+    }
 }
