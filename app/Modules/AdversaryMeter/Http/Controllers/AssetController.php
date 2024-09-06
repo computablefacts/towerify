@@ -2,6 +2,7 @@
 
 namespace App\Modules\AdversaryMeter\Http\Controllers;
 
+use App\Modules\AdversaryMeter\Events\BeginPortsScan;
 use App\Modules\AdversaryMeter\Helpers\ApiUtils;
 use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
 use App\Modules\AdversaryMeter\Models\Alert;
@@ -331,6 +332,27 @@ class AssetController extends Controller
                 'next_scan' => $nextScanDate,
             ],
             'hiddenAlerts' => $alerts->filter(fn(Alert $alert) => $alert->is_hidden)->toArray(),
+        ];
+    }
+
+    public function deleteAsset(Asset $asset): void
+    {
+        if ($asset->is_monitored) {
+            abort(500, 'Deletion not allowed, asset is monitored.');
+        }
+        $asset->delete();
+    }
+
+    public function restartScan(Asset $asset): array
+    {
+        if (!$asset->is_monitored) {
+            abort(500, 'Restart scan not allowed, asset is not monitored.');
+        }
+        if (!$asset->scanInProgress()) {
+            event(new BeginPortsScan($asset));
+        }
+        return [
+            'asset' => $this->convertAsset($asset),
         ];
     }
 }

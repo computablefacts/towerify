@@ -34,6 +34,8 @@ Route::group([
 Route::group([
     'prefix' => 'adversary',
 ], function () {
+    Route::delete('assets/{assetId}', 'AssetController@deleteAsset');
+    Route::post('assets/restart/{assetId}', 'AssetController@restartScan');
     Route::get('infos-from-asset/{asset}', 'AssetController@infosFromAsset');
     Route::get('attacker-index', 'HoneypotController@attackerIndex');
     Route::get('recent-events', 'HoneypotController@recentEvents');
@@ -58,5 +60,4 @@ Route::group([
     Route::delete('hidden-alerts/{hiddenAlertId}', 'HoneypotController@deleteHiddenAlert');
     Route::post('honeypots', 'HoneypotController@postHoneypots');
     Route::post('honeypots/set-next-step', 'HoneypotController@moveHoneypotsConfigurationToNextStep');
-    Route::delete('assets/{assetId}', 'HoneypotController@deleteAsset');
 });
