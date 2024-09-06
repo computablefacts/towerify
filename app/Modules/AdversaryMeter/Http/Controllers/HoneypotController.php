@@ -206,4 +206,13 @@ class HoneypotController extends Controller
             ->get()
             ->toArray();
     }
+
+    public function attackerTools(Attacker $attacker): array
+    {
+        return $attacker->events()
+            ->get()
+            ->pluck('details')
+            ->unique()
+            ->toArray();
+    }
 }
