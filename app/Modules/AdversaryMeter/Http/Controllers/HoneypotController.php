@@ -8,6 +8,7 @@ use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
 use App\Modules\AdversaryMeter\Mail\HoneypotRequested;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
+use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
@@ -335,7 +336,7 @@ class HoneypotController extends Controller
             ->toArray();
     }
 
-    public function moveHoneypotsConfigurationToNextStep(): array
+    public function moveHoneypotsConfigurationToNextStep(): void
     {
         $statuses = [
             HoneypotStatusesEnum::SETUP_COMPLETE,
@@ -364,5 +365,15 @@ class HoneypotController extends Controller
                     Mail::to('support@computablefacts.freshdesk.com')->send(new HoneypotRequested($user, $subject, $body));
                 }
             });
+    }
+
+    public function assetTags(): array
+    {
+        return [
+            'tags' => AssetTag::query()
+                ->get()
+                ->map(fn(AssetTag $tag) => $tag->tag)
+                ->toArray(),
+        ];
     }
 }
