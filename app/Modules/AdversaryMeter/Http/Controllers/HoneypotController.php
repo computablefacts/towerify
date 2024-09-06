@@ -140,4 +140,21 @@ class HoneypotController extends Controller
             })
             ->toArray();
     }
+
+    public function attackerActivity(Attacker $attacker): array
+    {
+        $events = $attacker->events()->orderBy('timestamp', 'desc')->get();
+        return [
+            'firstEvent' => $events->map(fn(HoneypotEvent $event) => $event->timestamp)->last(),
+            'top3EventTypes' => $events->groupBy('event')
+                ->sort(fn($e1, $e2) => $e2->count() - $e1->count())
+                ->take(3)
+                ->map(fn($events, $type) => [
+                    'type' => $type,
+                    'count' => $events->count(),
+                ])
+                ->toArray(),
+            'events' => $events->take(1000)->toArray(),
+        ];
+    }
 }

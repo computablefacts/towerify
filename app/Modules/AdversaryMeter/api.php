@@ -40,4 +40,5 @@ Route::group([
     Route::get('blacklist-ips/{attackerId?}', 'HoneypotController@blacklistIps');
     Route::get('vulnerabilities/{attackerId?}', 'HoneypotController@getVulnerabilitiesWithAssetInfo');
     Route::get('vulnerabilities2/{asset}', 'HoneypotController@getVulnerabilitiesWithAssetInfo2');
+    Route::get('activity/{attackerId}', 'HoneypotController@attackerActivity');
 });
