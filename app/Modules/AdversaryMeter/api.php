@@ -53,6 +53,7 @@ Route::group([
     Route::get('assets/tags', 'HoneypotController@assetTags');
     Route::get('hashes', 'HoneypotController@getHashes');
     Route::post('hashes', 'HoneypotController@createHash');
+    Route::delete('hashes/{hash}', 'HoneypotController@deleteHash');
     Route::post('honeypots', 'HoneypotController@postHoneypots');
     Route::post('honeypots/set-next-step', 'HoneypotController@moveHoneypotsConfigurationToNextStep');
 });

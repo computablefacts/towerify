@@ -15,6 +15,7 @@ use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use App\Modules\Elements\Mail\HoneypotNotification;
 use App\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -394,5 +395,12 @@ class HoneypotController extends Controller
             'tag' => $tag,
             'hash' => $hash,
         ]);
+    }
+
+    public function deleteHash(string $hash): JsonResponse
+    {
+        $hash = AssetTagHash::where('hash', $hash)->firstOrFail();
+        $hash->delete();
+        return response()->json(['message' => 'Hash successfully deleted']);
     }
 }
