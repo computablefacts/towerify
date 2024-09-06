@@ -5,6 +5,7 @@ namespace App\Modules\AdversaryMeter\Http\Controllers;
 use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HoneypotController extends Controller
 {
@@ -13,7 +14,7 @@ class HoneypotController extends Controller
         $this->middleware('auth:api');
     }
 
-    public function attackerIndex(Request $request)
+    public function attackerIndex(Request $request): array
     {
         $nbEvents = HoneypotEvent::count();
         return Attacker::select('attackers.*')
@@ -31,7 +32,7 @@ class HoneypotController extends Controller
                     ->count();
 
                 $ratio = $nbAttackerEvents / $nbEvents * 100;
-                
+
                 if ($ratio <= 33) {
                     $aggressiveness = 'low';
                 } elseif ($ratio <= 66) {
@@ -48,6 +49,33 @@ class HoneypotController extends Controller
                     'ips' => $ips,
                 ];
             })
+            ->toArray();
+    }
+
+    public function recentEvents(Request $request): array
+    {
+        $manual = $request->boolean('manual', true);
+        $auto = $request->boolean('auto', true);
+
+        if (!$manual && !$auto) {
+            return [];
+        }
+
+        $events = HoneypotEvent::select(
+            'honeypots_events.*',
+            DB::raw("CASE WHEN attackers IS NULL THEN '-' ELSE attackers.name END AS internal_name"),
+            DB::raw("CASE WHEN attackers IS NULL THEN '-' ELSE attackers.is END AS attacker_id"),
+        )
+            ->leftJoin('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
+
+        if ($auto && !$manual) {
+            $events->where('human', true);
+        } else if (!$auto && $manual) {
+            $events->where('targeted', true);
+        }
+        return $events->orderBy('timestamp', 'desc')
+            ->limit(1000)
+            ->get()
             ->toArray();
     }
 }

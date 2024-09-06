@@ -36,4 +36,5 @@ Route::group([
 ], function () {
     Route::get('infos-from-asset/{asset}', 'AssetController@infosFromAsset');
     Route::get('attacker-index', 'HoneypotController@attackerIndex');
+    Route::get('recent-events', 'HoneypotController@recentEvents');
 });
