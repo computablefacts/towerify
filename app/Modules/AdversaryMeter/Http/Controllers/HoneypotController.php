@@ -30,9 +30,7 @@ class HoneypotController extends Controller
                     ->map(fn(HoneypotEvent $event) => $event->ip)
                     ->toArray();
 
-                $nbAttackerEvents = HoneypotEvent::where('attacker_id', $attacker->id)
-                    ->count();
-
+                $nbAttackerEvents = HoneypotEvent::where('attacker_id', $attacker->id)->count();
                 $ratio = $nbAttackerEvents / $nbEvents * 100;
 
                 if ($ratio <= 33) {
@@ -161,9 +159,7 @@ class HoneypotController extends Controller
     public function attackerProfile(Attacker $attacker): array
     {
         $nbEvents = HoneypotEvent::count();
-        $nbAttackerEvents = HoneypotEvent::where('attacker_id', $attacker->id)
-            ->count();
-
+        $nbAttackerEvents = $attacker->events()->count();
         $ratio = $nbAttackerEvents / $nbEvents * 100;
 
         if ($ratio <= 33) {
@@ -181,6 +177,16 @@ class HoneypotController extends Controller
             'count' => $nbAttackerEvents,
             'tot' => $nbEvents,
             'aggressiveness' => $aggressiveness,
+        ];
+    }
+
+    public function attackerStats(Attacker $attacker): array
+    {
+        return [
+            'attacks' => $attacker->events()->count(),
+            'human' => $attacker->events()->where('human', true)->count(),
+            'targeted' => $attacker->events()->where('targeted', true)->count(),
+            'cve' => $attacker->events()->where('event', 'cve_tested')->count(),
         ];
     }
 }

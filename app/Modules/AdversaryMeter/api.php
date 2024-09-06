@@ -42,4 +42,5 @@ Route::group([
     Route::get('vulnerabilities2/{asset}', 'HoneypotController@getVulnerabilitiesWithAssetInfo2');
     Route::get('activity/{attackerId}', 'HoneypotController@attackerActivity');
     Route::get('profile/{attackerId}', 'HoneypotController@attackerProfile');
+    Route::get('profile/stats/{attackerId}', 'HoneypotController@attackerStats');
 });
