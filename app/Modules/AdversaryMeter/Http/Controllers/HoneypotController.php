@@ -122,4 +122,22 @@ class HoneypotController extends Controller
             })
             ->toArray();
     }
+
+    public function getVulnerabilitiesWithAssetInfo2(string $assetBase64): array
+    {
+        return Alert::select('alerts.*', 'assets.id AS asset_id')
+            ->join('ports', 'ports.id', '=', 'alerts.port_id')
+            ->join('scans', 'scans.id', '=', 'ports.scan_id')
+            ->join('assets', 'assets.cur_scan_id', '=', 'ports.ports_scan_id')
+            ->where('assets.asset', base64_decode($assetBase64))
+            ->get()
+            ->map(function (Alert $alert) {
+                return [
+                    'alert' => $alert,
+                    'asset' => Asset::find($alert->asset_id),
+                    'events' => $alert->events()->get()->toArray(),
+                ];
+            })
+            ->toArray();
+    }
 }
