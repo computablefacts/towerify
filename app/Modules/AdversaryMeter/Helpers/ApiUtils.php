@@ -6,11 +6,8 @@ use App\Modules\AdversaryMeter\Exceptions\ApiException;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Psr7;
 use GuzzleHttp\RequestOptions;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
-use function GuzzleHttp\Psr7;
 
 class ApiUtils
 {
@@ -18,21 +15,12 @@ class ApiUtils
 
     public function checkport_public($host, $port, $protocol)
     {
-        $cacheKey = 'am_api:checkport:' . $host . ':' . $port . ':' . $protocol;
-        if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str($this->checkport_private($host, $port, $protocol)), 6 * 60 * 60 /* 6 hours */);
-        }
-        return $this->json(Psr7\parse_response(Cache::get($cacheKey)));
-    }
-
-    private function checkport_private($host, $port, $protocol)
-    {
-        $json = [
+        $response = $this->post('/checkport', [
             'host' => $host,
             'port' => $port,
             'protocol' => $protocol
-        ];
-        return $this->post('/checkport', $json);
+        ]);
+        return $this->json($response);
     }
 
     private function post($endpoint, $json)
@@ -40,7 +28,11 @@ class ApiUtils
         $url = Config::get('towerify.adversarymeter.api') . $endpoint;
         try {
             $client = new Client([
-                RequestOptions::TIMEOUT => $this->REQUEST_TIMEOUT,
+                RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT,
+                'auth' => [
+                    config('towerify.adversarymeter.api_username'),
+                    config('towerify.adversarymeter.api_password')
+                ]
             ]);
             return $client->post($url, $this->httpHeaders($json));
         } catch (ClientException $exception) {
@@ -114,48 +106,27 @@ class ApiUtils
 
     public function discover_public(string $domain)
     {
-        $cacheKey = 'am_api:discovery:' . $domain;
-        if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str($this->discover_private($domain)), 12 * 60 * 60 /* 12 hours */);
-        }
-        return $this->json(Psr7\parse_response(Cache::get($cacheKey)), $domain);
-    }
-
-    private function discover_private(string $domain)
-    {
-        $json = array_merge(
+        $response = $this->post('/discover', array_merge(
             [
                 'domain' => $domain,
             ]
-        );
-        return $this->post('/discover', $json);
+        ));
+        return $this->json($response, $domain);
     }
 
     public function screenshot_public(string $domain)
     {
-        $response = $this->screenshot_private($domain);
-        return $this->json($response, $domain);
-    }
-
-    private function screenshot_private(string $domain)
-    {
-        $json = array_merge(
+        $response = $this->post('/screenshot', array_merge(
             [
                 'url' => $domain,
             ]
-        );
-        return $this->post('/screenshot', $json);
+        ));
+        return $this->json($response, $domain);
     }
 
     public function start_scan_public($asset, $ip, $port, $protocol)
     {
-        $response = $this->start_scan_private($asset, $ip, $port, $protocol);
-        return $this->json($response, $asset);
-    }
-
-    private function start_scan_private($asset, $ip, $port, $protocol)
-    {
-        $json = array_merge(
+        $response = $this->post('/start_scan', array_merge(
             [
                 'hostname' => $asset,
                 'ip' => $ip,
@@ -165,51 +136,34 @@ class ApiUtils
                 'tags' => [],
                 'tests' => [],
             ]
-        );
-        return $this->post('/start_scan', $json);
+        ));
+        return $this->json($response, $asset);
     }
 
     public function task_masscan_public(string $host)
     {
-        $response = $this->task_masscan_private($host);
-        return $this->json($response, $host);
-    }
-
-    private function task_masscan_private(string $host)
-    {
-        $json = [
+        $response = $this->post('/task-masscan', [
             'input' => [
                 $host
             ]
-        ];
-        return $this->post('/task-masscan', $json);
+        ]);
+        return $this->json($response, $host);
     }
 
     public function task_nmap_public(string $host)
     {
-        $response = $this->task_nmap_private($host);
-        return $this->json($response, $host);
-    }
-
-    private function task_nmap_private(string $host)
-    {
-        $json = [
+        $response = $this->post('/task-nmap', [
             'input' => [
                 $host
             ]
-        ];
-        return $this->post('/task-nmap', $json);
+        ]);
+        return $this->json($response, $host);
     }
 
     public function task_status_public(string $id)
     {
-        $response = $this->task_status_private($id);
+        $response = $this->get('/task_status/' . $id, []);
         return $this->json($response, $id);
-    }
-
-    private function task_status_private(string $id)
-    {
-        return $this->get('/task_status/' . $id, []);
     }
 
     private function get($endpoint, $json)
@@ -217,7 +171,11 @@ class ApiUtils
         $url = Config::get('towerify.adversarymeter.api') . $endpoint;
         try {
             $client = new Client([
-                RequestOptions::TIMEOUT => $this->REQUEST_TIMEOUT,
+                RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT,
+                'auth' => [
+                    config('towerify.adversarymeter.api_username'),
+                    config('towerify.adversarymeter.api_password')
+                ]
             ]);
             return $client->get($url, $this->httpHeaders($json));
         } catch (ClientException $exception) {
@@ -229,108 +187,59 @@ class ApiUtils
 
     public function task_result_public(string $id)
     {
-        $response = $this->task_result_private($id);
+        $response = $this->get('/task_result/' . $id, []);
         return $this->json($response, $id);
-    }
-
-    private function task_result_private(string $id)
-    {
-        return $this->get('/task_result/' . $id, []);
     }
 
     public function task_start_scan_public($hostname, $ip, $port, $protocol, $tags)
     {
-        $response = $this->task_start_scan_private($hostname, $ip, $port, $protocol, $tags);
-        return $this->json($response, $hostname);
-    }
-
-    private function task_start_scan_private($hostName, $ip, $port, $protocol, $tags)
-    {
-        $json = [
-            "hostname" => $hostName,
+        $response = $this->post('/start_scan', [
+            "hostname" => $hostname,
             "ip" => $ip,
             "port" => $port,
             "protocol" => $protocol,
             "client" => "",
             "tags" => $tags
-        ];
-        return $this->post('/start_scan', $json);
+        ]);
+        return $this->json($response, $hostname);
     }
 
     public function task_get_scan_public(string $scanId)
     {
-        $response = $this->task_get_scan_private($scanId);
+        $response = $this->get('/get_scan/' . $scanId, []);
         return $this->json($response, $scanId);
-    }
-
-    private function task_get_scan_private(string $scanId)
-    {
-        return $this->get('/get_scan/' . $scanId, []);
     }
 
     public function ip_geoloc_public(string $ip)
     {
-        $cacheKey = 'am_api:geoloc:' . $ip;
-        if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str($this->ip_geoloc_private($ip)), 72 * 60 * 60 /* 72 hours */);
-        }
-        return $this->json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
-    }
-
-    private function ip_geoloc_private(string $ip)
-    {
-        $json = [
+        $response = $this->post('/ipgeoloc', [
             'input' => $ip
-        ];
-        return $this->post('/ipgeoloc', $json);
+        ]);
+        return $this->json($response, $ip);
     }
 
     public function ip_whois_public(string $ip)
     {
-        $cacheKey = 'am_api:whois:' . $ip;
-        if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str($this->ip_whois_private($ip)), 72 * 60 * 60 /* 72 hours */);
-        }
-        return $this->json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
-    }
-
-    private function ip_whois_private(string $ip)
-    {
-        $json = [
+        $response = $this->post('/ipwhois', [
             'input' => $ip
-        ];
-        return $this->post('/ipwhois', $json);
+        ]);
+        return $this->json($response, $ip);
     }
 
     public function task_discover_full_public(array $urls)
     {
-        $response = $this->task_discover_full_private($urls);
-        return $this->json($response);
-    }
-
-    private function task_discover_full_private(array $urls)
-    {
-        $json = [
+        $response = $this->post('/discover-full-task', [
             'input' => $urls
-        ];
-        return $this->post('/discover-full-task', $json);
+        ]);
+        return $this->json($response);
     }
 
     public function discover_from_ip_public(string $ip)
     {
-        $cacheKey = 'am_api:discovery:' . $ip;
-        if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, Psr7\str($this->discover_from_ip_private($ip)), 12 * 60 * 60 /* 12 hours */);
-        }
-        return $this->json(Psr7\parse_response(Cache::get($cacheKey)), $ip);
-    }
-
-    private function discover_from_ip_private(string $ip)
-    {
-        $json = [
+        $response = $this->post('/rapid_reverse_ip', [
             'input' => $ip
-        ];
-        return $this->post('/rapid_reverse_ip', $json);
+        ]);
+        return $this->json($response, $ip);
     }
 
     public function external_ips()

@@ -5,6 +5,7 @@ namespace App\Modules\AdversaryMeter\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Port extends Model
 {
@@ -29,6 +30,7 @@ class Port extends Model
         'service',
         'product',
         'ssl',
+        'screenshot_id',
     ];
 
     protected $casts = [
@@ -38,5 +40,10 @@ class Port extends Model
     public function tags(): HasMany
     {
         return $this->hasMany(PortTag::class, 'port_id', 'id');
+    }
+
+    public function screenshot(): HasOne
+    {
+        return $this->hasOne(Screenshot::class, 'id', 'screenshot_id');
     }
 }

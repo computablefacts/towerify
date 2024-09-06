@@ -31,7 +31,7 @@ class Alert extends Model
 
     public function port(): ?Port
     {
-        return Port::find($this->port_id)->first();
+        return Port::find($this->port_id);
     }
 
     public function events(?int $attackerId = null): Builder

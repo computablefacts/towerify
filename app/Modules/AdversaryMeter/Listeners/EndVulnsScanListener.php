@@ -9,6 +9,7 @@ use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\Scan;
+use App\Modules\AdversaryMeter\Models\Screenshot;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -84,9 +85,7 @@ class EndVulnsScanListener extends AbstractListener
 
         $this->setAlertsV1($port, $task);
         $this->setAlertsV2($port, $task);
-
-        // TODO : deal with screenshot
-
+        $this->setScreenshot($port, $task);
         $this->markAssetScanAsCompleted($scan);
     }
 
@@ -97,6 +96,7 @@ class EndVulnsScanListener extends AbstractListener
             ->flatMap(fn(array $data) => collect(preg_split('/\r\n|\r|\n/', $data['rawOutput'])))
             ->filter(fn(string $alert) => $alert !== '')
             ->map(fn(string $alert) => json_decode($alert, true))
+            ->filter(fn(?array $alert) => $alert !== null)
             ->each(function (array $alert) use ($port) {
                 try {
                     Alert::updateOrCreate([
@@ -127,8 +127,8 @@ class EndVulnsScanListener extends AbstractListener
     {
         collect($task['data'] ?? [])
             ->filter(fn(array $data) => isset($data['alerts']) && count($data['alerts']))
-            ->flatMap(fn(array $data) => collect($data['alerts'] ?? []))
-            ->filter(fn($alert) => $alert !== '')
+            ->flatMap(fn(array $data) => $data['alerts'])
+            ->filter(fn(array|string $alert) => is_array($alert))
             ->each(function (array $alert) use ($port) {
                 try {
                     $type = trim($alert['type']);
@@ -143,8 +143,8 @@ class EndVulnsScanListener extends AbstractListener
                     ], [
                         'port_id' => $port->id,
                         'type' => $type,
-                        'vulnerability' => trim($alert['vulnerability']),
-                        'remediation' => trim($alert['remediation']),
+                        'vulnerability' => Str::limit(trim($alert['vulnerability']), 5000),
+                        'remediation' => Str::limit(trim($alert['remediation']), 5000),
                         'level' => trim($alert['level']),
                         'uid' => trim($alert['uid']),
                         'cve_id' => empty($alert['cve_id']) ? null : $alert['cve_id'],
@@ -158,6 +158,19 @@ class EndVulnsScanListener extends AbstractListener
                     Log::error($exception);
                     Log::error($alert);
                 }
+            });
+    }
+
+    private function setScreenshot(Port $port, array $task)
+    {
+        collect($task['data'] ?? [])
+            ->filter(fn(array $data) => $data['tool'] === 'splash' && $data['rawOutput'])
+            ->map(fn(array $data) => json_decode($data['rawOutput'], true))
+            ->filter(fn(array $screenshot) => !empty($screenshot['png']))
+            ->each(function (array $screenshot) use ($port) {
+                $screenshot = Screenshot::create(['png' => "data:image/png;base64,{$screenshot['png']}"]);
+                $port->screenshot_id = $screenshot->id;
+                $port->save();
             });
     }
 

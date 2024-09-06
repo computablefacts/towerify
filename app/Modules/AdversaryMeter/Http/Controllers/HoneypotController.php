@@ -14,7 +14,7 @@ use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\HiddenAlert;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
-use App\Modules\Elements\Mail\HoneypotNotification;
+use App\Modules\AdversaryMeter\Models\Port;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -129,6 +129,7 @@ class HoneypotController extends Controller
                 return [
                     'alert' => $alert,
                     'asset' => Asset::find($alert->asset_id),
+                    'port' => Port::find($alert->port_id),
                     'events' => $alert->events($attackerId)->get()->toArray(),
                 ];
             })

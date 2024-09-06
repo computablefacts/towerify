@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class Asset extends Model
@@ -113,17 +114,17 @@ class Asset extends Model
             ->where('assets.id', $this->id);
     }
 
-    public function scanCompleted(): ?Scan
+    public function scanCompleted(): Collection
     {
         return Scan::where('asset_id', $this->id)
             ->where('ports_scan_id', $this->cur_scan_id)
-            ->first();
+            ->get();
     }
 
-    public function scanInProgress(): ?Scan
+    public function scanInProgress(): Collection
     {
         return Scan::where('asset_id', $this->id)
             ->where('ports_scan_id', $this->next_scan_id)
-            ->first();
+            ->get();
     }
 }

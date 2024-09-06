@@ -11,6 +11,7 @@ use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\PortTag;
+use App\Modules\AdversaryMeter\Models\Screenshot;
 use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
@@ -96,9 +97,15 @@ class AssetController extends Controller
         $valid = Str::lower($request->string('valid'));
         $hours = $request->integer('hours');
 
-        $query = Asset::where('is_monitored', $valid === 'true');
+        $query = Asset::query();
 
-        if ($hours) {
+        if ($valid === 'true') {
+            $query->where('is_monitored', true);
+        }
+        if ($valid === 'false') {
+            $query->where('is_monitored', false);
+        }
+        if ($hours && is_integer($hours)) {
             $cutOffTime = now()->subHours($hours);
             $query->where('created_at', '>=', $cutOffTime);
         }
@@ -188,11 +195,10 @@ class AssetController extends Controller
         ];
     }
 
-    public function screenshot(int $id): array
+    public function screenshot(Screenshot $screenshot): array
     {
-        // TODO : backport code
         return [
-            "screenshot" => null,
+            "screenshot" => $screenshot->png,
         ];
     }
 
@@ -260,7 +266,7 @@ class AssetController extends Controller
                     'products' => [$port->product],
                     'services' => [$port->service],
                     'tags' => $port->tags()->get()->map(fn(PortTag $tag) => $tag->tag)->toArray(),
-                    'screenshotId' => null,
+                    'screenshotId' => $port->screenshot()->first()?->id,
                 ];
             })
             ->toArray();
@@ -290,23 +296,34 @@ class AssetController extends Controller
                     'title' => $alert->title,
                     'flarum_url' => null,
                     'start_date' => $alert->created_at,
+                    'is_hidden' => $alert->is_hidden,
                 ];
             });
 
         // Load the asset's scans
-        $scanInProgress = $asset->scanInProgress();
+        $scansInProgress = $asset->scanInProgress();
 
-        if ($scanInProgress) {
-            $scan = $scanInProgress;
+        if ($scansInProgress->isNotEmpty()) {
+            $scans = $scansInProgress;
         } else {
-            $scan = $asset->scanCompleted();
+            $scans = $asset->scanCompleted();
         }
 
+        $portsScanBeginsAt = $scans->sortBy('ports_scan_begins_at')->first()?->ports_scan_begins_at;
+        $portsScanEndsAt = $scans->sortBy('ports_scan_ends_at')->last()?->ports_scan_ends_at;
+
+        $vulnsScanBeginsAt = $scans->sortBy('vulns_scan_begins_at')->first()?->vulns_scan_begins_at;
+        $vulnsScanEndsAt = $scans->sortBy('vulns_scan_ends_at')->last()?->vulns_scan_ends_at;
+
         $frequency = config('towerify.adversarymeter.days_between_scans');
-        $nextScanDate = $asset->is_monitored ? $scan ? Carbon::parse($scan->ports_scan_begins_at)->addDays((int)$frequency) : Carbon::now() : null;
+        $nextScanDate = $asset->is_monitored ?
+            $vulnsScanEndsAt ?
+                Carbon::create($vulnsScanEndsAt)->addDays((int)$frequency) :
+                ($vulnsScanBeginsAt ? Carbon::create($vulnsScanBeginsAt)->addDays((int)$frequency) : Carbon::now()) :
+            null;
 
         // Load the identity of the user who created the asset
-        $user = null; // TODO : User::find($asset->user_id)->first();
+        $user = $asset->createdBy();
 
         return [
             'asset' => $asset->asset,
@@ -318,21 +335,21 @@ class AssetController extends Controller
             ]],
             'tags' => $tags,
             'ports' => $ports,
-            'vulnerabilities' => $alerts->filter(fn(Alert $alert) => !$alert->is_hidden)->toArray(),
+            'vulnerabilities' => $alerts->filter(fn(array $alert) => !$alert['is_hidden'])->toArray(),
             'timeline' => [
                 'nmap' => [
-                    'id' => optional($scan)->ports_scan_id,
-                    'start' => optional($scan)->ports_scan_begins_at,
-                    'end' => optional($scan)->ports_scan_ends_at,
+                    'id' => $scans->first()?->ports_scan_id,
+                    'start' => $portsScanBeginsAt,
+                    'end' => $portsScanEndsAt,
                 ],
                 'sentinel' => [
-                    'id' => optional($scan)->vulns_scan_id,
-                    'start' => optional($scan)->vulns_scan_begins_at,
-                    'end' => optional($scan)->vulns_scan_ends_at,
+                    'id' => '000000000000000000000000',
+                    'start' => $vulnsScanBeginsAt,
+                    'end' => $vulnsScanEndsAt,
                 ],
                 'next_scan' => $nextScanDate,
             ],
-            'hiddenAlerts' => $alerts->filter(fn(Alert $alert) => $alert->is_hidden)->toArray(),
+            'hiddenAlerts' => $alerts->filter(fn(array $alert) => $alert['is_hidden'])->toArray(),
         ];
     }
 
@@ -352,7 +369,7 @@ class AssetController extends Controller
         if (!$asset->is_monitored) {
             abort(500, 'Restart scan not allowed, asset is not monitored.');
         }
-        if (!$asset->scanInProgress()) {
+        if ($asset->scanInProgress()->isEmpty()) {
             event(new BeginPortsScan($asset));
         }
         return [

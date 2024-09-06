@@ -16,11 +16,6 @@ if (httpClient.getBaseUrl() === '') {
     httpClient.init(conf.API_BASE_URL);
 }
 
-/** @deprecated */
-export function urlStartDiscussion(vulnId) {
-    return httpClient.getBaseUrl() + `/api/v2/adversary/start-discussion/${vulnId}?api_token=${httpClient.getToken()}`;
-}
-
 export async function whoAmI() {
     return httpClient.whoAmI().then(resp => resp.data);
 }

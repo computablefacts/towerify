@@ -21,7 +21,7 @@ Route::group([
 Route::group([
     'prefix' => 'inbox',
 ], function () {
-    Route::get('screenshot/{id}', 'AssetController@screenshot');
+    Route::get('screenshot/{screenshot}', 'AssetController@screenshot');
 });
 
 Route::group([
@@ -34,30 +34,30 @@ Route::group([
 Route::group([
     'prefix' => 'adversary',
 ], function () {
-    Route::delete('assets/{assetId}', 'AssetController@deleteAsset');
-    Route::post('assets/restart/{assetId}', 'AssetController@restartScan');
+    Route::delete('assets/{asset}', 'AssetController@deleteAsset');
+    Route::post('assets/restart/{asset}', 'AssetController@restartScan');
     Route::get('infos-from-asset/{asset}', 'AssetController@infosFromAsset');
     Route::get('attacker-index', 'HoneypotController@attackerIndex');
     Route::get('recent-events', 'HoneypotController@recentEvents');
     Route::get('blacklist-ips/{attackerId?}', 'HoneypotController@blacklistIps');
     Route::get('vulnerabilities/{attackerId?}', 'HoneypotController@getVulnerabilitiesWithAssetInfo');
     Route::get('vulnerabilities2/{asset}', 'HoneypotController@getVulnerabilitiesWithAssetInfo2');
-    Route::get('activity/{attackerId}', 'HoneypotController@attackerActivity');
-    Route::get('profile/{attackerId}', 'HoneypotController@attackerProfile');
-    Route::get('profile/stats/{attackerId}', 'HoneypotController@attackerStats');
-    Route::get('profile/tools/{attackerId}', 'HoneypotController@attackerTools');
-    Route::get('profile/competency/{attackerId}', 'HoneypotController@attackerCompetency');
+    Route::get('activity/{attacker}', 'HoneypotController@attackerActivity');
+    Route::get('profile/{attacker}', 'HoneypotController@attackerProfile');
+    Route::get('profile/stats/{attacker}', 'HoneypotController@attackerStats');
+    Route::get('profile/tools/{attacker}', 'HoneypotController@attackerTools');
+    Route::get('profile/competency/{attacker}', 'HoneypotController@attackerCompetency');
     Route::get('last/events/{attackerId?}', 'HoneypotController@getMostRecentEvent');
     Route::get('last/honeypots', 'HoneypotController@lastHoneypots');
-    Route::get('honeypots/stats/{honeypotId}', 'HoneypotController@getHoneypotEventStats');
+    Route::get('honeypots/stats/{honeypot}', 'HoneypotController@getHoneypotEventStats');
     Route::get('alerts/stats', 'HoneypotController@getAlertStats');
     Route::get('honeypots/status', 'HoneypotController@honeypotsStatus');
     Route::get('assets/tags', 'HoneypotController@assetTags');
     Route::get('hashes', 'HoneypotController@getHashes');
     Route::post('hashes', 'HoneypotController@createHash');
-    Route::delete('hashes/{hashId}', 'HoneypotController@deleteHash');
+    Route::delete('hashes/{assetHashTag}', 'HoneypotController@deleteHash');
     Route::post('hidden-alerts', 'HoneypotController@createHiddenAlert');
-    Route::delete('hidden-alerts/{hiddenAlertId}', 'HoneypotController@deleteHiddenAlert');
+    Route::delete('hidden-alerts/{hiddenAlert}', 'HoneypotController@deleteHiddenAlert');
     Route::post('honeypots', 'HoneypotController@postHoneypots');
     Route::post('honeypots/set-next-step', 'HoneypotController@moveHoneypotsConfigurationToNextStep');
 });
