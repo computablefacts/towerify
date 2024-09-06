@@ -256,4 +256,15 @@ class HoneypotController extends Controller
             ->get()
             ->toArray();
     }
+
+    public function getAlertStats(): array
+    {
+        return Alert::select(
+            DB::raw("level"),
+            DB::raw("COUNT(*) AS count")
+        )
+            ->groupBy('level')
+            ->get()
+            ->toArray();
+    }
 }
