@@ -157,4 +157,30 @@ class HoneypotController extends Controller
             'events' => $events->take(1000)->toArray(),
         ];
     }
+
+    public function attackerProfile(Attacker $attacker): array
+    {
+        $nbEvents = HoneypotEvent::count();
+        $nbAttackerEvents = HoneypotEvent::where('attacker_id', $attacker->id)
+            ->count();
+
+        $ratio = $nbAttackerEvents / $nbEvents * 100;
+
+        if ($ratio <= 33) {
+            $aggressiveness = 'low';
+        } elseif ($ratio <= 66) {
+            $aggressiveness = 'medium';
+        } else {
+            $aggressiveness = 'high';
+        }
+        return [
+            'id' => $attacker->id,
+            'name' => $attacker->name,
+            'first_contact' => $attacker->first_contact,
+            'last_contact' => $attacker->last_contact,
+            'count' => $nbAttackerEvents,
+            'tot' => $nbEvents,
+            'aggressiveness' => $aggressiveness,
+        ];
+    }
 }
