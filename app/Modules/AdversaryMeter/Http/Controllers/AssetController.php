@@ -7,7 +7,6 @@ use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
-use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\PortTag;
 use App\Modules\AdversaryMeter\Rules\IsValidAsset;
@@ -266,12 +265,6 @@ class AssetController extends Controller
             ->get()
             ->map(function (Alert $alert) use ($asset) {
 
-                $isTested = HoneypotEvent::query()
-                    ->join('honeypots', 'honeypots.id', '=', 'honeypots_events.honeypot_id')
-                    ->where('honeypots_events.event', 'cve_tested')
-                    ->whereLike('honeypots_events.event', 'CVE-%')
-                    ->whereRaw("TRIM(UPPER(honeypots_events.details)) = TRIM(UPPER('{$alert->cve_id}'))")
-                    ->exists();
                 $port = $alert->port();
 
                 return [
@@ -280,7 +273,7 @@ class AssetController extends Controller
                     'port' => $port->port,
                     'protocol' => $port->protocol,
                     'type' => $alert->type,
-                    'tested' => $isTested,
+                    'tested' => $alert->events()->exists(),
                     'vulnerability' => $alert->vulnerability,
                     'remediation' => $alert->remediation,
                     'level' => Str::lower($alert->level),

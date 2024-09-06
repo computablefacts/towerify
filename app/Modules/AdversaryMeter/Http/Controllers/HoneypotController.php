@@ -2,6 +2,8 @@
 
 namespace App\Modules\AdversaryMeter\Http\Controllers;
 
+use App\Modules\AdversaryMeter\Models\Alert;
+use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use Illuminate\Http\Request;
@@ -61,11 +63,14 @@ class HoneypotController extends Controller
             return [];
         }
 
+        /** @var array $ips */
+        $ips = config('towerify.adversarymeter.ip_addresses');
         $events = HoneypotEvent::select(
             'honeypots_events.*',
             DB::raw("CASE WHEN attackers.name IS NULL THEN '-' ELSE attackers.name END AS internal_name"),
             DB::raw("CASE WHEN attackers.id IS NULL THEN '-' ELSE attackers.id END AS attacker_id"),
         )
+            ->whereNotIn('ip', $ips)
             ->leftJoin('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
 
         if ($auto && !$manual) {
@@ -99,5 +104,22 @@ class HoneypotController extends Controller
             $events->where('honeypots_events.attacker_id', $attackerId);
         }
         return $events->get()->toArray();
+    }
+
+    public function getVulnerabilitiesWithAssetInfo(?int $attackerId = null): array
+    {
+        return Alert::select('alerts.*', 'assets.id AS asset_id')
+            ->join('ports', 'ports.id', '=', 'alerts.port_id')
+            ->join('scans', 'scans.id', '=', 'ports.scan_id')
+            ->join('assets', 'assets.cur_scan_id', '=', 'ports.ports_scan_id')
+            ->get()
+            ->map(function (Alert $alert) use ($attackerId) {
+                return [
+                    'alert' => $alert,
+                    'asset' => Asset::find($alert->asset_id),
+                    'events' => $alert->events($attackerId)->get()->toArray(),
+                ];
+            })
+            ->toArray();
     }
 }
