@@ -19,11 +19,13 @@ class AdversaryMeter
 
     public static function addAsset(string $team, User $user, string $asset): array
     {
+        // TODO : sink the CreateAsset event
         return self::addAsset2(self::apiKey(), $team, $user->email, $asset);
     }
 
     public static function removeAsset(string $team, User $user, string $asset): array
     {
+        // TODO : sink the DeleteAsset event
         return self::removeAsset2(self::apiKey(), $team, $user->email, $asset);
     }
 
@@ -140,6 +142,14 @@ class AdversaryMeter
                 return $userTmp->am_api_token;
             }
         }
-        return null;
+
+        $token = $user->createToken('adversarymeter', ['']);
+        $plainTextToken = $token->plainTextToken;
+        $token = $token?->accessToken;
+
+        $user->am_api_token = $plainTextToken;
+        $user->save();
+
+        return $plainTextToken;
     }
 }

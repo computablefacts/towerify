@@ -9,11 +9,13 @@ use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
+use App\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class DeleteAssetListener extends AbstractListener
 {
-    public static function execute(string $asset): bool
+    public static function execute(User $user, string $asset): bool
     {
         if (!IsValidAsset::test($asset)) {
             Log::error("Invalid asset : {$asset}");
@@ -27,6 +29,7 @@ class DeleteAssetListener extends AbstractListener
             $assetType = AssetTypesEnum::RANGE;
         }
 
+        Auth::login($user); // otherwise the tenant will not be properly set
         Asset::where('asset', $asset)->where('type', $assetType)->delete();
         return true;
     }
@@ -36,6 +39,6 @@ class DeleteAssetListener extends AbstractListener
         if (!($event instanceof DeleteAsset)) {
             throw new \Exception('Invalid event type!');
         }
-        self::execute($event->asset);
+        self::execute($event->user, $event->asset);
     }
 }

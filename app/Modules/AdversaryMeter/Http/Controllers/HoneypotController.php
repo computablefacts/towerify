@@ -123,7 +123,7 @@ class HoneypotController extends Controller
         return Alert::select('alerts.*', 'assets.id AS asset_id')
             ->join('ports', 'ports.id', '=', 'alerts.port_id')
             ->join('scans', 'scans.id', '=', 'ports.scan_id')
-            ->join('assets', 'assets.cur_scan_id', '=', 'ports.ports_scan_id')
+            ->join('assets', 'assets.cur_scan_id', '=', 'scans.ports_scan_id')
             ->get()
             ->map(function (Alert $alert) use ($attackerId) {
                 return [
@@ -207,14 +207,14 @@ class HoneypotController extends Controller
     public function getMostRecentEvent(?int $attackerId = null): array
     {
         if ($attackerId) {
-            return HoneypotEvent::query()
+            return Attacker::find($attackerId)
+                ->events()
                 ->orderBy('timestamp', 'desc')
                 ->limit(3)
                 ->get()
                 ->toArray();
         }
-        return Attacker::find($attackerId)
-            ->events()
+        return HoneypotEvent::query()
             ->orderBy('timestamp', 'desc')
             ->limit(3)
             ->get()
@@ -298,7 +298,7 @@ class HoneypotController extends Controller
         }, 'dns_setup');
 
         return [
-            'current_user' => 'unknown',
+            'current_user' => Auth::user()->name,
             'honeypots' => $honeypots,
             'integration_status' => $honeypots->count() ? $leastAdvancedStatus : 'inactive'
         ];
@@ -386,7 +386,7 @@ class HoneypotController extends Controller
         return AssetTagHash::all()->toArray();
     }
 
-    public function createHash(Request $request): array
+    public function createHash(Request $request): AssetTagHash
     {
         $tag = $request->validate([
             'tag' => 'string|required',
@@ -398,9 +398,8 @@ class HoneypotController extends Controller
         ]);
     }
 
-    public function deleteHash(string $hash): JsonResponse
+    public function deleteHash(AssetTagHash $hash): JsonResponse
     {
-        $hash = AssetTagHash::where('hash', $hash)->firstOrFail();
         $hash->delete();
         return response()->json(['message' => 'Hash successfully deleted']);
     }

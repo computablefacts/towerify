@@ -73,7 +73,7 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace($this->namespace)
             ->group(base_path('routes/api.php'));
-        Route::prefix('am/api')
+        Route::prefix('am/api/v2')
             ->middleware('api')
             ->namespace('App\Modules\AdversaryMeter\Http\Controllers')
             ->group(base_path('app/Modules/AdversaryMeter/api.php'));

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return \Illuminate\Support\Facades\Auth::user();
+Route::middleware('auth:api')->get('/v2/public/whoami', function (Request $request) {
+    return Auth::user();
 });
 

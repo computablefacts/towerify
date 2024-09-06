@@ -5,6 +5,7 @@ namespace App\Modules\AdversaryMeter\Http\Controllers;
 use App\Modules\AdversaryMeter\Events\BeginPortsScan;
 use App\Modules\AdversaryMeter\Helpers\ApiUtils;
 use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
+use App\Modules\AdversaryMeter\Listeners\DeleteAssetListener;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
@@ -73,7 +74,7 @@ class AssetController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        $obj = CreateAssetListener::execute($asset);
+        $obj = CreateAssetListener::execute($user, $asset);
 
         if (!$obj) {
             abort(500, "The asset could not be created : {$asset}");
@@ -340,7 +341,10 @@ class AssetController extends Controller
         if ($asset->is_monitored) {
             abort(500, 'Deletion not allowed, asset is monitored.');
         }
-        $asset->delete();
+
+        /** @var User $user */
+        $user = Auth::user();
+        DeleteAssetListener::execute($user, $asset);
     }
 
     public function restartScan(Asset $asset): array

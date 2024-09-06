@@ -3,7 +3,7 @@
 namespace App\Modules\AdversaryMeter\Models;
 
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
-use App\Traits\HasTenant;
+use App\Modules\AdversaryMeter\Traits\HasTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
