@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class HoneypotController extends Controller
 {
@@ -381,5 +382,17 @@ class HoneypotController extends Controller
     public function getHashes(): array
     {
         return AssetTagHash::all()->toArray();
+    }
+
+    public function createHash(Request $request): array
+    {
+        $tag = $request->validate([
+            'tag' => 'string|required',
+        ])['tag'];
+        $hash = Str::random(32);
+        return AssetTagHash::create([
+            'tag' => $tag,
+            'hash' => $hash,
+        ]);
     }
 }
