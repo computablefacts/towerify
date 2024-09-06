@@ -5,6 +5,7 @@ namespace App\Modules\AdversaryMeter\Http\Controllers;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Attacker;
+use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -232,5 +233,14 @@ class HoneypotController extends Controller
             'curated_wordlist' => $targetedPasswords ? 10 : min($targetedWordlists / 50 * 100, 10),
             'persistence' => min($attacker->first_contact->diffInDays($attacker->last_contact) / 10 * 10, 10),
         ];
+    }
+
+    public function lastHoneypots(): array
+    {
+        return Honeypot::query()
+            ->orderBy('dns')
+            ->limit(3)
+            ->get()
+            ->toArray();
     }
 }
