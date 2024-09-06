@@ -189,4 +189,21 @@ class HoneypotController extends Controller
             'cve' => $attacker->events()->where('event', 'cve_tested')->count(),
         ];
     }
+
+    public function getMostRecentEvent(?int $attackerId = null): array
+    {
+        if ($attackerId) {
+            return HoneypotEvent::query()
+                ->orderBy('timestamp', 'desc')
+                ->limit(3)
+                ->get()
+                ->toArray();
+        }
+        return Attacker::find($attackerId)
+            ->events()
+            ->orderBy('timestamp', 'desc')
+            ->limit(3)
+            ->get()
+            ->toArray();
+    }
 }
