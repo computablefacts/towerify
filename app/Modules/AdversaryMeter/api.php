@@ -35,4 +35,5 @@ Route::group([
     'prefix' => 'adversary',
 ], function () {
     Route::get('infos-from-asset/{asset}', 'AssetController@infosFromAsset');
+    Route::get('attacker-index', 'HoneypotController@attackerIndex');
 });
