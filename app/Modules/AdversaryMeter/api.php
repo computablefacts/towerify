@@ -37,4 +37,5 @@ Route::group([
     Route::get('infos-from-asset/{asset}', 'AssetController@infosFromAsset');
     Route::get('attacker-index', 'HoneypotController@attackerIndex');
     Route::get('recent-events', 'HoneypotController@recentEvents');
+    Route::get('blacklist-ips/{attackerId?}', 'HoneypotController@blacklistIps');
 });

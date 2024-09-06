@@ -63,8 +63,8 @@ class HoneypotController extends Controller
 
         $events = HoneypotEvent::select(
             'honeypots_events.*',
-            DB::raw("CASE WHEN attackers IS NULL THEN '-' ELSE attackers.name END AS internal_name"),
-            DB::raw("CASE WHEN attackers IS NULL THEN '-' ELSE attackers.is END AS attacker_id"),
+            DB::raw("CASE WHEN attackers.name IS NULL THEN '-' ELSE attackers.name END AS internal_name"),
+            DB::raw("CASE WHEN attackers.id IS NULL THEN '-' ELSE attackers.id END AS attacker_id"),
         )
             ->leftJoin('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
 
@@ -77,5 +77,27 @@ class HoneypotController extends Controller
             ->limit(1000)
             ->get()
             ->toArray();
+    }
+
+    public function blacklistIps(?int $attackerId = null)
+    {
+        /** @var array $ips */
+        $ips = config('towerify.adversarymeter.ip_addresses');
+        $events = HoneypotEvent::select(
+            'honeypots_events.*',
+            DB::raw("attackers.first_contact AS first_contact"),
+            DB::raw("attackers.last_contact AS last_contact"),
+            DB::raw("CASE WHEN honeypots_events.hosting_service_description IS NULL THEN '-' ELSE honeypots_events.hosting_service_description END AS isp_name"),
+            DB::raw("CASE WHEN honeypots_events.hosting_service_country_code IS NULL THEN '-' ELSE honeypots_events.hosting_service_country_code END AS country_code"),
+        )
+            ->whereNotIn('ip', $ips);
+
+        if (!$attackerId) {
+            $events->leftJoin('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
+        } else {
+            $events->join('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
+            $events->where('honeypots_events.attacker_id', $attackerId);
+        }
+        return $events->get()->toArray();
     }
 }
