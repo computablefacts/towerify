@@ -442,4 +442,9 @@ class HoneypotController extends Controller
         }
         return $hidden;
     }
+
+    public function deleteHiddenAlert(HiddenAlert $hiddenAlert): void
+    {
+        $hiddenAlert->delete();
+    }
 }
