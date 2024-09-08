@@ -3,7 +3,7 @@
   <div class="row">
     <div class="col text-center p-3">
       <a href="{{ App\Helpers\AdversaryMeter::redirectUrl() }}" target="_blank" class="text-white">
-        Open AdversaryMeter...
+        Launch AdversaryMeter...
       </a>
     </div>
   </div>
