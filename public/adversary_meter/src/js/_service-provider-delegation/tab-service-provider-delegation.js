@@ -29,7 +29,7 @@ export class TabDelegation extends com.computablefacts.widgets.Widget {
     const container = this.container.querySelector('#hash-container');
     const line = this._createLineWithSelect(delegate.tag, delegate.hash);
 
-    const hashURL = `${window.location.protocol}//${window.location.hostname}/cyber-todo/${delegate.hash}`;
+    const hashURL = `${window.location.protocol}//${window.location.hostname}/am/web/cyber-todo/${delegate.hash}`;
     line.querySelector('.hash-url').innerHTML = `${hashURL} <i class="ms-1 fal fa-external-link"></i>`;
     line.querySelector('.hash-url').href = hashURL;
 
@@ -77,7 +77,7 @@ export class TabDelegation extends com.computablefacts.widgets.Widget {
         const loaderEl = line.querySelector('.loader');
         const loader = new com.computablefacts.blueprintjs.MinimalSpinner(loaderEl, 'small');
         this.datastore_.postHash(item).then(hash => {
-          const hashURL = `${window.location.protocol}//${window.location.hostname}/cyber-todo/${hash.hash}`;
+          const hashURL = `${window.location.protocol}//${window.location.hostname}/am/web/cyber-todo/${hash.hash}`;
           line.querySelector('.hash-url').innerHTML = `${hashURL} <i class="fal fa-external-link"></i>`;
           line.querySelector('.hash-url').href = hashURL;
           line.id = hash.id;

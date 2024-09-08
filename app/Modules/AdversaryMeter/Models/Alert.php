@@ -29,7 +29,17 @@ class Alert extends Model
         'flarum_slug',
     ];
 
-    public function port(): ?Port
+    public function asset(): Asset
+    {
+        return Asset::select('assets.*')
+            ->join('scans', 'scans.asset_id', '=', 'assets.id')
+            ->join('ports', 'ports.scan_id', '=', 'scans.id')
+            ->join('alerts', 'alerts.port_id', '=', 'ports.id')
+            ->where('alerts.id', $this->id)
+            ->first();
+    }
+
+    public function port(): Port
     {
         return Port::find($this->port_id);
     }

@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
-/** @deprecated */
-Route::middleware('auth:api')->get('/user', function () {
-    return \Illuminate\Support\Facades\Auth::user();
+Route::group([
+    'prefix' => 'public',
+], function () {
+    Route::post('alert/{alert}/mark-and-check-again', 'CyberTodoController@markAsResolved');
+    Route::get('vulnerabilities/{hash}', 'CyberTodoController@vulns');
 });
 
 Route::group([
