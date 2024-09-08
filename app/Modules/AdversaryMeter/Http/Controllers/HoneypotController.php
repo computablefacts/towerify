@@ -378,6 +378,7 @@ class HoneypotController extends Controller
             'tags' => AssetTag::query()
                 ->get()
                 ->map(fn(AssetTag $tag) => $tag->tag)
+                ->unique()
                 ->toArray(),
         ];
     }
