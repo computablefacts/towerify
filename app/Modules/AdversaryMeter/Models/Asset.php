@@ -95,10 +95,12 @@ class Asset extends Model
             ->where('uid', '<>', '')
             ->get()
             ->map(fn(HiddenAlert $marker) => $marker->uid);
-        $hiddenTypes = HiddenAlert::whereNotNull('type')->where('type', '<>', '')
+        $hiddenTypes = HiddenAlert::whereNotNull('type')
+            ->where('type', '<>', '')
             ->get()
             ->map(fn(HiddenAlert $marker) => addslashes($marker->type));
-        $hiddenTitles = HiddenAlert::whereNotNull('title')->where('title', '<>', '')
+        $hiddenTitles = HiddenAlert::whereNotNull('title')
+            ->where('title', '<>', '')
             ->get()
             ->map(fn(HiddenAlert $marker) => addslashes($marker->title));
 
