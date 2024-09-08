@@ -10,7 +10,6 @@ use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
 use App\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class DeleteAssetListener extends AbstractListener
@@ -29,8 +28,11 @@ class DeleteAssetListener extends AbstractListener
             $assetType = AssetTypesEnum::RANGE;
         }
 
-        Auth::login($user); // otherwise the tenant will not be properly set
-        Asset::where('asset', $asset)->where('type', $assetType)->delete();
+        Asset::where('asset', $asset)
+            ->where('type', $assetType)
+            ->where('created_by', $user->id)
+            ->delete();
+        
         return true;
     }
 

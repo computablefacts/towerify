@@ -71,7 +71,7 @@ class EndDiscoveryListener extends AbstractListener
                 Asset::where('tld', $tld)
                     ->get()
                     ->each(function (Asset $asset) use ($domain) {
-                        event(new CreateAsset($domain));
+                        event($asset->createdBy(), new CreateAsset($domain));
                     });
             });
 

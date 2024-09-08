@@ -10,7 +10,6 @@ use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
 use App\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CreateAssetListener extends AbstractListener
@@ -28,14 +27,15 @@ class CreateAssetListener extends AbstractListener
         } else {
             $assetType = AssetTypesEnum::RANGE;
         }
-        Auth::login($user); // otherwise the tenant will not be properly set
         return Asset::updateOrCreate(
             [
                 'asset' => $asset,
+                'created_by' => $user->id,
             ],
             [
                 'asset' => $asset,
                 'type' => $assetType,
+                'created_by' => $user->id,
             ]
         );
     }

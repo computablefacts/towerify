@@ -3,7 +3,7 @@
 namespace App\Modules\AdversaryMeter\Http\Controllers;
 
 use App\Modules\AdversaryMeter\Events\BeginPortsScan;
-use App\Modules\AdversaryMeter\Helpers\ApiUtils;
+use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
 use App\Modules\AdversaryMeter\Listeners\DeleteAssetListener;
 use App\Modules\AdversaryMeter\Models\Alert;
@@ -48,7 +48,7 @@ class AssetController extends Controller
         if (!IsValidDomain::test($domain)) {
             return [];
         }
-        if (!in_array($domain, self::BLACKLIST)) {
+        if (in_array($domain, self::BLACKLIST)) {
             abort(500, "The domain is blacklisted : {$domain}");
         }
         return ApiUtils::discover_public($domain);
@@ -361,7 +361,7 @@ class AssetController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        DeleteAssetListener::execute($user, $asset);
+        DeleteAssetListener::execute($user, $asset->asset);
     }
 
     public function restartScan(Asset $asset): array

@@ -64,7 +64,7 @@
   "Ce n'est pas un nom de domaine ou une adresse ip valide.": "This is not a valid domain name or IP address.",
   "Étiquettes": "Tags",
   "Status": "Status",
-  "Déjà importé": "Already imported",
+  "importé": "imported",
   "Une erreur s'est produite, veuillez réessayer plus tard.": "An error occurred, please try again later.",
   "Aucun fichier sélectionné.": "No file selected.",
   "Erreur lors de la lecture du fichier CSV.": "Error reading the CSV file.",
