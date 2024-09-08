@@ -168,9 +168,14 @@ class EndVulnsScanListener extends AbstractListener
             ->map(fn(array $data) => json_decode($data['rawOutput'], true))
             ->filter(fn(array $screenshot) => !empty($screenshot['png']))
             ->each(function (array $screenshot) use ($port) {
-                $screenshot = Screenshot::create(['png' => "data:image/png;base64,{$screenshot['png']}"]);
-                $port->screenshot_id = $screenshot->id;
-                $port->save();
+                try {
+                    $screenshot = Screenshot::create(['png' => "data:image/png;base64,{$screenshot['png']}"]);
+                    $port->screenshot_id = $screenshot->id;
+                    $port->save();
+                } catch (\Exception $exception) {
+                    Log::error($exception);
+                    Log::error($port);
+                }
             });
     }
 
