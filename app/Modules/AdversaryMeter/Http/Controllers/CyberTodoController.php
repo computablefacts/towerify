@@ -70,7 +70,8 @@ class CyberTodoController extends Controller
             $hash->views = (int)$hash->views + 1;
             $hash->update();
 
-            $assets = Asset::where('is_monitored', true)
+            $assets = Asset::select('assets.*')
+                ->where('is_monitored', true)
                 ->join('assets_tags', 'assets_tags.asset_id', '=', 'assets.id')
                 ->join('assets_tags_hashes', 'assets_tags_hashes.tag', '=', 'assets_tags.tag')
                 ->where('assets_tags_hashes.hash', $hash->hash)
