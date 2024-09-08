@@ -48,7 +48,7 @@ class EndVulnsScanListener extends AbstractListener
 
         if ($currentTaskName !== 'alerter' || $currentTaskStatus !== 'DONE') {
 
-            $isCsc = isset($task['tags']) && collect($task['tags'])->filter(fn(string $tag) => Str::startsWith($tag, 'Csc_'))->isNotEmpty();
+            $isCsc = isset($task['tags']) && collect($task['tags'])->filter(fn(string $tag) => Str::startsWith(Str::lower($tag), 'csc_'))->isNotEmpty();
 
             if (!$isCsc) {
 
