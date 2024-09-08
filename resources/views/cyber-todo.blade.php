@@ -279,11 +279,19 @@
           `;
           vulnerabilitiesDiv.appendChild(listItem);
           if (vuln.is_scan_in_progress) {
+
             listItem.style.textDecoration = 'line-through';
+
             const checkboxes = document.querySelectorAll(`input[data-asset="${vuln.asset}"]`);
             checkboxes.forEach(checkbox => {
               checkbox.disabled = true;
             });
+
+            const levelSpan = listItem.querySelector(".level");
+            levelSpan.style.display = "none";
+
+            const badgeSpan = listItem.querySelector(".badge");
+            badgeSpan.style.display = "inline-block";
           }
         });
 
