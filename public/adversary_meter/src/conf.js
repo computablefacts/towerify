@@ -1,7 +1,7 @@
 'use strict'
 
 const conf = {
-  API_BASE_URL: "http://127.0.0.1:8080",
+  API_BASE_URL: window.location.protocol + "://" + window.location.hostname + ":" + window.location.port,
   ENV: 'PROD',
   SKIP_HONEYPOT: true
 }

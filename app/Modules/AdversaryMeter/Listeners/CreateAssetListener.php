@@ -10,6 +10,7 @@ use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
 use App\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CreateAssetListener extends AbstractListener
@@ -45,6 +46,7 @@ class CreateAssetListener extends AbstractListener
         if (!($event instanceof CreateAsset)) {
             throw new \Exception('Invalid event type!');
         }
+        Auth::login($event->user); // otherwise the tenant will not be properly set
         self::execute($event->user, $event->asset);
     }
 }

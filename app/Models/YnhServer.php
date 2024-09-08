@@ -5,10 +5,10 @@ namespace App\Models;
 use App\Enums\ServerStatusEnum;
 use App\Enums\SshTraceStateEnum;
 use App\Hashing\TwHasher;
-use App\Helpers\AdversaryMeter;
 use App\Helpers\AppStore;
 use App\Helpers\SshConnection2;
 use App\Helpers\SshKeyPair;
+use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Traits\HasTenant2;
 use App\User;
 use Carbon\Carbon;
@@ -329,41 +329,13 @@ class YnhServer extends Model
 
     public function startMonitoringAsset(User $user, string $domainOrIpAddress): bool
     {
-        $team = $user->customer?->company_name;
-
-        if (!$team) {
-            return false;
-        }
-
-        $json = AdversaryMeter::addAsset($team, $user, $domainOrIpAddress);
-
-        if (count($json) === 0) {
-            return false;
-        }
-        if (!isset($user->am_api_token) || trim($user->am_api_token) === '') {
-            $user->am_api_token = $json['api_token'];
-            $user->save();
-        } else {
-            // TODO : check that $user->am_api_token is equal to $json['api_token'] ?
-        }
-
-        AdversaryMeter::switchTeam($team, $user);
+        event(new CreateAsset($user, $domainOrIpAddress));
         return true;
     }
 
     public function stopMonitoringAsset(User $user, string $domainOrIpAddress): bool
     {
-        $team = $user->customer?->company_name;
-
-        if (!$team) {
-            return false;
-        }
-
-        $json = AdversaryMeter::removeAsset($team, $user, $domainOrIpAddress);
-
-        if (count($json) === 0) {
-            return false;
-        }
+        event(new CreateAsset($user, $domainOrIpAddress));
         return true;
     }
 
