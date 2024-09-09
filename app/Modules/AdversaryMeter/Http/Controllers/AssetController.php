@@ -234,6 +234,7 @@ class AssetController extends Controller
     public function infosFromAsset(string $assetBase64): array
     {
         $domainOrIpOrRange = base64_decode($assetBase64);
+        /** @var Asset $asset */
         $asset = Asset::where('asset', $domainOrIpOrRange)->first();
 
         if (!$asset) {
@@ -253,10 +254,11 @@ class AssetController extends Controller
         }
 
         // Load the asset's tags
-        $tags = $asset->tags()->get()->map(fn(AssetTag $tag) => $tag->tag)->toArray();
+        $tags = $asset->tags()->orderBy('tag')->get()->map(fn(AssetTag $tag) => $tag->tag)->toArray();
 
         // Load the asset's open ports
         $ports = $asset->ports()
+            ->orderBy('port')
             ->get()
             ->map(function (Port $port) {
                 return [
@@ -265,7 +267,7 @@ class AssetController extends Controller
                     'protocol' => $port->protocol,
                     'products' => [$port->product],
                     'services' => [$port->service],
-                    'tags' => $port->tags()->get()->map(fn(PortTag $tag) => $tag->tag)->toArray(),
+                    'tags' => $port->tags()->orderBy('tag')->get()->map(fn(PortTag $tag) => $tag->tag)->toArray(),
                     'screenshotId' => $port->screenshot()->first()?->id,
                 ];
             })
@@ -296,9 +298,15 @@ class AssetController extends Controller
                     'title' => $alert->title,
                     'flarum_url' => null,
                     'start_date' => $alert->created_at,
-                    'is_hidden' => $alert->is_hidden,
+                    'is_hidden' => $alert->is_hidden === 1,
                 ];
-            });
+            })
+            ->sortBy([
+                ['ip', 'asc'],
+                ['port', 'asc'],
+                ['protocol', 'asc'],
+            ])
+            ->values();
 
         // Load the asset's scans
         $scansInProgress = $asset->scanInProgress();
