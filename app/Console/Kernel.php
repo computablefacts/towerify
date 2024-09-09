@@ -36,7 +36,6 @@ class Kernel extends ConsoleKernel
         $schedule->job(new CheckServersHealth())->everyFifteenMinutes();
         $schedule->job(new PullServersInfos())->hourly();
         $schedule->job(new AgeOffOsqueryEvents())->hourly();
-        $schedule->job(new ProcessLateScans())->hourly();
         $schedule->job(new TriggerDiscoveryShallow())->daily();
         $schedule->command('telescope:prune --hours=48')->daily();
         // $schedule->job(new TriggerDiscoveryDeep())->weekly();
