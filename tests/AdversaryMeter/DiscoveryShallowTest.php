@@ -19,8 +19,8 @@ class DiscoveryShallowTest extends AdversaryMeterTestCase
                 'subdomains' => ['www1.example.com', 'www1.example.com' /* duplicate! */, 'www2.example.com'],
             ]);
 
-        event(new CreateAsset('example.com'));
-        event(new CreateAsset('example.com'));
+        event(new CreateAsset($this->user, 'example.com'));
+        event(new CreateAsset($this->user, 'example.com'));
 
         TriggerDiscoveryShallow::dispatch();
 
@@ -31,7 +31,7 @@ class DiscoveryShallowTest extends AdversaryMeterTestCase
         $this->assertEquals(1, $assetsOriginal->count());
         $this->assertEquals(2, $assetsDiscovered->count());
 
-        $this->assertEquals(1, $assetsDiscovered->filter(fn(Asset $asset) => $asset->asset === 'www1.example.com')->count());
-        $this->assertEquals(1, $assetsDiscovered->filter(fn(Asset $asset) => $asset->asset === 'www2.example.com')->count());
+        $this->assertEquals(1, $assetsDiscovered->filter(fn(Asset $asset) => $asset->asset === 'www1.example.com' && $asset->created_by = $this->user->id)->count());
+        $this->assertEquals(1, $assetsDiscovered->filter(fn(Asset $asset) => $asset->asset === 'www2.example.com' && $asset->created_by = $this->user->id)->count());
     }
 }
