@@ -344,7 +344,7 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals(0, Screenshot::count());
     }
 
-    public function testTheDatabaseStaysCleanWhenOneOfManyPortsIsClosed()
+    public function testItScansAnAssetAndProperlyDealsWithClosedPorts()
     {
         // Mock external API calls
         $this->mockStartPortsScan();
