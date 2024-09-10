@@ -62,6 +62,11 @@ class EndVulnsScanListener extends AbstractListener
                 if ($service !== 'closed') {
                     $event->sink();
                 } else { // End the scan!
+
+                    $port = $scan->port()->first();
+                    $port->closed = 1;
+                    $port->save();
+
                     $this->markAssetScanAsCompleted($scan);
                 }
                 return;

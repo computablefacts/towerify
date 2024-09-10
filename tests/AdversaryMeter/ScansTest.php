@@ -430,7 +430,151 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals(['demo'], $asset->tags()->get()->pluck('tag')->toArray());
 
         // Check the ports table
-        // TODO
+        $ports = $asset->ports()->get();
+        /** @var Port $port80 */
+        $port80 = $ports->filter(fn(Port $port) => $port->port === 80)->first();
+        /** @var Port $port443 */
+        $port443 = $ports->filter(fn(Port $port) => $port->port === 443)->first();
+        $screenshot80 = $port80->screenshot()->first();
+        $screenshot443 = $port443->screenshot()->first();
+
+        $this->assertEquals(2, $ports->count());
+
+        $this->assertNull($screenshot80);
+        $this->assertNotNull($screenshot443);
+
+        $this->assertEquals('www.example.com', $port80->hostname);
+        $this->assertEquals('93.184.215.14', $port80->ip);
+        $this->assertEquals(80, $port80->port);
+        $this->assertEquals('tcp', $port80->protocol);
+        $this->assertEquals('US', $port80->country);
+        $this->assertNull($port80->service);
+        $this->assertNull($port80->product);
+        $this->assertNull($port80->ssl);
+        $this->assertNull($port80->screenshot_id);
+        $this->assertEquals('EDGECAST, US', $port80->hosting_service_description);
+        $this->assertEquals('ripencc', $port80->hosting_service_registry);
+        $this->assertEquals('15133', $port80->hosting_service_asn);
+        $this->assertEquals('93.184.215.0/24', $port80->hosting_service_cidr);
+        $this->assertEquals('US', $port80->hosting_service_country_code);
+        $this->assertEquals('2008-06-02', $port80->hosting_service_date);
+        $this->assertTrue($port80->closed);
+
+        $this->assertEquals('www.example.com', $port443->hostname);
+        $this->assertEquals('93.184.215.14', $port443->ip);
+        $this->assertEquals(443, $port443->port);
+        $this->assertEquals('tcp', $port443->protocol);
+        $this->assertEquals('US', $port443->country);
+        $this->assertEquals('http', $port443->service);
+        $this->assertEquals('ECAcc (bsb|2789)', $port443->product);
+        $this->assertTrue($port443->ssl);
+        $this->assertEquals($screenshot443->id, $port443->screenshot_id);
+        $this->assertEquals('EDGECAST, US', $port443->hosting_service_description);
+        $this->assertEquals('ripencc', $port443->hosting_service_registry);
+        $this->assertEquals('15133', $port443->hosting_service_asn);
+        $this->assertEquals('93.184.215.0/24', $port443->hosting_service_cidr);
+        $this->assertEquals('US', $port443->hosting_service_country_code);
+        $this->assertEquals('2008-06-02', $port443->hosting_service_date);
+        $this->assertFalse($port443->closed);
+
+        // Check the ports_tags table
+        /** @var array $tags80 */
+        $tags80 = $port80->tags()->orderBy('tag')->get()->pluck('tag')->toArray();
+        /** @var array $tags443 */
+        $tags443 = $port443->tags()->orderBy('tag')->get()->pluck('tag')->toArray();
+
+        $this->assertEquals([], $tags80);
+        $this->assertEquals(['azure', 'azure cdn', 'demo', 'ecacc (bsb/27bf)', 'http', 'ssl-issuer|digicert inc', 'tls10', 'tls11', 'tls12', 'tls13'], $tags443);
+
+        // Check the scans table
+        $scans = $asset->scanCompleted();
+        /** @var Scan $scan80 */
+        $scan80 = $scans->filter(fn(Scan $scan) => $scan->vulns_scan_id === 'b9b5e877-bdfe-4b39-8c4b-8316e451730e')->first();
+        /** @var Scan $scan443 */
+        $scan443 = $scans->filter(fn(Scan $scan) => $scan->vulns_scan_id === 'a9a5d877-abed-4a39-8b4a-8316d451730d')->first();
+
+        $this->assertEquals('6409ae68ed42e11e31e5f19d', $scan80->ports_scan_id);
+        $this->assertEquals('b9b5e877-bdfe-4b39-8c4b-8316e451730e', $scan80->vulns_scan_id);
+        $this->assertNotNull($scan80->ports_scan_begins_at);
+        $this->assertNotNull($scan80->ports_scan_ends_at);
+        $this->assertNotNull($scan80->vulns_scan_begins_at);
+        $this->assertNotNull($scan80->vulns_scan_ends_at);
+        $this->assertEquals($asset->id, $scan80->asset_id);
+
+        $this->assertEquals('6409ae68ed42e11e31e5f19d', $scan443->ports_scan_id);
+        $this->assertEquals('a9a5d877-abed-4a39-8b4a-8316d451730d', $scan443->vulns_scan_id);
+        $this->assertNotNull($scan443->ports_scan_begins_at);
+        $this->assertNotNull($scan443->ports_scan_ends_at);
+        $this->assertNotNull($scan443->vulns_scan_begins_at);
+        $this->assertNotNull($scan443->vulns_scan_ends_at);
+        $this->assertEquals($asset->id, $scan443->asset_id);
+
+        // Check the output of the /assets/infos endpoint (2/2)
+        $response = $this->withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$this->token}",
+        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+
+        $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset, $scan80, $scan443, $screenshot80, $screenshot443) {
+            $json->where('asset', 'www.example.com')
+                ->whereType('modifications', 'array')
+                ->where('modifications.0.asset_id', $asset->id)
+                ->where('modifications.0.asset_name', $asset->asset)
+                ->whereType('modifications.0.timestamp', 'string')
+                ->where('modifications.0.user', "qa@computablefacts.com")
+                ->where('tags', ['demo'])
+                ->whereType('ports', 'array')
+                ->where('ports.0.ip', '93.184.215.14')
+                ->where('ports.0.port', 443)
+                ->where('ports.0.protocol', 'tcp')
+                ->where('ports.0.products.0', 'ECAcc (bsb|2789)')
+                ->where('ports.0.services.0', 'http')
+                ->where('ports.0.tags', ['azure', 'azure cdn', 'demo', 'ecacc (bsb/27bf)', 'http', 'ssl-issuer|digicert inc', 'tls10', 'tls11', 'tls12', 'tls13'])
+                ->where('ports.0.screenshotId', $screenshot443->id)
+                ->whereType('vulnerabilities', 'array')
+                ->where('vulnerabilities.0.ip', '93.184.215.14')
+                ->where('vulnerabilities.0.port', 443)
+                ->where('vulnerabilities.0.protocol', 'tcp')
+                ->where('vulnerabilities.0.type', 'weak_cipher_suites_v3_alert')
+                ->where('vulnerabilities.0.tested', false)
+                ->where('vulnerabilities.0.vulnerability', "A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>")
+                ->where('vulnerabilities.0.remediation', "Fix the vulnerability described in this alert")
+                ->where('vulnerabilities.0.level', 'low')
+                ->where('vulnerabilities.0.uid', 'a2a95bb1311b66abb394ac9015175dcd')
+                ->where('vulnerabilities.0.cve_id', null)
+                ->where('vulnerabilities.0.cve_cvss', null)
+                ->where('vulnerabilities.0.cve_vendor', null)
+                ->where('vulnerabilities.0.cve_product', null)
+                ->where('vulnerabilities.0.title', "Weak Cipher Suites Detection")
+                ->where('vulnerabilities.0.flarum_url', null)
+                ->whereType('vulnerabilities.0.start_date', "string")
+                ->where('vulnerabilities.0.is_hidden', false)
+                ->where('timeline.nmap.id', '6409ae68ed42e11e31e5f19d')
+                ->whereType('timeline.nmap.start', "string")
+                ->whereType('timeline.nmap.end', "string")
+                ->where('timeline.sentinel.id', '000000000000000000000000')
+                ->whereType('timeline.sentinel.start', "string")
+                ->whereType('timeline.sentinel.end', "string")
+                ->whereType('timeline.next_scan', "string")
+                ->where('hiddenAlerts', [])
+                ->etc();
+        });
+
+        // Remove the asset
+        $asset->delete();
+
+        // Ensure removing the asset removes all associated data
+        $this->assertEquals(0, Asset::count());
+        $this->assertEquals(0, AssetTag::count());
+        $this->assertEquals(0, AssetTagHash::count());
+        $this->assertEquals(0, Attacker::count());
+        $this->assertEquals(0, HiddenAlert::count());
+        $this->assertEquals(0, Honeypot::count());
+        $this->assertEquals(0, HoneypotEvent::count());
+        $this->assertEquals(0, Port::count());
+        $this->assertEquals(0, PortTag::count());
+        $this->assertEquals(0, Scan::count());
+        $this->assertEquals(0, Screenshot::count());
     }
 
     public function testItScansAnAsset(): void
@@ -547,6 +691,7 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals('93.184.215.0/24', $port80->hosting_service_cidr);
         $this->assertEquals('US', $port80->hosting_service_country_code);
         $this->assertEquals('2008-06-02', $port80->hosting_service_date);
+        $this->assertFalse($port80->closed);
 
         $this->assertEquals('www.example.com', $port443->hostname);
         $this->assertEquals('93.184.215.14', $port443->ip);
@@ -563,6 +708,7 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals('93.184.215.0/24', $port443->hosting_service_cidr);
         $this->assertEquals('US', $port443->hosting_service_country_code);
         $this->assertEquals('2008-06-02', $port443->hosting_service_date);
+        $this->assertFalse($port443->closed);
 
         // Check the ports_tags table
         /** @var array $tags80 */

@@ -5,7 +5,7 @@ namespace App\Modules\AdversaryMeter\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Scan extends Model
 {
@@ -35,10 +35,10 @@ class Scan extends Model
     {
         return $this->belongsTo(Asset::class);
     }
-    
-    public function ports(): HasMany
+
+    public function port(): HasOne
     {
-        return $this->hasMany(Port::class, 'scan_id');
+        return $this->hasOne(Port::class, 'scan_id', 'id');
     }
 
     public function portsScanIsRunning(): bool

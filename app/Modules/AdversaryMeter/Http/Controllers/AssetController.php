@@ -114,6 +114,7 @@ class AssetController extends Controller
             ->get()
             ->map(function (Asset $asset) {
                 $tags = $asset->ports()
+                    ->where('closed', false)
                     ->orderBy('port')
                     ->get()
                     ->flatMap(function (Port $port) use ($asset) {
@@ -258,6 +259,7 @@ class AssetController extends Controller
 
         // Load the asset's open ports
         $ports = $asset->ports()
+            ->where('closed', false)
             ->orderBy('port')
             ->get()
             ->map(function (Port $port) {

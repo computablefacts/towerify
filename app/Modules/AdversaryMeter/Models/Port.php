@@ -31,10 +31,12 @@ class Port extends Model
         'product',
         'ssl',
         'screenshot_id',
+        'closed',
     ];
 
     protected $casts = [
         'ssl' => 'boolean',
+        'closed' => 'boolean',
     ];
 
     public function tags(): HasMany
