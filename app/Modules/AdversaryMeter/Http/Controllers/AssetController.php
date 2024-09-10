@@ -351,7 +351,7 @@ class AssetController extends Controller
                     'end' => $portsScanEndsAt,
                 ],
                 'sentinel' => [
-                    'id' => '000000000000000000000000',
+                    'id' => $vulnsScanBeginsAt ? '000000000000000000000000' : null,
                     'start' => $vulnsScanBeginsAt,
                     'end' => $vulnsScanEndsAt,
                 ],

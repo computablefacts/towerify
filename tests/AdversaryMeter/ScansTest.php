@@ -16,30 +16,12 @@ use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\PortTag;
 use App\Modules\AdversaryMeter\Models\Scan;
 use App\Modules\AdversaryMeter\Models\Screenshot;
-use App\User;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use Tests\AdversaryMeter\AdversaryMeterTestCase;
 
 class ScansTest extends AdversaryMeterTestCase
 {
-    private User $user;
-    private string $token;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->user = User::create([
-            'name' => 'QA',
-            'password' => bcrypt('whatapassword'),
-            'email' => 'qa@computablefacts.com'
-        ]);
-        $this->token = $this->user->createToken('tests', [])->plainTextToken;
-        $this->user->am_api_token = $this->token;
-        $this->user->save();
-    }
-
     public function testInvalidAssetsAreNotAdded()
     {
         $response = $this->withHeaders([
@@ -298,6 +280,70 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals([], $asset->tags()->get()->pluck('tag')->toArray());
     }
 
+    public function testTheDatabaseStaysCleanWhenThePortsScanFails()
+    {
+        // Mock external API calls
+        $this->mockStartPortsScan();
+        $this->mockGetPortsScanStatusError();
+
+        // Setup the asset and trigger a scan
+        $response = $this->addDns();
+
+        /** @var Asset $asset */
+        $asset = Asset::find($response['asset']['uid']);
+
+        $response = $this->startMonitoringAsset(
+            $asset->id,
+            $asset->asset,
+            $asset->tld(),
+            $asset->type->value
+        );
+
+        // Check the output of the /assets/infos endpoint (1/2)
+        $response = $this->withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$this->token}",
+        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+
+        $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset) {
+            $json->where('asset', 'www.example.com')
+                ->whereType('modifications', 'array')
+                ->where('modifications.0.asset_id', $asset->id)
+                ->where('modifications.0.asset_name', $asset->asset)
+                ->whereType('modifications.0.timestamp', 'string')
+                ->where('modifications.0.user', "qa@computablefacts.com")
+                ->where('tags', [])
+                ->where('ports', [])
+                ->where('vulnerabilities', [])
+                ->where('timeline.nmap.id', null)
+                ->where('timeline.nmap.start', null)
+                ->where('timeline.nmap.end', null)
+                ->where('timeline.sentinel.id', null)
+                ->where('timeline.sentinel.start', null)
+                ->where('timeline.sentinel.end', null)
+                ->whereType('timeline.next_scan', 'string')
+                ->where('hiddenAlerts', [])
+                ->etc();
+        });
+
+        TriggerScan::dispatch();
+
+        $asset->refresh();
+
+        // Check tables content
+        $this->assertEquals(1, Asset::count());
+        $this->assertEquals(0, AssetTag::count());
+        $this->assertEquals(0, AssetTagHash::count());
+        $this->assertEquals(0, Attacker::count());
+        $this->assertEquals(0, HiddenAlert::count());
+        $this->assertEquals(0, Honeypot::count());
+        $this->assertEquals(0, HoneypotEvent::count());
+        $this->assertEquals(0, Port::count());
+        $this->assertEquals(0, PortTag::count());
+        $this->assertEquals(0, Scan::count());
+        $this->assertEquals(0, Screenshot::count());
+    }
+
     public function testItScansAnAsset(): void
     {
         // Mock external API calls
@@ -324,6 +370,33 @@ class ScansTest extends AdversaryMeterTestCase
             $asset->tld(),
             $asset->type->value
         );
+
+        // Check the output of the /assets/infos endpoint (1/2)
+        $response = $this->withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$this->token}",
+        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+
+        $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset) {
+            $json->where('asset', 'www.example.com')
+                ->whereType('modifications', 'array')
+                ->where('modifications.0.asset_id', $asset->id)
+                ->where('modifications.0.asset_name', $asset->asset)
+                ->whereType('modifications.0.timestamp', 'string')
+                ->where('modifications.0.user', "qa@computablefacts.com")
+                ->where('tags', ['demo'])
+                ->where('ports', [])
+                ->where('vulnerabilities', [])
+                ->where('timeline.nmap.id', null)
+                ->where('timeline.nmap.start', null)
+                ->where('timeline.nmap.end', null)
+                ->where('timeline.sentinel.id', null)
+                ->where('timeline.sentinel.start', null)
+                ->where('timeline.sentinel.end', null)
+                ->whereType('timeline.next_scan', 'string')
+                ->where('hiddenAlerts', [])
+                ->etc();
+        });
 
         TriggerScan::dispatch();
 
@@ -378,7 +451,7 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals('http', $port80->service);
         $this->assertEquals('ECAcc (bsb|2789)', $port80->product);
         $this->assertFalse($port80->ssl);
-        $this->assertNotNull($port80->screenshot_id);
+        $this->assertEquals($screenshot80->id, $port80->screenshot_id);
         $this->assertEquals('EDGECAST, US', $port80->hosting_service_description);
         $this->assertEquals('ripencc', $port80->hosting_service_registry);
         $this->assertEquals('15133', $port80->hosting_service_asn);
@@ -394,7 +467,7 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals('http', $port443->service);
         $this->assertEquals('ECAcc (bsb|2789)', $port443->product);
         $this->assertTrue($port443->ssl);
-        $this->assertNotNull($port443->screenshot_id);
+        $this->assertEquals($screenshot443->id, $port443->screenshot_id);
         $this->assertEquals('EDGECAST, US', $port443->hosting_service_description);
         $this->assertEquals('ripencc', $port443->hosting_service_registry);
         $this->assertEquals('15133', $port443->hosting_service_asn);
@@ -434,7 +507,7 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertNotNull($scan443->vulns_scan_ends_at);
         $this->assertEquals($asset->id, $scan443->asset_id);
 
-        // Check the output of the /assets/infos endpoint
+        // Check the output of the /assets/infos endpoint (2/2)
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
@@ -679,6 +752,16 @@ class ScansTest extends AdversaryMeterTestCase
             ]);
     }
 
+    private function mockGetPortsScanStatusError()
+    {
+        ApiUtils::shouldReceive('task_status_public')
+            ->once()
+            ->with('6409ae68ed42e11e31e5f19d')
+            ->andReturn([
+                'task_status' => 'ERROR',
+            ]);
+    }
+
     private function mockGetPortsScanResult()
     {
         ApiUtils::shouldReceive('task_result_public')
@@ -732,10 +815,10 @@ class ScansTest extends AdversaryMeterTestCase
             ]);
     }
 
-    private function mockStartVulnsScanOnPort443(int $times = 1)
+    private function mockStartVulnsScanOnPort443()
     {
         ApiUtils::shouldReceive('task_start_scan_public')
-            ->times($times)
+            ->once()
             ->with('www.example.com', '93.184.215.14', 443, 'tcp', ['demo'])
             ->andReturn([
                 'scan_id' => 'a9a5d877-abed-4a39-8b4a-8316d451730d',
