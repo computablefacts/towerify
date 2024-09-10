@@ -284,7 +284,7 @@ class ScansTest extends AdversaryMeterTestCase
     {
         // Mock external API calls
         $this->mockStartPortsScan();
-        $this->mockGetPortsScanStatusError();
+        $this->mockGetPortsScanStatusWhenScanEndsWithAnError();
 
         // Setup the asset and trigger a scan
         $response = $this->addDns();
@@ -342,6 +342,95 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals(0, PortTag::count());
         $this->assertEquals(0, Scan::count());
         $this->assertEquals(0, Screenshot::count());
+    }
+
+    public function testTheDatabaseStaysCleanWhenOneOfManyPortsIsClosed()
+    {
+        // Mock external API calls
+        $this->mockStartPortsScan();
+        $this->mockGetPortsScanStatus();
+        $this->mockGetPortsScanResult();
+        $this->mockGetIpOwner();
+        $this->mockGetIpGeoloc();
+        $this->mockStartVulnsScanOnPort80();
+        $this->mockStartVulnsScanOnPort443();
+        $this->mockGetVulnsScanResultWhenPort80IsClosed();
+        $this->mockGetVulnsScanResultOnPort443();
+
+        // Setup the asset and trigger a scan
+        $response = $this->addDns();
+
+        /** @var Asset $asset */
+        $asset = Asset::find($response['asset']['uid']);
+
+        $response = $this->addTag($asset->id, 'demo');
+        $response = $this->startMonitoringAsset(
+            $asset->id,
+            $asset->asset,
+            $asset->tld(),
+            $asset->type->value
+        );
+
+        // Check the output of the /assets/infos endpoint (1/2)
+        $response = $this->withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$this->token}",
+        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+
+        $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset) {
+            $json->where('asset', 'www.example.com')
+                ->whereType('modifications', 'array')
+                ->where('modifications.0.asset_id', $asset->id)
+                ->where('modifications.0.asset_name', $asset->asset)
+                ->whereType('modifications.0.timestamp', 'string')
+                ->where('modifications.0.user', "qa@computablefacts.com")
+                ->where('tags', ['demo'])
+                ->where('ports', [])
+                ->where('vulnerabilities', [])
+                ->where('timeline.nmap.id', null)
+                ->where('timeline.nmap.start', null)
+                ->where('timeline.nmap.end', null)
+                ->where('timeline.sentinel.id', null)
+                ->where('timeline.sentinel.start', null)
+                ->where('timeline.sentinel.end', null)
+                ->whereType('timeline.next_scan', 'string')
+                ->where('hiddenAlerts', [])
+                ->etc();
+        });
+
+        TriggerScan::dispatch();
+
+        $asset->refresh();
+
+        // Check tables content
+        $this->assertEquals(1, Asset::count());
+        $this->assertEquals(1, AssetTag::count());
+        $this->assertEquals(0, AssetTagHash::count());
+        $this->assertEquals(0, Attacker::count());
+        $this->assertEquals(0, HiddenAlert::count());
+        $this->assertEquals(0, Honeypot::count());
+        $this->assertEquals(0, HoneypotEvent::count());
+        $this->assertEquals(2, Port::count());
+        $this->assertEquals(10, PortTag::count());
+        $this->assertEquals(2, Scan::count());
+        $this->assertEquals(1, Screenshot::count());
+
+        // Check the assets table
+        $this->assertEquals('www.example.com', $asset->asset);
+        $this->assertEquals(AssetTypesEnum::DNS, $asset->type);
+        $this->assertEquals('example.com', $asset->tld());
+        $this->assertNull($asset->discovery_id);
+        $this->assertNull($asset->prev_scan_id);
+        $this->assertEquals('6409ae68ed42e11e31e5f19d', $asset->cur_scan_id);
+        $this->assertNull($asset->next_scan_id);
+        $this->assertTrue($asset->is_monitored);
+        $this->assertEquals($this->user->id, $asset->created_by);
+
+        // Check the assets_tags table
+        $this->assertEquals(['demo'], $asset->tags()->get()->pluck('tag')->toArray());
+
+        // Check the ports table
+        // TODO
     }
 
     public function testItScansAnAsset(): void
@@ -585,10 +674,6 @@ class ScansTest extends AdversaryMeterTestCase
         // Remove the asset
         $asset->delete();
 
-        // TODO : fixup by inverting relationship
-        $screenshot80->delete();
-        $screenshot443->delete();
-
         // Ensure removing the asset removes all associated data
         $this->assertEquals(0, Asset::count());
         $this->assertEquals(0, AssetTag::count());
@@ -752,7 +837,7 @@ class ScansTest extends AdversaryMeterTestCase
             ]);
     }
 
-    private function mockGetPortsScanStatusError()
+    private function mockGetPortsScanStatusWhenScanEndsWithAnError()
     {
         ApiUtils::shouldReceive('task_status_public')
             ->once()
@@ -1058,6 +1143,38 @@ class ScansTest extends AdversaryMeterTestCase
                     'toolVersion' => '3.5',
                     'outputFormat' => 'json',
                 ]]
+            ]);
+    }
+
+    private function mockGetVulnsScanResultWhenPort80IsClosed()
+    {
+        ApiUtils::shouldReceive('task_get_scan_public')
+            ->once()
+            ->with('b9b5e877-bdfe-4b39-8c4b-8316e451730e')
+            ->andReturn([
+                "hostname" => "www.example.com",
+                "ip" => "93.184.215.14",
+                "port" => 80,
+                "protocol" => "tcp",
+                "client" => "",
+                "cf_ui_data" => [],
+                "tags" => [],
+                "tests" => [],
+                "scan_type" => "port",
+                "first_seen" => null,
+                "last_seen" => null,
+                "service" => "closed",
+                "vendor" => "",
+                "product" => null,
+                "version" => "",
+                "cpe" => null,
+                "ssl" => false,
+                "current_task" => "alerter",
+                "current_task_status" => "DROPPED",
+                "current_task_id" => "b9b5e877-bdfe-4b39-8c4b-8316e451730e",
+                "current_task_ret" => "",
+                "serviceConfidenceScore" => 1,
+                "data" => []
             ]);
     }
 }

@@ -13,6 +13,7 @@ class Screenshot extends Model
     protected $connection = 'mysql_am';
 
     protected $fillable = [
+        'port_id',
         'png',
     ];
 }
