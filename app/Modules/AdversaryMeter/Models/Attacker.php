@@ -5,6 +5,8 @@ namespace App\Modules\AdversaryMeter\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 
 class Attacker extends Model
 {
@@ -27,5 +29,61 @@ class Attacker extends Model
     public function events(): HasMany
     {
         return $this->hasMany(HoneypotEvent::class, 'attacker_id', 'id');
+    }
+
+    public function humans(): Builder
+    {
+        return $this->events()->where('human', true);
+    }
+
+    public function targeted(): Builder
+    {
+        return $this->events()->where('targeted', true);
+    }
+
+    public function ips(): Collection
+    {
+        return HoneypotEvent::where('attacker_id', $this->id)
+            ->get()
+            ->pluck('ip')
+            ->unique()
+            ->sort()
+            ->values();
+    }
+
+    public function tools(): Collection
+    {
+        return $this->events()
+            ->where('event', 'tool_detected')
+            ->get()
+            ->pluck('details')
+            ->unique()
+            ->sort()
+            ->values();
+    }
+
+    public function cves(): Collection
+    {
+        return $this->events()
+            ->where('event', 'cve_tested')
+            ->get()
+            ->pluck('details')
+            ->unique()
+            ->sort()
+            ->values();
+    }
+
+    public function aggressiveness(?int $totalNumberOfEvents = null): string
+    {
+        $totalNumberOfEvents = $totalNumberOfEvents == null ?? HoneypotEvent::count();
+        $numberOfEvents = HoneypotEvent::where('attacker_id', $this->id)->count();
+        $ratio = $numberOfEvents / $totalNumberOfEvents * 100;
+        if ($ratio <= 33) {
+            return 'low';
+        }
+        if ($ratio <= 66) {
+            return 'medium';
+        }
+        return 'high';
     }
 }

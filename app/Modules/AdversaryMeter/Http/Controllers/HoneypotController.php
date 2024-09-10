@@ -32,35 +32,19 @@ class HoneypotController extends Controller
 
     public function attackerIndex(Request $request): array
     {
-        $nbEvents = HoneypotEvent::count();
+        $totalNumberOfEvents = HoneypotEvent::count();
         return Attacker::select('attackers.*')
             ->orderBy('attackers.name')
             ->orderBy('attackers.last_contact')
             ->get()
-            ->map(function (Attacker $attacker) use ($nbEvents) {
-
-                $ips = HoneypotEvent::where('attacker_id', $attacker->id)
-                    ->get()
-                    ->map(fn(HoneypotEvent $event) => $event->ip)
-                    ->toArray();
-
-                $nbAttackerEvents = HoneypotEvent::where('attacker_id', $attacker->id)->count();
-                $ratio = $nbAttackerEvents / $nbEvents * 100;
-
-                if ($ratio <= 33) {
-                    $aggressiveness = 'low';
-                } elseif ($ratio <= 66) {
-                    $aggressiveness = 'medium';
-                } else {
-                    $aggressiveness = 'high';
-                }
+            ->map(function (Attacker $attacker) use ($totalNumberOfEvents) {
                 return [
                     'id' => $attacker->id,
                     'name' => $attacker->name,
                     'first_contact' => $attacker->first_contact,
                     'last_contact' => $attacker->last_contact,
-                    'aggressiveness' => $aggressiveness,
-                    'ips' => $ips,
+                    'aggressiveness' => $attacker->aggressiveness($totalNumberOfEvents),
+                    'ips' => $attacker->ips(),
                 ];
             })
             ->toArray();
@@ -173,25 +157,14 @@ class HoneypotController extends Controller
 
     public function attackerProfile(Attacker $attacker): array
     {
-        $nbEvents = HoneypotEvent::count();
-        $nbAttackerEvents = $attacker->events()->count();
-        $ratio = $nbAttackerEvents / $nbEvents * 100;
-
-        if ($ratio <= 33) {
-            $aggressiveness = 'low';
-        } elseif ($ratio <= 66) {
-            $aggressiveness = 'medium';
-        } else {
-            $aggressiveness = 'high';
-        }
         return [
             'id' => $attacker->id,
             'name' => $attacker->name,
             'first_contact' => $attacker->first_contact,
             'last_contact' => $attacker->last_contact,
-            'count' => $nbAttackerEvents,
-            'tot' => $nbEvents,
-            'aggressiveness' => $aggressiveness,
+            'count' => $attacker->events()->count(),
+            'tot' => HoneypotEvent::count(),
+            'aggressiveness' => $attacker->aggressiveness(),
         ];
     }
 
@@ -199,9 +172,9 @@ class HoneypotController extends Controller
     {
         return [
             'attacks' => $attacker->events()->count(),
-            'human' => $attacker->events()->where('human', true)->count(),
-            'targeted' => $attacker->events()->where('targeted', true)->count(),
-            'cve' => $attacker->events()->where('event', 'cve_tested')->count(),
+            'human' => $attacker->humans()->count(),
+            'targeted' => $attacker->targeted()->count(),
+            'cve' => $attacker->cves()->count(),
         ];
     }
 
@@ -224,19 +197,15 @@ class HoneypotController extends Controller
 
     public function attackerTools(Attacker $attacker): array
     {
-        return $attacker->events()
-            ->get()
-            ->pluck('details')
-            ->unique()
-            ->toArray();
+        return $attacker->tools()->toArray();
     }
 
     public function attackerCompetency(Attacker $attacker): array
     {
-        $tools = $attacker->events()->where('event', 'tool_detected')->count();
-        $cves = $attacker->events()->where('event', 'cve_tested')->count();
-        $humans = $attacker->events()->where('human', true)->count();
-        $ips = $attacker->events()->get()->pluck('ip')->unique()->count();
+        $tools = $attacker->tools()->count();
+        $cves = $attacker->cves()->count();
+        $humans = $attacker->humans()->count();
+        $ips = $attacker->ips()->count();
         $targetedWordlists = $attacker->events()->where('event', 'curated_wordlist')->count();
         $targetedPasswords = $attacker->events()->where('event', 'manual_actions_password_targeted')->count();
         return [
@@ -393,10 +362,9 @@ class HoneypotController extends Controller
         $tag = $request->validate([
             'tag' => 'string|required',
         ])['tag'];
-        $hash = Str::random(32);
         return AssetTagHash::create([
             'tag' => $tag,
-            'hash' => $hash,
+            'hash' => Str::random(32),
         ]);
     }
 
