@@ -438,10 +438,8 @@ class ScansTest extends AdversaryMeterTestCase
         $screenshot80 = $port80->screenshot()->first();
         $screenshot443 = $port443->screenshot()->first();
 
-        $this->assertEquals(2, $ports->count());
-
         $this->assertNull($screenshot80);
-        $this->assertNotNull($screenshot443);
+        $this->assertEquals($port443->id, $screenshot443->port_id);
 
         $this->assertEquals('www.example.com', $port80->hostname);
         $this->assertEquals('93.184.215.14', $port80->ip);
@@ -451,7 +449,6 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertNull($port80->service);
         $this->assertNull($port80->product);
         $this->assertNull($port80->ssl);
-        $this->assertNull($port80->screenshot_id);
         $this->assertEquals('EDGECAST, US', $port80->hosting_service_description);
         $this->assertEquals('ripencc', $port80->hosting_service_registry);
         $this->assertEquals('15133', $port80->hosting_service_asn);
@@ -468,7 +465,6 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals('http', $port443->service);
         $this->assertEquals('ECAcc (bsb|2789)', $port443->product);
         $this->assertTrue($port443->ssl);
-        $this->assertEquals($screenshot443->id, $port443->screenshot_id);
         $this->assertEquals('EDGECAST, US', $port443->hosting_service_description);
         $this->assertEquals('ripencc', $port443->hosting_service_registry);
         $this->assertEquals('15133', $port443->hosting_service_asn);
@@ -671,10 +667,8 @@ class ScansTest extends AdversaryMeterTestCase
         $screenshot80 = $port80->screenshot()->first();
         $screenshot443 = $port443->screenshot()->first();
 
-        $this->assertEquals(2, $ports->count());
-
-        $this->assertNotNull($screenshot80);
-        $this->assertNotNull($screenshot443);
+        $this->assertEquals($port80->id, $screenshot80->port_id);
+        $this->assertEquals($port443->id, $screenshot443->port_id);
 
         $this->assertEquals('www.example.com', $port80->hostname);
         $this->assertEquals('93.184.215.14', $port80->ip);
@@ -684,7 +678,6 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals('http', $port80->service);
         $this->assertEquals('ECAcc (bsb|2789)', $port80->product);
         $this->assertFalse($port80->ssl);
-        $this->assertEquals($screenshot80->id, $port80->screenshot_id);
         $this->assertEquals('EDGECAST, US', $port80->hosting_service_description);
         $this->assertEquals('ripencc', $port80->hosting_service_registry);
         $this->assertEquals('15133', $port80->hosting_service_asn);
@@ -701,7 +694,6 @@ class ScansTest extends AdversaryMeterTestCase
         $this->assertEquals('http', $port443->service);
         $this->assertEquals('ECAcc (bsb|2789)', $port443->product);
         $this->assertTrue($port443->ssl);
-        $this->assertEquals($screenshot443->id, $port443->screenshot_id);
         $this->assertEquals('EDGECAST, US', $port443->hosting_service_description);
         $this->assertEquals('ripencc', $port443->hosting_service_registry);
         $this->assertEquals('15133', $port443->hosting_service_asn);
