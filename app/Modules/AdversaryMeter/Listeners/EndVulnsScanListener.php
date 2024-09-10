@@ -6,7 +6,6 @@ use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\EndVulnsScan;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Alert;
-use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\Scan;
 use App\Modules\AdversaryMeter\Models\Screenshot;
@@ -67,7 +66,7 @@ class EndVulnsScanListener extends AbstractListener
                     $port->closed = 1;
                     $port->save();
 
-                    $this->markAssetScanAsCompleted($scan);
+                    $this->markScanAsCompleted($scan);
                 }
                 return;
             }
@@ -91,7 +90,7 @@ class EndVulnsScanListener extends AbstractListener
         $this->setAlertsV1($port, $task);
         $this->setAlertsV2($port, $task);
         $this->setScreenshot($port, $task);
-        $this->markAssetScanAsCompleted($scan);
+        $this->markScanAsCompleted($scan);
     }
 
     private function setAlertsV1(Port $port, array $task): void
@@ -187,7 +186,7 @@ class EndVulnsScanListener extends AbstractListener
             });
     }
 
-    private function markAssetScanAsCompleted(Scan $scan): void
+    private function markScanAsCompleted(Scan $scan): void
     {
         DB::transaction(function () use ($scan) {
 
@@ -201,7 +200,7 @@ class EndVulnsScanListener extends AbstractListener
 
             if ($remaining === 0) {
 
-                $asset = Asset::where('id', $scan->asset_id)->first();
+                $asset = $scan->asset()->first();
 
                 if ($asset) {
                     if ($asset->cur_scan_id === $scan->ports_scan_id) {
