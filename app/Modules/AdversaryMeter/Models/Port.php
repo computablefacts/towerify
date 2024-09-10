@@ -30,7 +30,6 @@ class Port extends Model
         'service',
         'product',
         'ssl',
-        'screenshot_id',
         'closed',
     ];
 
@@ -46,6 +45,6 @@ class Port extends Model
 
     public function screenshot(): HasOne
     {
-        return $this->hasOne(Screenshot::class, 'id', 'screenshot_id');
+        return $this->hasOne(Screenshot::class, 'port_id', 'id');
     }
 }

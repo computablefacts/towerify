@@ -8,7 +8,6 @@ use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\Scan;
-use App\Modules\AdversaryMeter\Models\Screenshot;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -173,12 +172,10 @@ class EndVulnsScanListener extends AbstractListener
             ->filter(fn(array $screenshot) => !empty($screenshot['png']))
             ->each(function (array $screenshot) use ($port) {
                 try {
-                    $screenshot = Screenshot::create([
+                    $port->screenshot()->create([
                         'port_id' => $port->id,
                         'png' => "data:image/png;base64,{$screenshot['png']}",
                     ]);
-                    $port->screenshot_id = $screenshot->id;
-                    $port->save();
                 } catch (\Exception $exception) {
                     Log::error($exception);
                     Log::error($port);
