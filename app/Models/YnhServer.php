@@ -22,6 +22,24 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * @property int id
+ * @property string name
+ * @property ?string version
+ * @property ?string ip_address
+ * @property ?int ssh_port
+ * @property ?string ssh_username
+ * @property ?string ssh_public_key
+ * @property ?string ssh_private_key
+ * @property ?int user_id
+ * @property bool updated
+ * @property bool is_ready
+ * @property ?int ynh_order_id
+ * @property string secret
+ * @property string ip_address_v6
+ * @property bool is_frozen
+ * @property bool added_with_curl
+ */
 class YnhServer extends Model
 {
     use HasFactory, HasTenant2;

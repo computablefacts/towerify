@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 
+/**
+ * @property int id
+ * @property int order_id
+ * @property int order_item_id
+ * @property ProductTypeEnum product_type
+ */
 class YnhOrder extends Model
 {
     use HasFactory;

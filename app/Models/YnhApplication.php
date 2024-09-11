@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int id
+ * @property string name
+ * @property ?string description
+ * @property string version
+ * @property ?string path
+ * @property string sku
+ * @property int ynh_server_id
+ * @property ?int ynh_order_id
+ * @property bool updated
+ */
 class YnhApplication extends Model
 {
     use HasFactory;

@@ -8,6 +8,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int id
+ * @property ?int user_id
+ * @property int ynh_server_id
+ * @property string uid
+ * @property int order
+ * @property SshTraceStateEnum state
+ * @property string trace
+ */
 class YnhSshTraces extends Model
 {
     use HasFactory;

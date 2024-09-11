@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int id
+ * @property string name
+ * @property bool is_principal
+ * @property int ynh_server_id
+ * @property bool updated
+ */
 class YnhDomain extends Model
 {
     use HasFactory;

@@ -2,12 +2,28 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int id
+ * @property int ynh_server_id
+ * @property int row
+ * @property string name
+ * @property string host_identifier
+ * @property Carbon calendar_time
+ * @property int unix_time
+ * @property int epoch
+ * @property int counter
+ * @property bool numerics
+ * @property array columns
+ * @property string action
+ * @property bool packed
+ */
 class YnhOsquery extends Model
 {
     use HasFactory;

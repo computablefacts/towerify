@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int id
+ * @property bool updated
+ * @property ?int from_ynh_server_id
+ * @property ?int to_ynh_server_id
+ * @property string from_ip_address
+ * @property string to_ip_address
+ * @property string service
+ * @property int weight
+ */
 class YnhNginxLogs extends Model
 {
     use HasFactory;

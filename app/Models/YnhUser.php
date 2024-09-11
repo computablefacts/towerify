@@ -9,6 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 
+/**
+ * @property int id
+ * @property string username
+ * @property ?string fullname
+ * @property string email
+ * @property int ynh_server_id
+ * @property bool updated
+ */
 class YnhUser extends Model
 {
     use HasFactory;

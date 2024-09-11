@@ -2,10 +2,21 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int id
+ * @property int ynh_server_id
+ * @property Carbon timestamp
+ * @property double percent_available
+ * @property double percent_used
+ * @property double space_left_gb
+ * @property double total_space_gb
+ * @property double used_space_gb
+ */
 class YnhOsqueryMemoryUsage extends Model
 {
     use HasFactory;

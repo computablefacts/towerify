@@ -6,6 +6,19 @@ use App\Enums\OsqueryPlatformEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int id
+ * @property string name
+ * @property string description
+ * @property ?string value
+ * @property string query
+ * @property ?string version
+ * @property int interval
+ * @property bool removed
+ * @property bool snapshot
+ * @property OsqueryPlatformEnum platform
+ * @property ?string category
+ */
 class YnhOsqueryRule extends Model
 {
     use HasFactory;

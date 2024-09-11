@@ -8,6 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 
+/**
+ * @property int id
+ * @property string name
+ * @property int ynh_user_id
+ * @property int ynh_application_id
+ * @property bool updated
+ * @property bool is_visitors
+ * @property bool is_all_users
+ * @property bool is_user_specific
+ */
 class YnhPermission extends Model
 {
     use HasFactory;
