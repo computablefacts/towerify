@@ -51,6 +51,7 @@ class ImportHoneypotsEvents implements ShouldQueue
 
                 foreach ($events as $event) {
                     $hp = $this->hostingProvider($event['ip']);
+                    /** @var HoneypotEvent $e */
                     $e = HoneypotEvent::create([
                         'honeypot_id' => $honeypot->id,
                         'event' => $event['event'],
@@ -73,9 +74,11 @@ class ImportHoneypotsEvents implements ShouldQueue
                     ]);
                     if ($e->targeted || $e->human) {
 
+                        /** @var HoneypotEvent $eventWithSameUid */
                         $eventWithSameUid = HoneypotEvent::where('uid', $event['uid'] ?? 'PLACEHOLDER')
                             ->whereNotNull('attacker_id')
                             ->first();
+                        /** @var HoneypotEvent $eventWithSameIp */
                         $eventWithSameIp = HoneypotEvent::where('ip', $event['ip'] ?? 'PLACEHOLDER')
                             ->whereNotNull('attacker_id')
                             ->first();
@@ -113,13 +116,17 @@ class ImportHoneypotsEvents implements ShouldQueue
                         } else {
                             if ($attackerWithSameUid && $attackerWithSameIp) {
                                 if (Str::startsWith($e->event, "ssh_bruteforce")) {
+                                    /** @var Attacker $attacker */
                                     $attacker = Attacker::find($attackerWithSameIp);
                                 } else {
+                                    /** @var Attacker $attacker */
                                     $attacker = Attacker::find($attackerWithSameUid);
                                 }
                             } elseif ($attackerWithSameUid) {
+                                /** @var Attacker $attacker */
                                 $attacker = Attacker::find($attackerWithSameUid);
                             } else {
+                                /** @var Attacker $attacker */
                                 $attacker = Attacker::find($attackerWithSameIp);
                             }
 

@@ -2,9 +2,32 @@
 
 namespace App\Modules\AdversaryMeter\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int id
+ * @property int honeypot_id
+ * @property ?int attacker_id
+ * @property string event
+ * @property string uid
+ * @property string endpoint
+ * @property Carbon timestamp
+ * @property string request_uri
+ * @property string user_agent
+ * @property string ip
+ * @property string details
+ * @property string feed_name
+ * @property ?string hosting_service_description
+ * @property ?string hosting_service_registry
+ * @property ?string hosting_service_asn
+ * @property ?string hosting_service_cidr
+ * @property ?string hosting_service_country_code
+ * @property ?string hosting_service_date
+ * @property bool human
+ * @property bool targeted
+ */
 class HoneypotEvent extends Model
 {
     use HasFactory;

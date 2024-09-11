@@ -96,7 +96,6 @@ class AssetController extends Controller
     {
         $valid = Str::lower($request->string('valid'));
         $hours = $request->integer('hours');
-
         $query = Asset::query();
 
         if ($valid === 'true') {
@@ -214,6 +213,7 @@ class AssetController extends Controller
         $obj = $asset->tags()->where('tag', $tag)->first();
 
         if (!$obj) {
+            /** @var AssetTag $obj */
             $obj = $asset->tags()->create(['tag' => $tag]);
             if (!$obj) {
                 abort(500, "The tag could not be created : {$tag}");
@@ -255,7 +255,7 @@ class AssetController extends Controller
         }
 
         // Load the asset's tags
-        $tags = $asset->tags()->orderBy('tag')->get()->map(fn(AssetTag $tag) => $tag->tag)->toArray();
+        $tags = $asset->tags()->orderBy('tag')->get()->pluck('tag')->toArray();
 
         // Load the asset's open ports
         $ports = $asset->ports()

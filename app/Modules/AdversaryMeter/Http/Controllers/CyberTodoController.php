@@ -58,6 +58,7 @@ class CyberTodoController extends Controller
     public function vulns(string $hash)
     {
         try {
+            /** @var AssetTagHash $hash */
             $hash = AssetTagHash::where('hash', $hash)->first();
 
             if ($hash === null) {

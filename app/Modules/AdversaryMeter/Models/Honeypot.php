@@ -31,6 +31,31 @@ class Honeypot extends Model
         'cloud_sensor' => HoneypotCloudSensorsEnum::class,
     ];
 
+    public function id(): int
+    {
+        return $this->id;
+    }
+
+    public function dns(): string
+    {
+        return $this->dns;
+    }
+
+    public function status(): ?HoneypotStatusesEnum
+    {
+        return $this->status;
+    }
+
+    public function cloudProvider(): HoneypotCloudProvidersEnum
+    {
+        return $this->cloud_provider;
+    }
+
+    public function cloudSensor(): HoneypotCloudSensorsEnum
+    {
+        return $this->cloud_sensor;
+    }
+
     public function events(): HasMany
     {
         return $this->hasMany(HoneypotEvent::class, 'honeypot_id', 'id');

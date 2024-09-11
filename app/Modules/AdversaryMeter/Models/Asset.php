@@ -11,6 +11,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int id
+ * @property string asset
+ * @property AssetTypesEnum type
+ * @property ?string tld
+ * @property ?string prev_scan_id
+ * @property ?string cur_scan_id
+ * @property ?string next_scan_id
+ * @property ?string discovery_id
+ * @property bool is_monitored
+ * @property int created_by
+ */
 class Asset extends Model
 {
     use HasFactory, HasTenant;

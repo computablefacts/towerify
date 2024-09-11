@@ -7,6 +7,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @property int id
+ * @property int port_id
+ * @property ?string uid
+ * @property string type
+ * @property ?string level
+ * @property ?string title
+ * @property ?string vulnerability
+ * @property ?string remediation
+ * @property ?string cve_id
+ * @property ?string cve_cvss
+ * @property ?string cve_vendor
+ * @property ?string cve_product
+ */
 class Alert extends Model
 {
     use HasFactory;

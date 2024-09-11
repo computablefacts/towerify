@@ -6,8 +6,6 @@ use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\BeginVulnsScan;
 use App\Modules\AdversaryMeter\Events\EndVulnsScan;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
-use App\Modules\AdversaryMeter\Models\Asset;
-use App\Modules\AdversaryMeter\Models\AssetTag;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -35,11 +33,7 @@ class BeginVulnsScanListener extends AbstractListener
             return;
         }
 
-        $tags = Asset::where('id', $scan->asset_id)
-            ->get()
-            ->flatMap(fn(Asset $asset) => $asset->tags()->get())
-            ->map(fn(AssetTag $tag) => $tag->tag)
-            ->toArray();
+        $tags = $scan->asset()->first()->tags()->get()->pluck('tag')->toArray();
         $task = $this->beginTask($port->hostname, $port->ip, $port->port, $port->protocol, $tags);
         $taskId = $task['scan_id'] ?? null;
 

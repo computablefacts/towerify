@@ -6,6 +6,12 @@ use App\Modules\AdversaryMeter\Traits\HasTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int id
+ * @property int asset_id
+ * @property string tag
+ * @property int created_by
+ */
 class AssetTag extends Model
 {
     use HasFactory, HasTenant;

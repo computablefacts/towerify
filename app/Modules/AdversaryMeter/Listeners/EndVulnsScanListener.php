@@ -6,6 +6,7 @@ use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Events\EndVulnsScan;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Alert;
+use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
@@ -75,7 +76,7 @@ class EndVulnsScanListener extends AbstractListener
         $product = $task['product'] ?? null;
         $ssl = $task['ssl'] ?? null;
 
-        $port = Port::where('scan_id', $scan->id)->first();
+        $port = $scan->port()->first();
         $port->service = $service;
         $port->product = $product;
         $port->ssl = $ssl ? 1 : 0;
@@ -197,6 +198,7 @@ class EndVulnsScanListener extends AbstractListener
 
             if ($remaining === 0) {
 
+                /** @var Asset $asset */
                 $asset = $scan->asset()->first();
 
                 if ($asset) {

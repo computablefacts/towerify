@@ -7,14 +7,12 @@ use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
 use App\Modules\AdversaryMeter\Mail\HoneypotRequested;
 use App\Modules\AdversaryMeter\Models\Alert;
-use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Models\AssetTagHash;
 use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\HiddenAlert;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
-use App\Modules\AdversaryMeter\Models\Port;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -39,10 +37,10 @@ class HoneypotController extends Controller
             ->get()
             ->map(function (Attacker $attacker) use ($totalNumberOfEvents) {
                 return [
-                    'id' => $attacker->id,
-                    'name' => $attacker->name,
-                    'first_contact' => $attacker->first_contact,
-                    'last_contact' => $attacker->last_contact,
+                    'id' => $attacker->id(),
+                    'name' => $attacker->name(),
+                    'first_contact' => $attacker->first_contact->format('Y-m-d H:i') . ' UTC',
+                    'last_contact' => $attacker->last_contact->format('Y-m-d H:i') . ' UTC',
                     'aggressiveness' => $attacker->aggressiveness($totalNumberOfEvents),
                     'ips' => $attacker->ips(),
                 ];
@@ -112,8 +110,8 @@ class HoneypotController extends Controller
             ->map(function (Alert $alert) use ($attackerId) {
                 return [
                     'alert' => $alert,
-                    'asset' => Asset::find($alert->asset_id),
-                    'port' => Port::find($alert->port_id),
+                    'asset' => $alert->asset(),
+                    'port' => $alert->port(),
                     'events' => $alert->events($attackerId)->get()->toArray(),
                 ];
             })
@@ -131,7 +129,7 @@ class HoneypotController extends Controller
             ->map(function (Alert $alert) {
                 return [
                     'alert' => $alert,
-                    'asset' => Asset::find($alert->asset_id),
+                    'asset' => $alert->asset(),
                     'events' => $alert->events()->get()->toArray(),
                 ];
             })
@@ -142,7 +140,7 @@ class HoneypotController extends Controller
     {
         $events = $attacker->events()->orderBy('timestamp', 'desc')->get();
         return [
-            'firstEvent' => $events->map(fn(HoneypotEvent $event) => $event->timestamp)->last(),
+            'firstEvent' => $events->pluck('timestamp')->last(),
             'top3EventTypes' => $events->groupBy('event')
                 ->sort(fn($e1, $e2) => $e2->count() - $e1->count())
                 ->take(3)
@@ -160,8 +158,8 @@ class HoneypotController extends Controller
         return [
             'id' => $attacker->id,
             'name' => $attacker->name,
-            'first_contact' => $attacker->first_contact,
-            'last_contact' => $attacker->last_contact,
+            'first_contact' => $attacker->first_contact->format('Y-m-d H:i') . ' UTC',
+            'last_contact' => $attacker->last_contact->format('Y-m-d H:i') . ' UTC',
             'count' => $attacker->events()->count(),
             'tot' => HoneypotEvent::count(),
             'aggressiveness' => $attacker->aggressiveness(),
@@ -261,11 +259,12 @@ class HoneypotController extends Controller
 
         $honeypots = Honeypot::all();
 
-        $leastAdvancedStatus = $honeypots->reduce(function ($carry, $honeypot) use ($statuses) {
-            $currentStatusIndex = array_search($honeypot->status, $statuses);
+        /** @var HoneypotStatusesEnum $leastAdvancedStatus */
+        $leastAdvancedStatus = $honeypots->reduce(function (HoneypotStatusesEnum $carry, Honeypot $honeypot) use ($statuses) {
+            $currentStatusIndex = array_search($honeypot->status(), $statuses);
             $carryIndex = array_search($carry, $statuses);
-            return $currentStatusIndex < $carryIndex ? $honeypot->status : $carry;
-        }, 'dns_setup');
+            return $currentStatusIndex < $carryIndex ? $honeypot->status() : $carry;
+        }, HoneypotStatusesEnum::DNS_SETUP);
 
         return [
             'current_user' => Auth::user()->name,
@@ -346,7 +345,7 @@ class HoneypotController extends Controller
         return [
             'tags' => AssetTag::query()
                 ->get()
-                ->map(fn(AssetTag $tag) => $tag->tag)
+                ->pluck('tag')
                 ->unique()
                 ->toArray(),
         ];

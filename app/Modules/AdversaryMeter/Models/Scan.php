@@ -2,11 +2,22 @@
 
 namespace App\Modules\AdversaryMeter\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int id
+ * @property int asset_id
+ * @property ?string ports_scan_id
+ * @property ?string vulns_scan_id
+ * @property ?Carbon ports_scan_begins_at
+ * @property ?Carbon ports_scan_ends_at
+ * @property ?Carbon vulns_scan_begins_at
+ * @property ?Carbon vulns_scan_ends_at
+ */
 class Scan extends Model
 {
     use HasFactory;
