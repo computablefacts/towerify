@@ -401,6 +401,7 @@ Route::post('/reset-password', function () {
 
 Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
     \Illuminate\Notifications\DatabaseNotification::query()
+        ->whereNull('read_at')
         ->whereJsonContains('data->group', $notification->data['group'])
         ->get()
         ->each(fn($notif) => $notif->markAsRead());
