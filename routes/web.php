@@ -399,8 +399,11 @@ Route::post('/reset-password', function () {
     return view('auth.passwords.email', compact('email'));
 })->middleware('auth')->name('reset-password');
 
-Route::get('/notification/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
-    $notification->markAsRead();
+Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
+    \Illuminate\Notifications\DatabaseNotification::query()
+        ->whereJsonContains('data->group', $notification->data['group'])
+        ->get()
+        ->each(fn($notif) => $notif->markAsRead());
 })->middleware('auth');
 
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {

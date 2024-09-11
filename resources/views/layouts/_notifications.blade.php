@@ -14,18 +14,21 @@
   let notifications = @json($notifications);
 
   function dismissNotification(notificationId) {
-    axios.get(`{{ url('/notification/${notificationId}/dismiss') }}`).then(response => {
+    axios.get(`{{ url('/notifications/${notificationId}/dismiss') }}`).then(response => {
       toaster.el.toast('The notification has been dismissed!', 'success');
     }).catch(error => {
       toaster.el.toast('An error occurred.', 'danger');
       console.error('Error:', error);
     });
-    notifications = notifications.filter(notification => notification.id !== notificationId);
-    drawer25.redraw();
+    const notification = notifications.find(notif => notif.id === notificationId);
+    if (notification) {
+      notifications = notifications.filter(notif => notif.data.group !== notification.data.group);
+    }
+    drawer33.redraw();
   }
 
   function showNotifications() {
-    drawer25.render = () => {
+    drawer33.render = () => {
       const rows = notifications.map(notification => {
         let details = '';
         for (let key in notification.data.details) {
@@ -40,7 +43,7 @@
         return `
             <div class="card border-${notification.data.level} m-1">
               <div class="card-body p-2">
-                <h6 class="card-title">${notification.data.type}</h6>
+                <h6 class="card-title">${notification.data.type}&nbsp;<span style="color:#f8b502">/</span>&nbsp;${notification.timestamp}</h6>
                 <p class="card-text">${notification.data.message}</p>
                 <h6 class="card-title">DETAILS</h6>
                 <ul>
@@ -60,6 +63,6 @@
       });
       return `<div class="container p-0 overflow-y-scroll" style="height:100vh;">${rows.join('')}</div>`;
     };
-    drawer25.el.show = true;
+    drawer33.el.show = true;
   }
 </script>

@@ -154,7 +154,7 @@
   </main>
 </div>
 <div id="toaster"></div>
-<div id="drawer-25"></div>
+<div id="drawer-33"></div>
 
 <!-- Scripts -->
 @stack('alpine')
@@ -179,21 +179,21 @@
     el: new com.computablefacts.blueprintjs.MinimalToaster(document.getElementById('toaster')),
     toast: (msg, intent) => toaster.el.toast(msg, intent)
   };
-  const drawer25 = {
-    el: new com.computablefacts.blueprintjs.MinimalDrawer(document.getElementById('drawer-25'), '25%'),
+  const drawer33 = {
+    el: new com.computablefacts.blueprintjs.MinimalDrawer(document.getElementById('drawer-33'), '33%'),
     redraw: null,
     render: null
   };
-  drawer25.el.onOpen(el => {
+  drawer33.el.onOpen(el => {
     // console.log(drawer);
     const div = document.createElement('div');
-    div.innerHTML = drawer25.render ? drawer25.render() : '';
+    div.innerHTML = drawer33.render ? drawer33.render() : '';
     el.appendChild(div);
-    drawer25.redraw = () => div.innerHTML = drawer25.render ? drawer25.render() : '';
+    drawer33.redraw = () => div.innerHTML = drawer33.render ? drawer33.render() : '';
   });
-  drawer25.el.onClose(() => {
-    drawer25.redraw = null;
-    drawer25.render = null;
+  drawer33.el.onClose(() => {
+    drawer33.redraw = null;
+    drawer33.render = null;
   });
 
 </script>

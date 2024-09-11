@@ -8,12 +8,14 @@ use App\Enums\ServerStatusEnum;
 use App\Models\YnhServer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class HealthCheckIssue extends Notification
 {
     use Queueable;
 
     private YnhServer $server;
+    private string $group;
 
     /**
      * Create a new notification instance.
@@ -21,6 +23,7 @@ class HealthCheckIssue extends Notification
     public function __construct(YnhServer $server)
     {
         $this->server = $server;
+        $this->group = Str::random(10);
     }
 
     /**
@@ -50,6 +53,7 @@ class HealthCheckIssue extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'group' => $this->group,
             'type' => NotificationTypeEnum::HEALTHCHECK_ISSUE->value,
             'level' => NotificationLevelEnum::DANGER->value,
             'message' => "A health check issue has been detected: no metrics have been recorded in the past 20 minutes.",
