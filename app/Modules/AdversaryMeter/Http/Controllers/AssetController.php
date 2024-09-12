@@ -269,7 +269,7 @@ class AssetController extends Controller
                     'protocol' => $port->protocol,
                     'products' => [$port->product],
                     'services' => [$port->service],
-                    'tags' => $port->tags()->orderBy('tag')->get()->map(fn(PortTag $tag) => $tag->tag)->toArray(),
+                    'tags' => $port->tags()->orderBy('tag')->get()->pluck('tag')->toArray(),
                     'screenshotId' => $port->screenshot()->first()?->id,
                 ];
             })
