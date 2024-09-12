@@ -225,14 +225,16 @@ class HoneypotController extends Controller
 
     public function getHoneypotEventStats(string $dns): array
     {
-        $honeypot = Honeypot::where('dns', $dns)->first();
         return HoneypotEvent::select(
             DB::raw("DATE_FORMAT(timestamp, '%Y-%m-%d') AS date"),
             DB::raw("SUM(CASE WHEN human = 1 OR targeted = 1 THEN 1 ELSE 0 END) AS human_or_targeted"),
             DB::raw("SUM(CASE WHEN human = 0 AND targeted = 0 THEN 1 ELSE 0 END) AS not_human_or_targeted")
         )
-            ->where('honeypot_id', $honeypot->id)
-            ->groupBy(DB::raw("DATE_FORMAT(timestamp, '%Y-%m-%d')"))
+            ->join('honeypots', 'honeypots.id', '=', 'honeypots_events.honeypot_id')
+            ->where('honeypots.dns', $dns)
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->limit(30)
             ->get()
             ->toArray();
     }

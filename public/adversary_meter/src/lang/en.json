@@ -198,5 +198,6 @@
   "de même type ({{type}})": "with same type ({{type}})",
   "Sauvegarder": "Save",
   "Masquer les vulnérabilités": "Hide vulnerabilities",
-  "Il n'y a aucune vulnérabilité de détectée.": "There is no vulnerability to display."
+  "Il n'y a aucune vulnérabilité de détectée.": "There is no vulnerability to display.",
+  "Activité récente": "Recent activity"
 }
