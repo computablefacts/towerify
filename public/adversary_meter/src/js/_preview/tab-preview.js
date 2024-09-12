@@ -348,7 +348,6 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
     const lastLoader = new com.computablefacts.blueprintjs.MinimalSpinner(tab.querySelector('#last-loader'))
     const honeypotLoaders = [honeypot1Loader, honeypot2Loader, honeypot3Loader]
     this.datastore_.getHoneypots().then((honeypots) => {
-      console.log(honeypots)
       this.honeypots_ = honeypots;
       for(let i = 0; i < 3; i++){
         if (honeypots[i]) {

@@ -37,8 +37,8 @@ class HoneypotController extends Controller
             ->get()
             ->map(function (Attacker $attacker) use ($totalNumberOfEvents) {
                 return [
-                    'id' => $attacker->id(),
-                    'name' => $attacker->name(),
+                    'id' => $attacker->id,
+                    'name' => $attacker->name,
                     'first_contact' => $attacker->first_contact->format('Y-m-d H:i') . ' UTC',
                     'last_contact' => $attacker->last_contact->format('Y-m-d H:i') . ' UTC',
                     'aggressiveness' => $attacker->aggressiveness($totalNumberOfEvents),

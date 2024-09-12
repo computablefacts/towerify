@@ -2,6 +2,7 @@
 
 namespace App\Modules\AdversaryMeter\Jobs;
 
+use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\Honeypot;
@@ -24,6 +25,7 @@ class ImportHoneypotsEvents implements ShouldQueue
     public $tries = 1;
     public $maxExceptions = 1;
     public $timeout = 3 * 180; // 9mn
+    private array $cache = [];
 
     public function __construct()
     {
@@ -62,7 +64,7 @@ class ImportHoneypotsEvents implements ShouldQueue
                         'request_uri' => Str::limit(trim($event['request_uri'] ?? '', 191)),
                         'user_agent' => Str::limit(trim($event['user_agent'] ?? '', 191)),
                         'ip' => $event['ip'],
-                        'details' => $event['details'],
+                        'details' => Str::limit(trim($event['details'] ?? '', 191)),
                         'targeted' => $event['targeted'] == '1',
                         'feed_name' => $feed,
                         'hosting_service_description' => $hp['data']['asn_description'] ?? null,
@@ -90,7 +92,7 @@ class ImportHoneypotsEvents implements ShouldQueue
 
                             // Create a new attacker's profile
                             $attacker = Attacker::create([
-                                'name' => $this->newCodename(),
+                                'name' => Str::upper($this->newCodename()),
                                 'first_contact' => $e->timestamp,
                                 'last_contact' => $e->timestamp,
                             ]);
@@ -147,15 +149,16 @@ class ImportHoneypotsEvents implements ShouldQueue
                 }
 
                 $this->archive($file);
-                return;
             }
-            return;
         });
     }
 
     private function events(): Collection
     {
-        $honeypots = Honeypot::get()->map(fn(Honeypot $honeypot) => $honeypot->dns)->values();
+        $honeypots = Honeypot::where('status', HoneypotStatusesEnum::SETUP_COMPLETE)
+            ->get()
+            ->map(fn(Honeypot $honeypot) => $honeypot->dns)
+            ->values();
         return collect($this->directories())->filter(function ($dir) use ($honeypots) {
             return $honeypots->contains($dir);
         })->flatMap(function (string $dir) {
@@ -198,6 +201,9 @@ class ImportHoneypotsEvents implements ShouldQueue
 
     private function hostingProvider(string $ip): array
     {
-        return ApiUtils::ip_whois_public($ip);
+        if (!isset($this->cache[$ip])) {
+            $this->cache[$ip] = ApiUtils::ip_whois_public($ip);
+        }
+        return $this->cache[$ip];
     }
 }

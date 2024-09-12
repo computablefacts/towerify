@@ -38,12 +38,12 @@ class Attacker extends Model
         return $this->hasMany(HoneypotEvent::class, 'attacker_id', 'id');
     }
 
-    public function humans(): Builder
+    public function humans(): HasMany
     {
         return $this->events()->where('human', true);
     }
 
-    public function targeted(): Builder
+    public function targeted(): HasMany
     {
         return $this->events()->where('targeted', true);
     }
@@ -82,7 +82,9 @@ class Attacker extends Model
 
     public function aggressiveness(?int $totalNumberOfEvents = null): string
     {
-        $totalNumberOfEvents = $totalNumberOfEvents == null ?? HoneypotEvent::count();
+        if ($totalNumberOfEvents == null) {
+            $totalNumberOfEvents = HoneypotEvent::count();
+        }
         $numberOfEvents = HoneypotEvent::where('attacker_id', $this->id)->count();
         $ratio = $numberOfEvents / $totalNumberOfEvents * 100;
         if ($ratio <= 33) {
