@@ -104,7 +104,7 @@ class HoneypotController extends Controller
             ->join('scans', 'scans.id', '=', 'ports.scan_id')
             ->join('assets', 'assets.cur_scan_id', '=', 'scans.ports_scan_id')
             ->get()
-            ->filter(fn(Alert $alert) => !$attackerId || !$alert->cve_id || $alert->events($attackerId)->exists())
+            ->filter(fn(Alert $alert) => !$attackerId || ($alert->cve_id && $alert->events($attackerId)->exists()))
             ->map(function (Alert $alert) use ($attackerId) {
                 return [
                     'alert' => $alert,
