@@ -89,7 +89,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
           loader.classList.remove('d-none');
 
           this.datastore_.postHoneypots(honeypots).then((honeypotsToConfig) => {
-            this.honeypots_ = honeypotsToConfig.filter((h) => h.value_1 === 'dns_setup');
+            this.honeypots_ = honeypotsToConfig.filter((h) => h.status === 'dns_setup');
             this.status_ = 'dns_setup';
             const statusContainer = container.querySelector('#status-container');
             statusContainer.innerHTML = this._writeTemplate();
@@ -162,7 +162,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
                 <input id="honeypot1-input" class="bp4-input w-100" type="text"
                 placeholder="ex: dev.lenomdemonsite.com"
                 pattern="${this.tldRegex_}" required
-                ${this.honeypots_.find((h) => h.value_3 === 'HTTP') ? `value="${this.honeypots_.find((h) => h.value_3 === 'HTTP').value_0}" disabled` : ''}>
+                ${this.honeypots_.find((h) => h.cloud_sensor === 'HTTP') ? `value="${this.honeypots_.find((h) => h.cloud_sensor === 'HTTP').dns}" disabled` : ''}>
                 <div class="invalid-feedback">
                     ${i18next.t('Veuillez fournir un sous-domaine valide.')}
                 </div>
@@ -172,7 +172,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
                 <input id="honeypot2-input" class="bp4-input w-100" type="text"
                 placeholder="ex: staging.lenomdemonsite.com"
                 pattern="${this.tldRegex_}" required
-                ${this.honeypots_.find((h) => h.value_3 === 'HTTPS') ? `value="${this.honeypots_.find((h) => h.value_3 === 'HTTPS').value_0}" disabled` : ''}>
+                ${this.honeypots_.find((h) => h.cloud_sensor === 'HTTPS') ? `value="${this.honeypots_.find((h) => h.cloud_sensor === 'HTTPS').dns}" disabled` : ''}>
                 <div class="invalid-feedback">
                     ${i18next.t('Veuillez fournir un sous-domaine valide.')}
                 </div>
@@ -182,7 +182,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
                 <input id="honeypot3-input" class="bp4-input w-100" type="text"
                 placeholder="ex: backup.lenomdemonsite.com"
                 pattern="${this.tldRegex_}" required
-                ${this.honeypots_.find((h) => h.value_3 === 'SSH') ? `value="${this.honeypots_.find((h) => h.value_3 === 'SSH').value_0}" disabled` : ''}>
+                ${this.honeypots_.find((h) => h.cloud_sensor === 'SSH') ? `value="${this.honeypots_.find((h) => h.cloud_sensor === 'SSH').dns}" disabled` : ''}>
                 <div class="invalid-feedback">
                     ${i18next.t('Veuillez fournir un sous-domaine valide.')}
                 </div>
@@ -210,7 +210,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
           </div>
         </div>
         <div class="my-2 d-flex flex-column flex-grow-1">
-          <div class="fw-bold px-2 my-2">${i18next.t('Routez chacun de vos DNS vers ladresse IP y étant associée :')}</div>
+          <div class="fw-bold px-2 my-2">${i18next.t('Routez chacun de vos DNS vers l\'adresse IP y étant associée :')}</div>
           <div class="flex-grow-1 overflow-auto" id="dns-table"></div>
         </div>
         <div class="my-2 text-right flex-grow-1">
@@ -231,7 +231,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
 
           let type, value;
 
-          switch (honeypot.value_3) {
+          switch (honeypot.cloud_sensor) {
             case 'HTTP':
             case 'HTTPS':
               type = 'CNAME';
@@ -246,7 +246,7 @@ export class TabHoneypots extends com.computablefacts.widgets.Widget {
             default:
               break;
           }
-          return {type, nom: honeypot.value_0, value: value};
+          return {type, nom: honeypot.dns, value: value};
         });
 
         const table = new Table(this.container.querySelector('#dns-table'), columns, alignment,

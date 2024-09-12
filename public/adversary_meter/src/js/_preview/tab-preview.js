@@ -110,7 +110,8 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
   }
 
   _getStatsAndUpdateChart(chart, honeypot, days) {
-    this.datastore_.getHoneypotStats(honeypot.value_0, days).then((data) => {
+    this.datastore_.getHoneypotStats(honeypot.dns, days).then((data) => {
+
       const allDates = this._generateAllDates(days);
       const {humanOrTargeted, notHumanOrTargeted} = this._generateData(allDates, data);
 
@@ -125,14 +126,14 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
   _getStatsAndCreateChart(honeypotIndex, tab, honeypot, loader)
   {
     let days = 7;
-    this.datastore_.getHoneypotStats(honeypot.value_0, 7).then((data) => {
+    this.datastore_.getHoneypotStats(honeypot.dns, 7).then((data) => {
       loader.destroy();
       const el = tab.querySelector('.element-' + (honeypotIndex + 1));
       el.innerHTML = `
         <div class="row">
           <div class="col my-2">
             <div class="d-flex my-auto justify-content-between">
-                <h4>${honeypot.value_0}&nbsp;(&nbsp;<span style="color: #ff9704;">${honeypot.value_3.toUpperCase()}</span>&nbsp;)</h4>
+                <h4>${honeypot.dns}&nbsp;(&nbsp;<span style="color: #ff9704;">${honeypot.cloud_sensor.toUpperCase()}</span>&nbsp;)</h4>
             </div>
             <div id="honeypot${honeypotIndex + 1}Select" class="select-container"></div>
           </div>
@@ -347,6 +348,7 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
     const lastLoader = new com.computablefacts.blueprintjs.MinimalSpinner(tab.querySelector('#last-loader'))
     const honeypotLoaders = [honeypot1Loader, honeypot2Loader, honeypot3Loader]
     this.datastore_.getHoneypots().then((honeypots) => {
+      console.log(honeypots)
       this.honeypots_ = honeypots;
       for(let i = 0; i < 3; i++){
         if (honeypots[i]) {
@@ -356,9 +358,11 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
           const el = tab.querySelector(`.element-${i+1}`);
           el.classList.add('background-light-grey', 'border');
           el.innerHTML = `
-        <div class="d-flex flex-column justify-content-center align-items-center my-auto">
-            <button class="btn btn-primary float-end rounded-0 me-1 configure-honeypot"><i class="fal fa-plus me-2"></i>${i18next.t('Configurer un honeypot')}</button>
-        </div>`;
+            <div class="d-flex flex-column justify-content-center align-items-center my-auto">
+                <button class="btn btn-primary float-end rounded-0 me-1 configure-honeypot">
+                  <i class="fal fa-plus me-2"></i>${i18next.t('Configurer un honeypot')}
+                </button>
+            </div>`;
         }
       }
     });

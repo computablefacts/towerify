@@ -225,8 +225,9 @@ class HoneypotController extends Controller
             ->toArray();
     }
 
-    public function getHoneypotEventStats(Honeypot $honeypot): array
+    public function getHoneypotEventStats(string $dns): array
     {
+        $honeypot = Honeypot::where('dns', $dns)->first();
         return HoneypotEvent::select(
             DB::raw("DATE_FORMAT(timestamp, '%Y-%m-%d') AS date"),
             DB::raw("SUM(CASE WHEN human = 1 OR targeted = 1 THEN 1 ELSE 0 END) AS human_or_targeted"),
@@ -311,15 +312,15 @@ class HoneypotController extends Controller
 
     public function moveHoneypotsConfigurationToNextStep(): void
     {
-        $statuses = [
-            HoneypotStatusesEnum::SETUP_COMPLETE,
-            HoneypotStatusesEnum::HONEYPOT_SETUP,
-            HoneypotStatusesEnum::DNS_SETUP
-        ];
-
-        $honeypots = Honeypot::where('status', '!=', HoneypotStatusesEnum::SETUP_COMPLETE)
+        Honeypot::where('status', '!=', HoneypotStatusesEnum::SETUP_COMPLETE)
             ->get()
-            ->each(function (Honeypot $honeypot) use ($statuses) {
+            ->each(function (Honeypot $honeypot) {
+
+                $statuses = [
+                    HoneypotStatusesEnum::DNS_SETUP,
+                    HoneypotStatusesEnum::HONEYPOT_SETUP,
+                    HoneypotStatusesEnum::SETUP_COMPLETE,
+                ];
 
                 $nextIdx = array_search($honeypot->status, $statuses) + 1;
                 $honeypot->status = $statuses[$nextIdx];

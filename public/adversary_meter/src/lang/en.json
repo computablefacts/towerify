@@ -160,7 +160,7 @@
   "Accéder au tableau de bord": "Access the dashboard",
   "Statut de la configuration :": "Configuration Status:",
   "En attente de la configuration de vos DNS.": "Waiting for your DNS configuration.",
-  "Routez chacun de vos DNS vers ladresse IP y étant associée :": "Route each of your DNS to the associated IP address:",
+  "Routez chacun de vos DNS vers l'adresse IP y étant associée :": "Route each of your DNS to the associated IP address:",
   "terminer >": "finish >",
   "Fin": "End",
   "Début": "Begin",
