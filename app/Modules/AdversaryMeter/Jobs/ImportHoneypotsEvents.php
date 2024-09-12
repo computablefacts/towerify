@@ -24,7 +24,7 @@ class ImportHoneypotsEvents implements ShouldQueue
 
     public $tries = 1;
     public $maxExceptions = 1;
-    public $timeout = 3 * 180; // 9mn
+    public $timeout = 15 * 60; // 15mn
     private array $cache = [];
 
     public function __construct()

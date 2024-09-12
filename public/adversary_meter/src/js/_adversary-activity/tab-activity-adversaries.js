@@ -150,9 +150,6 @@ export class TabActivityAdversaries extends com.computablefacts.widgets.Widget {
       table.loading = true;
       this.datastore_.getRecentEvents(checkboxAuto.checked, checkboxManual.checked).then(response => table.data = response)
     })
-
-
     return tab;
   }
-
 }

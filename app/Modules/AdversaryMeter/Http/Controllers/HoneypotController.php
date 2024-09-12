@@ -83,21 +83,18 @@ class HoneypotController extends Controller
         /** @var array $ips */
         $ips = config('towerify.adversarymeter.ip_addresses');
         $events = HoneypotEvent::select(
-            'honeypots_events.*',
-            DB::raw("attackers.first_contact AS first_contact"),
-            DB::raw("attackers.last_contact AS last_contact"),
-            DB::raw("CASE WHEN honeypots_events.hosting_service_description IS NULL THEN '-' ELSE honeypots_events.hosting_service_description END AS isp_name"),
-            DB::raw("CASE WHEN honeypots_events.hosting_service_country_code IS NULL THEN '-' ELSE honeypots_events.hosting_service_country_code END AS country_code"),
+            'honeypots_events.ip',
+            DB::raw('MIN(honeypots_events.timestamp) AS first_contact'),
+            DB::raw('MAX(honeypots_events.timestamp) AS last_contact'),
+            DB::raw("MAX(honeypots_events.hosting_service_description) AS isp_name"),
+            DB::raw("MAX(honeypots_events.hosting_service_country_code) AS country_code"),
         )
-            ->whereNotIn('ip', $ips);
-
-        if (!$attackerId) {
-            $events->leftJoin('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
-        } else {
-            $events->join('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
+            ->whereNotIn('honeypots_events.ip', $ips)
+            ->join('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
+        if ($attackerId) {
             $events->where('honeypots_events.attacker_id', $attackerId);
         }
-        return $events->get()->toArray();
+        return $events->groupBy('ip')->distinct()->get()->toArray();
     }
 
     public function getVulnerabilitiesWithAssetInfo(?int $attackerId = null): array
@@ -140,7 +137,7 @@ class HoneypotController extends Controller
     {
         $events = $attacker->events()->orderBy('timestamp', 'desc')->get();
         return [
-            'firstEvent' => $events->pluck('timestamp')->last(),
+            'firstEvent' => $events->pluck('timestamp')->last()?->format('Y-m-d H:i') . ' UTC',
             'top3EventTypes' => $events->groupBy('event')
                 ->sort(fn($e1, $e2) => $e2->count() - $e1->count())
                 ->take(3)
@@ -148,7 +145,7 @@ class HoneypotController extends Controller
                     'type' => $type,
                     'count' => $events->count(),
                 ])
-                ->toArray(),
+                ->values(),
             'events' => $events->take(1000)->toArray(),
         ];
     }
