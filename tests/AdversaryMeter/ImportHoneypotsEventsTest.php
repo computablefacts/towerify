@@ -19,7 +19,7 @@ class ImportHoneypotsEventsTest extends AdversaryMeterTestCase
     public function testItImportsHoneypotsEvents()
     {
         ApiUtils::shouldReceive('ip_whois_public')
-            ->twice()
+            ->once()
             ->with('1.1.1.1')
             ->andReturn([
                 'data' => [
