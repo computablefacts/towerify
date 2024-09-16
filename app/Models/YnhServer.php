@@ -9,6 +9,7 @@ use App\Helpers\AppStore;
 use App\Helpers\SshConnection2;
 use App\Helpers\SshKeyPair;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
+use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\Traits\HasTenant2;
 use App\User;
 use Carbon\Carbon;
@@ -353,7 +354,7 @@ class YnhServer extends Model
 
     public function stopMonitoringAsset(User $user, string $domainOrIpAddress): bool
     {
-        event(new CreateAsset($user, $domainOrIpAddress));
+        event(new DeleteAsset($user, $domainOrIpAddress));
         return true;
     }
 
