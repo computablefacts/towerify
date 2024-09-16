@@ -230,7 +230,7 @@ Route::post('/logalert/{secret}', function (string $secret, \Illuminate\Http\Req
 
         $events = collect($request->input('lines'))
             ->map(fn($line) => $line ? json_decode($line, true) : [])
-            ->filter(fn($event) => count($event) > 0)
+            ->filter(fn($event) => $event && count($event) > 0)
             ->all();
         $nbEventsAdded = $server->addOsqueryEvents($events);
 
