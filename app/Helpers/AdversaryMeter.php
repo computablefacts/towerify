@@ -11,13 +11,8 @@ class AdversaryMeter
     public static function redirectUrl()
     {
         $apiToken = self::findAnyAdversaryMeterApiToken(Auth::user()); // TODO : throw an error if not set ?
-        $apiUrl = self::url();
+        $apiUrl = config('towerify.adversarymeter.url');
         return asset('adversary_meter') . "/src/index.html?api_token={$apiToken}&api_url={$apiUrl}";
-    }
-
-    private static function url(): string
-    {
-        return config('towerify.adversarymeter.url');
     }
 
     private static function findAnyAdversaryMeterApiToken(User $user): ?string
@@ -55,7 +50,6 @@ class AdversaryMeter
 
         $token = $user->createToken('adversarymeter', ['']);
         $plainTextToken = $token->plainTextToken;
-        $token = $token?->accessToken;
 
         $user->am_api_token = $plainTextToken;
         $user->save();
