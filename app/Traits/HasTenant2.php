@@ -26,16 +26,12 @@ trait HasTenant2
                 $customerId = $user->customer_id;
 
                 if ($customerId) {
-                    $users = User::select('id')
-                        ->whereRaw("(tenant_id IS NULL OR tenant_id = {$tenantId})")
-                        ->whereRaw("(customer_id IS NULL OR customer_id = {$customerId})");
+                    $users = User::select('id')->where('tenant_id', $tenantId)->where('customer_id', $customerId);
                 } else {
-                    $users = User::select('id')
-                        ->whereRaw("(tenant_id IS NULL OR tenant_id = {$tenantId})");
+                    $users = User::select('id')->where('tenant_id', $tenantId);
                 }
 
-                $builder->whereNull('user_id')
-                    ->orWhereIn('user_id', $users);
+                $builder->whereIn('user_id', $users)->orWhereNull('user_id');
             }
         });
     }
