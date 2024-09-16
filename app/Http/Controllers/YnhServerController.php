@@ -34,6 +34,8 @@ use App\Models\YnhOrder;
 use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use App\Models\YnhUser;
+use App\Modules\AdversaryMeter\Events\CreateAsset;
+use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -166,6 +168,9 @@ class YnhServerController extends Controller
         $server->ssh_username = $request->username;
         $server->save();
 
+        /** @var User $user */
+        $user = Auth::user();
+
         if (!$principal) {
             $server->domains()->save(YnhDomain::updateOrCreate([
                 'ynh_server_id' => $server->id,
@@ -176,13 +181,16 @@ class YnhServerController extends Controller
                 'ynh_server_id' => $server->id,
                 'updated' => false,
             ]));
+            if ($user) {
+                event(new CreateAsset($user, $request->domain, true));
+            }
         }
 
         $uid = Str::random(10);
-        $ssh = $server->sshConnection($uid, Auth::user());
+        $ssh = $server->sshConnection($uid, $user);
         $ssh->newTrace(SshTraceStateEnum::PENDING, "Your host is being configured!");
 
-        event(new ConfigureHost($uid, Auth::user(), $server));
+        event(new ConfigureHost($uid, $user, $server));
 
         return response()->json(['success' => "Your host is being configured!"]);
     }
@@ -244,7 +252,7 @@ class YnhServerController extends Controller
         if ($server->ip()) {
 
             $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Stopping asset monitoring...');
-            $server->stopMonitoringAsset(Auth::user(), $server->ip());
+            event(new DeleteAsset(Auth::user(), $server->ip()));
             $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring stopped.');
 
             $server->sshEnableAdminConsole($ssh);

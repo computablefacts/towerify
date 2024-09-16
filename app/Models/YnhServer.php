@@ -9,7 +9,6 @@ use App\Helpers\AppStore;
 use App\Helpers\SshConnection2;
 use App\Helpers\SshKeyPair;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
-use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\Traits\HasTenant2;
 use App\User;
 use Carbon\Carbon;
@@ -344,18 +343,6 @@ class YnhServer extends Model
             ->where('ynh_server_id', $this->id)
             ->orderBy('order', 'desc')
             ->get() : collect();
-    }
-
-    public function startMonitoringAsset(User $user, string $domainOrIpAddress): bool
-    {
-        event(new CreateAsset($user, $domainOrIpAddress));
-        return true;
-    }
-
-    public function stopMonitoringAsset(User $user, string $domainOrIpAddress): bool
-    {
-        event(new DeleteAsset($user, $domainOrIpAddress));
-        return true;
     }
 
     public function sshTestConnection(): bool
@@ -838,6 +825,9 @@ EOT;
                     'ynh_server_id' => $this->id,
                     'updated' => true,
                 ]);
+                if ($user) {
+                    event(new CreateAsset($user, $domain, true));
+                }
             }
             DB::transaction(function () {
                 YnhDomain::where('ynh_server_id', $this->id)

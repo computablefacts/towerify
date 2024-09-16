@@ -43,7 +43,7 @@ class TriggerDiscoveryShallow implements ShouldQueue
                             Asset::where('tld', $tld)
                                 ->get()
                                 ->each(function (Asset $asset) use ($domain) {
-                                    event(new CreateAsset($asset->createdBy(), $domain));
+                                    event(new CreateAsset($asset->createdBy(), $domain, true));
                                 });
                         });
                 }

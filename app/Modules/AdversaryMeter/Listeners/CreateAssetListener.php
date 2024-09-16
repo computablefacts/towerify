@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 class CreateAssetListener extends AbstractListener
 {
-    public static function execute(User $user, string $asset): ?Asset
+    public static function execute(User $user, string $asset, bool $monitor): ?Asset
     {
         if (!IsValidAsset::test($asset)) {
             Log::error("Invalid asset : {$asset}");
@@ -36,6 +36,7 @@ class CreateAssetListener extends AbstractListener
             [
                 'asset' => $asset,
                 'type' => $assetType,
+                'is_monitored' => $monitor,
                 'created_by' => $user->id,
             ]
         );
@@ -47,6 +48,6 @@ class CreateAssetListener extends AbstractListener
             throw new \Exception('Invalid event type!');
         }
         Auth::login($event->user); // otherwise the tenant will not be properly set
-        self::execute($event->user, $event->asset);
+        self::execute($event->user, $event->asset, $event->monitor);
     }
 }

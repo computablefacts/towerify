@@ -7,6 +7,7 @@ use App\Events\InstallApp;
 use App\Events\PullServerInfos;
 use App\Helpers\AppStore;
 use App\Models\YnhApplication;
+use App\Modules\AdversaryMeter\Events\CreateAsset;
 use Illuminate\Support\Facades\Auth;
 
 class InstallAppListener extends AbstractListener
@@ -63,7 +64,7 @@ class InstallAppListener extends AbstractListener
             }
 
             $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Starting asset monitoring...');
-            $server->startMonitoringAsset($user, $domain);
+            event(new CreateAsset($user, $domain, true));
             $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring started.');
         }
     }

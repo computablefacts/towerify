@@ -19,8 +19,8 @@ class DiscoveryShallowTest extends AdversaryMeterTestCase
                 'subdomains' => ['www1.example.com', 'www1.example.com' /* duplicate! */, 'www2.example.com'],
             ]);
 
-        event(new CreateAsset($this->user, 'example.com'));
-        event(new CreateAsset($this->user, 'example.com'));
+        event(new CreateAsset($this->user, 'example.com', false));
+        event(new CreateAsset($this->user, 'example.com', false));
 
         TriggerDiscoveryShallow::dispatch();
 

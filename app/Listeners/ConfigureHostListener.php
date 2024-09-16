@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Enums\SshTraceStateEnum;
 use App\Events\ConfigureHost;
 use App\Events\PullServerInfos;
+use App\Modules\AdversaryMeter\Events\CreateAsset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Vanilo\Order\Models\FulfillmentStatus;
@@ -76,7 +77,7 @@ class ConfigureHostListener extends AbstractListener
                 // $isOk = $isOk && $server->sshRestartDocker($ssh);
 
                 $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Starting asset monitoring...');
-                $server->startMonitoringAsset($user, $server->ip());
+                event(new CreateAsset($user, $server->ip(), true));
                 $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring started.');
             }
             if ($isOk) {

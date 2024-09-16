@@ -75,20 +75,13 @@ class AssetController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        $obj = CreateAssetListener::execute($user, $asset);
+        $obj = CreateAssetListener::execute($user, $asset, is_bool($watch) && $watch);
 
         if (!$obj) {
             abort(500, "The asset could not be created : {$asset}");
         }
-        if (is_bool($watch) && $watch) {
-            $obj->is_monitored = true;
-            $obj->save();
-        }
-
-        $obj = $obj->refresh();
-
         return [
-            'asset' => $this->convertAsset($obj),
+            'asset' => $this->convertAsset($obj->refresh()),
         ];
     }
 
