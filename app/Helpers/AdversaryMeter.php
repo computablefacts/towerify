@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 /** @deprecated */
 class AdversaryMeter
@@ -12,6 +13,9 @@ class AdversaryMeter
     {
         $apiToken = self::findAnyAdversaryMeterApiToken(Auth::user()); // TODO : throw an error if not set ?
         $apiUrl = config('app.url');
+        if (Str::endsWith($apiUrl, '/')) {
+            $apiUrl = Str::beforeLast($apiUrl, '/');
+        }
         return asset('adversary_meter') . "/src/index.html?api_token={$apiToken}&api_url={$apiUrl}";
     }
 
