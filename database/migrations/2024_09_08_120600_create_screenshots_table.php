@@ -13,7 +13,7 @@ class CreateScreenshotsTable extends Migration
      */
     public function up()
     {
-        Schema::create('screenshots', function (Blueprint $table) {
+        Schema::create('am_screenshots', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
@@ -21,9 +21,9 @@ class CreateScreenshotsTable extends Migration
             // The screenshot as a base 64 string
             $table->text('png');
         });
-        Schema::table('ports', function (Blueprint $table) {
+        Schema::table('am_ports', function (Blueprint $table) {
             $table->bigInteger('screenshot_id')->unsigned()->nullable();
-            $table->foreign('screenshot_id')->references('id')->on('screenshots')->cascadeOnDelete();
+            $table->foreign('screenshot_id')->references('id')->on('am_screenshots')->cascadeOnDelete();
         });
     }
 

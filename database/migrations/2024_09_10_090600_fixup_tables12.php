@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class FixupTables8 extends Migration
+class FixupTables12 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class FixupTables8 extends Migration
      */
     public function up()
     {
-        Schema::table('hidden_alerts', function (Blueprint $table) {
-            $table->bigInteger('created_by')->unsigned()->nullable()->index();
+        Schema::table('am_ports', function (Blueprint $table) {
+            $table->boolean('closed')->default(false);
         });
     }
 

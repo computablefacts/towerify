@@ -21,7 +21,6 @@ class AdversaryMeterTestCase extends TestCase
         parent::setUp();
 
         $this->artisan("migrate --path=database/migrations --database=mysql");
-        $this->artisan("migrate --path=database/migrations/am --database=mysql_am");
 
         $this->user = User::create([
             'name' => 'QA',

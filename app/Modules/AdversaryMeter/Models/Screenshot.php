@@ -14,8 +14,7 @@ class Screenshot extends Model
 {
     use HasFactory;
 
-    protected $table = 'screenshots';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_screenshots';
 
     protected $fillable = [
         'port_id',

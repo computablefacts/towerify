@@ -13,7 +13,7 @@ class FixupTables3 extends Migration
      */
     public function up()
     {
-        Schema::table('alerts', function (Blueprint $table) {
+        Schema::table('am_alerts', function (Blueprint $table) {
             $table->string('remediation', 5000)->nullable()->change();
         });
     }
@@ -25,7 +25,7 @@ class FixupTables3 extends Migration
      */
     public function down()
     {
-        Schema::table('alerts', function (Blueprint $table) {
+        Schema::table('am_alerts', function (Blueprint $table) {
             // There is no going back!
         });
     }

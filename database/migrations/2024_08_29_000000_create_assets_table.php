@@ -13,7 +13,7 @@ class CreateAssetsTable extends Migration
      */
     public function up()
     {
-        Schema::create('scans', function (Blueprint $table) {
+        Schema::create('am_scans', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
@@ -29,7 +29,7 @@ class CreateAssetsTable extends Migration
             $table->timestamp('vulns_scan_begins_at')->nullable();
             $table->timestamp('vulns_scan_ends_at')->nullable();
         });
-        Schema::create('assets', function (Blueprint $table) {
+        Schema::create('am_assets', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
@@ -46,37 +46,37 @@ class CreateAssetsTable extends Migration
 
             // The previous, current and next scans ids
             $table->bigInteger('prev_scan_id')->unsigned()->nullable();
-            $table->foreign('prev_scan_id')->references('id')->on('scans')->nullOnDelete();
+            $table->foreign('prev_scan_id')->references('id')->on('am_scans')->nullOnDelete();
 
             $table->bigInteger('cur_scan_id')->unsigned()->nullable();
-            $table->foreign('cur_scan_id')->references('id')->on('scans')->nullOnDelete();
+            $table->foreign('cur_scan_id')->references('id')->on('am_scans')->nullOnDelete();
 
             $table->bigInteger('next_scan_id')->unsigned()->nullable();
-            $table->foreign('next_scan_id')->references('id')->on('scans')->nullOnDelete();
+            $table->foreign('next_scan_id')->references('id')->on('am_scans')->nullOnDelete();
             
             // The task id for the asset discovery task
             $table->string('discovery_id')->nullable();
         });
-        Schema::create('assets_tags', function (Blueprint $table) {
+        Schema::create('am_assets_tags', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
 
             // The asset id
             $table->bigInteger('asset_id')->unsigned()->unique();
-            $table->foreign('asset_id')->references('id')->on('assets')->cascadeOnDelete();
+            $table->foreign('asset_id')->references('id')->on('am_assets')->cascadeOnDelete();
 
             // The tag
             $table->string('tag');
         });
-        Schema::create('ports', function (Blueprint $table) {
+        Schema::create('am_ports', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
 
             // The scan id
             $table->bigInteger('scan_id')->unsigned()->unique();
-            $table->foreign('scan_id')->references('id')->on('scans')->cascadeOnDelete();
+            $table->foreign('scan_id')->references('id')->on('am_scans')->cascadeOnDelete();
 
             // The port properties
             $table->string('hostname');
@@ -98,26 +98,26 @@ class CreateAssetsTable extends Migration
             $table->string('product')->nullable();
             $table->boolean('ssl')->nullable();
         });
-        Schema::create('ports_tags', function (Blueprint $table) {
+        Schema::create('am_ports_tags', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
 
             // The port id
             $table->bigInteger('port_id')->unsigned()->unique();
-            $table->foreign('port_id')->references('id')->on('ports')->cascadeOnDelete();
+            $table->foreign('port_id')->references('id')->on('am_ports')->cascadeOnDelete();
 
             // The tag
             $table->string('tag');
         });
-        Schema::create('alerts', function (Blueprint $table) {
+        Schema::create('am_alerts', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
 
             // The port id
             $table->bigInteger('port_id')->unsigned()->unique();
-            $table->foreign('port_id')->references('id')->on('ports')->cascadeOnDelete();
+            $table->foreign('port_id')->references('id')->on('am_ports')->cascadeOnDelete();
 
             // The alert properties
             $table->string('type');
@@ -141,11 +141,11 @@ class CreateAssetsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('alerts');
-        Schema::dropIfExists('ports_tags');
-        Schema::dropIfExists('ports');
-        Schema::dropIfExists('assets_tags');
-        Schema::dropIfExists('assets');
-        Schema::dropIfExists('scans');
+        Schema::dropIfExists('am_alerts');
+        Schema::dropIfExists('am_ports_tags');
+        Schema::dropIfExists('am_ports');
+        Schema::dropIfExists('am_assets_tags');
+        Schema::dropIfExists('am_assets');
+        Schema::dropIfExists('am_scans');
     }
 }

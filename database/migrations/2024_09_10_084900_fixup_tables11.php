@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class FixupTables9 extends Migration
+class FixupTables11 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class FixupTables9 extends Migration
      */
     public function up()
     {
-        Schema::table('alerts', function (Blueprint $table) {
-            $table->string('vulnerability', 5000)->nullable()->change();
+        Schema::table('am_screenshots', function (Blueprint $table) {
+            $table->bigInteger('port_id')->unsigned()->unique();
+            $table->foreign('port_id')->references('id')->on('am_ports')->cascadeOnDelete();
         });
     }
 

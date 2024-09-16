@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class FixupTables14 extends Migration
+class FixupTables10 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class FixupTables14 extends Migration
      */
     public function up()
     {
-        Schema::table('honeypots_events', function (Blueprint $table) {
-            $table->boolean('human')->default(false)->change();
-            $table->boolean('targeted')->default(false)->change();
+        Schema::table('am_ports', function (Blueprint $table) {
+            $table->dropForeign(['screenshot_id']);
+            $table->foreign('screenshot_id')->references('id')->on('am_screenshots')->nullOnDelete();
         });
     }
 

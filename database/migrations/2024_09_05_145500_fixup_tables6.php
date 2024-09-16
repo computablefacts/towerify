@@ -13,7 +13,7 @@ class FixupTables6 extends Migration
      */
     public function up()
     {
-        Schema::create('hidden_alerts', function (Blueprint $table) {
+        Schema::create('am_hidden_alerts', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
@@ -23,14 +23,14 @@ class FixupTables6 extends Migration
             $table->string('type')->nullable();
             $table->string('title')->nullable();
         });
-        Schema::table('assets', function (Blueprint $table) {
+        Schema::table('am_assets', function (Blueprint $table) {
             $table->renameColumn('asset_type', 'type');
             $table->dropUnique(['asset', 'user_id', 'customer_id', 'tenant_id']);
             $table->dropColumn('tenant_id');
             $table->dropColumn('customer_id');
             $table->dropColumn('user_id');
         });
-        Schema::table('honeypots', function (Blueprint $table) {
+        Schema::table('am_honeypots', function (Blueprint $table) {
             $table->dropUnique(['dns', 'user_id', 'customer_id', 'tenant_id']);
             $table->dropColumn('tenant_id');
             $table->dropColumn('customer_id');
@@ -45,12 +45,12 @@ class FixupTables6 extends Migration
      */
     public function down()
     {
-        Schema::table('honeypots', function (Blueprint $table) {
+        Schema::table('am_honeypots', function (Blueprint $table) {
             // There is no going back!
         });
-        Schema::table('assets', function (Blueprint $table) {
+        Schema::table('am_assets', function (Blueprint $table) {
             // There is no going back!
         });
-        Schema::dropIfExists('hidden_alerts');
+        Schema::dropIfExists('am_hidden_alerts');
     }
 }

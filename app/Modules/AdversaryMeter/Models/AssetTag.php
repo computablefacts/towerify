@@ -16,8 +16,7 @@ class AssetTag extends Model
 {
     use HasFactory, HasTenant;
 
-    protected $table = 'assets_tags';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_assets_tags';
 
     protected $fillable = [
         'asset_id',

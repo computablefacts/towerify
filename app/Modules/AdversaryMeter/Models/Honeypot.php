@@ -21,8 +21,7 @@ class Honeypot extends Model
 {
     use HasFactory, HasTenant;
 
-    protected $table = 'honeypots';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_honeypots';
 
     protected $fillable = [
         'dns',

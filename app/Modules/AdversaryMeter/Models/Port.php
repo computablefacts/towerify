@@ -30,8 +30,7 @@ class Port extends Model
 {
     use HasFactory;
 
-    protected $table = 'ports';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_ports';
 
     protected $fillable = [
         'scan_id',

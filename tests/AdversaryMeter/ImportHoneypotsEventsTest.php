@@ -11,6 +11,7 @@ use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Tests\AdversaryMeter\AdversaryMeterTestCase;
 
@@ -52,6 +53,8 @@ class ImportHoneypotsEventsTest extends AdversaryMeterTestCase
 
         $filename = "honeypot2.example.com-access.log";
         Storage::disk('honeypots-s3')->put("honeypot2.example.com/{$filename}", json_encode($this->secondHoneypotEvents()));
+
+        Auth::login($this->user); // Ensure the honeypot's owner is properly set
 
         $honeypot1 = Honeypot::create([
             'dns' => 'honeypot1.example.com',

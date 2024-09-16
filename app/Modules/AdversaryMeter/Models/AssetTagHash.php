@@ -17,8 +17,7 @@ class AssetTagHash extends Model
 {
     use HasFactory, HasTenant;
 
-    protected $table = 'assets_tags_hashes';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_assets_tags_hashes';
 
     protected $fillable = [
         'hash',

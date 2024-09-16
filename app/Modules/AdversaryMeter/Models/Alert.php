@@ -25,8 +25,7 @@ class Alert extends Model
 {
     use HasFactory;
 
-    protected $table = 'alerts';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_alerts';
 
     protected $fillable = [
         'port_id',
@@ -45,11 +44,11 @@ class Alert extends Model
 
     public function asset(): Asset
     {
-        return Asset::select('assets.*')
-            ->join('scans', 'scans.asset_id', '=', 'assets.id')
-            ->join('ports', 'ports.scan_id', '=', 'scans.id')
-            ->join('alerts', 'alerts.port_id', '=', 'ports.id')
-            ->where('alerts.id', $this->id)
+        return Asset::select('am_assets.*')
+            ->join('am_scans', 'am_scans.asset_id', '=', 'am_assets.id')
+            ->join('am_ports', 'am_ports.scan_id', '=', 'am_scans.id')
+            ->join('am_alerts', 'am_alerts.port_id', '=', 'am_ports.id')
+            ->where('am_alerts.id', $this->id)
             ->first();
     }
 
@@ -64,13 +63,13 @@ class Alert extends Model
         $ips = config('towerify.adversarymeter.ip_addresses');
         $cveId = trim(Str::upper($this->cve_id));
         $events = HoneypotEvent::query()
-            ->join('honeypots', 'honeypots.id', '=', 'honeypots_events.honeypot_id')
-            ->where('honeypots_events.event', 'cve_tested')
-            ->whereLike('honeypots_events.event', 'CVE-%')
-            ->whereNotIn('honeypots_events.ip', $ips)
-            ->whereRaw("TRIM(UPPER(honeypots_events.details)) = '{$cveId}'");
+            ->join('am_honeypots', 'am_honeypots.id', '=', 'am_honeypots_events.honeypot_id')
+            ->where('am_honeypots_events.event', 'cve_tested')
+            ->whereLike('am_honeypots_events.event', 'CVE-%')
+            ->whereNotIn('am_honeypots_events.ip', $ips)
+            ->whereRaw("TRIM(UPPER(am_honeypots_events.details)) = '{$cveId}'");
         if ($attackerId) {
-            $events->where('honeypots_events.attacker_id', $attackerId);
+            $events->where('am_honeypots_events.attacker_id', $attackerId);
         }
         return $events;
     }

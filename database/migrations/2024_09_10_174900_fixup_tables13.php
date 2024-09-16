@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class FixupTables12 extends Migration
+class FixupTables13 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class FixupTables12 extends Migration
      */
     public function up()
     {
-        Schema::table('ports', function (Blueprint $table) {
-            $table->boolean('closed')->default(false);
+        Schema::table('am_ports', function (Blueprint $table) {
+            $table->dropForeign(['screenshot_id']);
+            $table->dropColumn('screenshot_id');
         });
     }
 

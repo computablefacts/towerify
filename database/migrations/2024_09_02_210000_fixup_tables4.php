@@ -13,7 +13,7 @@ class FixupTables4 extends Migration
      */
     public function up()
     {
-        Schema::table('assets', function (Blueprint $table) {
+        Schema::table('am_assets', function (Blueprint $table) {
 
             // Deal with ranges
             $table->enum('asset_type', [
@@ -37,7 +37,7 @@ class FixupTables4 extends Migration
      */
     public function down()
     {
-        Schema::table('assets', function (Blueprint $table) {
+        Schema::table('am_assets', function (Blueprint $table) {
             // There is no going back!
         });
     }

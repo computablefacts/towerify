@@ -13,16 +13,16 @@ class FixupTables7 extends Migration
      */
     public function up()
     {
-        Schema::table('assets', function (Blueprint $table) {
+        Schema::table('am_assets', function (Blueprint $table) {
             $table->bigInteger('created_by')->unsigned()->nullable()->index();
         });
-        Schema::table('assets_tags', function (Blueprint $table) {
+        Schema::table('am_assets_tags', function (Blueprint $table) {
             $table->bigInteger('created_by')->unsigned()->nullable()->index();
         });
-        Schema::table('assets_tags_hashes', function (Blueprint $table) {
+        Schema::table('am_assets_tags_hashes', function (Blueprint $table) {
             $table->bigInteger('created_by')->unsigned()->nullable()->index();
         });
-        Schema::table('honeypots', function (Blueprint $table) {
+        Schema::table('am_honeypots', function (Blueprint $table) {
             $table->bigInteger('created_by')->unsigned()->nullable()->index();
         });
     }

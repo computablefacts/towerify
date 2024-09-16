@@ -33,12 +33,6 @@
     <env name="DB_DATABASE" value="tw_testdb"/>
     <env name="DB_USERNAME" value="tw_testuser"/>
     <env name="DB_PASSWORD" value="z0rglub"/>
-    <env name="DB_CONNECTION_AM" value="mysql"/>
-    <env name="DB_HOST_AM" value="127.0.0.1"/>
-    <env name="DB_PORT_AM" value="3306"/>
-    <env name="DB_DATABASE_AM" value="tw_testdb_am"/>
-    <env name="DB_USERNAME_AM" value="tw_testuser_am"/>
-    <env name="DB_PASSWORD_AM" value="tapa2$"/>
     <env name="USE_SCHEMA_DUMP" value="true"/>
     <env name="DROP_SCAN_EVENTS_AFTER_X_MINUTES" value="1"/>
     <env name="DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES" value="1"/>

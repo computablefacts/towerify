@@ -13,7 +13,7 @@ class CreateHoneypotsTables extends Migration
      */
     public function up()
     {
-        Schema::create('attackers', function (Blueprint $table) {
+        Schema::create('am_attackers', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
@@ -23,7 +23,7 @@ class CreateHoneypotsTables extends Migration
             $table->datetime('first_contact');
             $table->datetime('last_contact');
         });
-        Schema::create('honeypots', function (Blueprint $table) {
+        Schema::create('am_honeypots', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
@@ -52,18 +52,18 @@ class CreateHoneypotsTables extends Migration
             $table->bigInteger('user_id')->unsigned()->nullable();
             $table->unique(['dns', 'user_id', 'customer_id', 'tenant_id']);
         });
-        Schema::create('honeypots_events', function (Blueprint $table) {
+        Schema::create('am_honeypots_events', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
 
             // The honeypot id
             $table->bigInteger('honeypot_id')->unsigned();
-            $table->foreign('honeypot_id')->references('id')->on('honeypots')->cascadeOnDelete();
+            $table->foreign('honeypot_id')->references('id')->on('am_honeypots')->cascadeOnDelete();
 
             // The attacker id
             $table->bigInteger('attacker_id')->unsigned()->nullable();
-            $table->foreign('attacker_id')->references('id')->on('attackers')->nullOnDelete();
+            $table->foreign('attacker_id')->references('id')->on('am_attackers')->nullOnDelete();
 
             // The events attributes
             $table->string('event');
@@ -95,8 +95,8 @@ class CreateHoneypotsTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('attackers');
-        Schema::dropIfExists('honeypots_events');
-        Schema::dropIfExists('honeypots');
+        Schema::dropIfExists('am_attackers');
+        Schema::dropIfExists('am_honeypots_events');
+        Schema::dropIfExists('am_honeypots');
     }
 }

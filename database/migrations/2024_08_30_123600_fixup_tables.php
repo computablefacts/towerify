@@ -13,21 +13,21 @@ class FixupTables extends Migration
      */
     public function up()
     {
-        Schema::table('assets_tags', function (Blueprint $table) {
+        Schema::table('am_assets_tags', function (Blueprint $table) {
             $table->dropForeign(['asset_id']);
             $table->dropUnique(['asset_id']);
-            $table->foreign('asset_id')->references('id')->on('assets')->cascadeOnDelete();
+            $table->foreign('asset_id')->references('id')->on('am_assets')->cascadeOnDelete();
         });
-        Schema::table('ports_tags', function (Blueprint $table) {
+        Schema::table('am_ports_tags', function (Blueprint $table) {
             $table->dropForeign(['port_id']);
             $table->dropUnique(['port_id']);
-            $table->foreign('port_id')->references('id')->on('ports')->cascadeOnDelete();
+            $table->foreign('port_id')->references('id')->on('am_ports')->cascadeOnDelete();
         });
-        Schema::table('scans', function (Blueprint $table) {
+        Schema::table('am_scans', function (Blueprint $table) {
             $table->bigInteger('asset_id')->unsigned();
-            $table->foreign('asset_id')->references('id')->on('assets')->cascadeOnDelete();
+            $table->foreign('asset_id')->references('id')->on('am_assets')->cascadeOnDelete();
         });
-        Schema::table('assets', function (Blueprint $table) {
+        Schema::table('am_assets', function (Blueprint $table) {
             $table->dropForeign(['prev_scan_id']);
             $table->dropForeign(['cur_scan_id']);
             $table->dropForeign(['next_scan_id']);
@@ -47,16 +47,16 @@ class FixupTables extends Migration
      */
     public function down()
     {
-        Schema::table('assets', function (Blueprint $table) {
+        Schema::table('am_assets', function (Blueprint $table) {
             // There is no going back!
         });
-        Schema::table('scans', function (Blueprint $table) {
+        Schema::table('am_scans', function (Blueprint $table) {
             $table->dropColumn('asset_id');
         });
-        Schema::table('ports_tags', function (Blueprint $table) {
+        Schema::table('am_ports_tags', function (Blueprint $table) {
             $table->bigInteger('port_id')->unsigned()->unique()->change();
         });
-        Schema::table('assets_tags', function (Blueprint $table) {
+        Schema::table('am_assets_tags', function (Blueprint $table) {
             $table->bigInteger('asset_id')->unsigned()->unique()->change();
         });
     }

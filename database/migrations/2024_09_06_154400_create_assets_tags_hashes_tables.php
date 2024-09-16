@@ -13,10 +13,10 @@ class CreateAssetsTagsHashesTables extends Migration
      */
     public function up()
     {
-        Schema::table('assets_tags', function (Blueprint $table) {
+        Schema::table('am_assets_tags', function (Blueprint $table) {
             $table->index('tag');
         });
-        Schema::create('assets_tags_hashes', function (Blueprint $table) {
+        Schema::create('am_assets_tags_hashes', function (Blueprint $table) {
 
             $table->id();
             $table->timestamps();
@@ -25,7 +25,7 @@ class CreateAssetsTagsHashesTables extends Migration
             $table->string('hash')->unique();
             $table->integer('views')->default(0);
             $table->string('tag')->unique();
-            $table->foreign('tag')->references('tag')->on('assets_tags')->cascadeOnDelete();
+            $table->foreign('tag')->references('tag')->on('am_assets_tags')->cascadeOnDelete();
         });
     }
 

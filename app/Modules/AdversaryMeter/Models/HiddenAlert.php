@@ -17,8 +17,7 @@ class HiddenAlert extends Model
 {
     use HasFactory, HasTenant;
 
-    protected $table = 'hidden_alerts';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_hidden_alerts';
 
     protected $fillable = [
         'uid',

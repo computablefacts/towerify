@@ -14,8 +14,7 @@ class PortTag extends Model
 {
     use HasFactory;
 
-    protected $table = 'ports_tags';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_ports_tags';
 
     protected $fillable = [
         'port_id',

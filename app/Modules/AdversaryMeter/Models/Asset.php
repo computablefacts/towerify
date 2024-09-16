@@ -27,8 +27,7 @@ class Asset extends Model
 {
     use HasFactory, HasTenant;
 
-    protected $table = 'assets';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_assets';
 
     protected $fillable = [
         'asset',
@@ -95,10 +94,10 @@ class Asset extends Model
 
     public function ports(): Builder
     {
-        return Port::select('ports.*')
-            ->join('scans', 'scans.id', '=', 'ports.scan_id')
-            ->join('assets', 'assets.cur_scan_id', '=', 'scans.ports_scan_id')
-            ->where('assets.id', $this->id);
+        return Port::select('am_ports.*')
+            ->join('am_scans', 'am_scans.id', '=', 'am_ports.scan_id')
+            ->join('am_assets', 'am_assets.cur_scan_id', '=', 'am_scans.ports_scan_id')
+            ->where('am_assets.id', $this->id);
     }
 
     public function alerts(): Builder
@@ -121,11 +120,11 @@ class Asset extends Model
         $ifTitles = $hiddenTitles->isEmpty() ? 'false' : "alerts.title IN ('{$hiddenTitles->join("','")}')";
         $case = "CASE WHEN {$ifUids} OR {$ifTypes} OR {$ifTitles} THEN true ELSE false END AS is_hidden";
 
-        return Alert::select('alerts.*', DB::raw($case))
-            ->join('ports', 'ports.id', '=', 'alerts.port_id')
-            ->join('scans', 'scans.id', '=', 'ports.scan_id')
-            ->join('assets', 'assets.cur_scan_id', '=', 'scans.ports_scan_id')
-            ->where('assets.id', $this->id);
+        return Alert::select('am_alerts.*', DB::raw($case))
+            ->join('am_ports', 'am_ports.id', '=', 'am_alerts.port_id')
+            ->join('am_scans', 'am_scans.id', '=', 'am_ports.scan_id')
+            ->join('am_assets', 'am_assets.cur_scan_id', '=', 'am_scans.ports_scan_id')
+            ->where('am_assets.id', $this->id);
     }
 
     public function scanCompleted(): Collection

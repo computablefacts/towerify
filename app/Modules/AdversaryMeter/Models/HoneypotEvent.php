@@ -32,8 +32,7 @@ class HoneypotEvent extends Model
 {
     use HasFactory;
 
-    protected $table = 'honeypots_events';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_honeypots_events';
 
     protected $fillable = [
         'honeypot_id',

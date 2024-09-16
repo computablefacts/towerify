@@ -22,8 +22,7 @@ class Scan extends Model
 {
     use HasFactory;
 
-    protected $table = 'scans';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_scans';
 
     protected $fillable = [
         'asset_id',

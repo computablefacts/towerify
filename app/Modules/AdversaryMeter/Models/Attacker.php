@@ -19,8 +19,7 @@ class Attacker extends Model
 {
     use HasFactory;
 
-    protected $table = 'attackers';
-    protected $connection = 'mysql_am';
+    protected $table = 'am_attackers';
 
     protected $fillable = [
         'name',

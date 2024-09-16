@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class FixupTables5 extends Migration
+class FixupTables8 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class FixupTables5 extends Migration
      */
     public function up()
     {
-        Schema::table('assets', function (Blueprint $table) {
-            $table->boolean('is_monitored')->default(false);
+        Schema::table('am_hidden_alerts', function (Blueprint $table) {
+            $table->bigInteger('created_by')->unsigned()->nullable()->index();
         });
     }
 
@@ -25,8 +25,6 @@ class FixupTables5 extends Migration
      */
     public function down()
     {
-        Schema::table('assets', function (Blueprint $table) {
-            $table->dropColumn('is_monitored');
-        });
+        // There is no going back!
     }
 }
