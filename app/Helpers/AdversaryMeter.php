@@ -11,7 +11,7 @@ class AdversaryMeter
     public static function redirectUrl()
     {
         $apiToken = self::findAnyAdversaryMeterApiToken(Auth::user()); // TODO : throw an error if not set ?
-        $apiUrl = config('towerify.adversarymeter.url');
+        $apiUrl = config('app.url');
         return asset('adversary_meter') . "/src/index.html?api_token={$apiToken}&api_url={$apiUrl}";
     }
 
