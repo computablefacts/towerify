@@ -18,20 +18,20 @@ Route::group([
     Route::get('assets', 'AssetController@userAssets');
     Route::post('asset/{asset}/monitoring/begin', 'AssetController@assetMonitoringBegins');
     Route::post('asset/{asset}/monitoring/end', 'AssetController@assetMonitoringEnds');
-});
+})->middleware(['auth', 'throttle:250,1']);
 
 Route::group([
     'prefix' => 'inbox',
 ], function () {
     Route::get('screenshot/{screenshot}', 'AssetController@screenshot');
-});
+})->middleware(['auth', 'throttle:250,1']);
 
 Route::group([
     'prefix' => 'facts',
 ], function () {
     Route::post('{asset}/metadata', 'AssetController@addTag');
     Route::delete('{asset}/metadata/{assetTag}', 'AssetController@removeTag');
-});
+})->middleware(['auth', 'throttle:250,1']);
 
 Route::group([
     'prefix' => 'adversary',
@@ -62,4 +62,4 @@ Route::group([
     Route::delete('hidden-alerts/{hiddenAlert}', 'HoneypotController@deleteHiddenAlert');
     Route::post('honeypots', 'HoneypotController@postHoneypots');
     Route::post('honeypots/set-next-step', 'HoneypotController@moveHoneypotsConfigurationToNextStep');
-});
+})->middleware(['auth', 'throttle:250,1']);
