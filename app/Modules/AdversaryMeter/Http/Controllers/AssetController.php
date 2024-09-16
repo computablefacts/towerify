@@ -235,10 +235,10 @@ class AssetController extends Controller
 
             // The asset cannot be identified: check if it is an IP address from a known range
             if (IsValidIpAddress::test($domainOrIpOrRange)) {
-                $asset = Asset::select('assets.*')
-                    ->join('scans', 'scans.ports_scan_id', '=', 'assets.cur_scan_id')
-                    ->join('ports', 'ports.scan_id', '=', 'scans.id')
-                    ->where('ports.ip', $domainOrIpOrRange)
+                $asset = Asset::select('am_assets.*')
+                    ->join('am_scans', 'am_scans.ports_scan_id', '=', 'am_assets.cur_scan_id')
+                    ->join('am_ports', 'am_ports.scan_id', '=', 'am_scans.id')
+                    ->where('am_ports.ip', $domainOrIpOrRange)
                     ->first();
                 if ($asset) {
                     return $this->infosFromAsset(base64_encode($asset->asset));

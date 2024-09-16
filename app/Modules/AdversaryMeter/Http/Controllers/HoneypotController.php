@@ -31,9 +31,9 @@ class HoneypotController extends Controller
     public function attackerIndex(Request $request): array
     {
         $totalNumberOfEvents = HoneypotEvent::count();
-        return Attacker::select('attackers.*')
-            ->orderBy('attackers.name')
-            ->orderBy('attackers.last_contact')
+        return Attacker::select('am_attackers.*')
+            ->orderBy('am_attackers.name')
+            ->orderBy('am_attackers.last_contact')
             ->get()
             ->map(function (Attacker $attacker) use ($totalNumberOfEvents) {
                 return [
@@ -60,12 +60,12 @@ class HoneypotController extends Controller
         /** @var array $ips */
         $ips = config('towerify.adversarymeter.ip_addresses');
         $events = HoneypotEvent::select(
-            'honeypots_events.*',
-            DB::raw("CASE WHEN attackers.name IS NULL THEN '-' ELSE attackers.name END AS internal_name"),
-            DB::raw("CASE WHEN attackers.id IS NULL THEN '-' ELSE attackers.id END AS attacker_id"),
+            'am_honeypots_events.*',
+            DB::raw("CASE WHEN am_attackers.name IS NULL THEN '-' ELSE am_attackers.name END AS internal_name"),
+            DB::raw("CASE WHEN am_attackers.id IS NULL THEN '-' ELSE am_attackers.id END AS attacker_id"),
         )
             ->whereNotIn('ip', $ips)
-            ->leftJoin('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
+            ->leftJoin('am_attackers', 'am_attackers.id', '=', 'am_honeypots_events.attacker_id');
 
         if ($auto && !$manual) {
             $events->where('human', true);
@@ -83,26 +83,26 @@ class HoneypotController extends Controller
         /** @var array $ips */
         $ips = config('towerify.adversarymeter.ip_addresses');
         $events = HoneypotEvent::select(
-            'honeypots_events.ip',
-            DB::raw('MIN(honeypots_events.timestamp) AS first_contact'),
-            DB::raw('MAX(honeypots_events.timestamp) AS last_contact'),
-            DB::raw("MAX(honeypots_events.hosting_service_description) AS isp_name"),
-            DB::raw("MAX(honeypots_events.hosting_service_country_code) AS country_code"),
+            'am_honeypots_events.ip',
+            DB::raw('MIN(am_honeypots_events.timestamp) AS first_contact'),
+            DB::raw('MAX(am_honeypots_events.timestamp) AS last_contact'),
+            DB::raw("MAX(am_honeypots_events.hosting_service_description) AS isp_name"),
+            DB::raw("MAX(am_honeypots_events.hosting_service_country_code) AS country_code"),
         )
-            ->whereNotIn('honeypots_events.ip', $ips)
-            ->join('attackers', 'attackers.id', '=', 'honeypots_events.attacker_id');
+            ->whereNotIn('am_honeypots_events.ip', $ips)
+            ->join('am_attackers', 'am_attackers.id', '=', 'am_honeypots_events.attacker_id');
         if ($attackerId) {
-            $events->where('honeypots_events.attacker_id', $attackerId);
+            $events->where('am_honeypots_events.attacker_id', $attackerId);
         }
         return $events->groupBy('ip')->distinct()->get()->toArray();
     }
 
     public function getVulnerabilitiesWithAssetInfo(?int $attackerId = null): array
     {
-        return Alert::select('alerts.*', 'assets.id AS asset_id')
-            ->join('ports', 'ports.id', '=', 'alerts.port_id')
-            ->join('scans', 'scans.id', '=', 'ports.scan_id')
-            ->join('assets', 'assets.cur_scan_id', '=', 'scans.ports_scan_id')
+        return Alert::select('am_alerts.*', 'am_assets.id AS asset_id')
+            ->join('am_ports', 'am_ports.id', '=', 'am_alerts.port_id')
+            ->join('am_scans', 'am_scans.id', '=', 'am_ports.scan_id')
+            ->join('am_assets', 'am_assets.cur_scan_id', '=', 'am_scans.ports_scan_id')
             ->get()
             ->filter(fn(Alert $alert) => !$attackerId || ($alert->cve_id && $alert->events($attackerId)->exists()))
             ->map(function (Alert $alert) use ($attackerId) {
@@ -118,11 +118,11 @@ class HoneypotController extends Controller
 
     public function getVulnerabilitiesWithAssetInfo2(string $assetBase64): array
     {
-        return Alert::select('alerts.*', 'assets.id AS asset_id')
-            ->join('ports', 'ports.id', '=', 'alerts.port_id')
-            ->join('scans', 'scans.id', '=', 'ports.scan_id')
-            ->join('assets', 'assets.cur_scan_id', '=', 'ports.ports_scan_id')
-            ->where('assets.asset', base64_decode($assetBase64))
+        return Alert::select('am_alerts.*', 'am_assets.id AS asset_id')
+            ->join('am_ports', 'am_ports.id', '=', 'am_alerts.port_id')
+            ->join('am_scans', 'am_scans.id', '=', 'am_ports.scan_id')
+            ->join('am_assets', 'am_assets.cur_scan_id', '=', 'am_ports.ports_scan_id')
+            ->where('am_assets.asset', base64_decode($assetBase64))
             ->get()
             ->map(function (Alert $alert) {
                 return [
@@ -230,8 +230,8 @@ class HoneypotController extends Controller
             DB::raw("SUM(CASE WHEN human = 1 OR targeted = 1 THEN 1 ELSE 0 END) AS human_or_targeted"),
             DB::raw("SUM(CASE WHEN human = 0 AND targeted = 0 THEN 1 ELSE 0 END) AS not_human_or_targeted")
         )
-            ->join('honeypots', 'honeypots.id', '=', 'honeypots_events.honeypot_id')
-            ->where('honeypots.dns', $dns)
+            ->join('am_honeypots', 'am_honeypots.id', '=', 'am_honeypots_events.honeypot_id')
+            ->where('am_honeypots.dns', $dns)
             ->groupBy('date')
             ->orderBy('date', 'desc')
             ->limit(30)

@@ -115,9 +115,9 @@ class Asset extends Model
             ->get()
             ->map(fn(HiddenAlert $marker) => addslashes($marker->title));
 
-        $ifUids = $hiddenUids->isEmpty() ? 'false' : "alerts.uid IN ('{$hiddenUids->join("','")}')";
-        $ifTypes = $hiddenTypes->isEmpty() ? 'false' : "alerts.type IN ('{$hiddenTypes->join("','")}')";
-        $ifTitles = $hiddenTitles->isEmpty() ? 'false' : "alerts.title IN ('{$hiddenTitles->join("','")}')";
+        $ifUids = $hiddenUids->isEmpty() ? 'false' : "am_alerts.uid IN ('{$hiddenUids->join("','")}')";
+        $ifTypes = $hiddenTypes->isEmpty() ? 'false' : "am_alerts.type IN ('{$hiddenTypes->join("','")}')";
+        $ifTitles = $hiddenTitles->isEmpty() ? 'false' : "am_alerts.title IN ('{$hiddenTitles->join("','")}')";
         $case = "CASE WHEN {$ifUids} OR {$ifTypes} OR {$ifTitles} THEN true ELSE false END AS is_hidden";
 
         return Alert::select('am_alerts.*', DB::raw($case))
