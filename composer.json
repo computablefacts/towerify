@@ -11,6 +11,8 @@
         "ext-gd": "*",
         "ext-imagick": "*",
         "ext-pcntl": "*",
+        "botman/botman": "^2.8",
+        "botman/driver-web": "^1.5",
         "guzzlehttp/guzzle": "^7.5",
         "laravel/framework": "^11.20",
         "laravel/sanctum": "^4.0",

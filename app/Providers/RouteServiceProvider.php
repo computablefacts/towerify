@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
 
@@ -23,9 +24,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
-
         parent::boot();
+        VerifyCsrfToken::except(['cb/web/botman']);
     }
 
     /**
@@ -36,10 +36,7 @@ class RouteServiceProvider extends ServiceProvider
     public function map()
     {
         $this->mapApiRoutes();
-
         $this->mapWebRoutes();
-
-        //
     }
 
     /**
@@ -58,6 +55,10 @@ class RouteServiceProvider extends ServiceProvider
             ->prefix('am/web')
             ->namespace('App\Modules\AdversaryMeter\Http\Controllers')
             ->group(base_path('app/Modules/AdversaryMeter/web.php'));
+        Route::middleware('web')
+            ->prefix('cb/web')
+            ->namespace('App\Modules\CyberBuddy\Http\Controllers')
+            ->group(base_path('app/Modules/CyberBuddy/web.php'));
     }
 
     /**
@@ -77,5 +78,9 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace('App\Modules\AdversaryMeter\Http\Controllers')
             ->group(base_path('app/Modules/AdversaryMeter/api.php'));
+        Route::prefix('cb/api/v2')
+            ->middleware('api')
+            ->namespace('App\Modules\CyberBuddy\Http\Controllers')
+            ->group(base_path('app/Modules/CyberBuddy/api.php'));
     }
 }
