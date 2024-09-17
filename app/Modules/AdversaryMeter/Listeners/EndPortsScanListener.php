@@ -47,7 +47,7 @@ class EndPortsScanListener extends AbstractListener
         $taskStatus = $task['task_status'] ?? null;
 
         // The task is running: try again later
-        if (!$taskStatus || $taskStatus === 'STARTED') {
+        if (!$taskStatus || $taskStatus === 'STARTED' || $taskStatus === 'PENDING') {
             $event->sink();
             return;
         }
