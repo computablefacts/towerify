@@ -826,7 +826,7 @@ EOT;
                     'updated' => true,
                 ]);
                 if ($user) {
-                    event(new CreateAsset($user, $domain, true));
+                    event(new CreateAsset($user, $domain, true, [$this->name]));
                 }
             }
             DB::transaction(function () {

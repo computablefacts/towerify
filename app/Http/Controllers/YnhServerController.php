@@ -182,7 +182,7 @@ class YnhServerController extends Controller
                 'updated' => false,
             ]));
             if ($user) {
-                event(new CreateAsset($user, $request->domain, true));
+                event(new CreateAsset($user, $request->domain, true, [$server->name]));
             }
         }
 

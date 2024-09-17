@@ -15,12 +15,14 @@ class CreateAsset
     public User $user;
     public string $asset;
     public bool $monitor;
+    public array $tags;
 
-    public function __construct(User $user, string $asset, bool $monitor)
+    public function __construct(User $user, string $asset, bool $monitor, array $tags = [])
     {
         $this->user = $user;
         $this->asset = $asset;
         $this->monitor = $monitor;
+        $this->tags = $tags;
     }
 
     public function broadcastOn()

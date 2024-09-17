@@ -6,16 +6,19 @@ use App\Listeners\AbstractListener;
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Models\Asset;
+use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Rules\IsValidAsset;
 use App\Modules\AdversaryMeter\Rules\IsValidDomain;
 use App\Modules\AdversaryMeter\Rules\IsValidIpAddress;
+use App\Modules\AdversaryMeter\Rules\IsValidTag;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CreateAssetListener extends AbstractListener
 {
-    public static function execute(User $user, string $asset, bool $monitor): ?Asset
+    public static function execute(User $user, string $asset, bool $monitor, array $tags = []): ?Asset
     {
         if (!IsValidAsset::test($asset)) {
             Log::error("Invalid asset : {$asset}");
@@ -28,7 +31,8 @@ class CreateAssetListener extends AbstractListener
         } else {
             $assetType = AssetTypesEnum::RANGE;
         }
-        return Asset::updateOrCreate(
+        /** @var Asset $azzet */
+        $azzet = Asset::updateOrCreate(
             [
                 'asset' => $asset,
                 'created_by' => $user->id,
@@ -40,6 +44,16 @@ class CreateAssetListener extends AbstractListener
                 'created_by' => $user->id,
             ]
         );
+        collect($tags)->map(fn(string $tag) => Str::lower($tag))
+            ->filter(fn(string $tag) => IsValidTag::test($tag))
+            ->each(function (string $tag) use ($azzet) {
+                /** @var ?AssetTag $obj */
+                $obj = $azzet->tags()->where('tag', $tag)->first();
+                if (!$obj) {
+                    $obj = $azzet->tags()->create(['tag' => $tag]);
+                }
+            });
+        return $azzet;
     }
 
     protected function handle2($event)
@@ -48,6 +62,6 @@ class CreateAssetListener extends AbstractListener
             throw new \Exception('Invalid event type!');
         }
         Auth::login($event->user); // otherwise the tenant will not be properly set
-        self::execute($event->user, $event->asset, $event->monitor);
+        self::execute($event->user, $event->asset, $event->monitor, $event->tags);
     }
 }
