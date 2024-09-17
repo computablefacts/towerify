@@ -19,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -229,7 +230,7 @@ Route::post('/logalert/{secret}', function (string $secret, \Illuminate\Http\Req
 
         $events = collect($request->input('lines'))
             ->map(fn($line) => $line ? json_decode($line, true) : [])
-            ->filter(fn($event) => count($event) > 0)
+            ->filter(fn($event) => $event && count($event) > 0)
             ->all();
         $nbEventsAdded = $server->addOsqueryEvents($events);
 
@@ -398,8 +399,12 @@ Route::post('/reset-password', function () {
     return view('auth.passwords.email', compact('email'));
 })->middleware('auth')->name('reset-password');
 
-Route::get('/notification/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
-    $notification->markAsRead();
+Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
+    \Illuminate\Notifications\DatabaseNotification::query()
+        ->whereNull('read_at')
+        ->whereJsonContains('data->group', $notification->data['group'])
+        ->get()
+        ->each(fn($notif) => $notif->markAsRead());
 })->middleware('auth');
 
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {

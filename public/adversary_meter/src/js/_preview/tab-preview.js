@@ -45,33 +45,31 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
   }
 
   _generateData(allDates, data) {
+
     const humanOrTargetedEvents = Array(allDates.length).fill(0);
     const notHumanOrTargetedEvents = Array(allDates.length).fill(0);
 
     for (const event of data) {
+
       const dateIndex = allDates.indexOf(event.date);
 
       if (dateIndex >= 0) {
         if (typeof event.human_or_targeted !== 'undefined') {
           humanOrTargetedEvents[dateIndex] = event.human_or_targeted;
         }
-
         if (typeof event.not_human_or_targeted !== 'undefined') {
           notHumanOrTargetedEvents[dateIndex] = event.not_human_or_targeted;
         }
       }
     }
 
-    return { humanOrTargeted: humanOrTargetedEvents, notHumanOrTargeted: notHumanOrTargetedEvents };
+    return {humanOrTargeted: humanOrTargetedEvents, notHumanOrTargeted: notHumanOrTargetedEvents};
   }
-
 
   _createChart(elementId, allDates, humanOrTargeted, notHumanOrTargeted) {
     return new Chart(document.getElementById(elementId), {
-      type: 'bar',
-      data: {
-        labels: allDates,
-        datasets: [{
+      type: 'bar', data: {
+        labels: allDates, datasets: [{
           label: i18next.t('Attaques Manuelles'),
           data: humanOrTargeted,
           backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -86,21 +84,14 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
           borderWidth: 1,
           categoryPercentage: 1
         }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
+      }, options: {
+        responsive: true, maintainAspectRatio: false, scales: {
           y: {
-            beginAtZero: true,
-            stacked: true,
-            grid: {
+            beginAtZero: true, stacked: true, grid: {
               display: false
             }
-          },
-          x: {
-            stacked: true,
-            grid: {
+          }, x: {
+            stacked: true, grid: {
               display: false
             }
           }
@@ -109,32 +100,16 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
     });
   }
 
-  _getStatsAndUpdateChart(chart, honeypot, days) {
-    this.datastore_.getHoneypotStats(honeypot.value_0, days).then((data) => {
-      const allDates = this._generateAllDates(days);
-      const {humanOrTargeted, notHumanOrTargeted} = this._generateData(allDates, data);
-
-      chart.data.labels = allDates;
-      chart.data.datasets[0].data = humanOrTargeted;
-      chart.data.datasets[1].data = notHumanOrTargeted;
-
-      chart.update();
-    });
-  }
-
-  _getStatsAndCreateChart(honeypotIndex, tab, honeypot, loader)
-  {
-    let days = 7;
-    this.datastore_.getHoneypotStats(honeypot.value_0, 7).then((data) => {
+  _getStatsAndCreateChart(honeypotIndex, tab, honeypot, loader) {
+    this.datastore_.getHoneypotStats(honeypot.dns, 7).then((data) => {
       loader.destroy();
       const el = tab.querySelector('.element-' + (honeypotIndex + 1));
       el.innerHTML = `
         <div class="row">
           <div class="col my-2">
             <div class="d-flex my-auto justify-content-between">
-                <h4>${honeypot.value_0}&nbsp;(&nbsp;<span style="color: #ff9704;">${honeypot.value_3.toUpperCase()}</span>&nbsp;)</h4>
+                <h4>${honeypot.dns}&nbsp;(&nbsp;<span style="color: #ff9704;">${honeypot.cloud_sensor.toUpperCase()}</span>&nbsp;)</h4>
             </div>
-            <div id="honeypot${honeypotIndex + 1}Select" class="select-container"></div>
           </div>
           </div>
         </div>
@@ -147,29 +122,10 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
         </div>
       `;
 
-      const selectItems = [
-        {value: 7, label: i18next.t('7 derniers jours')},
-        {value: 14, label: i18next.t('14 derniers jours')},
-        {value: 30, label: i18next.t('30 derniers jours')}
-      ];
-
-      const select = new com.computablefacts.blueprintjs.MinimalSelect(
-        tab.querySelector(`#honeypot${honeypotIndex + 1}Select`),
-        (item) => item.label
-      );
-      select.filterable = false;
-      select.items = selectItems;
-      select.selectedItem = selectItems.find(item => item.value === days);
-
-      const allDates = this._generateAllDates(days);
+      const allDates = data.map(event => event.date);
       const {humanOrTargeted, notHumanOrTargeted} = this._generateData(allDates, data);
-
-      const chart = this._createChart(`honeypot${honeypotIndex + 1}Chart`, allDates, humanOrTargeted, notHumanOrTargeted);
-
-      select.onSelectionChange((item) => {
-        this._getStatsAndUpdateChart(chart, honeypot, item.value);
-      })
-      this.register(select)
+      const chart = this._createChart(`honeypot${honeypotIndex + 1}Chart`, allDates, humanOrTargeted,
+        notHumanOrTargeted);
     });
   }
 
@@ -180,30 +136,32 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
     return index1 - index2;
   }
 
-  _createDoughnutChart(tab, data, loader)
-  {
+  _createDoughnutChart(tab, data, loader) {
+
     loader.destroy();
+
     const el = tab.querySelector('.element-4');
     let template = `
-        <div class="my-2">
-          <h4>${i18next.t('Criticité des vulnérabilités découvertes')}</h4>
-        </div>`;
+      <div class="my-2">
+        <h4>${i18next.t('Criticité des vulnérabilités découvertes')}</h4>
+      </div>`;
 
-    if (!data.length){
+    if (!data.length) {
       template += `
         <div class="background-light-grey border flex-grow-1 p-2 d-flex justify-content-center">
           <p class="my-auto">${i18next.t('Il n\'y a aucune vulnérabilité de détectée.')}</p>
-        </div>`
+        </div>`;
       el.innerHTML = template;
       return;
     }
-    template += `<div class="flex-grow-1 h-0 background-light-grey border">
-            <div class="h-100">
-                <canvas id="alertChart" class="w-100 h-100"></canvas>
-            </div>
-        </div>`
-    el.innerHTML = template;
+    template += `
+      <div class="flex-grow-1 h-0 background-light-grey border">
+          <div class="h-100">
+              <canvas id="alertChart" class="w-100 h-100"></canvas>
+          </div>
+      </div>`;
 
+    el.innerHTML = template;
     data.sort(this._sortByLevel);
 
     const translations = {
@@ -215,11 +173,8 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
     };
 
     const chartData = {
-      labels: data.map(({level}) => level || 'Unknown'),
-      datasets: [{
-        label: i18next.t('Vulnérabilités'),
-        data: data.map(({count}) => count),
-        backgroundColor: data.map(({level}) => {
+      labels: data.map(({level}) => level || 'Unknown'), datasets: [{
+        label: i18next.t('Vulnérabilités'), data: data.map(({count}) => count), backgroundColor: data.map(({level}) => {
           switch (level) {
             case "High":
               return "rgb(255, 99, 132)";
@@ -232,17 +187,14 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
             default:
               return "rgb(255, 255, 255)";
           }
-        }),
-        hoverOffset: 4
+        }), hoverOffset: 4
       }],
     };
 
     new Chart(document.getElementById('alertChart'), {
-      data: chartData,
-      type: 'doughnut',
-      plugins: [{
-        id: 'translation',
-        beforeDraw: function(chart) {
+      data: chartData, type: 'doughnut', plugins: [{
+        id: 'translation', beforeDraw: function (chart) {
+
           //Translate legends
           const labels = chart.legend.legendItems;
           labels.forEach(label => {
@@ -251,14 +203,13 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
           chart.legend.legendItems = labels;
 
           //Translate labels from tooltip
-          chart.data.labels.forEach(function(label, index) {
+          chart.data.labels.forEach(function (label, index) {
             if (translations[label]) {
               chart.data.labels[index] = translations[label];
             }
           });
         }
-      }],
-      options: {
+      }], options: {
         rotation: -90,
         circumference: 180,
         maintainAspectRatio: false,
@@ -339,62 +290,66 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
 
     const tab = document.createElement('div');
     tab.innerHTML = template;
-    tab.className = 'p-3 flex-grow-1 d-flex flex-column '
+    tab.className = 'p-3 flex-grow-1 d-flex flex-column ';
+
     const honeypot1Loader = new com.computablefacts.blueprintjs.MinimalSpinner(tab.querySelector('#honeypot1-loader'))
     const honeypot2Loader = new com.computablefacts.blueprintjs.MinimalSpinner(tab.querySelector('#honeypot2-loader'))
     const honeypot3Loader = new com.computablefacts.blueprintjs.MinimalSpinner(tab.querySelector('#honeypot3-loader'))
     const alertsLoader = new com.computablefacts.blueprintjs.MinimalSpinner(tab.querySelector('#alerts-loader'))
     const lastLoader = new com.computablefacts.blueprintjs.MinimalSpinner(tab.querySelector('#last-loader'))
     const honeypotLoaders = [honeypot1Loader, honeypot2Loader, honeypot3Loader]
+
     this.datastore_.getHoneypots().then((honeypots) => {
       this.honeypots_ = honeypots;
-      for(let i = 0; i < 3; i++){
+      for (let i = 0; i < 3; i++) {
         if (honeypots[i]) {
           this._getStatsAndCreateChart(i, tab, honeypots[i], honeypotLoaders[i]);
         } else {
           honeypotLoaders[i].destroy();
-          const el = tab.querySelector(`.element-${i+1}`);
+          const el = tab.querySelector(`.element-${i + 1}`);
           el.classList.add('background-light-grey', 'border');
           el.innerHTML = `
-        <div class="d-flex flex-column justify-content-center align-items-center my-auto">
-            <button class="btn btn-primary float-end rounded-0 me-1 configure-honeypot"><i class="fal fa-plus me-2"></i>${i18next.t('Configurer un honeypot')}</button>
-        </div>`;
+            <div class="d-flex flex-column justify-content-center align-items-center my-auto">
+                <button class="btn btn-primary float-end rounded-0 me-1 configure-honeypot">
+                  <i class="fal fa-plus me-2"></i>${i18next.t('Configurer un honeypot')}
+                </button>
+            </div>`;
         }
       }
     });
     this.datastore_.getAlertStats().then((response) => {
-     this._createDoughnutChart(tab, response, alertsLoader)
+      this._createDoughnutChart(tab, response, alertsLoader)
     })
     this.datastore_.getMostRecentEvent().then((events) => {
       lastLoader.destroy()
       const el = tab.querySelector('.element-5');
       if (events.length > 0) {
         el.innerHTML = `
-      <div class="d-flex justify-content-between">
-        <h4 class="my-2">${i18next.t('Activité des 7 derniers jours')}</h4>
-        <span class="mt-auto mb-2">
-            <a href="#" class="see-all">${i18next.t("Voir toute l'activité")}</a>
-        </span>
-      </div>
-      <div class="flex-grow-1 h-0 overflow-auto">
-        ${events.map(event => `
-          <div class="m-1 p-1 bg-white border row">
-            <div class="col-10">
-               <div class="fw-bold red d-flex">${event.event}</div>
-               <div class="text-muted d-flex">
-                    <div class="me-2">
-                      ${i18next.t('Dernier contact le')} ${event.timestamp.replace('+0000', 'UTC')}
-                    </div>
-               </div>
-            </div>
-            <div class="col d-flex justify-content-end align-self-center">
-                <a href="#" class="see-all" class="my-auto">
-                    >
-                </a>
-            </div>
+          <div class="d-flex justify-content-between">
+            <h4 class="my-2">${i18next.t('Activité récente')}</h4>
+            <span class="mt-auto mb-2">
+                <a href="#" class="see-all">${i18next.t("Voir toute l'activité")}</a>
+            </span>
           </div>
-        `).join('')}
-      </div>`
+          <div class="flex-grow-1 h-0 overflow-auto">
+            ${events.map(event => `
+              <div class="m-1 p-1 bg-white border row">
+                <div class="col-10">
+                   <div class="fw-bold red d-flex">${event.event}</div>
+                   <div class="text-muted d-flex">
+                      <div class="me-2">
+                        ${i18next.t('Dernier contact le')} ${event.timestamp.replace('+0000', 'UTC')}
+                      </div>
+                   </div>
+                </div>
+                <div class="col d-flex justify-content-end align-self-center">
+                    <a href="#" class="see-all" class="my-auto">
+                        >
+                    </a>
+                </div>
+              </div>
+            `).join('')}
+          </div>`
       } else {
         el.innerHTML = `
       <div class="d-flex justify-content-between">

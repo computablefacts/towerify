@@ -16,17 +16,13 @@ if (httpClient.getBaseUrl() === '') {
     httpClient.init(conf.API_BASE_URL);
 }
 
-export function urlStartDiscussion(vulnId) {
-    return httpClient.getBaseUrl() + `/api/v2/adversary/start-discussion/${vulnId}?api_token=${httpClient.getToken()}`;
-}
-
 export async function whoAmI() {
     return httpClient.whoAmI().then(resp => resp.data);
 }
 
 export async function apiCall(method, url, params = {}, body = null) {
 
-    let fullUrl = httpClient.getBaseUrl() + "/" + url;
+    let fullUrl = httpClient.getBaseUrl() + "/am/" + url;
 
     if (method.toUpperCase() === "GET" && Object.keys(params).length > 0) {
         const queryParams = new URLSearchParams(params).toString();

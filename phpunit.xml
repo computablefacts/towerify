@@ -11,6 +11,9 @@
   cacheDirectory=".phpunit.cache"
   backupStaticProperties="false">
   <testsuites>
+    <testsuite name="AdversaryMeter">
+      <directory suffix="Test.php">./tests/AdversaryMeter</directory>
+    </testsuite>
     <testsuite name="Feature">
       <directory suffix="Test.php">./tests/Feature</directory>
     </testsuite>
@@ -31,6 +34,9 @@
     <env name="DB_USERNAME" value="tw_testuser"/>
     <env name="DB_PASSWORD" value="z0rglub"/>
     <env name="USE_SCHEMA_DUMP" value="true"/>
+    <env name="DROP_SCAN_EVENTS_AFTER_X_MINUTES" value="1"/>
+    <env name="DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES" value="1"/>
+    <env name="DAYS_BETWEEN_SCANS" value="5"/>
   </php>
   <source>
     <include>

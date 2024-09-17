@@ -138,8 +138,13 @@ class HomeController extends Controller
                 return [
                     'id' => $notification->id,
                     'data' => $notification->data,
+                    'timestamp' => $notification->updated_at->format('Y-m-d H:i') . ' UTC',
                 ];
             })
+            ->sortBy([
+                ['timestamp', 'desc']
+            ])
+            ->values()
             ->all();
 
         return view('home.index', compact(

@@ -9,6 +9,18 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * @property int id
+ * @property string news
+ * @property LanguageEnum news_language
+ * @property ?string hyperlink
+ * @property ?string website
+ * @property ?string teaser
+ * @property ?string opener
+ * @property ?string why_it_matters
+ * @property ?string go_deeper
+ * @property bool is_published
+ */
 class YnhTheCyberBrief extends Model
 {
     use HasFactory;

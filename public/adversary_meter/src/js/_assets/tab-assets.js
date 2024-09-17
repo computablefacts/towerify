@@ -393,7 +393,7 @@ export class TabAssets extends com.computablefacts.widgets.Widget {
 
                     if (data.is_watched) {
 
-                        const loader = new com.computablefacts.blueprintjs.MinimalSpinner(node);
+                        const loader = new com.computablefacts.blueprintjs.MinimalSpinner(node, 'small');
                         this.register(loader);
                         this.datastore_.getInfosFromAsset(data.asset).then(infos => {
 

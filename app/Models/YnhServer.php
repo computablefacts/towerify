@@ -5,10 +5,10 @@ namespace App\Models;
 use App\Enums\ServerStatusEnum;
 use App\Enums\SshTraceStateEnum;
 use App\Hashing\TwHasher;
-use App\Helpers\AdversaryMeter;
 use App\Helpers\AppStore;
 use App\Helpers\SshConnection2;
 use App\Helpers\SshKeyPair;
+use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Traits\HasTenant2;
 use App\User;
 use Carbon\Carbon;
@@ -22,6 +22,24 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * @property int id
+ * @property string name
+ * @property ?string version
+ * @property ?string ip_address
+ * @property ?int ssh_port
+ * @property ?string ssh_username
+ * @property ?string ssh_public_key
+ * @property ?string ssh_private_key
+ * @property ?int user_id
+ * @property bool updated
+ * @property bool is_ready
+ * @property ?int ynh_order_id
+ * @property string secret
+ * @property string ip_address_v6
+ * @property bool is_frozen
+ * @property bool added_with_curl
+ */
 class YnhServer extends Model
 {
     use HasFactory, HasTenant2;
@@ -325,46 +343,6 @@ class YnhServer extends Model
             ->where('ynh_server_id', $this->id)
             ->orderBy('order', 'desc')
             ->get() : collect();
-    }
-
-    public function startMonitoringAsset(User $user, string $domainOrIpAddress): bool
-    {
-        $team = $user->customer?->company_name;
-
-        if (!$team) {
-            return false;
-        }
-
-        $json = AdversaryMeter::addAsset($team, $user, $domainOrIpAddress);
-
-        if (count($json) === 0) {
-            return false;
-        }
-        if (!isset($user->am_api_token) || trim($user->am_api_token) === '') {
-            $user->am_api_token = $json['api_token'];
-            $user->save();
-        } else {
-            // TODO : check that $user->am_api_token is equal to $json['api_token'] ?
-        }
-
-        AdversaryMeter::switchTeam($team, $user);
-        return true;
-    }
-
-    public function stopMonitoringAsset(User $user, string $domainOrIpAddress): bool
-    {
-        $team = $user->customer?->company_name;
-
-        if (!$team) {
-            return false;
-        }
-
-        $json = AdversaryMeter::removeAsset($team, $user, $domainOrIpAddress);
-
-        if (count($json) === 0) {
-            return false;
-        }
-        return true;
     }
 
     public function sshTestConnection(): bool
@@ -847,6 +825,9 @@ EOT;
                     'ynh_server_id' => $this->id,
                     'updated' => true,
                 ]);
+                if ($user) {
+                    event(new CreateAsset($user, $domain, true, [$this->name]));
+                }
             }
             DB::transaction(function () {
                 YnhDomain::where('ynh_server_id', $this->id)

@@ -8,6 +8,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int id
+ * @property ?int user_id
+ * @property int ynh_server_id
+ * @property string name
+ * @property int size
+ * @property ?string storage_path
+ * @property array result
+ */
 class YnhBackup extends Model
 {
     use HasFactory, HasTenant2;

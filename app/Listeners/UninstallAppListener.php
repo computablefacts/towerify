@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Enums\SshTraceStateEnum;
 use App\Events\PullServerInfos;
 use App\Events\UninstallApp;
+use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -36,7 +37,7 @@ class UninstallAppListener extends AbstractListener
             }
 
             $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Stopping asset monitoring...');
-            $server->stopMonitoringAsset($user, $domain);
+            event(new DeleteAsset($user, $domain));
             $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring stopped.');
         }
     }

@@ -64,7 +64,7 @@
   "Ce n'est pas un nom de domaine ou une adresse ip valide.": "This is not a valid domain name or IP address.",
   "Étiquettes": "Tags",
   "Status": "Status",
-  "Déjà importé": "Already imported",
+  "importé": "imported",
   "Une erreur s'est produite, veuillez réessayer plus tard.": "An error occurred, please try again later.",
   "Aucun fichier sélectionné.": "No file selected.",
   "Erreur lors de la lecture du fichier CSV.": "Error reading the CSV file.",
@@ -160,7 +160,7 @@
   "Accéder au tableau de bord": "Access the dashboard",
   "Statut de la configuration :": "Configuration Status:",
   "En attente de la configuration de vos DNS.": "Waiting for your DNS configuration.",
-  "Routez chacun de vos DNS vers ladresse IP y étant associée :": "Route each of your DNS to the associated IP address:",
+  "Routez chacun de vos DNS vers l'adresse IP y étant associée :": "Route each of your DNS to the associated IP address:",
   "terminer >": "finish >",
   "Fin": "End",
   "Début": "Begin",
@@ -198,5 +198,6 @@
   "de même type ({{type}})": "with same type ({{type}})",
   "Sauvegarder": "Save",
   "Masquer les vulnérabilités": "Hide vulnerabilities",
-  "Il n'y a aucune vulnérabilité de détectée.": "There is no vulnerability to display."
+  "Il n'y a aucune vulnérabilité de détectée.": "There is no vulnerability to display.",
+  "Activité récente": "Recent activity"
 }

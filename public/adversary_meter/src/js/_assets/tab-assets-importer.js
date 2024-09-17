@@ -211,7 +211,7 @@ export class TabAssetsImporter extends com.computablefacts.widgets.Widget {
             const tags = data.tags.map(tag => `<span class="badge me-2 mb-1">${tag}</span>`).join('');
             return createNode('div', tags)
           },
-          (data) => document.createTextNode(data.inDatabase ? i18next.t('Déjà importé') : '-'),
+          (data) => document.createTextNode(data.inDatabase ? i18next.t('importé') : ''),
           (data) => {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -222,7 +222,7 @@ export class TabAssetsImporter extends com.computablefacts.widgets.Widget {
           }
         ] : [
           (data) => document.createTextNode(data.asset ? data.asset : '-'),
-          (data) => document.createTextNode(data.inDatabase ? i18next.t('Déjà importé') : '-'),
+          (data) => document.createTextNode(data.inDatabase ? i18next.t('importé') : ''),
           (data) => {
             const checkbox = document.createElement('input');
             checkbox.classList.add('me-2')

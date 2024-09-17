@@ -1,6 +1,5 @@
 'use strict'
 
-import {urlStartDiscussion} from "../_datastore/api.js"
 import {HiddenAlert} from "../_datastore/hidden-alert.js";
 
 export class Panel extends com.computablefacts.widgets.Widget {
@@ -70,15 +69,9 @@ export class Panel extends com.computablefacts.widgets.Widget {
 
             Panel.IS_OPEN = true;
 
-            this.datastore_.whoAmI().then(user => {
-
-                const username = user.name;
-                const email = user.email;
-
-                this.datastore_.getInfosFromAsset(this.asset_).then(infos => this._redraw(drawerEl, infos));
-                drawerEl.removeEventListener('click', clickHandler);
-                drawerEl.addEventListener('click', clickHandler);
-            });
+            this.datastore_.getInfosFromAsset(this.asset_).then(infos => this._redraw(drawerEl, infos));
+            drawerEl.removeEventListener('click', clickHandler);
+            drawerEl.addEventListener('click', clickHandler);
         });
         drawer.show = true;
 
@@ -362,10 +355,7 @@ export class Panel extends com.computablefacts.widgets.Widget {
                     <h5 class="mb-0">
                       <strong>
                         ${newTitle(this.selectedVuln_)}
-                      </strong>&nbsp;&nbsp;
-                      <a href="${urlStartDiscussion(this.selectedVuln_.id)}" target="_blank" title="Start a conversation...">
-                        <i class="fal fa-comments"></i>
-                      </a>
+                      </strong>
                     </h5>
                   </div>
                   <div class="col-1 d-flex align-items-center justify-content-end">

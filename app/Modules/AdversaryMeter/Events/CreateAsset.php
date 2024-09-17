@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Modules\AdversaryMeter\Events;
+
+use App\User;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class CreateAsset
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public User $user;
+    public string $asset;
+    public bool $monitor;
+    public array $tags;
+
+    public function __construct(User $user, string $asset, bool $monitor, array $tags = [])
+    {
+        $this->user = $user;
+        $this->asset = $asset;
+        $this->monitor = $monitor;
+        $this->tags = $tags;
+    }
+
+    public function broadcastOn()
+    {
+        return new PrivateChannel('channel-name');
+    }
+}
