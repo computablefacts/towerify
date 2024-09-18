@@ -77,7 +77,7 @@ class ConfigureHostListener extends AbstractListener
                 // $isOk = $isOk && $server->sshRestartDocker($ssh);
 
                 $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Starting asset monitoring...');
-                event(new CreateAsset($user, $server->ip(), true, [$server->name]));
+                event(new CreateAsset($server->user()->first(), $server->ip(), true, [$server->name]));
                 $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring started.');
             }
             if ($isOk) {

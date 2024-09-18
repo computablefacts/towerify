@@ -64,7 +64,7 @@ class InstallAppListener extends AbstractListener
             }
 
             $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Starting asset monitoring...');
-            event(new CreateAsset($user, $domain, true, [$server->name]));
+            event(new CreateAsset($server->user()->first(), $domain, true, [$server->name]));
             $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring started.');
         }
     }

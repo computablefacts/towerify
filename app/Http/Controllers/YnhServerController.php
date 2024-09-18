@@ -181,9 +181,7 @@ class YnhServerController extends Controller
                 'ynh_server_id' => $server->id,
                 'updated' => false,
             ]));
-            if ($user) {
-                event(new CreateAsset($user, $request->domain, true, [$server->name]));
-            }
+            event(new CreateAsset($server->user()->first(), $request->domain, true, [$server->name]));
         }
 
         $uid = Str::random(10);
