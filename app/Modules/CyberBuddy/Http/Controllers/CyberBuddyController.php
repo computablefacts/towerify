@@ -59,10 +59,44 @@ class CyberBuddyController extends Controller
                 $list = $servers->filter(fn(YnhServer $server) => $server->ip())
                     ->map(function (YnhServer $server) use ($botman, $user) {
                         $json = base64_encode(json_encode($server));
-                        return "<span data-json=\"{$json}\">{$server->name} / {$server->ip()}</a>";
+                        $name = $server->name;
+                        $os = isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-';
+                        $ipv4 = $server->ip();
+                        $ipv6 = $server->isFrozen() || $server->ipv6() === '<unavailable>' ? '-' : $server->ipv6();
+                        $domains = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->domains->count();
+                        $applications = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->applications->count();
+                        $users = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->users->count();
+                        return "
+                          <tr data-json=\"{$json}\">
+                            <td><div class=\"tooltip\">{$name}<span class=\"tooltiptext tooltip-right\">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</span></div></td>
+                            <td>{$os}</td>
+                            <td>{$ipv4}</td>
+                            <td>{$ipv6}</td>
+                            <td>{$domains}</td>
+                            <td>{$applications}</td>
+                            <td>{$users}</td>
+                          </tr>
+                        ";
                     })
-                    ->join("<br>");
-                $botman->reply($list);
+                    ->join("");
+                $botman->reply("
+                    <table data-type=\"table\" style=\"width:100%\">
+                      <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>OS</th>
+                            <th>IP V4</th>
+                            <th>IP V6</th>
+                            <th>Domains</th>
+                            <th>Applications</th>
+                            <th>Users</th>
+                          </tr>
+                          <tbody>
+                            {$list}
+                          </tbody>
+                      </thead>
+                    </table>
+                ");
             }
         });
         $botman->fallback(function (BotMan $botman) {

@@ -1,3 +1,4 @@
+/* https://cdn.jsdelivr.net/npm/botman-web-widget@0/build/js/widget.js */
 !function (t) {
   function e(o) {
     if (n[o]) {

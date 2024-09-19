@@ -1,3 +1,4 @@
+/* https://cdn.jsdelivr.net/npm/botman-web-widget@0/build/js/chat.js */
 !function (t) {
   function e(r) {
     if (n[r]) {
