@@ -89,7 +89,7 @@
             @foreach($whyItMatters as $index => $text)
             @if($index === 0)
             <div class="card-text">
-              <span class="tw-pill bg-primary">WHY IT MATTERS</span>&nbsp;
+              <b style="color:#f8b502">WHY IT MATTERS</b>&nbsp;
             </div>
             @endif
             <div class="card-text">
@@ -103,8 +103,8 @@
               <?php $goDeeper = preg_split("/\r\n|\n|\r/", $brief->brief()['go_deeper']) ?>
             @foreach($goDeeper as $index => $text)
             @if($index === 0)
-            <div class="card-text">
-              <span class="tw-pill bg-primary">GO DEEPER</span>&nbsp;
+            <div class="card-text" style="color:#f8b502">
+              <b style="color:#f8b502">GO DEEPER</b>&nbsp;
             </div>
             @endif
             <div class="card-text">
