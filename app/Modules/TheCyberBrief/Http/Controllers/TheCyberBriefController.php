@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Modules\TheCyberBrief\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\YnhTheCyberBrief;
 
 class TheCyberBriefController extends Controller
@@ -18,6 +19,6 @@ class TheCyberBriefController extends Controller
             ->limit(50)
             ->get();
 
-        return view('the-cyber-brief.index', compact('briefes'));
+        return view('modules.the-cyber-brief.index', compact('briefes'));
     }
 }

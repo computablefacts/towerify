@@ -59,6 +59,10 @@ class RouteServiceProvider extends ServiceProvider
             ->prefix('cb/web')
             ->namespace('App\Modules\CyberBuddy\Http\Controllers')
             ->group(base_path('app/Modules/CyberBuddy/web.php'));
+        Route::middleware('web')
+            ->prefix('tcb/web')
+            ->namespace('App\Modules\TheCyberBrief\Http\Controllers')
+            ->group(base_path('app/Modules/TheCyberBrief/web.php'));
     }
 
     /**

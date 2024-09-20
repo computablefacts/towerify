@@ -378,21 +378,19 @@ Route::get('', function () {
     if (\Illuminate\Support\Facades\Auth::user()) {
         return redirect('/home');
     }
-    return redirect('/the-cyber-brief');
+    return redirect()->route('the-cyber-brief');
 });
 
 Route::get('/', function () {
     if (\Illuminate\Support\Facades\Auth::user()) {
-        return redirect('/home');
+        return redirect()->route('home');
     }
-    return redirect('/the-cyber-brief');
+    return redirect()->route('the-cyber-brief');
 });
 
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-
-Route::get('/the-cyber-brief', 'TheCyberBriefController@index')->name('the-cyber-brief');
 
 Route::post('/reset-password', function () {
     $email = \Illuminate\Support\Facades\Auth::user()->email;

@@ -17,12 +17,12 @@ class CyberBuddyController extends Controller
 
     public function showPage()
     {
-        return view('cyber-buddy.page');
+        return view('modules.cyber-buddy.page');
     }
 
     public function showChat()
     {
-        return view('cyber-buddy.chat');
+        return view('modules.cyber-buddy.chat');
     }
 
     public function handle(): void
