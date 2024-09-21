@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Modules\TheCyberBrief\Models;
 
 use App\Enums\LanguageEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

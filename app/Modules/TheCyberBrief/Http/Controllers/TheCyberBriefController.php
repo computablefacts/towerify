@@ -3,7 +3,7 @@
 namespace App\Modules\TheCyberBrief\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\YnhTheCyberBrief;
+use App\Modules\TheCyberBrief\Models\YnhTheCyberBrief;
 
 class TheCyberBriefController extends Controller
 {
