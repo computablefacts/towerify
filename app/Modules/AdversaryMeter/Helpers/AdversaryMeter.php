@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Modules\AdversaryMeter\Helpers;
 
 use App\User;
 use Illuminate\Support\Facades\Auth;
