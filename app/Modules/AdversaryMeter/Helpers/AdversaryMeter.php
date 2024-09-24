@@ -4,19 +4,15 @@ namespace App\Modules\AdversaryMeter\Helpers;
 
 use App\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 /** @deprecated */
 class AdversaryMeter
 {
     public static function redirectUrl()
     {
-        $apiToken = self::findAnyAdversaryMeterApiToken(Auth::user()); // TODO : throw an error if not set ?
-        $apiUrl = config('app.url');
-        if (Str::endsWith($apiUrl, '/')) {
-            $apiUrl = Str::beforeLast($apiUrl, '/');
-        }
-        return asset('adversary_meter') . "/src/index.html?api_token={$apiToken}&api_url={$apiUrl}";
+        $token = self::findAnyAdversaryMeterApiToken(Auth::user()); // TODO : throw an error if not set ?
+        $url = app_url();
+        return asset('adversary_meter') . "/src/index.html?api_token={$token}&api_url={$url}";
     }
 
     private static function findAnyAdversaryMeterApiToken(User $user): ?string

@@ -15,7 +15,7 @@
   window.botmanWidget = {
     title: 'CyberBuddy',
     aboutText: '⚡ Powered by Towerify',
-    aboutLink: 'https://towerify.io',
+    aboutLink: '{{ app_url() }}',
     userId: '{{ Auth::user() ? Auth::user()->id : \Illuminate\Support\Str::random(10) }}',
     chatServer: '/cb/web/botman',
     frameEndpoint: '/cb/web/cyber-buddy/chat',

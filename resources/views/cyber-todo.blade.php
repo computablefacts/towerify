@@ -202,7 +202,7 @@
 <div class="page">
   <div class="header">
     <div class="logo">
-      <a href="https://towerify.io" rel="noreferrer">
+      <a href="{{ app_url() }}" rel="noreferrer">
         <img src="/images/adversarymeter.png" alt="Logo AdversaryMeter" title="Logo AdversaryMeter" height="55">
       </a>
     </div>

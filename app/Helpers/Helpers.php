@@ -48,3 +48,8 @@ if (!function_exists('format_subscription_price')) {
             ) . ' / month' . ($taxIncluded ? ' (incl. taxes)' : ' (excl. taxes)');
     }
 }
+
+function app_url(): string
+{
+    return rtrim(config('app.url'), '/');
+}

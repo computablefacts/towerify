@@ -4,7 +4,7 @@
     <div class="row">
       <pre class="m-0">To configure or restore metrics and security event collection on this server, execute the following command with <b>root</b> privileges:
 
-curl -s <a href="https://app.towerify.io/update/{{ $server->secret }}">https://app.towerify.io/update/{{ $server->secret }}</a> | bash
+curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/update/{{ $server->secret }}</a> | bash
 
 The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional
 changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.</pre>

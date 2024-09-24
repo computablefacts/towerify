@@ -28,7 +28,7 @@
       </div>
       <div class="mb-3 col-5 col-md-5">
         <label for="email" class="control-label">{{ __('Email') }}</label>
-        <input type="email" value='' class="form-control" id="email" placeholder="john.doe@towerify.io">
+        <input type="email" value='' class="form-control" id="email" placeholder="john.doe@cywise.io">
       </div>
       <div class="mb-3 col-2 col-md-2 d-flex align-items-end">
         <button type="button"

@@ -54,6 +54,7 @@ class YnhOsquery extends Model
 
     public static function configLogParser(YnhServer $server): string
     {
+        $url = app_url();
         return <<< EOT
 #!/bin/bash
 
@@ -68,7 +69,7 @@ if [ -d /var/log/nginx ]; then
   curl -X POST \
     -H "Content-Type: multipart/form-data" \
     -F "data=@/opt/logparser/nginx.txt.gz" \
-    https://app.towerify.io/logparser/{$server->secret}
+    {$url}/logparser/{$server->secret}
 fi
 
 EOT;
@@ -76,13 +77,14 @@ EOT;
 
     public static function configLogAlert(YnhServer $server): array
     {
+        $url = app_url();
         return ["monitors" => [
             [
                 "name" => "Monitor Osquery Daemon Output",
                 "path" => "/var/log/osquery/osqueryd.*.log",
                 "match" => ".*",
                 "regexp" => true,
-                "url" => "https://app.towerify.io/logalert/{$server->secret}"
+                "url" => "{$url}/logalert/{$server->secret}"
             ]
         ],
             "sleep" => 5,
@@ -155,6 +157,7 @@ EOT;
 
     public static function monitorServer(YnhServer $server): string
     {
+        $url = app_url();
         return <<<EOT
 #!/bin/bash
 
@@ -184,7 +187,7 @@ sudo -H -u root bash -c 'tmux kill-ses -t logalert'
 osqueryctl stop osqueryd
 
 # Update LogAlert configuration
-wget -O /opt/logalert/config2.json https://app.towerify.io/logalert/{$server->secret}
+wget -O /opt/logalert/config2.json {$url}/logalert/{$server->secret}
 
 if [ -s /opt/logalert/config2.json ]; then
   if jq empty /opt/logalert/config2.json; then
@@ -195,7 +198,7 @@ else
 fi
 
 # Update LogParser configuration
-wget -O /opt/logparser/parser2 https://app.towerify.io/logparser/{$server->secret}
+wget -O /opt/logparser/parser2 {$url}/logparser/{$server->secret}
 
 if [ -s /opt/logparser/parser2 ]; then
   if { bash -n /opt/logparser/parser2; } then
@@ -207,7 +210,7 @@ else
 fi
 
 # Update Osquery configuration
-wget -O /etc/osquery/osquery2.conf https://app.towerify.io/osquery/{$server->secret}
+wget -O /etc/osquery/osquery2.conf {$url}/osquery/{$server->secret}
 
 if [ -s /etc/osquery/osquery2.conf ]; then
   if jq empty /etc/osquery/osquery2.conf; then
@@ -227,7 +230,7 @@ cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osq
 cat <(fgrep -i -v 'rm /opt/logalert/log.txt' <(crontab -l)) <(echo '22 2 * * * rm /opt/logalert/log.txt') | crontab -
 
 # Auto-update the server every day at 03:33 am
-cat <(fgrep -i -v 'curl -s https://app.towerify.io/update/{$server->secret} | bash' <(crontab -l)) <(echo '33 3 * * * curl -s https://app.towerify.io/update/{$server->secret} | bash') | crontab -
+cat <(fgrep -i -v 'curl -s {$url}/update/{$server->secret} | bash' <(crontab -l)) <(echo '33 3 * * * curl -s {$url}/update/{$server->secret} | bash') | crontab -
 
 # Start Osquery then LogAlert 
 osqueryctl start osqueryd

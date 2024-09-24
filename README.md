@@ -45,7 +45,7 @@ up new servers, making it convenient for users to adopt Towerify for existing se
 > [!NOTE]
 > Metrics and security event collection no longer depend on the server being YunoHost-based, as any Linux server can now
 > be configured for automatic collection by running
-> `curl -s https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name> | bash` as root on
+> `curl -s https://app.cywise.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name> | bash` as root on
 > the target server.
 
 ## Contents
