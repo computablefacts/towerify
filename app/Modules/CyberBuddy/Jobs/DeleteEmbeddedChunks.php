@@ -51,7 +51,7 @@ class DeleteEmbeddedChunks implements ShouldQueue
                 $collection->chunks()
                     ->where('is_embedded', true)
                     ->where('is_deleted', true)
-                    ->chunk(100, function ($chunks) use ($collection) {
+                    ->chunk(500, function ($chunks) use ($collection) {
 
                         $uids = [];
 

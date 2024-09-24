@@ -32,7 +32,7 @@ class EmbedChunks implements ShouldQueue
                 $collection->chunks()
                     ->where('is_embedded', false)
                     ->where('is_deleted', false)
-                    ->chunk(100, function ($chunks) use ($collection) {
+                    ->chunk(500, function ($chunks) use ($collection) {
 
                         $chunkz = [];
 
