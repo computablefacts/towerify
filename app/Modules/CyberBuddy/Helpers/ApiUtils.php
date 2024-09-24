@@ -3,6 +3,7 @@
 namespace App\Modules\CyberBuddy\Helpers;
 
 use App\Modules\CyberBuddy\Exceptions\ApiException;
+use App\Modules\CyberBuddy\Models\Prompt;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -47,6 +48,14 @@ class ApiUtils
             'uids' => $uids
         ]);
         return $this->json($response);
+    }
+
+    /** @deprecated */
+    public function ask_chunks_demo(string $question): array
+    {
+        /** @var Prompt $prompt */
+        $prompt = Prompt::where('name', 'default_debugger')->firstOrfail();
+        return $this->ask_chunks($question, 'test-local-3', $prompt->template, true, true, 'fr');
     }
 
     public function ask_chunks(string $question, string $collectionName, string $prompt, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 5): array
@@ -111,6 +120,21 @@ class ApiUtils
             'facts' => $facts,
             'title' => $title,
             'prompt' => $prompt
+        ]);
+        return $this->json($response);
+    }
+
+    public function chat_manual(string $question, string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 5, string $lang = 'en'): array
+    {
+        $response = $this->post('/chat_manual', [
+            'question' => $question,
+            'collection_name' => $collectionName,
+            'history_key' => $historyKey,
+            'prompt' => $prompt,
+            'history_prompt' => $historyPrompt,
+            'max_docs_used' => $maxDocsUsed,
+            'lang' => $lang,
+            'show_context' => true
         ]);
         return $this->json($response);
     }

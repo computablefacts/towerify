@@ -4,9 +4,11 @@ namespace App\Modules\CyberBuddy\Http\Controllers;
 
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
+use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\User;
 use BotMan\BotMan\BotMan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class CyberBuddyController extends Controller
 {
@@ -97,6 +99,39 @@ class CyberBuddyController extends Controller
                       </thead>
                     </table>
                 ");
+            }
+        });
+        $botman->hears('/debug {question}', function (BotMan $botman, string $question) {
+
+            $botman->types();
+            $response = ApiUtils::ask_chunks_demo($question);
+            if ($response['error']) {
+                $botman->reply('Une erreur s\'est produite. Veuillez reposer votre question ultérieurement.');
+            } else {
+
+                $answer = $response['response'];
+                $context = collect($response['context'] ?? []);
+                $matches = array();
+                $isOk = preg_match_all("/\[\[\d+]]/", $answer, $matches);
+
+                if (!$isOk) {
+                    $botman->reply($answer);
+                } else {
+                    /** @var array $refs */
+                    $refs = $matches[0];
+                    foreach ($refs as $ref) {
+                        $id = Str::replace(['[', ']'], '', $ref);
+                        $tooltip = $context->filter(fn($ctx) => $ctx['id'] === $id)->first();
+                        if ($tooltip) {
+                            $answer = Str::replace($ref, "
+                              <div class=\"tooltip\" style=\"color:#f8b500\">[{$id}]
+                                <span class=\"tooltiptext tooltip-right\">{$tooltip['text']}</span>
+                              </div>
+                            ", $answer);
+                        }
+                    }
+                    $botman->reply($answer);
+                }
             }
         });
         $botman->fallback(function (BotMan $botman) {
