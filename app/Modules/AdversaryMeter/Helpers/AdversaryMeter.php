@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 /** @deprecated */
 class AdversaryMeter
 {
-    public static function redirectUrl()
+    public static function redirectUrl(): string
     {
         $token = self::findAnyAdversaryMeterApiToken(Auth::user()); // TODO : throw an error if not set ?
         $url = app_url();
