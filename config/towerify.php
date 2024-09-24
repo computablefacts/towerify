@@ -13,6 +13,11 @@ return [
         'drop_discovery_events_after_x_minutes' => env('DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES', 1 * 24 * 60),
         'days_between_scans' => env('DAYS_BETWEEN_SCANS', 5),
     ],
+    'cyberbuddy' => [
+        'api' => env('CB_API'),
+        'api_username' => env('CB_API_USERNAME'),
+        'api_password' => env('CB_API_PASSWORD'),
+    ],
     'telescope' => [
         'whitelist' => [
             'usernames' => explode(',', env('TELESCOPE_WHITELIST_USERNAMES')),
