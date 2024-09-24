@@ -226,8 +226,6 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        'ApiUtils' => \App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade::class,
-        'ApiUtilsCb' => \App\Modules\CyberBuddy\Helpers\ApiUtilsFacade::class,
 
     ],
 
