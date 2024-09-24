@@ -82,4 +82,15 @@ class User extends \Konekt\AppShell\Models\User
     {
         return TwHasher::unhash($this->password);
     }
+
+    public function client(): string
+    {
+        if ($this->customer_id) {
+            return "cid{$this->customer_id}";
+        }
+        if ($this->tenant_id) {
+            return "tid{$this->tenant_id}";
+        }
+        return "tid0-cid0";
+    }
 }

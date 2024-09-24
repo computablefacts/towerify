@@ -32,6 +32,8 @@ use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
 use App\Modules\AdversaryMeter\Listeners\DeleteAssetListener;
 use App\Modules\AdversaryMeter\Listeners\EndPortsScanListener;
 use App\Modules\AdversaryMeter\Listeners\EndVulnsScanListener;
+use App\Modules\CyberBuddy\Events\IngestFile;
+use App\Modules\CyberBuddy\Listeners\IngestFileListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Konekt\User\Events\UserInvitationUtilized;
 use Vanilo\Order\Events\OrderWasCreated;
@@ -77,6 +79,8 @@ class EventServiceProvider extends ServiceProvider
         PullServerInfos::class => [
             UpdateServerInfosListener::class,
         ],
+
+        // AdversaryMeter
         BeginPortsScan::class => [
             BeginPortsScanListener::class,
         ],
@@ -94,6 +98,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         DeleteAsset::class => [
             DeleteAssetListener::class,
+        ],
+
+        // CyberBuddy
+        IngestFile::class => [
+            IngestFileListener::class,
         ],
     ];
 

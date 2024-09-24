@@ -56,7 +56,7 @@ class CreateChunksTable extends Migration
             $table->foreign('created_by')->references('id')->on('users')->cascadeOnDelete();
 
             // The chunk id
-            $table->bigInteger('chunk_id')->unsigned()->unique();
+            $table->bigInteger('chunk_id')->unsigned();
             $table->foreign('chunk_id')->references('id')->on('cb_chunks')->cascadeOnDelete();
 
             // The tag

@@ -14,6 +14,15 @@ class ApiUtils
 {
     const REQUEST_TIMEOUT = 300; // 5 minutes
 
+    public function file_input(string $client, string $url): array
+    {
+        $response = $this->post('/api/file-input', [
+            'url' => $url,
+            'client' => $client,
+        ]);
+        return $this->json($response);
+    }
+
     public function delete_collection(string $collectionName): array
     {
         $response = $this->post('/delete_collection', [

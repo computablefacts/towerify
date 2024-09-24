@@ -9,6 +9,7 @@ use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
+use App\Modules\CyberBuddy\Events\IngestFile;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
