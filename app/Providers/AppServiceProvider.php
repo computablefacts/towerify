@@ -44,11 +44,19 @@ use App\Models\ZoneMember;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Models\AssetTagHash;
+use App\Modules\AdversaryMeter\Models\HiddenAlert;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Observers\AssetObserver;
 use App\Modules\AdversaryMeter\Observers\AssetTagHashObserver;
 use App\Modules\AdversaryMeter\Observers\AssetTagObserver;
+use App\Modules\AdversaryMeter\Observers\HiddenAlertObserver;
 use App\Modules\AdversaryMeter\Observers\HoneypotObserver;
+use App\Modules\CyberBuddy\Models\Chunk;
+use App\Modules\CyberBuddy\Models\ChunkTag;
+use App\Modules\CyberBuddy\Models\ChunkCollection;
+use App\Modules\CyberBuddy\Observers\ChunkObserver;
+use App\Modules\CyberBuddy\Observers\ChunkTagObserver;
+use App\Modules\CyberBuddy\Observers\CollectionObserver;
 use App\Observers\AddressObserver;
 use App\Observers\AdjustmentObserver;
 use App\Observers\BillpayerObserver;
@@ -203,10 +211,17 @@ class AppServiceProvider extends ServiceProvider
         ZoneMember::observe(ZoneMemberObserver::class);
         Zone::observe(ZoneObserver::class);
 
+        // AdversaryMeter
         Asset::observe(AssetObserver::class);
-        AssetTag::observe(AssetTagObserver::class);
         AssetTagHash::observe(AssetTagHashObserver::class);
+        AssetTag::observe(AssetTagObserver::class);
+        HiddenAlert::observe(HiddenAlertObserver::class);
         Honeypot::observe(HoneypotObserver::class);
+
+        // CyberBuddy
+        Chunk::observe(ChunkObserver::class);
+        ChunkTag::observe(ChunkTagObserver::class);
+        ChunkCollection::observe(CollectionObserver::class);
     }
 
     /**
@@ -216,9 +231,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // AdversaryMeter
         $this->app->bind('am_api_utils', function () {
             return new \App\Modules\AdversaryMeter\Helpers\ApiUtils();
         });
+
+        // CyberBuddy
         $this->app->bind('cb_api_utils', function () {
             return new \App\Modules\CyberBuddy\Helpers\ApiUtils();
         });

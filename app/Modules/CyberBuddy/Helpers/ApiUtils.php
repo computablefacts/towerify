@@ -14,6 +14,14 @@ class ApiUtils
 {
     const REQUEST_TIMEOUT = 300; // 5 minutes
 
+    public function delete_collection(string $collectionName): array
+    {
+        $response = $this->post('/delete_collection', [
+            'collection_name' => $collectionName
+        ]);
+        return $this->json($response);
+    }
+
     public function import_chunks(array $chunks, string $collectionName): array
     {
         $response = $this->post('/import_chunks', [
@@ -87,7 +95,7 @@ class ApiUtils
         ]);
         return $this->json($response);
     }
-    
+
     public function capsule(array $facts, string $title, string $prompt): array
     {
         $response = $this->post('/capsule', [
