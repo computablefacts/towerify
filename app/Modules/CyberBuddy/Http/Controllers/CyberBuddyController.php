@@ -70,7 +70,7 @@ class CyberBuddyController extends Controller
                         $users = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->users->count();
                         return "
                           <tr data-json=\"{$json}\">
-                            <td><div class=\"tooltip\">{$name}<span class=\"tooltiptext tooltip-right\">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</span></div></td>
+                            <td><div class=\"tooltip\">{$name}<span class=\"tooltiptext tooltip-top\">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</span></div></td>
                             <td>{$os}</td>
                             <td>{$ipv4}</td>
                             <td>{$ipv6}</td>
@@ -124,8 +124,9 @@ class CyberBuddyController extends Controller
                         $tooltip = $context->filter(fn($ctx) => $ctx['id'] === $id)->first();
                         if ($tooltip) {
                             $answer = Str::replace($ref, "
-                              <div class=\"tooltip\" style=\"color:#f8b500\">[{$id}]
-                                <span class=\"tooltiptext tooltip-right\">{$tooltip['text']}</span>
+                              <div class=\"tooltip\">
+                                <b style=\"color:#f8b500\">[{$id}]</b>
+                                <span class=\"tooltiptext tooltip-top\">{$tooltip['text']}</span>
                               </div>
                             ", $answer);
                         }

@@ -6,6 +6,11 @@
   <link rel="stylesheet" type="text/css" href="/cyber_buddy/botman/chat.css">
   <style>
 
+    /* OVERRIDES CHAT.CSS */
+    .chat li {
+      overflow: visible;
+    }
+
     /* TABLE */
 
     table {
@@ -35,6 +40,7 @@
       position: relative;
       display: inline-block;
       border-bottom: 1px dotted #f8b500; /* If you want dots under the hoverable text */
+      cursor: pointer;
     }
 
     .tooltip .tooltiptext {
