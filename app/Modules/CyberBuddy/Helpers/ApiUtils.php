@@ -55,7 +55,7 @@ class ApiUtils
     {
         /** @var Prompt $prompt */
         $prompt = Prompt::where('name', 'default_debugger')->firstOrfail();
-        return $this->ask_chunks($question, 'test-local-3', $prompt->template, true, true, 'fr');
+        return $this->ask_chunks($question, 'anssi-2017', $prompt->template, true, true, 'fr');
     }
 
     public function ask_chunks(string $question, string $collectionName, string $prompt, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 5): array
@@ -122,6 +122,15 @@ class ApiUtils
             'prompt' => $prompt
         ]);
         return $this->json($response);
+    }
+
+    /** @deprecated */
+    public function chat_manual_demo(string $historyKey, string $collection, string $question): array
+    {
+        /** @var Prompt $prompt */
+        $prompt = Prompt::where('name', 'default_chat')->firstOrfail();
+        $promptHistory = Prompt::where('name', 'default_chat_history')->firstOrfail();
+        return $this->chat_manual($question, $collection, $historyKey, $prompt->template, $promptHistory->template, 10, 'fr');
     }
 
     public function chat_manual(string $question, string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 5, string $lang = 'en'): array

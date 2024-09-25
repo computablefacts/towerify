@@ -5,13 +5,39 @@ namespace App\Modules\CyberBuddy\Http\Controllers;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
+use App\Modules\CyberBuddy\Http\Conversations\FrameworksConversation;
 use App\User;
 use BotMan\BotMan\BotMan;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class CyberBuddyController extends Controller
 {
+    public static function enhanceAnswerWithSources(string $answer, Collection $sources): string
+    {
+        $matches = [];
+        $isOk = preg_match_all("/\[\[\d+]]/", $answer, $matches);
+        if (!$isOk) {
+            return Str::replace(["\n\n", "\n-"], "<br>", $answer);
+        }
+        /** @var array $refs */
+        $refs = $matches[0];
+        foreach ($refs as $ref) {
+            $id = Str::replace(['[', ']'], '', $ref);
+            $tooltip = $sources->filter(fn($ctx) => $ctx['id'] === $id)->first();
+            if ($tooltip) {
+                $answer = Str::replace($ref, "
+                  <div class=\"tooltip\">
+                    <b style=\"color:#f8b500\">[{$id}]</b>
+                    <span class=\"tooltiptext tooltip-top\">{$tooltip['text']}</span>
+                  </div>
+                ", $answer);
+            }
+        }
+        return Str::replace(["\n\n", "\n-"], "<br>", $answer);
+    }
+
     public function __construct()
     {
         //
@@ -47,7 +73,7 @@ class CyberBuddyController extends Controller
                     }
                 }
             }
-        });
+        })->skipsConversation();
         $botman->hears('/servers', function (BotMan $botman) {
             $user = $this->user($botman);
             $servers = $user ? YnhServer::forUser($user) : collect();
@@ -100,43 +126,19 @@ class CyberBuddyController extends Controller
                     </table>
                 ");
             }
-        });
+        })->skipsConversation();
         $botman->hears('/question {question}', function (BotMan $botman, string $question) {
-            $botman->typesAndWaits(3);
+            $botman->types();
             $response = ApiUtils::ask_chunks_demo($question);
             if ($response['error']) {
-                $botman->reply('Une erreur s\'est produite. Veuillez reposer votre question ultérieurement.');
+                $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
             } else {
-
-                $answer = $response['response'];
-                $context = collect($response['context'] ?? []);
-                $matches = array();
-                $isOk = preg_match_all("/\[\[\d+]]/", $answer, $matches);
-
-                if (!$isOk) {
-                    $botman->reply($answer);
-                } else {
-                    /** @var array $refs */
-                    $refs = $matches[0];
-                    foreach ($refs as $ref) {
-                        $id = Str::replace(['[', ']'], '', $ref);
-                        $tooltip = $context->filter(fn($ctx) => $ctx['id'] === $id)->first();
-                        if ($tooltip) {
-                            $answer = Str::replace($ref, "
-                              <div class=\"tooltip\">
-                                <b style=\"color:#f8b500\">[{$id}]</b>
-                                <span class=\"tooltiptext tooltip-top\">{$tooltip['text']}</span>
-                              </div>
-                            ", $answer);
-                        }
-                    }
-                    $botman->reply($answer);
-                }
+                $answer = self::enhanceAnswerWithSources($response['response'], collect($response['context'] ?? []));
+                $botman->reply($answer);
             }
-        });
-        $botman->fallback(function (BotMan $botman) {
-            $botman->reply('Désolé, je n\'ai pas compris votre commande.');
-        });
+        })->skipsConversation();
+        $botman->hears('/frameworks', fn(BotMan $botman) => $botman->startConversation(new FrameworksConversation()));
+        $botman->fallback(fn(BotMan $botman) => $botman->reply('Désolé, je n\'ai pas compris votre commande.'));
         $botman->listen();
     }
 
