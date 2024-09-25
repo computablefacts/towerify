@@ -59,7 +59,7 @@
       <a class="navbar-brand" href="{{ url('/') }}">
         <div class="tw-logo">
           <div class="image">
-            <img src="{{ asset('images/logo.png') }}" alt="Towerify's logo">
+            <img src="{{ asset('images/logo.png') }}" alt="Cywise's logo">
           </div>
           <div class="text">
             {{ env('APP_NAME') }}
