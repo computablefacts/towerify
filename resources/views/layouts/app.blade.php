@@ -7,7 +7,7 @@
   <!-- CSRF Token -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
-  <title>{{ env('APP_NAME') }}</title>
+  <title>{{ config('app.name') }}</title>
 
   <!-- Fonts -->
   <link rel="dns-prefetch" href="https://fonts.gstatic.com">
@@ -59,10 +59,10 @@
       <a class="navbar-brand" href="{{ url('/') }}">
         <div class="tw-logo">
           <div class="image">
-            <img src="{{ asset('images/logo.png') }}" alt="Towerify's logo">
+            <img src="{{ asset('images/logo.png') }}" alt="Cywise's logo">
           </div>
           <div class="text">
-            {{ env('APP_NAME') }}
+            {{ config('app.name') }}
           </div>
         </div>
       </a>

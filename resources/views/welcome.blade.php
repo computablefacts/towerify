@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ env('APP_NAME') }}</title>
+        <title>{{ config('app.name') }}</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
@@ -99,10 +99,10 @@
                 <div class=" m-b-md">
                     <div class="container">
                         <div class="image">
-                          <img src="{{ asset('images/logo.png') }}" alt="Towerify's logo">
+                          <img src="{{ asset('images/logo.png') }}" alt="Cywise's logo">
                         </div>
                         <div class="text">
-                          {{ env('APP_NAME') }}
+                          {{ config('app.name') }}
                         </div>
                     </div>
                 </div>
