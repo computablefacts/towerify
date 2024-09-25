@@ -202,6 +202,9 @@
     drawer33.render = null;
   });
 
+</script>
+@if(Auth::user())
+<script>
   window.botmanWidget = {
     title: 'CyberBuddy',
     aboutText: '⚡ Powered by Towerify',
@@ -217,8 +220,8 @@
     bubbleBackground: '#00264b',
     headerTextColor: 'white',
   };
-
 </script>
 <script src='/cyber_buddy/botman/widget.js'></script>
+@endif
 </body>
 </html>
