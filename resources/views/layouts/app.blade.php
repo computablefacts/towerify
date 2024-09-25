@@ -45,6 +45,12 @@
   <link href="{{ asset('adversary_meter/src/blueprintjs/blueprintjs/blueprint-select.css') }}" rel="stylesheet"/>
   <link href="{{ asset('adversary_meter/src/blueprintjs/blueprintjs/blueprint-datetime.css') }}" rel="stylesheet"/>
 
+  <!-- CyberBuddy -->
+  <style>
+    #botmanWidgetRoot .desktop-closed-message-avatar {
+      background: unset !important;
+    }
+  </style>
 </head>
 <body>
 <div id="app">
@@ -202,6 +208,7 @@
     aboutLink: '{{ app_url() }}',
     userId: '{{ Auth::user() ? Auth::user()->id : \Illuminate\Support\Str::random(10) }}',
     chatServer: '/cb/web/botman',
+    bubbleAvatarUrl: '/images/icons/cyber-buddy.svg',
     frameEndpoint: '/cb/web/cyber-buddy/chat',
     introMessage: 'Que puis-je faire pour vous?',
     desktopHeight: 900,
