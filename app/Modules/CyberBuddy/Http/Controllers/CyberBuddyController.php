@@ -29,12 +29,10 @@ class CyberBuddyController extends Controller
 
     public function handle(): void
     {
-        /** @var User $user */
-        $user = Auth::user();
         $botman = app('botman');
-        $botman->hears('/login {username} {password}', function (BotMan $botman, string $username, string $password) use ($user) {
+        $botman->hears('/login {username} {password}', function (BotMan $botman, string $username, string $password) {
+            $user = $this->user($botman);
             if ($user) {
-                $botman->userStorage()->save(['user_id' => $user->id]);
                 $botman->reply('You are now logged in.');
             } else {
                 $user = User::where('email', $username)->first();
@@ -51,9 +49,7 @@ class CyberBuddyController extends Controller
             }
         });
         $botman->hears('/servers', function (BotMan $botman) {
-            /** @var int $userId */
-            $userId = $botman->userStorage()->get('user_id');
-            $user = $userId ? User::find($userId) : null;
+            $user = $this->user($botman);
             $servers = $user ? YnhServer::forUser($user) : collect();
             if ($servers->isEmpty()) {
                 $botman->reply('Connectez-vous pour accéder à cette commande.<br>Pour ce faire, vous pouvez utiliser la commande <b>/login {username} {password}</b>');
@@ -68,15 +64,19 @@ class CyberBuddyController extends Controller
                         $domains = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->domains->count();
                         $applications = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->applications->count();
                         $users = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->users->count();
+                        $linkServer = '<a href="' . route('ynh.servers.edit', $server->id) . '" target="_blank">' . $name . '</a>';
+                        $linkDomains = $domains === '-' ? $domains : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=domains\" target=\"_blank\">$domains</a>";
+                        $linkApplications = $applications === '-' ? $applications : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=applications\" target=\"_blank\">$applications</a>";
+                        $linkUsers = $users === '-' ? $users : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=users\" target=\"_blank\">$users</a>";
                         return "
                           <tr data-json=\"{$json}\">
-                            <td><div class=\"tooltip\">{$name}<span class=\"tooltiptext tooltip-top\">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</span></div></td>
+                            <td>{$linkServer}</td>
                             <td>{$os}</td>
                             <td>{$ipv4}</td>
                             <td>{$ipv6}</td>
-                            <td>{$domains}</td>
-                            <td>{$applications}</td>
-                            <td>{$users}</td>
+                            <td>{$linkDomains}</td>
+                            <td>{$linkApplications}</td>
+                            <td>{$linkUsers}</td>
                           </tr>
                         ";
                     })
@@ -93,17 +93,16 @@ class CyberBuddyController extends Controller
                             <th>Applications</th>
                             <th>Users</th>
                           </tr>
-                          <tbody>
-                            {$list}
-                          </tbody>
                       </thead>
+                      <tbody>
+                        {$list}
+                      </tbody>
                     </table>
                 ");
             }
         });
-        $botman->hears('/debug {question}', function (BotMan $botman, string $question) {
-
-            $botman->types();
+        $botman->hears('/question {question}', function (BotMan $botman, string $question) {
+            $botman->typesAndWaits(3);
             $response = ApiUtils::ask_chunks_demo($question);
             if ($response['error']) {
                 $botman->reply('Une erreur s\'est produite. Veuillez reposer votre question ultérieurement.');
@@ -139,5 +138,20 @@ class CyberBuddyController extends Controller
             $botman->reply('Désolé, je n\'ai pas compris votre commande.');
         });
         $botman->listen();
+    }
+
+    private function user(BotMan $botman): ?User
+    {
+        /** @var int $userId */
+        $userId = $botman->userStorage()->get('user_id');
+        if ($userId) {
+            return User::find($userId);
+        }
+        /** @var User $user */
+        $user = Auth::user();
+        if ($user) {
+            $botman->userStorage()->save(['user_id' => $user->id]);
+        }
+        return $user;
     }
 }

@@ -196,6 +196,22 @@
     drawer33.render = null;
   });
 
+  window.botmanWidget = {
+    title: 'CyberBuddy',
+    aboutText: '⚡ Powered by Towerify',
+    aboutLink: '{{ app_url() }}',
+    userId: '{{ Auth::user() ? Auth::user()->id : \Illuminate\Support\Str::random(10) }}',
+    chatServer: '/cb/web/botman',
+    frameEndpoint: '/cb/web/cyber-buddy/chat',
+    introMessage: 'Que puis-je faire pour vous?',
+    desktopHeight: 900,
+    desktopWidth: 2 * window.innerWidth / 3,
+    mainColor: '#00264b',
+    bubbleBackground: '#00264b',
+    headerTextColor: 'white',
+  };
+
 </script>
+<script src='/cyber_buddy/botman/widget.js'></script>
 </body>
 </html>
