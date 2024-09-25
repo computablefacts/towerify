@@ -19,6 +19,10 @@ use Illuminate\Support\Str;
  * @property ?string opener
  * @property ?string why_it_matters
  * @property ?string go_deeper
+ * @property ?string teaser_fr
+ * @property ?string opener_fr
+ * @property ?string why_it_matters_fr
+ * @property ?string go_deeper_fr
  * @property bool is_published
  */
 class YnhTheCyberBrief extends Model
@@ -36,6 +40,10 @@ class YnhTheCyberBrief extends Model
         'opener',
         'why_it_matters',
         'go_deeper',
+        'teaser_fr',
+        'opener_fr',
+        'why_it_matters_fr',
+        'go_deeper_fr',
         'is_published',
     ];
 
@@ -44,11 +52,13 @@ class YnhTheCyberBrief extends Model
         'is_published' => 'boolean',
     ];
 
-    public function brief(): array
+    public function brief(LanguageEnum $language): array
     {
-        if (!$this->teaser || !$this->opener || !$this->why_it_matters) {
+        $summarizeEn = $language === LanguageEnum::ENGLISH && (!$this->teaser || !$this->opener || !$this->why_it_matters);
+        $summarizeFr = $language === LanguageEnum::FRENCH && (!$this->teaser_fr || !$this->opener_fr || !$this->why_it_matters_fr);
+        if ($summarizeEn || $summarizeFr) {
 
-            $response = $this->summary();
+            $response = $this->summary($language);
 
             if (!isset($response['choices'][0]['message']['content'])) {
                 return [];
@@ -60,30 +70,42 @@ class YnhTheCyberBrief extends Model
                 $this->hyperlink = Str::limit(trim($this->news), 500);
                 $this->website = Str::before(Str::after($this->news, '://'), '/');
             }
+            if ($language === LanguageEnum::FRENCH) {
 
-            $this->teaser = Str::trim(Str::between($brief, '[TEASER]', '[OPENER]'));
-            $this->opener = Str::trim(Str::between($brief, '[OPENER]', '[WHY_IT_MATTERS]'));
+                $this->teaser_fr = Str::trim(Str::between($brief, '[TEASER]', '[OPENER]'));
+                $this->opener_fr = Str::trim(Str::between($brief, '[OPENER]', '[WHY_IT_MATTERS]'));
 
-            if (!Str::contains($brief, '[GO_DEEPER]')) {
-                $this->why_it_matters = Str::trim(Str::after($brief, '[WHY_IT_MATTERS]'));
+                if (!Str::contains($brief, '[GO_DEEPER]')) {
+                    $this->why_it_matters_fr = Str::trim(Str::after($brief, '[WHY_IT_MATTERS]'));
+                } else {
+                    $this->why_it_matters_fr = Str::trim(Str::between($brief, '[WHY_IT_MATTERS]', '[GO_DEEPER]'));
+                    $this->go_deeper_fr = Str::trim(Str::after($brief, '[GO_DEEPER]'));
+                }
             } else {
-                $this->why_it_matters = Str::trim(Str::between($brief, '[WHY_IT_MATTERS]', '[GO_DEEPER]'));
-                $this->go_deeper = Str::trim(Str::after($brief, '[GO_DEEPER]'));
-            }
 
+                $this->teaser = Str::trim(Str::between($brief, '[TEASER]', '[OPENER]'));
+                $this->opener = Str::trim(Str::between($brief, '[OPENER]', '[WHY_IT_MATTERS]'));
+
+                if (!Str::contains($brief, '[GO_DEEPER]')) {
+                    $this->why_it_matters = Str::trim(Str::after($brief, '[WHY_IT_MATTERS]'));
+                } else {
+                    $this->why_it_matters = Str::trim(Str::between($brief, '[WHY_IT_MATTERS]', '[GO_DEEPER]'));
+                    $this->go_deeper = Str::trim(Str::after($brief, '[GO_DEEPER]'));
+                }
+            }
             $this->save();
         }
         return [
             'website' => $this->website,
             'link' => $this->hyperlink,
-            'teaser' => $this->teaser,
-            'opener' => $this->opener,
-            'why_it_matters' => $this->why_it_matters,
-            'go_deeper' => $this->go_deeper,
+            'teaser' => $language === LanguageEnum::FRENCH ? $this->teaser_fr : $this->teaser,
+            'opener' => $language === LanguageEnum::FRENCH ? $this->opener_fr : $this->opener,
+            'why_it_matters' => $language === LanguageEnum::FRENCH ? $this->why_it_matters_fr : $this->why_it_matters,
+            'go_deeper' => $language === LanguageEnum::FRENCH ? $this->go_deeper_fr : $this->go_deeper,
         ];
     }
 
-    private function summary(): array
+    private function summary(LanguageEnum $language): array
     {
         if ($this->isHyperlink()) {
             $news = Http::get('http://api.scraperapi.com?api_key=' . config('towerify.scraperapi.api_key') . '&url=' . $this->news);
@@ -97,7 +119,7 @@ class YnhTheCyberBrief extends Model
             'model' => 'gpt-4o',
             'messages' => [[
                 'role' => 'user',
-                'content' => $this->prompt($news)
+                'content' => $this->prompt($language, $news)
             ]],
             'temperature' => 0.7
         ]);
@@ -110,8 +132,9 @@ class YnhTheCyberBrief extends Model
         return [];
     }
 
-    private function prompt(string $news): string
+    private function prompt(LanguageEnum $language, string $news): string
     {
+        $lang = $language === LanguageEnum::FRENCH ? 'french' : 'english';
         return "
 Below is the description of SmartBrevity's four parts news format:
 [TEASER] Six or fewer strong words to catch someone's attention.
@@ -156,7 +179,7 @@ Below is another example of an original news rewritten using SmartBrevity's news
   [GO_DEEPER] Our product speaks for itself, but it was Ava’s new pitch—tested over three weeks of focus groups—that got it into customers’ hands.
     • Please review Ava’s materials on the intranet.
 
-Now, take the following text and summarizes it using SmartBrevity's news format: {$news}
+Now, take the following text and summarizes it in {$lang} using SmartBrevity's news format: {$news}
         ";
     }
 
