@@ -57,7 +57,7 @@ class YnhTheCyberBrief extends Model
             $brief = $response['choices'][0]['message']['content'];
 
             if ($this->isHyperlink()) {
-                $this->hyperlink = $this->news;
+                $this->hyperlink = Str::limit(trim($this->news), 500);
                 $this->website = Str::before(Str::after($this->news, '://'), '/');
             }
 
