@@ -232,6 +232,9 @@ cat <(fgrep -i -v 'rm /opt/logalert/log.txt' <(crontab -l)) <(echo '22 2 * * * r
 # Auto-update the server every day at 03:33 am
 cat <(fgrep -i -v 'curl -s {$url}/update/{$server->secret} | bash' <(crontab -l)) <(echo '33 3 * * * curl -s {$url}/update/{$server->secret} | bash') | crontab -
 
+# Delete entry that call old domain app.towerify.io
+crontab -l | grep -v "app\.towerify\.io" | crontab -
+
 # Start Osquery then LogAlert 
 osqueryctl start osqueryd
 sudo -H -u root bash -c 'tmux new-session -A -d -s logalert'
