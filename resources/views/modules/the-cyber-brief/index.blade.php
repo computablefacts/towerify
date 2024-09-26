@@ -87,7 +87,7 @@
       <div class="card mb-4">
         <div class="card-body">
           <h5 id="toggle-{{ $brief->id }}" class="card-title cursor-pointer">
-            <span style="color:#f8b502">&gt;</span>&nbsp;{{ strtoupper($brief->brief($lang)['teaser']) }}
+            <span style="color:#f8b502">&gt;</span>&nbsp;{{ Illuminate\Support\Str::upper($brief->brief($lang)['teaser']) }}
           </h5>
           <h6 class="card-subtitle text-muted">
             {{ $brief->brief($lang)['opener'] }}
