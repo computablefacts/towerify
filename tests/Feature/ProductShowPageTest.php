@@ -11,6 +11,12 @@ class ProductShowPageTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed();
+    }
+
     /** @test */
     public function it_can_show_active_product()
     {
