@@ -24,6 +24,9 @@
   <php>
     <env name="APP_ENV" value="testing"/>
     <env name="APP_KEY" value="base64:YZzRGIAPQgqSLZBJ7rILm7B05FfdvxSBaHVoQFzBuS0="/>
+    <env name="ADMIN_EMAIL" value="qa@computablefacts.com"/>
+    <env name="ADMIN_USERNAME" value="qa"/>
+    <env name="ADMIN_PASSWORD" value="whatapassword"/>
     <env name="CACHE_DRIVER" value="array"/>
     <env name="SESSION_DRIVER" value="array"/>
     <env name="QUEUE_DRIVER" value="sync"/>

@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Attacker;
+use App\Modules\AdversaryMeter\Models\HiddenAlert;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -26,11 +27,7 @@ abstract class TestCase extends BaseTestCase
 
         $this->seed();
 
-        $this->user = User::create([
-            'name' => 'QA',
-            'password' => bcrypt('whatapassword'),
-            'email' => 'qa@computablefacts.com'
-        ]);
+        $this->user = User::where('email', 'qa@computablefacts.com')->firstOrfail();
         $this->token = $this->user->createToken('tests', [])->plainTextToken;
         $this->user->am_api_token = $this->token;
         $this->user->save();
@@ -41,6 +38,7 @@ abstract class TestCase extends BaseTestCase
         Asset::whereNotNull('id')->delete();
         Honeypot::whereNotNull('id')->delete();
         Attacker::whereNotNull('id')->delete();
+        HiddenAlert::whereNotNull('id')->delete();
         parent::tearDown();
     }
 }
