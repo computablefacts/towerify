@@ -53,3 +53,8 @@ function app_url(): string
 {
     return rtrim(config('app.url'), '/');
 }
+
+function is_cywise(): bool
+{
+    return mb_strtolower(config('app.name')) === 'cywise';
+}

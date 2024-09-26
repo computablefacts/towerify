@@ -1,8 +1,10 @@
 @extends('layouts.app')
 @section('breadcrumbs')
 <nav class="breadcrumb mb-0 pt-0 pb-0 ps-0">
-  <a class="breadcrumb-item" href="/">Home</a>
-  @if($tab === 'my-apps')
+  <a class="breadcrumb-item" href="/?tab=summary">Home</a>
+  @if($tab === 'summary')
+  <span class="breadcrumb-item active">{{ __('Summary') }}</span>
+  @elseif($tab === 'my-apps')
   <span class="breadcrumb-item active">{{ __('My Apps') }}</span>
   @elseif($tab === 'servers')
   <span class="breadcrumb-item active">{{ __('Servers') }}</span>
@@ -42,11 +44,19 @@
 <div class="container">
   <ul class="nav justify-content-end mb-4">
     <li class="nav-item">
-      <a class="nav-link {{ !$tab || $tab === 'my-apps' ? 'active' : '' }}"
+      <a class="nav-link {{ !$tab || $tab === 'summary' ? 'active' : '' }}"
+         href="/home?tab=summary">
+        {{ __('Summary') }}
+      </a>
+    </li>
+    @if(!is_cywise())
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'my-apps' ? 'active' : '' }}"
          href="/home?tab=my-apps">
         {{ __('My Apps') }}
       </a>
     </li>
+    @endif
     @if(Auth::user()->canListServers())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'servers' ? 'active' : '' }}"
@@ -55,7 +65,7 @@
       </a>
     </li>
     @endif
-    @if(Auth::user()->canListServers())
+    @if(Auth::user()->canListServers() && !is_cywise())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'backups' ? 'active' : '' }}"
          href="/home?tab=backups">
@@ -63,7 +73,7 @@
       </a>
     </li>
     @endif
-    @if(Auth::user()->canListServers())
+    @if(Auth::user()->canListServers() && !is_cywise())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'domains' ? 'active' : '' }}"
          href="/home?tab=domains">
@@ -71,7 +81,7 @@
       </a>
     </li>
     @endif
-    @if(Auth::user()->canListServers())
+    @if(Auth::user()->canListServers() && !is_cywise())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'applications' ? 'active' : '' }}"
          href="/home?tab=applications">
@@ -117,7 +127,7 @@
         {{ __('Security Rules') }}
       </a>
     </li>
-    @if(Auth::user()->canListOrders())
+    @if(Auth::user()->canListOrders() && !is_cywise())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'orders' ? 'active' : '' }}"
          href="/home?tab=orders">
@@ -142,7 +152,10 @@
     </li>
     @endif
   </ul>
-  @if(!$tab || $tab === 'my-apps')
+  @if(!$tab || $tab === 'summary')
+  @include('home.cards._summary')
+  @endif
+  @if($tab === 'my-apps')
   @include('home.cards._my_apps')
   @endif
   @if($tab === 'servers')

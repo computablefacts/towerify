@@ -27,7 +27,7 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        $tab = $request->input('tab', 'my-apps');
+        $tab = $request->input('tab', 'summary');
         $limit = $request->input('limit', 20);
         /** @var User $user */
         $user = Auth::user();
@@ -146,6 +146,9 @@ class HomeController extends Controller
             ])
             ->values()
             ->all();
+
+        // Disable a few tabs if Towerify is running as Cywise...
+        $tab = is_cywise() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders') ? 'summary' : $tab;
 
         return view('home.index', compact(
             'tab',
