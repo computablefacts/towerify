@@ -203,11 +203,11 @@
   });
 
 </script>
-@if(Auth::user())
+@if(Auth::user() && Auth::user()->canUseCyberBuddy())
 <script>
   window.botmanWidget = {
     title: 'CyberBuddy',
-    aboutText: '⚡ Powered by Towerify',
+    aboutText: '⚡ Powered by {{ config('app.name') }}',
     aboutLink: '{{ app_url() }}',
     userId: '{{ Auth::user() ? Auth::user()->id : \Illuminate\Support\Str::random(10) }}',
     chatServer: '/cb/web/botman',

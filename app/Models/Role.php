@@ -30,6 +30,9 @@ class Role extends RoleBase
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
+
+            // Access to CyberBuddy
+            Permission::USE_CYBER_BUDDY,
         ],
         self::ADMINISTRATOR => [
 
@@ -50,6 +53,9 @@ class Role extends RoleBase
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
+
+            // Access to CyberBuddy
+            Permission::USE_CYBER_BUDDY,
 
             // Add missing permissions after upgrade to Laravel 11.0+ and Vanilo 4.0+
             'list tax rates',
@@ -75,6 +81,9 @@ class Role extends RoleBase
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
+            
+            // Access to CyberBuddy
+            Permission::USE_CYBER_BUDDY,
         ],
         self::BASIC_END_USER => [
             Permission::LIST_APPS,
