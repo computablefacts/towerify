@@ -50,7 +50,7 @@ class Role extends RoleBase
             Permission::MANAGE_USERS,
 
             // Access to store and cart
-            Permission::BUY_STUFF,
+            // Permission::BUY_STUFF,
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
@@ -78,7 +78,7 @@ class Role extends RoleBase
             Permission::MANAGE_USERS,
 
             // Access to store and cart
-            Permission::BUY_STUFF,
+            // Permission::BUY_STUFF,
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
