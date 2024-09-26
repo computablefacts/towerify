@@ -392,6 +392,8 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::get('/terms', 'TermsController@show')->name('terms');
+
 Route::post('/reset-password', function () {
     $email = \Illuminate\Support\Facades\Auth::user()->email;
     return view('auth.passwords.email', compact('email'));

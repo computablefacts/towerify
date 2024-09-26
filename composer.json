@@ -13,6 +13,7 @@
         "ext-pcntl": "*",
         "botman/botman": "^2.8",
         "botman/driver-web": "^1.5",
+        "erusev/parsedown": "^1.7",
         "guzzlehttp/guzzle": "^7.5",
         "laravel/framework": "^11.20",
         "laravel/sanctum": "^4.0",

@@ -119,6 +119,9 @@
               {{ Auth::user()->name }} <span class="caret"></span>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="{{ route('terms') }}">
+                {{ __('Mentions légales') }}
+              </a>
               <a class="dropdown-item" href="{{ route('reset-password') }}"
                  onclick="event.preventDefault();document.getElementById('reset-password-form').submit();">
                 {{ __('Reset Password') }}

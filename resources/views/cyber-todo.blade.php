@@ -1,11 +1,11 @@
 <html>
 <head>
-  <title>My Cyber TODO (Powered by AdversaryMeter)</title>
+  <title>My Cyber TODO (Powered by {{ config('app.name') }})</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <meta name="keywords"
         content="honeypot, vulnerability scanner, assets discovery, attack surface management, shadow it">
   <meta name="description"
-        content="AdversaryMeter is a hybrid between a Honeypot and a Vulnerability Scanner that helps you get a better understanding of your organization's security posture and what should be done to take it to the next level. No installation required.">
+        content="{{ config('app.name') }} is a hybrid between a Honeypot and a Vulnerability Scanner that helps you get a better understanding of your organization's security posture and what should be done to take it to the next level. No installation required.">
   <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css"
         integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
   <style>
