@@ -376,16 +376,16 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
 
 Route::get('', function () {
     if (\Illuminate\Support\Facades\Auth::user()) {
-        return redirect('/home');
+        return redirect()->route('home');
     }
-    return redirect()->route('the-cyber-brief');
+    return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
 });
 
 Route::get('/', function () {
     if (\Illuminate\Support\Facades\Auth::user()) {
         return redirect()->route('home');
     }
-    return redirect()->route('the-cyber-brief');
+    return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
 });
 
 Auth::routes();
