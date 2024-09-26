@@ -25,7 +25,7 @@ Dernière mise à jour le 05/11/2023.
 
 - **Raison Sociale :** ComputableFacts SAS
 - **Capital Social :** 1031500,00 €
-- **Siège Social :** 178 boulebard Haussmann, 75008 Paris, France
+- **Siège Social :** 178 boulevard Haussmann, 75008 Paris, France
 - **SIREN :** 844389882
 - **Directeur de Publication :** Cyrille SAVELIEF
 
