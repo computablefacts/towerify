@@ -216,7 +216,7 @@
     introMessage: 'Que puis-je faire pour vous?',
     desktopHeight: 900,
     desktopWidth: 2 * window.innerWidth / 3,
-    mainColor: '#00264b',
+    mainColor: '#47627F',
     bubbleBackground: '#00264b',
     headerTextColor: 'white',
   };

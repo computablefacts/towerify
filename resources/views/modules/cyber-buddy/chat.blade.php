@@ -6,11 +6,6 @@
   <link rel="stylesheet" type="text/css" href="/cyber_buddy/botman/chat.css">
   <style>
 
-    /* OVERRIDES CHAT.CSS */
-    .chat li {
-      overflow: visible;
-    }
-
     /* TABLE */
 
     table {
@@ -163,7 +158,7 @@
             const elMessage = addedNode.closest('div.msg');
 
             if (elRow && elMessage && addedNode.dataset.type) {
-              elRow.style.overflow='visible';
+              elRow.style.overflow = 'visible';
               elMessage.style.width = '100%';
               elMessage.style.maxWidth = '100%';
               elMessage.style.background = 'unset';
