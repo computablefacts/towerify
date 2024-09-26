@@ -77,7 +77,11 @@ class RegisterController extends Controller
         $tenant = Tenant::create(['name' => Str::random()]);
 
         $user->tenant_id = $tenant->id;
-        $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
+        if (is_cywise()) {
+            $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER, Role::CYWISE_USER);
+        } else {
+            $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
+        }
         $user->type = UserType::CLIENT();
         $user->save();
 

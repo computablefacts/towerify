@@ -16,10 +16,12 @@ class UserInvitationUtilizedListener extends AbstractListener
         }
 
         $invitation = $event->getInvitation();
+        /** @var User $created */
         $created = User::where('id', $invitation->user_id)->first();
 
         if ($created) {
 
+            /** @var User $creator */
             $creator = User::where('id', $invitation->created_by)->first();
 
             if ($creator) {
@@ -41,6 +43,14 @@ class UserInvitationUtilizedListener extends AbstractListener
 
                 if ($basicEndUser) {
                     $created->roles()->syncWithoutDetaching($basicEndUser);
+                }
+                if ($creator->isCywiseUser()) {
+                    
+                    $cywiseUser = Role::where('name', Role::CYWISE_USER)->first();
+
+                    if ($cywiseUser) {
+                        $created->roles()->syncWithoutDetaching($cywiseUser);
+                    }
                 }
 
                 $created->save();
