@@ -101,6 +101,7 @@
           <li class="nav-item">
             <a class="nav-link" href="{{ route('home') }}">Dashboard</a>
           </li>
+          @if(Auth::user()->canBuyStuff())
           <li class="nav-item">
             <a class="nav-link" href="{{ route('product.index') }}">App Store</a>
           </li>
@@ -111,6 +112,7 @@
               @endif
             </a>
           </li>
+          @endif
           <li class="nav-item dropdown">
             <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                aria-haspopup="true" aria-expanded="false" v-pre>
@@ -207,7 +209,10 @@
 <script>
   window.botmanWidget = {
     title: 'CyberBuddy',
-    aboutText: '⚡ Powered by {{ config('app.name') }}',
+    aboutText: '⚡ Powered by {{ config('
+    app
+    .name
+    ') }}',
     aboutLink: '{{ app_url() }}',
     userId: '{{ Auth::user() ? Auth::user()->id : \Illuminate\Support\Str::random(10) }}',
     chatServer: '/cb/web/botman',
