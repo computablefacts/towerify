@@ -10,6 +10,7 @@ class Role extends RoleBase
     const ADMINISTRATOR = 'administrator';
     const LIMITED_ADMINISTRATOR = 'limited administrator';
     const BASIC_END_USER = 'basic end user';
+    const CYWISE_USER = 'cywise user';
     const ROLES = [
         self::ADMIN => [
 
@@ -81,12 +82,14 @@ class Role extends RoleBase
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
-            
+
             // Access to CyberBuddy
             // Permission::USE_CYBER_BUDDY,
         ],
         self::BASIC_END_USER => [
             Permission::LIST_APPS,
+        ],
+        self::CYWISE_USER => [
         ],
     ];
 }

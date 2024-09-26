@@ -49,7 +49,7 @@
         {{ __('Summary') }}
       </a>
     </li>
-    @if(!is_cywise())
+    @if(!Auth::user()->isCywiseUser())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'my-apps' ? 'active' : '' }}"
          href="/home?tab=my-apps">
@@ -65,7 +65,7 @@
       </a>
     </li>
     @endif
-    @if(Auth::user()->canListServers() && !is_cywise())
+    @if(Auth::user()->canListServers() && !Auth::user()->isCywiseUser())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'backups' ? 'active' : '' }}"
          href="/home?tab=backups">
@@ -73,7 +73,7 @@
       </a>
     </li>
     @endif
-    @if(Auth::user()->canListServers() && !is_cywise())
+    @if(Auth::user()->canListServers() && !Auth::user()->isCywiseUser())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'domains' ? 'active' : '' }}"
          href="/home?tab=domains">
@@ -81,7 +81,7 @@
       </a>
     </li>
     @endif
-    @if(Auth::user()->canListServers() && !is_cywise())
+    @if(Auth::user()->canListServers() && !Auth::user()->isCywiseUser())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'applications' ? 'active' : '' }}"
          href="/home?tab=applications">
@@ -127,7 +127,7 @@
         {{ __('Security Rules') }}
       </a>
     </li>
-    @if(Auth::user()->canListOrders() && !is_cywise())
+    @if(Auth::user()->canListOrders() && !Auth::user()->isCywiseUser())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'orders' ? 'active' : '' }}"
          href="/home?tab=orders">

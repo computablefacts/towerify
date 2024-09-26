@@ -148,7 +148,7 @@ class HomeController extends Controller
             ->all();
 
         // Disable a few tabs if Towerify is running as Cywise...
-        $tab = is_cywise() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders') ? 'summary' : $tab;
+        $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders') ? 'summary' : $tab;
 
         return view('home.index', compact(
             'tab',

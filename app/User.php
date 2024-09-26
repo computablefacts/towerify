@@ -4,6 +4,7 @@ namespace App;
 
 use App\Hashing\TwHasher;
 use App\Models\Permission;
+use App\Models\Role;
 use App\Models\Tenant;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
@@ -26,6 +27,11 @@ class User extends \Konekt\AppShell\Models\User
     public function isAdmin(): bool
     {
         return $this->type->isAdmin();
+    }
+
+    public function isCywiseUser(): bool
+    {
+        return $this->hasRole(Role::CYWISE_USER);
     }
 
     public function canListServers(): bool
