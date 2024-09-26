@@ -18,9 +18,9 @@ use App\Modules\AdversaryMeter\Models\Scan;
 use App\Modules\AdversaryMeter\Models\Screenshot;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
-use Tests\AdversaryMeter\AdversaryMeterTestCase;
+use Tests\TestCase;
 
-class ScansTest extends AdversaryMeterTestCase
+class ScansTest extends TestCase
 {
     public function testInvalidAssetsAreNotAdded()
     {

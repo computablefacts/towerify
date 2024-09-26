@@ -6,9 +6,9 @@ use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Models\Asset;
-use Tests\AdversaryMeter\AdversaryMeterTestCase;
+use Tests\TestCase;
 
-class DiscoveryShallowTest extends AdversaryMeterTestCase
+class DiscoveryShallowTest extends TestCase
 {
     public function testItCreatesAnAssetAfterDiscovery()
     {

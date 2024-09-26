@@ -13,9 +13,9 @@ use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Tests\AdversaryMeter\AdversaryMeterTestCase;
+use Tests\TestCase;
 
-class ImportHoneypotsEventsTest extends AdversaryMeterTestCase
+class ImportHoneypotsEventsTest extends TestCase
 {
     public function testItImportsHoneypotsEvents()
     {

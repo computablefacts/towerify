@@ -3,20 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Vanilo\Product\Models\ProductState;
 
 class ProductListPageTest extends TestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->seed();
-    }
-
     /** @test */
     public function it_can_list_active_products()
     {
