@@ -125,3 +125,27 @@ body {
 .text-right {
   text-align: right;
 }
+
+.ml-1 {
+  margin-left: .25rem !important;
+}
+
+.mr-1 {
+  margin-right: .25rem !important;
+}
+
+.ml-2 {
+  margin-left: .5rem !important;
+}
+
+.mr-2 {
+  margin-right: .5rem !important;
+}
+
+.ml-3 {
+  margin-left: 1rem !important;
+}
+
+.mr-3 {
+  margin-right: 1rem !important;
+}
