@@ -57,6 +57,7 @@ class RegisterController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|string|email|max:100|unique:users',
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
+            'terms' => ['required'],
         ]);
     }
 
@@ -83,15 +84,9 @@ class RegisterController extends Controller
             $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
         }
         $user->type = UserType::CLIENT();
+        $user->terms_accepted = $data['terms'] === 'on';
         $user->save();
 
-        $this->setupAccount($tenant, $user);
-
         return $user;
-    }
-
-    private function setupAccount(Tenant $tenant, User $user)
-    {
-        // TODO : set products, etc.
     }
 }

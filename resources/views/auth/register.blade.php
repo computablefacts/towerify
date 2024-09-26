@@ -61,7 +61,22 @@
                             </div>
                         </div>
 
-                        <div class="mb-3 row mb-0">
+                      <div class="mb-3 row">
+                        <div class="col-md-6 offset-md-4">
+                          <div class="form-check">
+                            <input class="form-control{{ $errors->has('terms') ? ' is-invalid' : '' }} form-check-input" type="checkbox" name="terms" id="terms" required>
+
+                            <label class="form-check-label" for="terms">
+                              <a href="/terms" target="_blank">
+                                {{ __('I agree with the terms and conditions') }}
+                              </a>
+                            </label>
+
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="mb-3 row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('Register') }}
