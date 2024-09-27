@@ -29,8 +29,12 @@ class HomeController extends Controller
     {
         $tab = $request->input('tab', 'summary');
         $limit = $request->input('limit', 20);
+
         /** @var User $user */
         $user = Auth::user();
+
+        // Disable a few tabs if Towerify is running as Cywise...
+        $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'summary' : $tab;
         $servers = YnhServer::forUser($user);
         $os_infos = YnhOsquery::osInfos($servers)
             ->map(function ($osInfos) {
@@ -146,9 +150,6 @@ class HomeController extends Controller
             ])
             ->values()
             ->all();
-
-        // Disable a few tabs if Towerify is running as Cywise...
-        $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'summary' : $tab;
 
         return view('home.index', compact(
             'tab',
