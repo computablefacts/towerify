@@ -7,7 +7,7 @@
             <i class="zmdi zmdi-shield-security"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['ip_monitored'] ?? 0 }}
+            {{ $summary['ip_monitored'] ? Illuminate\Support\Number::format($summary['ip_monitored'], locale: 'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
             {{ __('IP Monitored') }}
@@ -18,7 +18,7 @@
             <i class="zmdi zmdi-shield-security"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['dns_monitored'] ?? 0 }}
+            {{ $summary['dns_monitored'] ? Illuminate\Support\Number::format($summary['dns_monitored'], locale: 'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
             {{ __('DNS Monitored') }}
@@ -33,7 +33,7 @@
             <i class="zmdi zmdi-layers "></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['metrics_collected'] ?? 0 }}
+            {{ $summary['metrics_collected'] ? Illuminate\Support\Number::format($summary['metrics_collected'], locale: 'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
             {{ __('Metrics collected') }}
@@ -44,7 +44,7 @@
             <i class="zmdi zmdi-layers "></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['events_collected'] ?? 0 }}
+            {{ $summary['events_collected'] ? Illuminate\Support\Number::format($summary['events_collected'], locale: 'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
             {{ __('Events collected') }}
