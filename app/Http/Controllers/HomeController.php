@@ -6,9 +6,13 @@ use App\Models\Invitation;
 use App\Models\YnhNginxLogs;
 use App\Models\YnhOrder;
 use App\Models\YnhOsquery;
+use App\Models\YnhOsqueryDiskUsage;
+use App\Models\YnhOsqueryMemoryUsage;
 use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
+use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
+use App\Modules\AdversaryMeter\Models\Asset;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -137,6 +141,33 @@ class HomeController extends Controller
             $orders = YnhOrder::forUser($user);
         }
 
+        $summary = collect();
+
+        if ($tab === 'summary') {
+            $monitoredIps = Asset::where('type', AssetTypesEnum::IP)->where('is_monitored', true)->count();
+            $monitoredDns = Asset::where('type', AssetTypesEnum::DNS)->where('is_monitored', true)->count();
+            $metricsCollected = YnhOsqueryDiskUsage::query()
+                    ->whereIn('ynh_server_id', $servers->pluck('id'))
+                    ->count()
+                + YnhOsqueryMemoryUsage::query()
+                    ->whereIn('ynh_server_id', $servers->pluck('id'))
+                    ->count()
+                + YnhOsquery::select('ynh_osquery.*')
+                    ->whereIn('name', ['disk_available_snapshot', 'memory_available_snapshot'])
+                    ->whereIn('ynh_server_id', $servers->pluck('id'))
+                    ->count();
+            $eventsCollected = YnhOsquery::select('ynh_osquery.*')
+                ->whereNotIn('name', ['disk_available_snapshot', 'memory_available_snapshot'])
+                ->whereIn('ynh_server_id', $servers->pluck('id'))
+                ->count();
+            $summary = [
+                'ip_monitored' => $monitoredIps,
+                'dns_monitored' => $monitoredDns,
+                'metrics_collected' => $metricsCollected,
+                'events_collected' => $eventsCollected,
+            ];
+        }
+
         $notifications = $user->unreadNotifications
             ->map(function ($notification) {
                 return [
@@ -169,7 +200,8 @@ class HomeController extends Controller
             'applications',
             'backups',
             'os_infos',
-            'notifications'
+            'notifications',
+            'summary'
         ));
     }
 }
