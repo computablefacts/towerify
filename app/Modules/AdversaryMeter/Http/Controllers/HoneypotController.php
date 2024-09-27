@@ -7,6 +7,7 @@ use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
 use App\Modules\AdversaryMeter\Mail\HoneypotRequested;
 use App\Modules\AdversaryMeter\Models\Alert;
+use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
 use App\Modules\AdversaryMeter\Models\AssetTagHash;
 use App\Modules\AdversaryMeter\Models\Attacker;
@@ -99,37 +100,37 @@ class HoneypotController extends Controller
 
     public function getVulnerabilitiesWithAssetInfo(?int $attackerId = null): array
     {
-        return Alert::select('am_alerts.*', 'am_assets.id AS asset_id')
-            ->join('am_ports', 'am_ports.id', '=', 'am_alerts.port_id')
-            ->join('am_scans', 'am_scans.id', '=', 'am_ports.scan_id')
-            ->join('am_assets', 'am_assets.cur_scan_id', '=', 'am_scans.ports_scan_id')
-            ->get()
-            ->filter(fn(Alert $alert) => !$attackerId || ($alert->cve_id && $alert->events($attackerId)->exists()))
-            ->map(function (Alert $alert) use ($attackerId) {
-                return [
-                    'alert' => $alert,
-                    'asset' => $alert->asset(),
-                    'port' => $alert->port(),
-                    'events' => $alert->cve_id ? $alert->events($attackerId)->get()->toArray() : [],
-                ];
+        return Asset::all()
+            ->flatMap(function (Asset $asset) use ($attackerId) {
+                return $asset->alerts()
+                    ->get()
+                    ->filter(fn(Alert $alert) => !$attackerId || ($alert->cve_id && $alert->events($attackerId)->exists()))
+                    ->map(function (Alert $alert) use ($asset, $attackerId) {
+                        return [
+                            'alert' => $alert,
+                            'asset' => $asset,
+                            'port' => $alert->port(),
+                            'events' => $alert->cve_id ? $alert->events($attackerId)->get()->toArray() : [],
+                        ];
+                    });
             })
             ->toArray();
     }
 
     public function getVulnerabilitiesWithAssetInfo2(string $assetBase64): array
     {
-        return Alert::select('am_alerts.*', 'am_assets.id AS asset_id')
-            ->join('am_ports', 'am_ports.id', '=', 'am_alerts.port_id')
-            ->join('am_scans', 'am_scans.id', '=', 'am_ports.scan_id')
-            ->join('am_assets', 'am_assets.cur_scan_id', '=', 'am_ports.ports_scan_id')
-            ->where('am_assets.asset', base64_decode($assetBase64))
+        return Asset::where('asset', base64_decode($assetBase64))
             ->get()
-            ->map(function (Alert $alert) {
-                return [
-                    'alert' => $alert,
-                    'asset' => $alert->asset(),
-                    'events' => $alert->events()->get()->toArray(),
-                ];
+            ->flatMap(function (Asset $asset) {
+                return $asset->alerts()
+                    ->get()
+                    ->map(function (Alert $alert) use ($asset) {
+                        return [
+                            'alert' => $alert,
+                            'asset' => $asset,
+                            'events' => $alert->events()->get()->toArray(),
+                        ];
+                    });
             })
             ->toArray();
     }
