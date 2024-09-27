@@ -54,8 +54,6 @@ curl -s {{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken
                 (optionnel).
               </li>
             </ul>
-            </li>
-            </ul>
           </div>
         </div>
       </div>

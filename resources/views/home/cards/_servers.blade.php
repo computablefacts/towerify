@@ -2,9 +2,19 @@
 <div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
   <div class="card-body">
     <div class="row">
-      <pre class="m-0"><b>If you are simply looking to retrieve metrics or security events from an existing server:</b>
-<b>1.</b> In the browser, go to <a href="{{ app_url() }}/setup/token" target="_blank">{{ app_url() }}/setup/token</a> to get a specific cURL token. Note that your token will be shown only once!
-<b>2.</b> On the server, run as <b>root</b>: curl -s {{ app_url() }}/setup/script?api_token=&lt;token&gt;&server_ip=&lt;ip&gt;&server_name=&lt;name&gt; | bash</pre>
+      <div class="col">
+        To monitor a new server, log in as <b>root</b> and execute this command line :
+        <br><br>
+        <pre style="margin-bottom:0">
+curl -s {{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=<i>&lt;ip&gt;</i>&server_name=<i>&lt;name&gt;</i> | bash
+        </pre>
+        Before executing it, make sure that:<br><br>
+        <ul>
+          <li><i>&lt;ip&gt;</i> has been correctly replaced with your server's IP address ;</li>
+          <li><i>&lt;name&gt;</i> has been correctly replaced with a string identifying your server (optional).
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>
@@ -17,7 +27,7 @@
         {{ __('Servers') }}
       </h3>
     </div>
-    @if(Auth::user()->canManageServers())
+    @if(Auth::user()->canManageServers() && !Auth::user()->isCywiseUser())
     <div class="align-items-end">
       <h3 class="m-0">
         <a href="{{ route('ynh.servers.create') }}" class="float-end">
