@@ -14,15 +14,15 @@
         </div>
         <div class="row mt-3">
           <div class="col">
-            <ul>
-              <li>Pour configurer AdversaryMeter, cliquez <a
-                  href="{{ App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl() }}" target="_blank">ici</a>.
-              </li>
-              <li>Pour accéder à la documentation détaillée, cliquez <a
-                  href="https://computablefacts.notion.site/AdversaryMeter-a30527edc0554ea8aabf7cb7d0137258?pvs=4"
-                  target="_blank">ici</a>.
-              </li>
-            </ul>
+            Pour configurer AdversaryMeter, cliquez <a
+              href="{{ App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl() }}" target="_blank">ici</a>.
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col">
+            Pour accéder à la documentation détaillée, cliquez <a
+              href="https://computablefacts.notion.site/AdversaryMeter-a30527edc0554ea8aabf7cb7d0137258?pvs=4"
+              target="_blank">ici</a>.
           </div>
         </div>
       </div>
