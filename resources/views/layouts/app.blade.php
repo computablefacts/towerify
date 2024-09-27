@@ -98,9 +98,6 @@
             </a>
           </li>
           @endif
-          <li class="nav-item">
-            <a class="nav-link" href="{{ route('home') }}">Dashboard</a>
-          </li>
           @if(Auth::user()->canBuyStuff())
           <li class="nav-item">
             <a class="nav-link" href="{{ route('product.index') }}">App Store</a>
