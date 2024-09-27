@@ -124,7 +124,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
-})->middleware(['auth', 'throttle:6,1']);
+})->middleware(['throttle:6,1']);
 
 Route::get('/update/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
 
