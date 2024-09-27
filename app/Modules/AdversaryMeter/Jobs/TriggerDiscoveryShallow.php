@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Str;
 
 class TriggerDiscoveryShallow implements ShouldQueue
 {
@@ -42,6 +43,11 @@ class TriggerDiscoveryShallow implements ShouldQueue
                         ->each(function (string $domain) use ($tld) {
                             Asset::where('tld', $tld)
                                 ->get()
+                                ->filter(function (Asset $asset) {
+                                    // Deal with clients using one of our many domains...
+                                    return $asset->createdBy()->email === config('towerify.admin.email')
+                                        || !Str::endsWith($asset->asset, ['computablefacts.com', 'computablefacts.io', 'towerify.io', 'cywise.io']);
+                                })
                                 ->each(function (Asset $asset) use ($domain) {
                                     event(new CreateAsset($asset->createdBy(), $domain, true));
                                 });
