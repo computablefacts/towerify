@@ -34,6 +34,71 @@ class User extends \Konekt\AppShell\Models\User
         return $this->hasRole(Role::CYWISE_USER);
     }
 
+    public function adversaryMeterApiToken(): ?string
+    {
+        if (!$this->canUseAdversaryMeter()) {
+            return null;
+        }
+        if ($this->am_api_token) {
+            return $this->am_api_token;
+        }
+
+        $tenantId = $this->tenant_id;
+        $customerId = $this->customer_id;
+
+        if ($customerId) {
+
+            // Find the first user of this customer with an API token
+            $userTmp = User::where('customer_id', $customerId)
+                ->where('tenant_id', $tenantId)
+                ->whereNotNull('am_api_token')
+                ->first();
+
+            if ($userTmp) {
+                return $userTmp->am_api_token;
+            }
+        }
+        if ($tenantId) {
+
+            // Find the first user of this tenant with an API token
+            $userTmp = User::where('tenant_id', $tenantId)
+                ->whereNotNull('am_api_token')
+                ->first();
+
+            if ($userTmp) {
+                return $userTmp->am_api_token;
+            }
+        }
+
+        // This token will enable the user to configure AdversaryMeter through the user interface
+        $token = $this->createToken('adversarymeter', ['']);
+        $plainTextToken = $token->plainTextToken;
+
+        $this->am_api_token = $plainTextToken;
+        $this->save();
+
+        return $plainTextToken;
+    }
+
+    public function sentinelApiToken(): ?string
+    {
+        if (!$this->canManageServers()) {
+            return null;
+        }
+        if ($this->se_api_token) {
+            return $this->se_api_token;
+        }
+
+        // This token will enable the user to configure servers using curl
+        $token = $this->createToken('sentinel', []);
+        $plainTextToken = $token->plainTextToken;
+
+        $this->se_api_token = $plainTextToken;
+        $this->save();
+
+        return $plainTextToken;
+    }
+
     public function canListServers(): bool
     {
         return $this->hasPermissionTo(Permission::LIST_SERVERS) || $this->canManageServers();

@@ -8,7 +8,7 @@
       <div class="card-body">
         <div class="row mt-3">
           <div class="col">
-            AdversaryMeter est votre garde du corps numérique. Il veille sur vos <b>serveurs exposés sur Internet</b> en
+            AdversaryMeter est votre garde du corps numérique. <b>Il veille sur vos serveurs exposés sur Internet</b> en
             détectant les vulnérabilités avant que des acteurs malveillants ne les exploitent.
           </div>
         </div>
@@ -34,37 +34,27 @@
       <div class="card-body">
         <div class="row mt-3">
           <div class="col">
-            Sentinel est votre vigile numérique. Il surveille en continu <b>l'état de vos serveurs</b>, remontant
+            Sentinel est votre vigile numérique. <b>Il surveille en continu l'état de vos serveurs</b>, remontant
             rapidement toute anomalie ou non-conformité afin de prévenir les risques avant qu'ils ne deviennent des
             menaces réelles.
           </div>
         </div>
         <div class="row mt-3">
           <div class="col">
-            Pour configurer Sentinel :
+            Pour configurer Sentinel, connectez-vous en <i>root</i> au serveur que vous souhaitez surveiller et exécutez
+            cette ligne de commande :
+            <br><br>
+            <pre>
+curl -s {{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=<i>&lt;ip&gt;</i>&server_name=<i>&lt;name&gt;</i> | bash
+            </pre>
+            Avant d'exécuter celle-ci, assurez-vous que :<br><br>
             <ul>
-              <li>
-                Dans votre navigateur, rendez-vous à l'adresse suivante pour obtenir un jeton d'accès : <br><br>
-                <b><a href="{{ app_url() }}/setup/token" target="_blank">{{ app_url() }}/setup/token</a></b>
-                <br><br>
-                Conservez-le soigneusement, il ne sera affiché qu'une seule fois !
-                <br><br>
+              <li><i>&lt;ip&gt;</i> a bien été remplacé par l'IP de votre serveur ;</li>
+              <li><i>&lt;name&gt;</i> a bien été remplacé par une chaîne de caractères identifiant votre serveur
+                (optionnel).
               </li>
-              <li>
-                Connectez vous en root au serveur que vous souhaitez surveiller et exécutez cette ligne de commande :
-                <br><br>
-                <b>curl -s {{ app_url() }}/setup/script?api_token=<i>&lt;token&gt;</i>&server_ip=<i>&lt;ip&gt;</i>&server_name=<i>&lt;name&gt;</i>
-                  | bash</b>
-                <br><br>
-                Avant d'exécuter celle-ci, assurez-vous que :<br><br>
-                <ul>
-                  <li><i>&lt;token&gt;</i> est bien remplacé par le jeton obtenu lors de l'étape précédente ;</li>
-                  <li><i>&lt;ip&gt;</i> est bien remplacé par l'IP de votre serveur ;</li>
-                  <li><i>&lt;name&gt;</i> est bien remplacé par une chaîne de caractères identifiant votre serveur
-                    (optionnel).
-                  </li>
-                </ul>
-              </li>
+            </ul>
+            </li>
             </ul>
           </div>
         </div>

@@ -45,55 +45,6 @@ Route::get('catalog', function () {
     return new JsonResponse($apps, 200, ['Access-Control-Allow-Origin' => '*']);
 })->middleware('throttle:30,1');
 
-Route::get('/setup/token', function (\Illuminate\Http\Request $request) {
-
-    /** @var User $user */
-    $user = $request->user();
-
-    if (!$user->canManageServers()) {
-        return new JsonResponse([
-            'status' => 'failure',
-            'message' => 'User must be able to manage servers.',
-            'user' => $user,
-        ], 200, ['Access-Control-Allow-Origin' => '*']);
-    }
-
-    // Upon first connection, generate a user-specific 'system' token.
-    // This token will enable the user to configure servers using curl.
-    /** @var \Laravel\Sanctum\PersonalAccessToken $token */
-    $token = $user->tokens->where('name', 'system')->first();
-    $plainTextToken = null;
-
-    if (!$token) {
-        $token = $user->createToken('system', ['setup.sh']);
-        if (!$token) {
-            return new JsonResponse([
-                'status' => 'failure',
-                'message' => 'The token could not be generated.',
-                'user' => $user,
-            ], 200, ['Access-Control-Allow-Origin' => '*']);
-        }
-        $plainTextToken = $token->plainTextToken;
-        $token = $token?->accessToken;
-    }
-    if ($token->cant('setup.sh')) {
-        $token->abilities = array_merge($token->abilities, ['setup.sh']);
-        $token->save();
-    }
-    if (!$plainTextToken) {
-        return new JsonResponse([
-            'status' => 'success',
-            'message' => 'A \'system\' token has already been generated. Please, reuse it.',
-            'token' => null,
-        ], 200, ['Access-Control-Allow-Origin' => '*']);
-    }
-    return new JsonResponse([
-        'status' => 'success',
-        'message' => 'The \'system\' token has been generated.',
-        'token' => $plainTextToken,
-    ], 200, ['Access-Control-Allow-Origin' => '*']);
-})->middleware(['auth', 'throttle:6,1']);
-
 Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
 
     $token = $request->input('api_token');
@@ -106,7 +57,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
     /** @var \Laravel\Sanctum\PersonalAccessToken $token */
     $token = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
 
-    if (!$token || $token->cant('setup.sh')) {
+    if (!$token) {
         return response('Invalid token', 403)
             ->header('Content-Type', 'text/plain');
     }
@@ -167,13 +118,8 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
     $server->added_with_curl = true;
     $server->save();
 
-    // 1. In the browser, go to "https://app.towerify.io" and login using your user account.
-    // 2. In the browser, go to "https://app.towerify.io/setup/token" to get a user-specific cURL token.
-    // 3. On the server, run:
-    //    3.1 curl -s https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name> >install.sh
-    //    3.2 chmod +x install.sh
-    //    3.3 ./install.sh
-    //    3.4 rm install.sh
+    // 1. In the browser, go to "https://app.towerify.io" and login using your user account
+    // 2. On the server, run as root: curl -s https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name> | bash
     $installScript = \App\Models\YnhOsquery::monitorServer($server);
 
     return response($installScript, 200)
