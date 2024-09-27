@@ -6,14 +6,8 @@
         To monitor a new server, log in as <b>root</b> and execute this command line :
         <br><br>
         <pre style="margin-bottom:0">
-curl -s {{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=<i>&lt;ip&gt;</i>&server_name=<i>&lt;name&gt;</i> | bash
+curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')" | bash
         </pre>
-        Before executing it, make sure that:<br><br>
-        <ul>
-          <li><i>&lt;ip&gt;</i> has been correctly replaced with your server's IP address ;</li>
-          <li><i>&lt;name&gt;</i> has been correctly replaced with a string identifying your server (optional).
-          </li>
-        </ul>
       </div>
     </div>
   </div>

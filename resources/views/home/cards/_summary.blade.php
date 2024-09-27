@@ -45,15 +45,8 @@
             cette ligne de commande :
             <br><br>
             <pre>
-curl -s {{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=<i>&lt;ip&gt;</i>&server_name=<i>&lt;name&gt;</i> | bash
+curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')" | bash
             </pre>
-            Avant d'exécuter celle-ci, assurez-vous que :<br><br>
-            <ul>
-              <li><i>&lt;ip&gt;</i> a bien été remplacé par l'IP de votre serveur ;</li>
-              <li><i>&lt;name&gt;</i> a bien été remplacé par une chaîne de caractères identifiant votre serveur
-                (optionnel).
-              </li>
-            </ul>
           </div>
         </div>
       </div>
