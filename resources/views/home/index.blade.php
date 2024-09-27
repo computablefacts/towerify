@@ -89,7 +89,7 @@
       </a>
     </li>
     @endif
-    @if(Auth::user()->canListServers())
+    @if(Auth::user()->canListServers() && !Auth::user()->isCywiseUser())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'traces' ? 'active' : '' }}"
          href="/home?tab=traces">
