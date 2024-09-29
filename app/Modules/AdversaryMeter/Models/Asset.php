@@ -4,6 +4,7 @@ namespace App\Modules\AdversaryMeter\Models;
 
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
 use App\Modules\AdversaryMeter\Traits\HasTenant;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property string asset
  * @property AssetTypesEnum type
  * @property ?string tld
@@ -44,6 +47,8 @@ class Asset extends Model
     protected $casts = [
         'type' => AssetTypesEnum::class,
         'is_monitored' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function isDns(): bool

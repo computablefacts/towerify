@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int asset_id
  * @property ?string ports_scan_id
  * @property ?string vulns_scan_id
@@ -39,6 +41,8 @@ class Scan extends Model
         'ports_scan_ends_at' => 'datetime',
         'vulns_scan_begins_at' => 'datetime',
         'vulns_scan_ends_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function asset(): BelongsTo

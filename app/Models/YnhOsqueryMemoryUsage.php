@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int ynh_server_id
  * @property Carbon timestamp
  * @property double percent_available
@@ -35,6 +37,8 @@ class YnhOsqueryMemoryUsage extends Model
 
     protected $casts = [
         'timestamp' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function server(): BelongsTo

@@ -24,6 +24,8 @@ use Illuminate\Support\Str;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property string name
  * @property ?string version
  * @property ?string ip_address
@@ -67,6 +69,8 @@ class YnhServer extends Model
         'is_ready' => 'boolean',
         'is_frozen' => 'boolean',
         'added_with_curl' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     protected $hidden = ['ssh_private_key', 'secret'];

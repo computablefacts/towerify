@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property bool updated
  * @property ?int from_ynh_server_id
  * @property ?int to_ynh_server_id
@@ -35,6 +38,8 @@ class YnhNginxLogs extends Model
 
     protected $casts = [
         'updated' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public static function interdependencies(Collection $servers, ?YnhServer $centeredAroundServer = null): array

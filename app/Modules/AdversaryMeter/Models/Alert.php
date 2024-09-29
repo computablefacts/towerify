@@ -2,6 +2,7 @@
 
 namespace App\Modules\AdversaryMeter\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +10,8 @@ use Illuminate\Support\Str;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int port_id
  * @property ?string uid
  * @property string type
@@ -40,6 +43,11 @@ class Alert extends Model
         'cve_product',
         'title',
         'flarum_slug',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function asset(): Asset

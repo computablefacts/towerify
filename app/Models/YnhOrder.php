@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ProductTypeEnum;
 use App\Helpers\ProductOrProductVariant;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,8 @@ use Illuminate\Support\Collection;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int order_id
  * @property int order_item_id
  * @property ProductTypeEnum product_type
@@ -27,7 +30,9 @@ class YnhOrder extends Model
     ];
 
     protected $casts = [
-        'product_type' => ProductTypeEnum::class
+        'product_type' => ProductTypeEnum::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public static function forUser(User $user): Collection

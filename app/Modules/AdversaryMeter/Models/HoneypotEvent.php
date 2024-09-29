@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int honeypot_id
  * @property ?int attacker_id
  * @property string event
@@ -60,5 +62,7 @@ class HoneypotEvent extends Model
         'human' => 'boolean',
         'targeted' => 'boolean',
         'timestamp' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 }

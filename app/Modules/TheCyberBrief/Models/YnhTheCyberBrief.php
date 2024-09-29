@@ -3,6 +3,7 @@
 namespace App\Modules\TheCyberBrief\Models;
 
 use App\Enums\LanguageEnum;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
@@ -11,6 +12,8 @@ use Illuminate\Support\Str;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property string news
  * @property LanguageEnum news_language
  * @property ?string hyperlink
@@ -50,6 +53,8 @@ class YnhTheCyberBrief extends Model
     protected $casts = [
         'language' => LanguageEnum::class,
         'is_published' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function brief(LanguageEnum $language): array

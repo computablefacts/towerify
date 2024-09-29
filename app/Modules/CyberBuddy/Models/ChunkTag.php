@@ -3,11 +3,14 @@
 namespace App\Modules\CyberBuddy\Models;
 
 use App\Modules\CyberBuddy\Traits\HasTenant;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int chunk_id
  * @property string tag
  * @property int created_by
@@ -22,5 +25,10 @@ class ChunkTag extends Model
         'chunk_id',
         'tag',
         'created_by',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 }

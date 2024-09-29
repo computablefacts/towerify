@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int ynh_server_id
  * @property int row
  * @property string name
@@ -50,6 +52,8 @@ class YnhOsquery extends Model
         'columns' => 'array',
         'calendar_time' => 'datetime',
         'packed' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public static function configLogParser(YnhServer $server): string

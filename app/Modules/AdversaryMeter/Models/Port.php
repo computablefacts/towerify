@@ -2,6 +2,7 @@
 
 namespace App\Modules\AdversaryMeter\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int scan_id
  * @property string hostname
  * @property string ip
@@ -54,6 +57,8 @@ class Port extends Model
     protected $casts = [
         'ssl' => 'boolean',
         'closed' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function tags(): HasMany

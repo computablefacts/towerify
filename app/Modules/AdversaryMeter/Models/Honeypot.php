@@ -6,12 +6,15 @@ use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
 use App\Modules\AdversaryMeter\Traits\HasTenant;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property string dns
  * @property ?HoneypotStatusesEnum status
  * @property HoneypotCloudProvidersEnum cloud_provider
@@ -35,6 +38,8 @@ class Honeypot extends Model
         'status' => HoneypotStatusesEnum::class,
         'cloud_provider' => HoneypotCloudProvidersEnum::class,
         'cloud_sensor' => HoneypotCloudSensorsEnum::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function id(): int

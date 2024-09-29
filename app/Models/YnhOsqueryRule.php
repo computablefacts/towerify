@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Enums\OsqueryPlatformEnum;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property string name
  * @property string description
  * @property ?string value
@@ -42,6 +45,8 @@ class YnhOsqueryRule extends Model
         'removed' => 'boolean',
         'snapshot' => 'boolean',
         'platform' => OsqueryPlatformEnum::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function tenants()

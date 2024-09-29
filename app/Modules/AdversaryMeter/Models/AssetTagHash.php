@@ -3,11 +3,14 @@
 namespace App\Modules\AdversaryMeter\Models;
 
 use App\Modules\AdversaryMeter\Traits\HasTenant;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property string hash
  * @property string tag
  * @property int views
@@ -24,5 +27,10 @@ class AssetTagHash extends Model
         'views',
         'tag',
         'created_by',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 }

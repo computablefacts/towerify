@@ -3,12 +3,15 @@
 namespace App\Modules\CyberBuddy\Models;
 
 use App\Modules\CyberBuddy\Traits\HasTenant;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int id
+ * @property Carbon created_at
+ * @property Carbon updated_at
  * @property int collection_id
  * @property ?string file
  * @property ?int page
@@ -37,6 +40,8 @@ class Chunk extends Model
         'page' => 'integer',
         'is_embedded' => 'boolean',
         'is_deleted' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function tags(): HasMany
