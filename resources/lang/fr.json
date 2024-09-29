@@ -117,5 +117,8 @@
   "Pending Actions": "Actions en attentes",
   "Latest traces": "Dernières traces",
   "Admin": "Administration",
-  "I agree with the terms and conditions": "J'accepte les conditions d'utilisation."
+  "I agree with the terms and conditions": "J'accepte les conditions d'utilisation.",
+  "Vulnerabilities high": "Vulnérabilités hautes",
+  "Vulnerabilities medium": "Vulnérabilités moyennes",
+  "Vulnerabilities low": "Vulnérabilités basses"
 }

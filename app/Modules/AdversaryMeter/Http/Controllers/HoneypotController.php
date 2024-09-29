@@ -2,6 +2,7 @@
 
 namespace App\Modules\AdversaryMeter\Http\Controllers;
 
+use App\Jobs\Summarize;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
@@ -242,13 +243,13 @@ class HoneypotController extends Controller
 
     public function getAlertStats(): array
     {
-        return Alert::select(
-            DB::raw("level"),
-            DB::raw("COUNT(*) AS count")
-        )
-            ->groupBy('level')
-            ->get()
-            ->toArray();
+        $nbVulnerabilities = Summarize::numberOfVulnerabilitiesByLevel();
+        return [
+            'High' => $nbVulnerabilities['high'],
+            'High (unverified)' => $nbVulnerabilities['high_unverified'],
+            'Medium' => $nbVulnerabilities['medium'],
+            'Low' => $nbVulnerabilities['low'],
+        ];
     }
 
     public function honeypotsStatus(): array

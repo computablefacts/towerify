@@ -141,11 +141,15 @@ class HomeController extends Controller
         $summary = collect();
 
         if ($tab === 'summary') {
+            $numberOfVulnerabilitiesByLevel = Summarize::numberOfVulnerabilitiesByLevel();
             $summary = [
                 'ip_monitored' => Summarize::monitoredIps(),
                 'dns_monitored' => Summarize::monitoredDns(),
                 'metrics_collected' => Summarize::collectedMetrics($servers),
                 'events_collected' => Summarize::collectedEvents($servers),
+                'vulns_high' => $numberOfVulnerabilitiesByLevel['high'],
+                'vulns_medium' => $numberOfVulnerabilitiesByLevel['medium'],
+                'vulns_low' => $numberOfVulnerabilitiesByLevel['low'],
             ];
         }
 

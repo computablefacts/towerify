@@ -31,6 +31,32 @@ class Summarize implements ShouldQueue
         //
     }
 
+    public static function numberOfVulnerabilitiesByLevel(): array
+    {
+        return Asset::all()
+            ->flatMap(function (Asset $asset) {
+                return [
+                    'high' => $asset->alerts()->where('level', 'High')->count(),
+                    'high_unverified' => $asset->alerts()->where('level', 'High (unverified)')->count(),
+                    'medium' => $asset->alerts()->where('level', 'Medium')->count(),
+                    'low' => $asset->alerts()->where('level', 'Low')->count(),
+                ];
+            })
+            ->reduce(function (array $carry, array $counts) {
+                return [
+                    'high' => $carry['high'] + $counts['high'],
+                    'high_unverified' => $carry['high_unverified'] + $counts['high_unverified'],
+                    'medium' => $carry['medium'] + $counts['medium'],
+                    'low' => $carry['low'] + $counts['low'],
+                ];
+            }, [
+                'high' => 0,
+                'high_unverified' => 0,
+                'medium' => 0,
+                'low' => 0,
+            ]);
+    }
+
     public static function monitoredIps(): int
     {
         return Asset::where('type', AssetTypesEnum::IP)->where('is_monitored', true)->count();
@@ -101,11 +127,16 @@ class Summarize implements ShouldQueue
                 Auth::login($user); // otherwise the tenant will not be properly set
 
                 $servers = YnhServer::forUser($user);
+                $nbVulnerabilities = self::numberOfVulnerabilitiesByLevel();
                 $summary = YnhSummary::create([
                     'monitored_ips' => self::monitoredIps(),
                     'monitored_dns' => self::monitoredDns(),
                     'collected_metrics' => self::collectedMetrics($servers),
                     'collected_events' => self::collectedEvents($servers),
+                    'vulns_high' => $nbVulnerabilities['high'],
+                    'vulns_high_unverified' => $nbVulnerabilities['high_unverified'],
+                    'vulns_medium' => $nbVulnerabilities['medium'],
+                    'vulns_low' => $nbVulnerabilities['low'],
                 ]);
             });
     }
