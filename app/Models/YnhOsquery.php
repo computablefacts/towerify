@@ -162,6 +162,9 @@ EOT;
     public static function monitorServer(YnhServer $server): string
     {
         $url = app_url();
+        $whitelist = collect(config('towerify.adversarymeter.ip_addresses'))
+            ->map(fn(string $ip) => "sed -i '/^ignoreip/ { /{$ip}/! s/$/ {$ip}/ }' /etc/fail2ban/jail.conf")
+            ->join("\n");
         return <<<EOT
 #!/bin/bash
 
@@ -243,6 +246,14 @@ crontab -l | grep -v "app\.towerify\.io" | crontab -
 osqueryctl start osqueryd
 sudo -H -u root bash -c 'tmux new-session -A -d -s logalert'
 tmux send-keys -t logalert "/opt/logalert/logalert.bin" C-m
+
+# If fail2ban is up-and-running, whitelist AdversaryMeter IP addresses
+if systemctl is-active --quiet fail2ban; then
+  if [ -f /etc/fail2ban/jail.conf ]; then
+    {$whitelist}
+    systemctl restart fail2ban
+  fi
+fi
 
 EOT;
     }

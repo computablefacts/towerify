@@ -637,7 +637,7 @@ EOT;
     {
         $output = [];
         $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Adding IP address to fail2ban whitelist...');
-        if ($ssh->executeCommand("sudo fail2ban-client set JAIL addignoreip {$ip}", $output)) {
+        if ($ssh->executeCommand("sudo sed -i '/^ignoreip/ { /{$ip}/! s/$/ {$ip}/ }' /etc/fail2ban/jail.conf && sudo systemctl restart fail2ban", $output)) {
             $ssh->newTrace(SshTraceStateEnum::DONE, 'IP address added to fail2ban whitelist.');
             return true;
         }
@@ -648,7 +648,7 @@ EOT;
     {
         $output = [];
         $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Removing IP address from fail2ban whitelist...');
-        if ($ssh->executeCommand("sudo fail2ban-client set JAIL delignoreip {$ip}", $output)) {
+        if ($ssh->executeCommand("sudo sed -i '/^ignoreip/ s/\b{$ip}\b//g' /etc/fail2ban/jail.conf && sudo systemctl restart fail2ban", $output)) {
             $ssh->newTrace(SshTraceStateEnum::DONE, 'IP address removed from fail2ban whitelist.');
             return true;
         }
