@@ -5,8 +5,8 @@ namespace App\Jobs;
 use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryDiskUsage;
 use App\Models\YnhOsqueryMemoryUsage;
+use App\Models\YnhOverview;
 use App\Models\YnhServer;
-use App\Models\YnhSummary;
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\User;
@@ -39,7 +39,7 @@ class Summarize implements ShouldQueue
     public static function numberOfVulnerabilitiesByLevel(): array
     {
         return Asset::all()
-            ->flatMap(function (Asset $asset) {
+            ->map(function (Asset $asset) {
                 return [
                     'high' => $asset->alerts()->where('level', 'High')->count(),
                     'high_unverified' => $asset->alerts()->where('level', 'High (unverified)')->count(),
@@ -116,9 +116,9 @@ class Summarize implements ShouldQueue
         return ($summary ? $summary->collected_events : 0) + $query->count();
     }
 
-    private static function summary(): ?YnhSummary
+    private static function summary(): ?YnhOverview
     {
-        return YnhSummary::query()
+        return YnhOverview::query()
             ->orderBy('updated_at', 'desc')
             ->limit(1)
             ->first();
@@ -133,7 +133,7 @@ class Summarize implements ShouldQueue
 
                 $servers = YnhServer::forUser($user);
                 $nbVulnerabilities = self::numberOfVulnerabilitiesByLevel();
-                $summary = YnhSummary::create([
+                $summary = YnhOverview::create([
                     'monitored_servers' => self::monitoredServers(),
                     'monitored_ips' => self::monitoredIps(),
                     'monitored_dns' => self::monitoredDns(),

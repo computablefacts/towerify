@@ -28,14 +28,14 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        $tab = $request->input('tab', 'summary');
+        $tab = $request->input('tab', 'overview');
         $limit = $request->input('limit', 20);
 
         /** @var User $user */
         $user = Auth::user();
 
         // Disable a few tabs if Towerify is running as Cywise...
-        $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'summary' : $tab;
+        $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'overview' : $tab;
         $servers = YnhServer::forUser($user);
         $os_infos = YnhOsquery::osInfos($servers)
             ->map(function ($osInfos) {
@@ -138,11 +138,11 @@ class HomeController extends Controller
             $orders = YnhOrder::forUser($user);
         }
 
-        $summary = collect();
+        $overview = collect();
 
-        if ($tab === 'summary') {
+        if ($tab === 'overview') {
             $numberOfVulnerabilitiesByLevel = Summarize::numberOfVulnerabilitiesByLevel();
-            $summary = [
+            $overview = [
                 'servers_monitored' => Summarize::monitoredServers(),
                 'ip_monitored' => Summarize::monitoredIps(),
                 'dns_monitored' => Summarize::monitoredDns(),
@@ -187,7 +187,7 @@ class HomeController extends Controller
             'backups',
             'os_infos',
             'notifications',
-            'summary'
+            'overview'
         ));
     }
 }

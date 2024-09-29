@@ -39,7 +39,7 @@ use App\Models\Taxonomy;
 use App\Models\TaxRate;
 use App\Models\YnhBackup;
 use App\Models\YnhServer;
-use App\Models\YnhSummary;
+use App\Models\YnhOverview;
 use App\Models\Zone;
 use App\Models\ZoneMember;
 use App\Modules\AdversaryMeter\Models\Asset;
@@ -212,7 +212,7 @@ class AppServiceProvider extends ServiceProvider
         TaxRate::observe(TaxRateObserver::class);
         YnhBackup::observe(YnhBackupObserver::class);
         YnhServer::observe(YnhServerObserver::class);
-        YnhSummary::observe(YnhSummaryObserver::class);
+        YnhOverview::observe(YnhSummaryObserver::class);
         ZoneMember::observe(ZoneMemberObserver::class);
         Zone::observe(ZoneObserver::class);
 

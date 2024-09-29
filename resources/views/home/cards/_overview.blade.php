@@ -7,7 +7,7 @@
             <i class="zmdi zmdi-shield-security"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['ip_monitored'] ? Illuminate\Support\Number::format($summary['ip_monitored'], locale: 'sv') : 0
+            {{ $overview['ip_monitored'] ? Illuminate\Support\Number::format($overview['ip_monitored'], locale: 'sv') : 0
             }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
@@ -19,7 +19,7 @@
             <i class="zmdi zmdi-shield-security"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['dns_monitored'] ? Illuminate\Support\Number::format($summary['dns_monitored'], locale: 'sv') :
+            {{ $overview['dns_monitored'] ? Illuminate\Support\Number::format($overview['dns_monitored'], locale: 'sv') :
             0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
@@ -35,7 +35,7 @@
             <i class="zmdi zmdi-dns"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['servers_monitored'] ? Illuminate\Support\Number::format($summary['servers_monitored'], locale:
+            {{ $overview['servers_monitored'] ? Illuminate\Support\Number::format($overview['servers_monitored'], locale:
             'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
@@ -53,7 +53,7 @@
             <i class="zmdi zmdi-gps-dot"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['vulns_high'] ? Illuminate\Support\Number::format($summary['vulns_high'], locale:
+            {{ $overview['vulns_high'] ? Illuminate\Support\Number::format($overview['vulns_high'], locale:
             'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
@@ -65,7 +65,7 @@
             <i class="zmdi zmdi-gps-dot"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['vulns_medium'] ? Illuminate\Support\Number::format($summary['vulns_medium'], locale:
+            {{ $overview['vulns_medium'] ? Illuminate\Support\Number::format($overview['vulns_medium'], locale:
             'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
@@ -77,7 +77,7 @@
             <i class="zmdi zmdi-gps-dot"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['vulns_low'] ? Illuminate\Support\Number::format($summary['vulns_low'], locale:
+            {{ $overview['vulns_low'] ? Illuminate\Support\Number::format($overview['vulns_low'], locale:
             'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
@@ -93,7 +93,7 @@
             <i class="zmdi zmdi-layers"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['metrics_collected'] ? Illuminate\Support\Number::format($summary['metrics_collected'], locale:
+            {{ $overview['metrics_collected'] ? Illuminate\Support\Number::format($overview['metrics_collected'], locale:
             'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
@@ -105,7 +105,7 @@
             <i class="zmdi zmdi-layers "></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['events_collected'] ? Illuminate\Support\Number::format($summary['events_collected'], locale:
+            {{ $overview['events_collected'] ? Illuminate\Support\Number::format($overview['events_collected'], locale:
             'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">

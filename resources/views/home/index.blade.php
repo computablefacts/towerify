@@ -1,9 +1,9 @@
 @extends('layouts.app')
 @section('breadcrumbs')
 <nav class="breadcrumb mb-0 pt-0 pb-0 ps-0">
-  <a class="breadcrumb-item" href="/?tab=summary">{{ __('Home') }}</a>
-  @if($tab === 'summary')
-  <span class="breadcrumb-item active">{{ __('Summary') }}</span>
+  <a class="breadcrumb-item" href="/?tab=overview">{{ __('Home') }}</a>
+  @if($tab === 'overview')
+  <span class="breadcrumb-item active">{{ __('Overview') }}</span>
   @elseif($tab === 'my-apps')
   <span class="breadcrumb-item active">{{ __('My Apps') }}</span>
   @elseif($tab === 'servers')
@@ -44,9 +44,9 @@
 <div class="container">
   <ul class="nav justify-content-end mb-4">
     <li class="nav-item">
-      <a class="nav-link {{ !$tab || $tab === 'summary' ? 'active' : '' }}"
-         href="/home?tab=summary">
-        {{ __('Summary') }}
+      <a class="nav-link {{ !$tab || $tab === 'overview' ? 'active' : '' }}"
+         href="/home?tab=overview">
+        {{ __('Overview') }}
       </a>
     </li>
     @if(!Auth::user()->isCywiseUser())
@@ -152,8 +152,8 @@
     </li>
     @endif
   </ul>
-  @if(!$tab || $tab === 'summary')
-  @include('home.cards._summary')
+  @if(!$tab || $tab === 'overview')
+  @include('home.cards._overview')
   @endif
   @if($tab === 'my-apps')
   @include('home.cards._my_apps')
