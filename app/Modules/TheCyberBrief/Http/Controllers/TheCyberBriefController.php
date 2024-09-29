@@ -4,7 +4,7 @@ namespace App\Modules\TheCyberBrief\Http\Controllers;
 
 use App\Enums\LanguageEnum;
 use App\Http\Controllers\Controller;
-use App\Modules\TheCyberBrief\Models\YnhTheCyberBrief;
+use App\Modules\TheCyberBrief\Models\Stories;
 use Illuminate\Http\Request;
 
 class TheCyberBriefController extends Controller
@@ -24,8 +24,8 @@ class TheCyberBriefController extends Controller
         } else {
             $lang = LanguageEnum::ENGLISH;
         }
-        
-        $briefes = YnhTheCyberBrief::where('is_published', true)
+
+        $briefes = Stories::where('is_published', true)
             ->orderBy('updated_at', 'desc')
             ->limit(50)
             ->get();

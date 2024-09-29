@@ -28,11 +28,11 @@ use Illuminate\Support\Str;
  * @property ?string go_deeper_fr
  * @property bool is_published
  */
-class YnhTheCyberBrief extends Model
+class Stories extends Model
 {
     use HasFactory;
 
-    protected $table = 'ynh_the_cyber_brief';
+    protected $table = 'tcb_stories';
 
     protected $fillable = [
         'news',
