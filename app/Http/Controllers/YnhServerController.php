@@ -168,6 +168,8 @@ class YnhServerController extends Controller
         $server->ssh_username = $request->username;
         $server->save();
 
+        event(new CreateAsset($server->user()->first(), $server->ip(), true, [$server->name]));
+
         /** @var User $user */
         $user = Auth::user();
 
@@ -248,6 +250,8 @@ class YnhServerController extends Controller
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The server is being removed from the inventory!");
 
         if ($server->ip()) {
+
+            event(new DeleteAsset($server->user()->first(), $server->ip()));
 
             $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Stopping asset monitoring...');
             event(new DeleteAsset(Auth::user(), $server->ip()));
