@@ -146,7 +146,7 @@ class HomeController extends Controller
         if ($tab === 'summary') {
             $monitoredIps = Asset::where('type', AssetTypesEnum::IP)->where('is_monitored', true)->count();
             $monitoredDns = Asset::where('type', AssetTypesEnum::DNS)->where('is_monitored', true)->count();
-            $metricsCollected = YnhOsqueryDiskUsage::query()
+            $collectedMetrics = YnhOsqueryDiskUsage::query()
                     ->whereIn('ynh_server_id', $servers->pluck('id'))
                     ->count()
                 + YnhOsqueryMemoryUsage::query()
@@ -156,15 +156,15 @@ class HomeController extends Controller
                     ->whereIn('name', ['disk_available_snapshot', 'memory_available_snapshot'])
                     ->whereIn('ynh_server_id', $servers->pluck('id'))
                     ->count();
-            $eventsCollected = YnhOsquery::select('ynh_osquery.*')
+            $collectedEvents = YnhOsquery::select('ynh_osquery.*')
                 ->whereNotIn('name', ['disk_available_snapshot', 'memory_available_snapshot'])
                 ->whereIn('ynh_server_id', $servers->pluck('id'))
                 ->count();
             $summary = [
                 'ip_monitored' => $monitoredIps,
                 'dns_monitored' => $monitoredDns,
-                'metrics_collected' => $metricsCollected,
-                'events_collected' => $eventsCollected,
+                'metrics_collected' => $collectedMetrics,
+                'events_collected' => $collectedEvents,
             ];
         }
 

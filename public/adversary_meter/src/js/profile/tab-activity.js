@@ -76,7 +76,7 @@ export class TabActivity extends com.computablefacts.widgets.Widget {
             document.createTextNode(i18next.t("Nature de l'alerte")),
             document.createTextNode(i18next.t('IP')),
             document.createTextNode(i18next.t("Honeypot")),
-            document.createTextNode(i18next.t("Detail"))
+            document.createTextNode(i18next.t("Détail"))
         ];
         const alignment = ['left', 'left', 'left', 'left', 'left', 'center']
         const table = new Table(tab.querySelector('#table-profile-activity'), columns, alignment, {

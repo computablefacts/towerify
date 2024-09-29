@@ -180,7 +180,7 @@ export class TabAssetsImporter extends com.computablefacts.widgets.Widget {
     }
     const columns = isCsv ? [
       document.createTextNode(i18next.t('Actif')), document.createTextNode(i18next.t('Étiquettes')),
-      document.createTextNode(i18next.t('Status')), (() => {
+      document.createTextNode(i18next.t('Statut')), (() => {
         const checkbox = document.createElement('input');
         checkbox.classList.add('me-2')
         checkbox.type = 'checkbox';
@@ -189,7 +189,7 @@ export class TabAssetsImporter extends com.computablefacts.widgets.Widget {
       })()
     ] : [
       document.createTextNode(i18next.t('Actif')),
-      document.createTextNode(i18next.t('Status')), (() => {
+      document.createTextNode(i18next.t('Statut')), (() => {
         const checkbox = document.createElement('input');
         checkbox.classList.add('me-2')
         checkbox.type = 'checkbox';

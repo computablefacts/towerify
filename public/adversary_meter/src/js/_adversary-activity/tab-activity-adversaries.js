@@ -55,7 +55,7 @@ export class TabActivityAdversaries extends com.computablefacts.widgets.Widget {
       document.createTextNode(i18next.t("Nature de l'alerte")),
       document.createTextNode(i18next.t('IP')),
       document.createTextNode(i18next.t("Honeypot")),
-      document.createTextNode(i18next.t("Detail")),
+      document.createTextNode(i18next.t("Détail")),
       document.createTextNode('')
     ];
     const alignment = ['left', 'left', 'left', 'left', 'left', 'left', 'center']
