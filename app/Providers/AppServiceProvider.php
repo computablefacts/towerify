@@ -39,6 +39,7 @@ use App\Models\Taxonomy;
 use App\Models\TaxRate;
 use App\Models\YnhBackup;
 use App\Models\YnhServer;
+use App\Models\YnhSummary;
 use App\Models\Zone;
 use App\Models\ZoneMember;
 use App\Modules\AdversaryMeter\Models\Asset;
@@ -95,6 +96,7 @@ use App\Observers\TaxonomyObserver;
 use App\Observers\TaxRateObserver;
 use App\Observers\YnhBackupObserver;
 use App\Observers\YnhServerObserver;
+use App\Observers\YnhSummaryObserver;
 use App\Observers\ZoneMemberObserver;
 use App\Observers\ZoneObserver;
 use App\Rules\AtLeastOneDigit;
@@ -210,6 +212,7 @@ class AppServiceProvider extends ServiceProvider
         TaxRate::observe(TaxRateObserver::class);
         YnhBackup::observe(YnhBackupObserver::class);
         YnhServer::observe(YnhServerObserver::class);
+        YnhSummary::observe(YnhSummaryObserver::class);
         ZoneMember::observe(ZoneMemberObserver::class);
         Zone::observe(ZoneObserver::class);
 
