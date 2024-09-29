@@ -30,11 +30,12 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.13",
-        "spatie/laravel-ignition": "^2.5",
         "fakerphp/faker": "^1.23",
+        "laravel-lang/lang": "^15.7",
         "laravel/dusk": "^8.2",
         "mockery/mockery": "^1.6",
-        "phpunit/phpunit": "^11.2"
+        "phpunit/phpunit": "^11.2",
+        "spatie/laravel-ignition": "^2.5"
     },
     "autoload": {
         "files": [
@@ -69,6 +70,10 @@
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php artisan lang:update"
         ]
     },
     "config": {

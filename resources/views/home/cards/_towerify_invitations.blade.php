@@ -43,7 +43,7 @@
   <div class="card-body">
     <div class="row">
       <div class="col">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>
@@ -72,7 +72,7 @@
         </td>
         <td>
           <button class="btn btn-link p-0" onclick="copyInvitationToClipboard('{{ $invitation->id }}')">
-            copy invitation
+            {{ __('copy invitation') }}
             <input type="text" class="invisible"
                    style="height: 0.5rem; width: 2rem; padding: 0;"
                    id="__invitation_link_{{ $invitation->id }}"

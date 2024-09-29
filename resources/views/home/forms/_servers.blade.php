@@ -2,12 +2,17 @@
 <div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
   <div class="card-body">
     <div class="row">
-      <pre class="m-0">To configure or restore metrics and security event collection on this server, execute the following command with <b>root</b> privileges:
-
-curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/update/{{ $server->secret }}</a> | bash
-
-The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional
-changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.</pre>
+      <div class="col">
+        {{ __('To configure or restore metrics and security event collection on this server, execute the following
+        command with root privileges:') }}
+        <br><br>
+        <pre class="m-0">
+curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/update/{{ $server->secret }}</a> | bash</pre>
+        <br>
+        {{ __('The command is idempotent, meaning you can run it multiple times, but it will produce the same result
+        each time without creating additional changes or effects beyond the initial execution. This ensures consistency
+        and prevents duplication of settings or data each time it is run.') }}
+      </div>
     </div>
   </div>
 </div>
@@ -113,7 +118,7 @@ changes or effects beyond the initial execution. This ensures consistency and pr
     <div class="mb-3">
       <div class="d-flex justify-content-between align-items-center">
         <label for="authorizedKey" class="mb-0 form-control-label">
-          {{ __('Log-in to your server using the username above and execute the following command') }}
+          {{ __('Log-in to your server using the username above and execute the following command :') }}
         </label>
         <button type="button" onclick="copyToClipboard()" class="m-1 btn" title="{{ __('Copy') }}">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"

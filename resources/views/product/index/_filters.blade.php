@@ -4,7 +4,7 @@
     :
     route('product.index')
 }}">
-    <div class="card-header">Filters
+    <div class="card-header">{{ __('Filters') }}
         @if($properties->map(function ($property) {
         return $property->values()->count();
         })->sum() > 0)
@@ -22,7 +22,7 @@
     @else
     <ul class="list-group list-group-flush">
       <li class="list-group-item">
-        The filters are not available.
+        {{ __('The filters are not available.') }}
       </li>
     </ul>
     @endif

@@ -26,7 +26,7 @@
 @stop
 
 @section('breadcrumbs')
-    <li class="breadcrumb-item"><a href="{{ route('product.index') }}">All Products</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('product.index') }}">{{ __('All Products') }}</a></li>
     @if($taxon)
         @include('product._breadcrumbs')
     @endif
@@ -65,7 +65,7 @@
 
                 @if(!$products->isEmpty())
                 <div class="card card-default card-accent-secondary tw-card">
-                    <div class="card-header">{{ $taxon ?  'Products in ' . $taxon->name : 'All Products' }}</div>
+                    <div class="card-header">{{ $taxon ?  'Products in ' . $taxon->name : __('All Products') }}</div>
 
                     <div class="card-body">
                         <div class="card-columns" style="column-count:1;">

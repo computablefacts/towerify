@@ -161,7 +161,20 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/webmozart/assert" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/laravel/sanctum" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/error-solutions" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/archtechx/enums" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/dragon-code/contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/dragon-code/pretty-array" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/dragon-code/support" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/erusev/parsedown" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/config" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/lang" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/locale-list" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/locales" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/native-country-names" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/native-currency-names" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/native-locale-names" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/publisher" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-php81" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

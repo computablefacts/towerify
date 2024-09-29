@@ -9,7 +9,7 @@ $apps = \App\Models\YnhPermission::apps(Auth::user())
   <div class="card-body">
     <div class="row">
       <div class="col">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>

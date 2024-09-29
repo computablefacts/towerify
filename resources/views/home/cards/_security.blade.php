@@ -1,5 +1,4 @@
 @if(Auth::user()->canListServers())
-@include('home.cards._adversarymeter')
 @if($security_events['authorized_keys'])
 <div class="card card-accent-secondary tw-card mt-4">
   <div class="card-header">
@@ -12,7 +11,7 @@
     </div>
     <div class="row">
       <div class="col pt-2">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>
@@ -83,7 +82,7 @@
     </div>
     <div class="row">
       <div class="col pt-2">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>
@@ -158,11 +157,11 @@
   @if(count($security_events['users']) === 0)
   <div class="card-body">
     <div class="p-3" style="background-color:#fff3cd;">
-      {{ __('System logins and logouts.') }}
+      {{ __('Users accounts created or suppressed.') }}
     </div>
     <div class="row">
       <div class="col pt-2">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>
@@ -237,7 +236,7 @@
     </div>
     <div class="row">
       <div class="col pt-2">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>
@@ -311,23 +310,23 @@
 @if($security_events['suid_bin'])
 <div class="card card-accent-secondary tw-card mt-4">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Suid Binaries (last :count events)', ['count' => $limit]) }}</b></h3>
+    <h3 class="m-0"><b>{{ __('SUID Binaries (last :count events)', ['count' => $limit]) }}</b></h3>
   </div>
   @if(count($security_events['suid_bin']) === 0)
   <div class="card-body">
     <div class="p-3" style="background-color:#fff3cd;">
-      {{ __('A suid binary has been detected (often used in backdoors).') }}
+      {{ __('A SUID binary has been detected (often used in backdoors).') }}
     </div>
     <div class="row">
       <div class="col pt-2">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>
   @else
   <div class="card-body p-0">
     <div class="p-3" style="background-color:#fff3cd;">
-      {{ __('A suid binary has been detected (often used in backdoors).') }}
+      {{ __('A SUID binary has been detected (often used in backdoors).') }}
     </div>
     <table class="table table-hover">
       <thead>

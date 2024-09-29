@@ -3,7 +3,7 @@
   <div class="card-body">
     <div class="row">
       <div class="col">
-        To monitor a new server, log in as <b>root</b> and execute this command line :
+        {{ __('To monitor a new server, log in as root and execute this command line :') }}
         <br><br>
         <pre style="margin-bottom:0">
 curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')" | bash
@@ -39,7 +39,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
   <div class="card-body">
     <div class="row">
       <div class="col">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>

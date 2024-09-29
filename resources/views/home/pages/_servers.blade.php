@@ -2,7 +2,7 @@
 
 @section('breadcrumbs')
 <nav class="breadcrumb mb-0 pt-0 pb-0 ps-0">
-  <a class="breadcrumb-item" href="/">Home</a>
+  <a class="breadcrumb-item" href="/">{{ __('Home') }}</a>
   <a class="breadcrumb-item" href="/home?tab=servers">{{ __('Servers') }}</a>
   <span class="breadcrumb-item active">{{ $server->name }}</span>
   <span class="breadcrumb-menu"></span>

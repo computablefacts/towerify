@@ -94,16 +94,16 @@
           @if(Auth::user()->isAdmin())
           <li class="nav-item">
             <a class="nav-link" href="{{ config('konekt.app_shell.ui.url') }}" target="_blank">
-              Admin
+              {{ __('Admin') }}
             </a>
           </li>
           @endif
           @if(Auth::user()->canBuyStuff())
           <li class="nav-item">
-            <a class="nav-link" href="{{ route('product.index') }}">App Store</a>
+            <a class="nav-link" href="{{ route('product.index') }}">{{ __('App Store') }}</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ route('cart.show') }}">Cart
+            <a class="nav-link" href="{{ route('cart.show') }}">{{ __('Cart') }}
               @if (Cart::isNotEmpty())
               <span class="tw-pill rounded-pill bg-secondary">{{ Cart::itemCount() }}</span>
               @endif

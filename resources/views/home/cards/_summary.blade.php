@@ -36,7 +36,7 @@
             {{ $summary['metrics_collected'] ? Illuminate\Support\Number::format($summary['metrics_collected'], locale: 'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Metrics collected') }}
+            {{ __('Metrics Collected') }}
           </small>
         </div>
         <div class="col card card-accent-secondary tw-card ml-1">
@@ -47,7 +47,7 @@
             {{ $summary['events_collected'] ? Illuminate\Support\Number::format($summary['events_collected'], locale: 'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Events collected') }}
+            {{ __('Events Collected') }}
           </small>
         </div>
       </div>

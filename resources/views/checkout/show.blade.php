@@ -1,10 +1,9 @@
 @extends('layouts.app')
 
 @section('breadcrumbs')
-    <li class="breadcrumb-item"><a href="{{ route('product.index') }}">All Products</a></li>
-    <li class="breadcrumb-item"><a href="{{ route('cart.show') }}">Cart</a></li>
-    <li class="breadcrumb-item">Checkout</li>
-
+    <li class="breadcrumb-item"><a href="{{ route('product.index') }}">{{ __('All Products') }}</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('cart.show') }}">{{ __('Cart') }}</a></li>
+    <li class="breadcrumb-item">{{ __('Checkout') }}</li>
 @stop
 
 @section('content')

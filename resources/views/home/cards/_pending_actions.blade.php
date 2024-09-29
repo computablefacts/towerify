@@ -9,7 +9,7 @@
         @if($pendingActions->isEmpty())
         <div class="row">
           <div class="col">
-            None.
+            {{ __('None.') }}
           </div>
         </div>
         @else

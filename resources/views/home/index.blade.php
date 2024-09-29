@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('breadcrumbs')
 <nav class="breadcrumb mb-0 pt-0 pb-0 ps-0">
-  <a class="breadcrumb-item" href="/?tab=summary">Home</a>
+  <a class="breadcrumb-item" href="/?tab=summary">{{ __('Home') }}</a>
   @if($tab === 'summary')
   <span class="breadcrumb-item active">{{ __('Summary') }}</span>
   @elseif($tab === 'my-apps')

@@ -9,7 +9,7 @@
       <div class="mb-3 col">
         <div class="row">
           <div class="col">
-            None.
+            {{ __('None.') }}
           </div>
         </div>
       </div>
@@ -22,7 +22,7 @@
 @foreach($servers as $server)
 <div class="card card-accent-secondary mt-4 tw-card">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ $server }} / {{ __('Latest traces') }}</b></h3>
+    <h3 class="m-0"><b>{{ $server }}&nbsp;<span style="color:#f8b502">/</span>&nbsp;{{ __('Latest traces') }}</b></h3>
   </div>
   <div class="card-body">
     <div class="row">
