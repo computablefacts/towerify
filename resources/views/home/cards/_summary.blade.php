@@ -54,6 +54,7 @@
     </div>
   </div>
   <div class="row mt-2">
+    @if(Auth::user()->canUseAdversaryMeter())
     <div class="col col-6 card card-accent-secondary tw-card p-0 mr-1">
       <div class="card-header">
         <h3 class="m-0"><b>{{ __('AdversaryMeter') }}</b></h3>
@@ -80,6 +81,8 @@
         </div>
       </div>
     </div>
+    @endif
+    @if(Auth::user()->canManageServers())
     <div class="col card card-accent-secondary tw-card p-0 ml-1">
       <div class="card-header">
         <h3 class="m-0"><b>{{ __('Sentinel') }}</b></h3>
@@ -104,5 +107,6 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
         </div>
       </div>
     </div>
+    @endif
   </div>
 </div>
