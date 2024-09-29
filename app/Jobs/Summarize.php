@@ -31,6 +31,11 @@ class Summarize implements ShouldQueue
         //
     }
 
+    public static function monitoredServers(): int
+    {
+        return YnhServer::count();
+    }
+
     public static function numberOfVulnerabilitiesByLevel(): array
     {
         return Asset::all()
@@ -129,6 +134,7 @@ class Summarize implements ShouldQueue
                 $servers = YnhServer::forUser($user);
                 $nbVulnerabilities = self::numberOfVulnerabilitiesByLevel();
                 $summary = YnhSummary::create([
+                    'monitored_servers' => self::monitoredServers(),
                     'monitored_ips' => self::monitoredIps(),
                     'monitored_dns' => self::monitoredDns(),
                     'collected_metrics' => self::collectedMetrics($servers),

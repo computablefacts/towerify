@@ -3,7 +3,7 @@
     <div class="col-6 mr-1">
       <div class="row">
         <div class="col col-6 card card-accent-secondary tw-card mr-1">
-          <div class="fs-1 text-end" style="color: #ffaa00">
+          <div class="fs-1 text-end" style="opacity: .55">
             <i class="zmdi zmdi-shield-security"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
@@ -15,7 +15,7 @@
           </small>
         </div>
         <div class="col card card-accent-secondary tw-card ml-1">
-          <div class="fs-1 text-end" style="color: #ffaa00">
+          <div class="fs-1 text-end" style="opacity: .55">
             <i class="zmdi zmdi-shield-security"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
@@ -30,35 +30,23 @@
     </div>
     <div class="col ml-1">
       <div class="row">
-        <div class="col col-6 card card-accent-secondary tw-card mr-1">
-          <div class="fs-1 text-end" style="color: #ffaa00">
-            <i class="zmdi zmdi-layers "></i>
+        <div class="col card card-accent-secondary tw-card">
+          <div class="fs-1 text-end" style="opacity: .55">
+            <i class="zmdi zmdi-dns"></i>
           </div>
           <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['metrics_collected'] ? Illuminate\Support\Number::format($summary['metrics_collected'], locale:
+            {{ $summary['servers_monitored'] ? Illuminate\Support\Number::format($summary['servers_monitored'], locale:
             'sv') : 0 }}
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Metrics Collected') }}
-          </small>
-        </div>
-        <div class="col card card-accent-secondary tw-card ml-1">
-          <div class="fs-1 text-end" style="color: #ffaa00">
-            <i class="zmdi zmdi-layers "></i>
-          </div>
-          <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $summary['events_collected'] ? Illuminate\Support\Number::format($summary['events_collected'], locale:
-            'sv') : 0 }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Events Collected') }}
+            {{ __('Servers Monitored') }}
           </small>
         </div>
       </div>
     </div>
   </div>
   <div class="row mt-2">
-    <div class="col-6">
+    <div class="col-6 mr-1">
       <div class="row">
         <div class="col col-4 card card-accent-secondary tw-card mr-1">
           <div class="fs-1 text-end" style="color: red;">
@@ -94,6 +82,34 @@
           </div>
           <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
             {{ __('Vulnerabilities low') }}
+          </small>
+        </div>
+      </div>
+    </div>
+    <div class="col ml-1">
+      <div class="row">
+        <div class="col col-6 card card-accent-secondary tw-card mr-1">
+          <div class="fs-1 text-end" style="opacity: .55">
+            <i class="zmdi zmdi-layers"></i>
+          </div>
+          <div class="fs-4 mb-0 fw-bold text-uppercase">
+            {{ $summary['metrics_collected'] ? Illuminate\Support\Number::format($summary['metrics_collected'], locale:
+            'sv') : 0 }}
+          </div>
+          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
+            {{ __('Metrics Collected') }}
+          </small>
+        </div>
+        <div class="col card card-accent-secondary tw-card ml-1">
+          <div class="fs-1 text-end" style="opacity: .55">
+            <i class="zmdi zmdi-layers "></i>
+          </div>
+          <div class="fs-4 mb-0 fw-bold text-uppercase">
+            {{ $summary['events_collected'] ? Illuminate\Support\Number::format($summary['events_collected'], locale:
+            'sv') : 0 }}
+          </div>
+          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
+            {{ __('Events Collected') }}
           </small>
         </div>
       </div>
