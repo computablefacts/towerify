@@ -122,5 +122,8 @@
   "Vulnerabilities medium": "Vulnérabilités moyennes",
   "Vulnerabilities low": "Vulnérabilités basses",
   "Servers Monitored": "Serveurs surveillés",
-  "Overview": "Aperçu"
+  "Overview": "Aperçu",
+  "Settings": "Paramètres",
+  "Server Settings": "Paramètres serveurs",
+  "Monitor Host": "Surveiller l'hôte"
 }
