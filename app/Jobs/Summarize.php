@@ -118,6 +118,14 @@ class Summarize implements ShouldQueue
 
     private static function summary(): ?YnhOverview
     {
+        /** @var User $user */
+        $user = Auth::user();
+        if ($user) {
+            return YnhOverview::where('created_by', $user->id)
+                ->orderBy('updated_at', 'desc')
+                ->limit(1)
+                ->first();
+        }
         return YnhOverview::query()
             ->orderBy('updated_at', 'desc')
             ->limit(1)
@@ -126,7 +134,8 @@ class Summarize implements ShouldQueue
 
     public function handle()
     {
-        User::all()
+        User::where('is_active', true)
+            ->get()
             ->each(function ($user) {
 
                 Auth::login($user); // otherwise the tenant will not be properly set
