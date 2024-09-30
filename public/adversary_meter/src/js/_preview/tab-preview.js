@@ -146,7 +146,7 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
         <h4>${i18next.t('Criticité des vulnérabilités découvertes')}</h4>
       </div>`;
 
-    if (!data.length) {
+    if (!Object.keys(data).length) {
       template += `
         <div class="background-light-grey border flex-grow-1 p-2 d-flex justify-content-center">
           <p class="my-auto">${i18next.t('Il n\'y a aucune vulnérabilité de détectée.')}</p>
@@ -162,19 +162,12 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
       </div>`;
 
     el.innerHTML = template;
-    data.sort(this._sortByLevel);
-
-    const translations = {
-      "high": i18next.t("Élevé"),
-      "High": i18next.t("Élevé"),
-      "High (unverified)": i18next.t("Élevé (à vérifier)"),
-      "Medium": i18next.t("Moyen"),
-      "Low": i18next.t("Faible")
-    };
 
     const chartData = {
-      labels: data.map(({level}) => level || 'Unknown'), datasets: [{
-        label: i18next.t('Vulnérabilités'), data: data.map(({count}) => count), backgroundColor: data.map(({level}) => {
+      labels: [i18next.t("Élevé"), i18next.t("Moyen"), i18next.t("Faible"),], datasets: [{
+        label: i18next.t('Vulnérabilités'),
+        data: Object.keys(data).map(key => data[key]),
+        backgroundColor: Object.keys(data).map(level => {
           switch (level) {
             case "High":
               return "rgb(255, 99, 132)";
@@ -187,29 +180,13 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
             default:
               return "rgb(255, 255, 255)";
           }
-        }), hoverOffset: 4
+        }),
+        hoverOffset: 4
       }],
     };
 
     new Chart(document.getElementById('alertChart'), {
-      data: chartData, type: 'doughnut', plugins: [{
-        id: 'translation', beforeDraw: function (chart) {
-
-          //Translate legends
-          const labels = chart.legend.legendItems;
-          labels.forEach(label => {
-            label.text = translations[label.text] ? translations[label.text] : label.text;
-          });
-          chart.legend.legendItems = labels;
-
-          //Translate labels from tooltip
-          chart.data.labels.forEach(function (label, index) {
-            if (translations[label]) {
-              chart.data.labels[index] = translations[label];
-            }
-          });
-        }
-      }], options: {
+      data: chartData, type: 'doughnut', options: {
         rotation: -90,
         circumference: 180,
         maintainAspectRatio: false,

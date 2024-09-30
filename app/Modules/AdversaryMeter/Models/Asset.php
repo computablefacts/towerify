@@ -107,18 +107,19 @@ class Asset extends Model
 
     public function alerts(): Builder
     {
-        $hiddenUids = HiddenAlert::whereNotNull('uid')
-            ->where('uid', '<>', '')
-            ->get()
+        $hiddenAlerts = HiddenAlert::whereNotNull('uid')
+            ->orWhereNotNull('type')
+            ->orWhereNotNull('title')
+            ->get();
+        $hiddenUids = $hiddenAlerts
+            ->filter(fn(HiddenAlert $marker) => !empty($marker->uid))
             ->map(fn(HiddenAlert $marker) => $marker->uid);
-        $hiddenTypes = HiddenAlert::whereNotNull('type')
-            ->where('type', '<>', '')
-            ->get()
-            ->map(fn(HiddenAlert $marker) => addslashes($marker->type));
-        $hiddenTitles = HiddenAlert::whereNotNull('title')
-            ->where('title', '<>', '')
-            ->get()
-            ->map(fn(HiddenAlert $marker) => addslashes($marker->title));
+        $hiddenTypes = $hiddenAlerts
+            ->filter(fn(HiddenAlert $marker) => !empty($marker->type))
+            ->map(fn(HiddenAlert $marker) => $marker->type);
+        $hiddenTitles = $hiddenAlerts
+            ->filter(fn(HiddenAlert $marker) => !empty($marker->title))
+            ->map(fn(HiddenAlert $marker) => $marker->title);
 
         $ifUids = $hiddenUids->isEmpty() ? 'false' : "am_alerts.uid IN ('{$hiddenUids->join("','")}')";
         $ifTypes = $hiddenTypes->isEmpty() ? 'false' : "am_alerts.type IN ('{$hiddenTypes->join("','")}')";
