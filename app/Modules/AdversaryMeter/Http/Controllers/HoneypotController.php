@@ -39,6 +39,7 @@ class HoneypotController extends Controller
             ->whereIn('am_honeypots_events.honeypot_id', $honeypots)
             ->orderBy('am_attackers.name')
             ->orderBy('am_attackers.last_contact')
+            ->distinct()
             ->get()
             ->map(function (Attacker $attacker) use ($totalNumberOfEvents) {
                 return [
@@ -255,7 +256,7 @@ class HoneypotController extends Controller
         )
             ->join('am_honeypots', 'am_honeypots.id', '=', 'am_honeypots_events.honeypot_id')
             ->where('am_honeypots.dns', $dns)
-            ->whereIn('am_honeypots.honeypot_id', $honeypots)
+            ->whereIn('am_honeypots_events.honeypot_id', $honeypots)
             ->groupBy('date')
             ->orderBy('date', 'desc')
             ->limit(30)
