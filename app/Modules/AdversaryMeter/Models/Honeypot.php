@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
 
 /**
  * @property int id
@@ -70,5 +71,12 @@ class Honeypot extends Model
     public function events(): HasMany
     {
         return $this->hasMany(HoneypotEvent::class, 'honeypot_id', 'id');
+    }
+
+    public function attackers(): Builder
+    {
+        return Attacker::select('am_attackers.*')
+            ->join('am_honeypots_events', 'am_honeypots_events.attacker_id', '=', 'am_attackers.id')
+            ->where('am_honeypots_events.honeypot_id', $this->id);
     }
 }

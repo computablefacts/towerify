@@ -32,8 +32,11 @@ class HoneypotController extends Controller
 
     public function attackerIndex(Request $request): array
     {
+        $honeypots = Honeypot::all()->pluck('id');
         $totalNumberOfEvents = HoneypotEvent::count();
         return Attacker::select('am_attackers.*')
+            ->join('am_honeypots_events', 'am_honeypots_events.attacker_id', '=', 'am_attackers.id')
+            ->whereIn('am_honeypots_events.honeypot_id', $honeypots)
             ->orderBy('am_attackers.name')
             ->orderBy('am_attackers.last_contact')
             ->get()
@@ -61,11 +64,13 @@ class HoneypotController extends Controller
 
         /** @var array $ips */
         $ips = config('towerify.adversarymeter.ip_addresses');
+        $honeypots = Honeypot::all()->pluck('id');
         $events = HoneypotEvent::select(
             'am_honeypots_events.*',
             DB::raw("CASE WHEN am_attackers.name IS NULL THEN '-' ELSE am_attackers.name END AS internal_name"),
             DB::raw("CASE WHEN am_attackers.id IS NULL THEN '-' ELSE am_attackers.id END AS attacker_id"),
         )
+            ->whereIn('honeypot_id', $honeypots)
             ->whereNotIn('ip', $ips)
             ->leftJoin('am_attackers', 'am_attackers.id', '=', 'am_honeypots_events.attacker_id');
 
@@ -84,6 +89,7 @@ class HoneypotController extends Controller
     {
         /** @var array $ips */
         $ips = config('towerify.adversarymeter.ip_addresses');
+        $honeypots = Honeypot::all()->pluck('id');
         $events = HoneypotEvent::select(
             'am_honeypots_events.ip',
             DB::raw('MIN(am_honeypots_events.timestamp) AS first_contact'),
@@ -91,6 +97,7 @@ class HoneypotController extends Controller
             DB::raw("MAX(am_honeypots_events.hosting_service_description) AS isp_name"),
             DB::raw("MAX(am_honeypots_events.hosting_service_country_code) AS country_code"),
         )
+            ->whereIn('honeypot_id', $honeypots)
             ->whereNotIn('am_honeypots_events.ip', $ips)
             ->join('am_attackers', 'am_attackers.id', '=', 'am_honeypots_events.attacker_id');
         if ($attackerId) {
@@ -138,7 +145,8 @@ class HoneypotController extends Controller
 
     public function attackerActivity(Attacker $attacker): array
     {
-        $events = $attacker->events()->orderBy('timestamp', 'desc')->get();
+        $honeypots = Honeypot::all()->pluck('id');
+        $events = $attacker->events()->whereIn('honeypot_id', $honeypots)->orderBy('timestamp', 'desc')->get();
         return [
             'firstEvent' => $events->pluck('timestamp')->last()?->format('Y-m-d H:i') . ' UTC',
             'top3EventTypes' => $events->groupBy('event')
@@ -155,38 +163,43 @@ class HoneypotController extends Controller
 
     public function attackerProfile(Attacker $attacker): array
     {
+        $honeypots = Honeypot::all()->pluck('id');
         return [
             'id' => $attacker->id,
             'name' => $attacker->name,
             'first_contact' => $attacker->first_contact->format('Y-m-d H:i') . ' UTC',
             'last_contact' => $attacker->last_contact->format('Y-m-d H:i') . ' UTC',
-            'count' => $attacker->events()->count(),
-            'tot' => HoneypotEvent::count(),
+            'count' => $attacker->events()->whereIn('honeypot_id', $honeypots)->count(),
+            'tot' => HoneypotEvent::whereIn('honeypot_id', $honeypots)->count(),
             'aggressiveness' => $attacker->aggressiveness(),
         ];
     }
 
     public function attackerStats(Attacker $attacker): array
     {
+        $honeypots = Honeypot::all()->pluck('id');
         return [
-            'attacks' => $attacker->events()->count(),
-            'human' => $attacker->humans()->count(),
-            'targeted' => $attacker->targeted()->count(),
+            'attacks' => $attacker->events()->whereIn('honeypot_id', $honeypots)->count(),
+            'human' => $attacker->humans()->whereIn('honeypot_id', $honeypots)->count(),
+            'targeted' => $attacker->targeted()->whereIn('honeypot_id', $honeypots)->count(),
             'cve' => $attacker->cves()->count(),
         ];
     }
 
     public function getMostRecentEvent(?int $attackerId = null): array
     {
+        $honeypots = Honeypot::all()->pluck('id');
         if ($attackerId) {
             return Attacker::find($attackerId)
                 ->events()
+                ->whereIn('honeypot_id', $honeypots)
                 ->orderBy('timestamp', 'desc')
                 ->limit(3)
                 ->get()
                 ->toArray();
         }
         return HoneypotEvent::query()
+            ->whereIn('honeypot_id', $honeypots)
             ->orderBy('timestamp', 'desc')
             ->limit(3)
             ->get()
@@ -200,12 +213,19 @@ class HoneypotController extends Controller
 
     public function attackerCompetency(Attacker $attacker): array
     {
+        $honeypots = Honeypot::all()->pluck('id');
         $tools = $attacker->tools()->count();
         $cves = $attacker->cves()->count();
-        $humans = $attacker->humans()->count();
+        $humans = $attacker->humans()->whereIn('honeypot_id', $honeypots)->count();
         $ips = $attacker->ips()->count();
-        $targetedWordlists = $attacker->events()->where('event', 'curated_wordlist')->count();
-        $targetedPasswords = $attacker->events()->where('event', 'manual_actions_password_targeted')->count();
+        $targetedWordlists = $attacker->events()
+            ->whereIn('honeypot_id', $honeypots)
+            ->where('event', 'curated_wordlist')
+            ->count();
+        $targetedPasswords = $attacker->events()
+            ->whereIn('honeypot_id', $honeypots)
+            ->where('event', 'manual_actions_password_targeted')
+            ->count();
         return [
             'toolbox' => min($tools * 1, 10),
             'cve_collection' => min($cves / 1000 * 100, 10),
@@ -227,6 +247,7 @@ class HoneypotController extends Controller
 
     public function getHoneypotEventStats(string $dns): array
     {
+        $honeypots = Honeypot::all()->pluck('id');
         return HoneypotEvent::select(
             DB::raw("DATE_FORMAT(timestamp, '%Y-%m-%d') AS date"),
             DB::raw("SUM(CASE WHEN human = 1 OR targeted = 1 THEN 1 ELSE 0 END) AS human_or_targeted"),
@@ -234,6 +255,7 @@ class HoneypotController extends Controller
         )
             ->join('am_honeypots', 'am_honeypots.id', '=', 'am_honeypots_events.honeypot_id')
             ->where('am_honeypots.dns', $dns)
+            ->whereIn('am_honeypots.honeypot_id', $honeypots)
             ->groupBy('date')
             ->orderBy('date', 'desc')
             ->limit(30)
