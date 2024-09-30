@@ -6,8 +6,8 @@ use App\Jobs\AgeOffOsqueryEvents;
 use App\Jobs\CheckServersHealth;
 use App\Jobs\PullServersInfos;
 use App\Jobs\Summarize;
+use App\Modules\AdversaryMeter\Jobs\FixDanglingScans;
 use App\Modules\AdversaryMeter\Jobs\ImportHoneypotsEvents;
-use App\Modules\AdversaryMeter\Jobs\ProcessLateScans;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Jobs\TriggerScan;
 use App\Modules\CyberBuddy\Jobs\DeleteEmbeddedChunks;
@@ -43,6 +43,7 @@ class Kernel extends ConsoleKernel
         // AdversaryMeter
         $schedule->job(new TriggerScan())->everyMinute();
         $schedule->job(new ImportHoneypotsEvents())->everyFiveMinutes();
+        $schedule->job(new FixDanglingScans())->hourly();
         $schedule->job(new TriggerDiscoveryShallow())->daily();
         // $schedule->job(new TriggerDiscoveryDeep())->weekly();
 
