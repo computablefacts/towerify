@@ -315,7 +315,7 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
                    <div class="fw-bold red d-flex">${event.event}</div>
                    <div class="text-muted d-flex">
                       <div class="me-2">
-                        ${i18next.t('Dernier contact le')} ${event.timestamp.replace('+0000', 'UTC')}
+                        ${i18next.t('Dernier contact le')} ${event.timestampFormatted}
                       </div>
                    </div>
                 </div>
@@ -330,7 +330,7 @@ export class TabPreview extends com.computablefacts.widgets.Widget {
       } else {
         el.innerHTML = `
       <div class="d-flex justify-content-between">
-        <h4 class="my-2">${i18next.t('Activité des 7 derniers jours')}</h4>
+        <h4 class="my-2">${i18next.t('Activité récente')}</h4>
       </div>
       <div class="background-light-grey border flex-grow-1 p-2 d-flex justify-content-center">
         <p class="my-auto">${i18next.t('Aucun événement enregistré.')}</p>

@@ -82,7 +82,7 @@ export class TabActivity extends com.computablefacts.widgets.Widget {
         const table = new Table(tab.querySelector('#table-profile-activity'), columns, alignment, {
             main: [data => {
                 const node = document.createElement('template');
-                node.innerHTML = data.timestamp.replace('+0000', 'UTC');
+                node.innerHTML = data.timestampFormatted;
                 return node.content.cloneNode(true);
             }, data => {
                 const node = document.createElement('template');
@@ -135,7 +135,7 @@ export class TabActivity extends com.computablefacts.widgets.Widget {
             filter.disabled = false;
             table.data = response.events;
             originalData = response.events;
-            dateEl.innerText = response.firstDate.replace('+0000', 'UTC');
+            dateEl.innerText = response.firstDate.replace('T', ' ').substring(0, response.firstDate.lastIndexOf(':')) + ' UTC';
             top3El.innerHTML = response.top3.map((eventType, index) => {
                 return `<div class="me-2 my-auto d-flex"><div class="fw-bold my-auto">${eventType.count} :&nbsp;</div><div class="my-auto"> ${eventType.type}</div></div>`;
             }).join('');

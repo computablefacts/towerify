@@ -176,9 +176,9 @@ export class TabProfile extends com.computablefacts.widgets.Widget {
       if (events.length > 0) {
         el.innerHTML = `
             <div class="d-flex justify-content-between">
-                <h4 class="my-2">${i18next.t('Activité des 7 derniers jours')}</h4>
+                <h4 class="my-2">${i18next.t('Activité récente')}</h4>
                 <span class="mt-auto mb-2">
-                    <span class="ms-2">${events[0].timestamp.replace('+0000', 'UTC')}</span>
+                    <span class="ms-2">${events[0].timestampFormatted}</span>
                 </span>
             </div>
             <div class="flex-grow-1 h-0 overflow-auto">
@@ -210,7 +210,7 @@ export class TabProfile extends com.computablefacts.widgets.Widget {
       } else {
         el.innerHTML = `
             <div class="d-flex justify-content-between">
-                <h4 class="my-2">${i18next.t('Activité des 7 derniers jours')}</h4>
+                <h4 class="my-2">${i18next.t('Activité récente')}</h4>
             </div>
             <div class="border flex-grow-1 p-2">
                 <p>${i18next.t('Aucun événement trouvé pour cet attaquant.')}</p>

@@ -23,4 +23,8 @@ export class EventHoneypot {
         let endIndex = this.feedName.indexOf('-access.');
         return endIndex !== -1 ? this.feedName.substring(6, endIndex) : null;
     }
+
+    get timestampFormatted() {
+        return this.timestamp.replace('T', ' ').substring(0, this.timestamp.lastIndexOf(':')) + ' UTC';
+    }
 }

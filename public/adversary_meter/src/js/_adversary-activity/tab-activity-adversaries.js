@@ -36,7 +36,7 @@ export class TabActivityAdversaries extends com.computablefacts.widgets.Widget {
 
     const template = `
       <div class="d-flex justify-content-between">
-          <h1>${i18next.t('Activité des attaquants (7 jours glissants)')}</h1>
+          <h1>${i18next.t('Activité récente')}</h1>
           <div class="d-flex my-auto"><div class="me-3"id="chk-manual"></div><div id="chk-auto"></div></div>
       </div>
       <div class="pb-3">
@@ -68,7 +68,7 @@ export class TabActivityAdversaries extends com.computablefacts.widgets.Widget {
             div.title = data.internalName;
             return div;
           },
-          data => createNode('div', data.timestamp.replace('+0000', 'UTC'), 'text-truncate'),
+          data => createNode('div', data.timestampFormatted, 'text-truncate'),
           data => createNode('div', data.event, 'text-truncate'),
           data => createNode('div', data.ip, 'text-truncate'),
           data => {
