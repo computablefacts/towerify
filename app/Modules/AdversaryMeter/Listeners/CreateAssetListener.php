@@ -32,27 +32,24 @@ class CreateAssetListener extends AbstractListener
             $assetType = AssetTypesEnum::RANGE;
         }
         /** @var Asset $azzet */
-        $azzet = Asset::updateOrCreate(
-            [
-                'asset' => $asset,
-                'created_by' => $user->id,
-            ],
-            [
+        $azzet = Asset::where('asset', $asset)->first();
+        if (!$azzet) {
+            $azzet = Asset::create([
                 'asset' => $asset,
                 'type' => $assetType,
                 'is_monitored' => $monitor,
                 'created_by' => $user->id,
-            ]
-        );
-        collect($tags)->map(fn(string $tag) => Str::lower($tag))
-            ->filter(fn(string $tag) => IsValidTag::test($tag))
-            ->each(function (string $tag) use ($azzet) {
-                /** @var ?AssetTag $obj */
-                $obj = $azzet->tags()->where('tag', $tag)->first();
-                if (!$obj) {
-                    $obj = $azzet->tags()->create(['tag' => $tag]);
-                }
-            });
+            ]);
+            collect($tags)->map(fn(string $tag) => Str::lower($tag))
+                ->filter(fn(string $tag) => IsValidTag::test($tag))
+                ->each(function (string $tag) use ($azzet) {
+                    /** @var ?AssetTag $obj */
+                    $obj = $azzet->tags()->where('tag', $tag)->first();
+                    if (!$obj) {
+                        $obj = $azzet->tags()->create(['tag' => $tag]);
+                    }
+                });
+        }
         return $azzet;
     }
 
