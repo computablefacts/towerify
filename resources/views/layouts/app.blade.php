@@ -56,6 +56,18 @@
 <div id="app">
   <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
     <div class="container">
+      @guest
+      <a class="navbar-brand" href="{{ config('towerify.website') }}">
+        <div class="tw-logo">
+          <div class="image">
+            <img src="{{ asset('images/logo.png') }}" alt="Cywise's logo">
+          </div>
+          <div class="text">
+            {{ config('app.name') }}
+          </div>
+        </div>
+      </a>
+      @else
       <a class="navbar-brand" href="{{ url('/') }}">
         <div class="tw-logo">
           <div class="image">
@@ -66,6 +78,7 @@
           </div>
         </div>
       </a>
+      @endguest
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-target="#navbarSupportedContent"
               aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
         <span class="navbar-toggler-icon"></span>

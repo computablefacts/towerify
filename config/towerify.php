@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'website' => env('WEBSITE_URL'),
     'hasher' => [
         'nonce' => env('HASHER_NONCE'),
     ],
