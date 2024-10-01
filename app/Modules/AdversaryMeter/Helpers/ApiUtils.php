@@ -31,7 +31,13 @@ class ApiUtils
                 'domain' => $domain,
             ]
         ));
-        return $this->json($response);
+        $json = $this->json($response);
+        if (isset($json['subdomains'])) {
+            $json['subdomains'] = collect($json['subdomains'])
+                ->filter(fn(string $subdomain) => !empty($subdomain))
+                ->toArray();
+        }
+        return $json;
     }
 
     public function screenshot_public(string $domain): array
