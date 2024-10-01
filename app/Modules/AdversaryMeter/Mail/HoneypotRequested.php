@@ -11,9 +11,9 @@ class HoneypotRequested extends Mailable
 {
     use Queueable, SerializesModels;
 
-    private $user;
-    private $emailSubject;
-    private $emailBody;
+    private User $user;
+    private string $emailSubject;
+    private array $emailBody;
 
     /**
      * Create a new message instance.
@@ -36,8 +36,8 @@ class HoneypotRequested extends Mailable
     {
         return $this
             ->from($this->user->email, $this->user->name)
-            ->subject("AdversaryMeter - {$this->emailSubject}")
-            ->markdown('email.honeypot-requested', [
+            ->subject("Cywise: {$this->emailSubject}")
+            ->markdown('modules.adversary-meter.email.honeypot-requested', [
                 'params' => $this->emailBody
             ]);
     }
