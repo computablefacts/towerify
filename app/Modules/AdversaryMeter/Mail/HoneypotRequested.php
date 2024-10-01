@@ -36,7 +36,7 @@ class HoneypotRequested extends Mailable
     {
         return $this
             ->from($this->user->email, $this->user->name)
-            ->subject("Cywise: {$this->emailSubject}")
+            ->subject("Cywise : {$this->emailSubject}")
             ->markdown('modules.adversary-meter.email.honeypot-requested', [
                 'params' => $this->emailBody
             ]);
