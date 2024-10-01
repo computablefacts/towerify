@@ -2,6 +2,7 @@
 
 return [
     'website' => env('WEBSITE_URL'),
+    'freshdesk' => env('FRESHDESK_ID'),
     'hasher' => [
         'nonce' => env('HASHER_NONCE'),
     ],
