@@ -795,13 +795,13 @@ export class Panel extends com.computablefacts.widgets.Widget {
               </div>
             </div>
             <div class="row">
-              <div class="col-3">
+              <div class="col-4">
                 ${createTimelineItem(i18next.t('Recherche de ports ouverts...'), timeline.nmap)}
               </div>
-              <div class="col-3">
+              <div class="col-4">
                 ${createTimelineItem(i18next.t('Recherche de vulnérabilités...'), timeline.sentinel)}
               </div>
-              <div class="col-3">
+              <div class="col-4">
                 ${createTimelineItem(i18next.t('Prochain scan...'), {start: timeline.next_scan}, true)}
               </div>
             </div>
