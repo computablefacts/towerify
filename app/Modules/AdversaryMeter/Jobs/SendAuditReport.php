@@ -43,7 +43,9 @@ class SendAuditReport implements ShouldQueue
                 $assetsMonitored = Asset::where('is_monitored', true)->orderBy('asset')->get();
                 $assetsNotMonitored = Asset::where('is_monitored', false)->orderBy('asset')->get();
 
-                Mail::to($user->email)->send(new AuditReport($alertsHigh, $alertsMedium, $alertsLow, $assetsMonitored, $assetsNotMonitored));
+                if ($alerts->count() > 0 || $assetsMonitored->count() > 0 || $assetsNotMonitored->count() > 0) {
+                    Mail::to($user->email)->send(new AuditReport($alertsHigh, $alertsMedium, $alertsLow, $assetsMonitored, $assetsNotMonitored));
+                }
             });
     }
 }
