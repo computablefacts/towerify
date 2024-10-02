@@ -3,6 +3,7 @@
 namespace App\Modules\AdversaryMeter\Jobs;
 
 use App\Modules\AdversaryMeter\Mail\AuditReport;
+use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\User;
 use Illuminate\Bus\Queueable;
