@@ -38,4 +38,9 @@ class ChunkCollection extends Model
     {
         return $this->hasMany(Chunk::class, 'collection_id', 'id');
     }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(File::class, 'collection_id', 'id');
+    }
 }

@@ -14,34 +14,41 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property Carbon created_at
  * @property Carbon updated_at
  * @property int collection_id
- * @property int file_id
- * @property ?string url
- * @property ?int page
- * @property string text
- * @property boolean is_embedded
+ * @property string name
+ * @property string name_normalized
+ * @property string extension
+ * @property string path
+ * @property int size
+ * @property string md5
+ * @property string sha1
+ * @property string mime_type
+ * @property string secret
  * @property boolean is_deleted
  * @property int created_by
  */
-class Chunk extends Model
+class File extends Model
 {
     use HasFactory, HasTenant;
 
-    protected $table = 'cb_chunks';
+    protected $table = 'cb_files';
 
     protected $fillable = [
         'collection_id',
-        'file_id',
-        'url',
-        'page',
-        'text',
-        'is_embedded',
+        'name',
+        'name_normalized',
+        'extension',
+        'path',
+        'size',
+        'md5',
+        'sha1',
+        'mime_type',
+        'secret',
         'is_deleted',
         'created_by',
     ];
 
     protected $casts = [
-        'page' => 'integer',
-        'is_embedded' => 'boolean',
+        'size' => 'integer',
         'is_deleted' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -52,13 +59,18 @@ class Chunk extends Model
         return $this->hasOne(ChunkCollection::class, 'id', 'collection_id');
     }
 
-    public function file(): HasOne
+    public function chunks(): HasMany
     {
-        return $this->hasOne(File::class, 'id', 'file_id');
+        return $this->hasMany(Chunk::class, 'file_id', 'id');
     }
 
-    public function tags(): HasMany
+    public function downloadUrl(): string
     {
-        return $this->hasMany(ChunkTag::class, 'chunk_id', 'id');
+        return app_url() . "/cb/web/files/download/{$this->secret}";
+    }
+
+    public function streamUrl(): string
+    {
+        return app_url() . "/cb/web/files/stream/{$this->secret}";
     }
 }

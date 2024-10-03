@@ -14,13 +14,13 @@ class IngestFile
 
     public User $user;
     public string $collection;
-    public string $url;
+    public int $fileId;
 
-    public function __construct(User $user, string $collection, string $url)
+    public function __construct(User $user, string $collection, int $fileId)
     {
         $this->user = $user;
         $this->collection = $collection;
-        $this->url = $url;
+        $this->fileId = $fileId;
     }
 
     public function broadcastOn()

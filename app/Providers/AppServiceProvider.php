@@ -38,8 +38,8 @@ use App\Models\Taxon;
 use App\Models\Taxonomy;
 use App\Models\TaxRate;
 use App\Models\YnhBackup;
-use App\Models\YnhServer;
 use App\Models\YnhOverview;
+use App\Models\YnhServer;
 use App\Models\Zone;
 use App\Models\ZoneMember;
 use App\Modules\AdversaryMeter\Models\Asset;
@@ -55,10 +55,12 @@ use App\Modules\AdversaryMeter\Observers\HoneypotObserver;
 use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\ChunkCollection;
 use App\Modules\CyberBuddy\Models\ChunkTag;
+use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
 use App\Modules\CyberBuddy\Observers\ChunkObserver;
 use App\Modules\CyberBuddy\Observers\ChunkTagObserver;
 use App\Modules\CyberBuddy\Observers\CollectionObserver;
+use App\Modules\CyberBuddy\Observers\FilesObserver;
 use App\Modules\CyberBuddy\Observers\PromptObserver;
 use App\Observers\AddressObserver;
 use App\Observers\AdjustmentObserver;
@@ -227,6 +229,7 @@ class AppServiceProvider extends ServiceProvider
         Chunk::observe(ChunkObserver::class);
         ChunkTag::observe(ChunkTagObserver::class);
         ChunkCollection::observe(CollectionObserver::class);
+        File::observe(FilesObserver::class);
         Prompt::observe(PromptObserver::class);
     }
 

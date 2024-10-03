@@ -15,7 +15,7 @@ trait HasTenant
     protected static function booted()
     {
         parent::booted();
-        static::addGlobalScope('tenant_scope_am', function (Builder $builder) {
+        static::addGlobalScope('tenant_scope_cb', function (Builder $builder) {
 
             $user = Auth::user();
             $tenantId = $user?->tenant_id;

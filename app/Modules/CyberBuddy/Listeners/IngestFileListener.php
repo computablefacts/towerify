@@ -7,10 +7,10 @@ use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\ChunkCollection;
+use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class IngestFileListener extends AbstractListener
 {
@@ -19,57 +19,59 @@ class IngestFileListener extends AbstractListener
         if (!($event instanceof IngestFile)) {
             throw new \Exception('Invalid event type!');
         }
-
-        $url = $event->url;
-
         if (!IsValidCollectionName::test($event->collection)) {
             Log::error("Invalid collection name : {$event->collection}");
-            return;
-        }
-        if (!Str::startsWith($url, 'https://')) {
-            Log::error("Invalid url : {$url}");
             return;
         }
 
         Auth::login($event->user); // otherwise the tenant will not be properly set
 
         try {
-            $collection = ChunkCollection::where('name', $event->collection)->first();
+            $collection = ChunkCollection::where('name', $event->collection)
+                ->where('is_deleted', false)
+                ->first();
 
             if (!$collection) {
-                $collection = ChunkCollection::create([
-                    'name' => $event->collection,
-                ]);
+                $collection = ChunkCollection::create(['name' => $event->collection]);
             }
 
-            $response = ApiUtils::file_input($event->user->client(), $url);
+            /** @var File $file */
+            $file = File::find($event->fileId);
 
-            if ($response['error']) {
-                Log::error($response['error_details']);
+            if (!$file) {
+                Log::error("Invalid file id : {$event->fileId}");
             } else {
 
-                $fragments = $response['response'];
+                $response = ApiUtils::file_input($event->user->client(), $file->downloadUrl());
 
-                foreach ($fragments as $fragment) {
+                if ($response['error']) {
+                    Log::error($response['error_details']);
+                } else {
 
-                    $tags = explode('>', $fragment['metadata']['title']);
-                    $page = $fragment['metadata']['page_idx'] + 1;
+                    $fragments = $response['response'];
 
-                    if ($fragment['metadata']['tag'] === 'list') {
-                        $text = trim($fragment['metadata']['prevPara']['text']) . "\n" . trim($fragment['text']);
-                    } else {
-                        $text = trim($fragment['text']);
-                    }
+                    foreach ($fragments as $fragment) {
 
-                    /** @var Chunk $chunk */
-                    $chunk = $collection->chunks()->create([
-                        'file' => $url,
-                        'page' => $page,
-                        'text' => $text,
-                    ]);
+                        $tags = explode('>', $fragment['metadata']['title']);
+                        $page = $fragment['metadata']['page_idx'] + 1;
 
-                    foreach ($tags as $tag) {
-                        $chunk->tags()->create(['tag' => $tag]);
+                        if ($fragment['metadata']['tag'] === 'list') {
+                            $text = trim($fragment['metadata']['prevPara']['text']) . "\n" . trim($fragment['text']);
+                        } else {
+                            $text = trim($fragment['text']);
+                        }
+
+                        /** @var Chunk $chunk */
+                        $chunk = $collection->chunks()->create([
+                            'file_id' => $file->id,
+                            'url' => $file->downloadUrl(),
+                            'page' => $page,
+                            'text' => $text,
+                        ]);
+
+                        foreach ($tags as $tag) {
+                            $chunk->tags()->create(['tag' => $tag]);
+                        }
                     }
                 }
             }
