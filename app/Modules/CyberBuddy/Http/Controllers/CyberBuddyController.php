@@ -13,6 +13,7 @@ use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadOneFileRequest;
 use App\Modules\CyberBuddy\Models\ChunkCollection;
 use App\Modules\CyberBuddy\Models\File;
+use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;
 use Illuminate\Http\UploadedFile;
@@ -60,6 +61,42 @@ class CyberBuddyController extends Controller
     public function showChat()
     {
         return view('modules.cyber-buddy.chat');
+    }
+
+    public function files()
+    {
+        return File::select('cb_files.*')
+            ->join('cb_chunks_collections', 'cb_chunks_collections.id', '=', 'cb_files.collection_id')
+            ->orderBy('cb_chunks_collections.name')
+            ->orderBy('name_normalized')
+            ->get()
+            ->map(function (File $file) {
+                $nbChunks = $file->chunks()->count();
+                $nbVectors = $file->chunks()->where('is_embedded', true)->count();
+                $nbNotVectors = $file->chunks()->where('is_embedded', false)->count();
+                return [
+                    'collection' => $file->collection->name,
+                    'filename' => "{$file->name_normalized}.{$file->extension}",
+                    'size' => $file->size,
+                    'nb_chunks' => $nbChunks,
+                    'nb_vectors' => $nbVectors,
+                    'nb_not_vectors' => $nbNotVectors,
+                    'status' => $nbVectors != 0 && $nbNotVectors === 0 ? 'processed' : 'processing',
+                    'download_url' => $file->downloadUrl(),
+                ];
+            });
+    }
+
+    public function collections()
+    {
+        return ChunkCollection::orderBy('name', 'asc')
+            ->get()
+            ->map(function (ChunkCollection $collection) {
+                return [
+                    'id' => $collection->id,
+                    'name' => $collection->name,
+                ];
+            });
     }
 
     public function streamFile(string $secret, StreamOneFileRequest $request)
@@ -124,7 +161,10 @@ class CyberBuddyController extends Controller
         $collection = ChunkCollection::where('name', $request->string('collection'))->where('is_deleted', false)->first();
 
         if (!$collection) {
-            return response()->json(['error' => 'Invalid collection name.'], 500);
+            if (!IsValidCollectionName::test($request->string('collection'))) {
+                return response()->json(['error' => 'Invalid collection name.'], 500);
+            }
+            $collection = ChunkCollection::create(['name' => $request->string('collection')]);
         }
         if (!$request->hasFile('file')) {
             return response()->json(['error' => 'Missing file content.'], 500);
@@ -148,7 +188,10 @@ class CyberBuddyController extends Controller
         $collection = ChunkCollection::where('name', $request->string('collection'))->where('is_deleted', false)->first();
 
         if (!$collection) {
-            return response()->json(['error' => 'Invalid collection name.'], 500);
+            if (!IsValidCollectionName::test($request->string('collection'))) {
+                return response()->json(['error' => 'Invalid collection name.'], 500);
+            }
+            $collection = ChunkCollection::create(['name' => $request->string('collection')]);
         }
 
         $files = $request->file('files');

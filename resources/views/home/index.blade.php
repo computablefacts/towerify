@@ -24,6 +24,8 @@
   <span class="breadcrumb-item active">{{ __('Security') }}</span>
   @elseif($tab === 'security_rules')
   <span class="breadcrumb-item active">{{ __('Security Rules') }}</span>
+  @elseif($tab === 'knowledge_base')
+  <span class="breadcrumb-item active">{{ __('Knowledge Base') }}</span>
   @elseif($tab === 'orders')
   <span class="breadcrumb-item active">{{ __('Orders') }}</span>
   @elseif($tab === 'users')
@@ -127,6 +129,12 @@
         {{ __('Security Rules') }}
       </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link {{ $tab === 'knowledge_base' ? 'active' : '' }}"
+         href="/home?tab=knowledge_base">
+        {{ __('Knowledge Base') }}
+      </a>
+    </li>
     @if(Auth::user()->canListOrders() && !Auth::user()->isCywiseUser())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'orders' ? 'active' : '' }}"
@@ -187,6 +195,9 @@
   @endif
   @if($tab === 'security_rules')
   @include('home.cards._osquery_rules', [ 'rules' => $security_rules ])
+  @endif
+  @if($tab === 'knowledge_base')
+  @include('home.cards._knowledge_base', [ 'files' => $knowledge_base ])
   @endif
   @if($tab === 'interdependencies')
   @include('home.cards._interdependencies')

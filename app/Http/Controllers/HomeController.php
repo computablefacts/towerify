@@ -10,6 +10,7 @@ use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
+use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -154,6 +155,12 @@ class HomeController extends Controller
             ];
         }
 
+        $knowledge_base = collect();
+
+        if ($tab === 'knowledge_base') {
+            $knowledge_base = (new CyberBuddyController())->files();
+        }
+
         $notifications = $user->unreadNotifications
             ->map(function ($notification) {
                 return [
@@ -187,7 +194,8 @@ class HomeController extends Controller
             'backups',
             'os_infos',
             'notifications',
-            'overview'
+            'overview',
+            'knowledge_base'
         ));
     }
 }

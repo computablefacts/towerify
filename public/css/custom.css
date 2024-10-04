@@ -114,6 +114,14 @@ body {
   padding: .25em .6em;
 }
 
+.tw-pill-blue-text {
+  font-size: 75%;
+  color: #00264b;
+  font-weight: 600;
+  line-height: 1;
+  padding: .25em .6em;
+}
+
 .cursor-pointer {
   cursor: pointer
 }

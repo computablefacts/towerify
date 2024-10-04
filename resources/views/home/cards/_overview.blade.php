@@ -224,7 +224,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
         'Authorization': 'Bearer {{Auth::user()->adversaryMeterApiToken()}}'
       }
     }).then(function (asset) {
-      toaster.toast(`La surveillance de ${asset.data.asset.asset} a commencé.`, 'success');
+      toaster.toastSuccess(`La surveillance de ${asset.data.asset.asset} a commencé.`);
       if (asset.data.asset.type === 'IP') {
         const div = document.getElementById('ip-monitored');
         div.innerText = parseInt(div.innerText) + 1;
@@ -232,13 +232,6 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
         const div = document.getElementById('dns-monitored');
         div.innerText = parseInt(div.innerText, 10) + 1;
       }
-    }).catch(function (error) {
-      console.error('Error:', error.response.data);
-      if (error.response && error.response.data && error.response.data.errors) {
-        toaster.toast(error.response.data.message || 'Une erreur est survenue.', 'danger');
-      } else {
-        toaster.toast('Une erreur est survenue.', 'danger');
-      }
-    });
+    }).catch((error) => toaster.toastAxiosError(error));
   }
 </script>
