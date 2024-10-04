@@ -1,4 +1,3 @@
-@if(Auth::user()->canUseCyberBuddy())
 <div class="card card-accent-secondary tw-card">
   <div class="card-header">
     <h3 class="m-0"><b>{{ __('Import your documents !') }}</b></h3>
@@ -126,4 +125,3 @@
     }).catch(error => toaster.toastAxiosError(error));
   });
 </script>
-@endif
