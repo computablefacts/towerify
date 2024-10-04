@@ -30,7 +30,7 @@ trait HasTenant
                     $users = User::select('id')->where('tenant_id', $tenantId);
                 }
 
-                $builder->whereIn('created_by', $users);
+                $builder->whereIn("{$builder->getModel()->getTable()}.created_by", $users);
             }
         });
     }

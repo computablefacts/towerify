@@ -31,7 +31,7 @@ trait HasTenant2
                     $users = User::select('id')->where('tenant_id', $tenantId);
                 }
 
-                $builder->whereIn('user_id', $users)->orWhereNull('user_id');
+                $builder->whereIn("{$builder->getModel()->getTable()}.user_id", $users)->orWhereNull('user_id');
             }
         });
     }
