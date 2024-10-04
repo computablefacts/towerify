@@ -53,6 +53,19 @@
   </style>
 </head>
 <body>
+<script>
+  /*
+   * Fix Blueprintjs issue.
+   *
+   * https://adambien.blog/roller/abien/entry/uncaught_referenceerror_process_is_not
+   */
+  window.process = {
+    env: {
+      NODE_ENV: 'production'
+    }
+  }
+</script>
+<script src="{{ asset('adversary_meter/src/blueprintjs/main.min.js') }}"></script>
 <div id="app">
   <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
     <div class="container">
@@ -181,19 +194,6 @@
 @stack('alpine')
 <script src="{{ asset('js/app.js') }}"></script>
 @stack('scripts')
-<script>
-  /*
-   * Fix Blueprintjs issue.
-   *
-   * https://adambien.blog/roller/abien/entry/uncaught_referenceerror_process_is_not
-   */
-  window.process = {
-    env: {
-      NODE_ENV: 'production'
-    }
-  }
-</script>
-<script src="{{ asset('adversary_meter/src/blueprintjs/main.min.js') }}"></script>
 <script>
 
   const toaster = {
