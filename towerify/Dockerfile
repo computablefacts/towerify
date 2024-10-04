@@ -66,9 +66,9 @@ RUN echo "max_execution_time=15" > $PHP_INI_DIR/conf.d/max-execution-time.ini
 # Memory Limit (default=128M)
 RUN echo "memory_limit=1024M" > $PHP_INI_DIR/conf.d/max-limit.ini
 # POST max size (default=8M)
-RUN echo "post_max_size=8M" >> $PHP_INI_DIR/conf.d/max-limit.ini
+RUN echo "post_max_size=50M" >> $PHP_INI_DIR/conf.d/max-limit.ini
 # Upload max file size (default=2M)
-RUN echo "upload_max_filesize=2M" >> $PHP_INI_DIR/conf.d/max-limit.ini
+RUN echo "upload_max_filesize=50M" >> $PHP_INI_DIR/conf.d/max-limit.ini
 # Set maximum length of log_errors (default=1024)
 RUN echo "log_errors_max_len=16384" >> $PHP_INI_DIR/conf.d/max-limit.ini
 
