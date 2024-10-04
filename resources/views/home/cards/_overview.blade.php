@@ -217,7 +217,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
 
     const asset = document.querySelector('#asset').value;
 
-    axios.post("{{ url('/am/api/v2/inventory/assets') }}", {
+    axios.post('/am/api/v2/inventory/assets', {
       asset: asset, watch: true,
     }, {
       headers: {

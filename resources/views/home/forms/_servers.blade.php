@@ -133,10 +133,6 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
       <textarea id="authorizedKey" class="form-control" rows="5" readonly>{{ $server->ssh_public_key ? $server->sshKeyPair()->echoAuthorizedKey() : '-' }}</textarea>
     </div>
   </div>
-  <div id="result-3" class="alert alert-dismissible fade show m-2" style="display:none;">
-    <button type="button" class="btn-close" aria-label="Close" onclick="closeResult3()"></button>
-    <span id="result-message-3"></span>
-  </div>
   <div class="card-footer d-flex justify-content-between">
     <div>
       <button type="button" onclick="testSshConnection()" class="btn btn-outline-primary">
@@ -167,16 +163,9 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
 
   function copyToClipboard() {
     const copyText = document.getElementById("authorizedKey").value;
-    navigator.clipboard.writeText(copyText).then(function () {
-      console.log('Text successfully copied to clipboard');
-    }).catch(function (err) {
-      console.error('Error in copying text: ', err);
-    });
-  }
-
-  function closeResult3() {
-    const resultDiv = document.getElementById('result-3');
-    resultDiv.style.display = 'none';
+    navigator.clipboard.writeText(copyText)
+    .then(() => toaster.toastSuccess("{{ __('Text successfully copied to clipboard.') }}"))
+    .catch(error => toaster.toastError("{{ __('An error occurred.') }}"));
   }
 
   function testSshConnection() {
@@ -184,32 +173,18 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
     const ip = document.querySelector('[name="ip_address"]').value;
     const port = document.querySelector('[name="ssh_port"]').value;
     const username = document.querySelector('[name="ssh_username"]').value;
-    const resultDiv = document.getElementById('result-3');
-    const messageSpan = document.getElementById('result-message-3');
 
     axios.post("{{ route('ynh.servers.test-ssh-connection', $server) }}", {
       ip: ip, port: port, username: username
     }).then(data => {
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
       if (data.data.success) {
-        resultDiv.classList.add('alert-success');
-        resultDiv.classList.remove('alert-danger');
-        messageSpan.textContent = data.data.success;
+        toaster.toastSuccess(data.data.success);
       } else if (data.data.error) {
-        resultDiv.classList.add('alert-danger');
-        resultDiv.classList.remove('alert-success');
-        messageSpan.textContent = data.data.error;
+        toaster.toastError(data.data.error);
       } else {
         console.log(data.data);
       }
-    }).catch(error => {
-      console.error('Error:', error);
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
-      resultDiv.classList.add('alert-danger');
-      messageSpan.textContent = 'An error occurred.';
-    });
+    }).catch(error => toaster.toastAxiosError(error));
   }
 
   function setupHost() {
@@ -219,111 +194,46 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
     const port = document.querySelector('[name="ssh_port"]').value;
     const username = document.querySelector('[name="ssh_username"]').value;
     const domain = document.querySelector('[name="principal_domain"]').value;
-    const resultDiv = document.getElementById('result-3');
-    const messageSpan = document.getElementById('result-message-3');
 
     axios.post("{{ route('ynh.servers.configure', $server) }}", {
       name: name, ip: ip, port: port, username: username, domain: domain,
     }).then(function (response) {
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
       if (response.data.success) {
-        resultDiv.classList.add('alert-success');
-        resultDiv.classList.remove('alert-danger');
-        messageSpan.textContent = response.data.success;
+        toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
-        resultDiv.classList.add('alert-danger');
-        resultDiv.classList.remove('alert-success');
-        messageSpan.textContent = response.data.error;
+        toaster.toastError(response.data.error);
       } else {
         console.log(data.data);
       }
-    }).catch(function (error) {
-      console.error('Error:', error.response.data);
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
-      resultDiv.classList.remove('alert-success');
-      if (error.response && error.response.data && error.response.data.errors) {
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = error.response.data.message || 'An error occurred.';
-      } else {
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = 'An error occurred.';
-      }
-    });
+    }).catch(error => toaster.toastAxiosError(error));
   }
 
   function monitorHost() {
-
-    const name = document.querySelector('[name="name"]').value;
-    const ip = document.querySelector('[name="ip_address"]').value;
-    const port = document.querySelector('[name="ssh_port"]').value;
-    const username = document.querySelector('[name="ssh_username"]').value;
-    const domain = document.querySelector('[name="principal_domain"]').value;
-    const resultDiv = document.getElementById('result-3');
-    const messageSpan = document.getElementById('result-message-3');
-
-    axios.post("{{ route('ynh.servers.monitor-server', $server) }}", {})
-    .then(function (response) {
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
+    axios.post("{{ route('ynh.servers.monitor-server', $server) }}", {}).then(function (response) {
       if (response.data.success) {
-        resultDiv.classList.add('alert-success');
-        resultDiv.classList.remove('alert-danger');
-        messageSpan.textContent = response.data.success;
+        toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
-        resultDiv.classList.add('alert-danger');
-        resultDiv.classList.remove('alert-success');
-        messageSpan.textContent = response.data.error;
+        toaster.toastError(response.data.error);
       } else {
         console.log(data.data);
       }
-    }).catch(function (error) {
-      console.error('Error:', error.response.data);
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
-      resultDiv.classList.remove('alert-success');
-      if (error.response && error.response.data && error.response.data.errors) {
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = error.response.data.message || 'An error occurred.';
-      } else {
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = 'An error occurred.';
-      }
-    });
+    }).catch(error => toaster.toastAxiosError(error));
   }
 
   function removeFromInventory() {
 
-    const resultDiv = document.getElementById('result-3');
-    const messageSpan = document.getElementById('result-message-3');
     const response = confirm(`Are you sure you want to remove {{ $server->name }} from the inventory?`);
 
     if (response) {
-      axios.delete("{{ route('ynh.servers.delete', $server) }}")
-      .then(function (response) {
-        resultDiv.className = 'alert alert-dismissible fade show m-2';
-        resultDiv.style.display = 'block';
+      axios.delete("{{ route('ynh.servers.delete', $server) }}").then(function (response) {
         if (response.data.success) {
-          resultDiv.classList.add('alert-success');
-          resultDiv.classList.remove('alert-danger');
-          messageSpan.textContent = response.data.success;
+          toaster.toastSuccess(response.data.success);
         } else if (response.data.error) {
-          resultDiv.classList.add('alert-danger');
-          resultDiv.classList.remove('alert-success');
-          messageSpan.textContent = response.data.error;
+          toaster.toastError(response.data.error);
         } else {
           console.log(data.data);
         }
-      }).catch(function (error) {
-        console.error('Error:', error);
-        resultDiv.className = 'alert alert-dismissible fade show m-2';
-        resultDiv.style.display = 'block';
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = 'An error occurred.';
-      }).finally(function () {
-        window.location.href = '/';
-      });
+      }).catch(error => toaster.toastAxiosError(error));
     }
   }
 

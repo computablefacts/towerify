@@ -31,10 +31,6 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
     </div>
     @endif
   </div>
-  <div id="result-7" class="alert alert-dismissible fade show m-2" style="display:none;">
-    <button type="button" class="btn-close" aria-label="Close" onclick="closeResult7()"></button>
-    <span id="result-message-7"></span>
-  </div>
   @if($servers->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -153,16 +149,9 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
 </div>
 <script>
 
-  function closeResult7() {
-    const resultDiv = document.getElementById('result-7');
-    resultDiv.style.display = 'none';
-  }
-
   function refresh(serverId) {
 
     const refreshBtn = document.getElementById(`refresh-${serverId}`);
-    const resultDiv = document.getElementById('result-7');
-    const messageSpan = document.getElementById('result-message-7');
 
     if (refreshBtn.classList.contains('loading')) {
       return;
@@ -171,28 +160,15 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
     refreshBtn.classList.add('loading');
     refreshBtn.innerHTML = '<span class=refresh>&#x25cc;</span>';
 
-    axios.post(`/ynh/servers/${serverId}/pull-server-infos`, {})
-    .then(function (data) {
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
+    axios.post(`/ynh/servers/${serverId}/pull-server-infos`, {}).then(function (data) {
       if (data.data.success) {
-        resultDiv.classList.add('alert-success');
-        resultDiv.classList.remove('alert-danger');
-        messageSpan.textContent = data.data.success;
+        toaster.toastSuccess(data.data.success);
       } else if (data.data.error) {
-        resultDiv.classList.add('alert-danger');
-        resultDiv.classList.remove('alert-success');
-        messageSpan.textContent = data.data.error;
+        toaster.toastError(data.data.error);
       } else {
         console.log(data.data);
       }
-    }).catch(error => {
-      console.error('Error:', error);
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
-      resultDiv.classList.add('alert-danger');
-      messageSpan.textContent = 'An error occurred.';
-    }).finally(() => {
+    }).catch(error => toaster.toastAxiosError(error)).finally(() => {
       refreshBtn.innerHTML = '<span class=refresh>&#x27f3;</span>';
       refreshBtn.classList.remove('loading');
       setTimeout(() => window.location.reload(), 5000);

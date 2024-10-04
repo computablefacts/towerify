@@ -16,10 +16,6 @@
     </div>
     @endif
   </div>
-  <div id="result-6" class="alert alert-dismissible fade show m-2" style="display:none;">
-    <button type="button" class="btn-close" aria-label="Close" onclick="closeResult6()"></button>
-    <span id="result-message-6"></span>
-  </div>
   <div id="form-invitation" class="container-fluid mt-2 d-none">
     <div class="row">
       <div class="mb-3 col-5 col-md-5">
@@ -88,11 +84,6 @@
 </div>
 <script>
 
-  function closeResult6() {
-    const resultDiv = document.getElementById('result-6');
-    resultDiv.style.display = 'none';
-  }
-
   function toggleForm() {
     document.getElementById('form-invitation').classList.toggle('d-none');
   }
@@ -104,45 +95,26 @@
     element.setSelectionRange(0, 99999); /* For mobile devices */
     document.execCommand('copy');
     element.classList.add('invisible');
+    toaster.toastSuccess("{{ __('Text successfully copied to clipboard.') }}");
   }
 
   function createInvitation() {
 
     const fullname = document.querySelector('#fullname').value;
     const email = document.querySelector('#email').value;
-    const resultDiv = document.getElementById('result-6');
-    const messageSpan = document.getElementById('result-message-6');
 
     axios.post("{{ route('ynh.invitations.create') }}", {
       fullname: fullname, email: email,
     }).then(function (response) {
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
       if (response.data.success) {
-        resultDiv.classList.add('alert-success');
-        resultDiv.classList.remove('alert-danger');
-        messageSpan.textContent = response.data.success;
+        toaster.toastSuccess(response.data.success);
         toggleForm();
       } else if (response.data.error) {
-        resultDiv.classList.add('alert-danger');
-        resultDiv.classList.remove('alert-success');
-        messageSpan.textContent = response.data.error;
+        toaster.toastError(response.data.error);
       } else {
         console.log(data.data);
       }
-    }).catch(function (error) {
-      console.error('Error:', error.response.data);
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
-      resultDiv.classList.remove('alert-success');
-      if (error.response && error.response.data && error.response.data.errors) {
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = error.response.data.message || 'An error occurred.';
-      } else {
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = 'An error occurred.';
-      }
-    });
+    }).catch(error => toaster.toastAxiosError(error));
   }
 
 </script>

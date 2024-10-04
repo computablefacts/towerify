@@ -29,10 +29,6 @@ function formatBytes($bytes, $precision = 2)
     </div>
     @endif
   </div>
-  <div id="result-8" class="alert alert-dismissible fade show m-2" style="display:none;">
-    <button type="button" class="btn-close" aria-label="Close" onclick="closeResult8()"></button>
-    <span id="result-message-8"></span>
-  </div>
   @if($backups->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -95,44 +91,16 @@ function formatBytes($bytes, $precision = 2)
 </div>
 <script>
 
-  function closeResult8() {
-    const resultDiv = document.getElementById('result-8');
-    resultDiv.style.display = 'none';
-  }
-
   function createBackup() {
-
-    const resultDiv = document.getElementById('result-8');
-    const messageSpan = document.getElementById('result-message-8');
-
-    axios.post("{{ route('ynh.servers.create-backup', $server) }}", {})
-    .then(function (response) {
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
+    axios.post("{{ route('ynh.servers.create-backup', $server) }}", {}).then(function (response) {
       if (response.data.success) {
-        resultDiv.classList.add('alert-success');
-        resultDiv.classList.remove('alert-danger');
-        messageSpan.textContent = response.data.success;
+        toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
-        resultDiv.classList.add('alert-danger');
-        resultDiv.classList.remove('alert-success');
-        messageSpan.textContent = response.data.error;
+        toaster.toastError(response.data.error);
       } else {
         console.log(data.data);
       }
-    }).catch(function (error) {
-      console.error('Error:', error.response.data);
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
-      resultDiv.classList.remove('alert-success');
-      if (error.response && error.response.data && error.response.data.errors) {
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = error.response.data.message || 'An error occurred.';
-      } else {
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = 'An error occurred.';
-      }
-    });
+    }).catch(error => toaster.toastAxiosError(error));
   }
 
 </script>

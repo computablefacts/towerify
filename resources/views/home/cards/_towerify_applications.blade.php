@@ -3,10 +3,6 @@
   <div class="card-header">
     <h3 class="m-0"><b>{{ __('Applications') }}</b></h3>
   </div>
-  <div id="result-1" class="alert alert-dismissible fade show m-2" style="display:none;">
-    <button type="button" class="btn-close" aria-label="Close" onclick="closeResult1()"></button>
-    <span id="result-message-1"></span>
-  </div>
   @if($applications->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -74,42 +70,20 @@
 </div>
 <script>
 
-  function closeResult1() {
-    const resultDiv = document.getElementById('result-1');
-    resultDiv.style.display = 'none';
-  }
-
   function uninstallApp(serverId, appId, appName) {
 
     const response = confirm(`Are you sure you want to remove ${appName} from the server?`);
 
     if (response) {
-
-      const resultDiv = document.getElementById('result-1');
-      const messageSpan = document.getElementById('result-message-1');
-
-      axios.delete(`/ynh/servers/${serverId}/apps/${appId}`)
-      .then(function (data) {
-        resultDiv.className = 'alert alert-dismissible fade show m-2';
-        resultDiv.style.display = 'block';
+      axios.delete(`/ynh/servers/${serverId}/apps/${appId}`).then(function (data) {
         if (data.data.success) {
-          resultDiv.classList.add('alert-success');
-          resultDiv.classList.remove('alert-danger');
-          messageSpan.textContent = data.data.success;
+          toaster.toastSuccess(data.data.success);
         } else if (data.data.error) {
-          resultDiv.classList.add('alert-danger');
-          resultDiv.classList.remove('alert-success');
-          messageSpan.textContent = data.data.error;
+          toaster.toastError(data.data.error);
         } else {
           console.log(data.data);
         }
-      }).catch(error => {
-        console.error('Error:', error);
-        resultDiv.className = 'alert alert-dismissible fade show m-2';
-        resultDiv.style.display = 'block';
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = 'An error occurred.';
-      });
+      }).catch(error => toaster.toastAxiosError(error));
     }
   }
 

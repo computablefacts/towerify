@@ -143,6 +143,8 @@
   "Integration Status": "Statut de l'intégration",
   "processing": "en cours de traitement",
   "processed": "traité",
+  "An error occurred.": "Une erreur est survenue.",
   "An error occurred. Try again in a moment or contact the support.": "Une erreur est survenue. Réessayez dans un instant ou contactez le support.",
-  "Your file has been successfully uploaded. It will be available shortly.": "Votre fichier a bien été importé. Il sera disponible dans quelques instants."
+  "Your file has been successfully uploaded. It will be available shortly.": "Votre fichier a bien été importé. Il sera disponible dans quelques instants.",
+  "Text successfully copied to clipboard.": "Le text a été copié dans le presse-papiers."
 }

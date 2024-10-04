@@ -81,7 +81,7 @@
         </div>
       </a>
       @else
-      <a class="navbar-brand" href="{{ url('/') }}">
+      <a class="navbar-brand" href="/">
         <div class="tw-logo">
           <div class="image">
             <img src="{{ asset('images/logo.png') }}" alt="Cywise's logo">

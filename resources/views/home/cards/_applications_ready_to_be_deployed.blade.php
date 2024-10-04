@@ -3,10 +3,6 @@
   <div class="card-header">
     <h3 class="m-0"><b>{{ __('Applications Ready To Be Deployed') }}</b></h3>
   </div>
-  <div id="result-2" class="alert alert-dismissible fade show m-2" style="display:none;">
-    <button type="button" class="btn-close" aria-label="Close" onclick="closeResult2()"></button>
-    <span id="result-message-2"></span>
-  </div>
   @if($orders->filter(fn($order) => $order->isFulfilled())->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -93,42 +89,20 @@
 </div>
 <script>
 
-  function closeResult2() {
-    const resultDiv = document.getElementById('result-2');
-    resultDiv.style.display = 'none';
-  }
-
   function installApp(serverId, orderId, appName) {
 
     const response = confirm(`Are you sure you want to install ${appName} on this server?`);
 
     if (response) {
-
-      const resultDiv = document.getElementById('result-2');
-      const messageSpan = document.getElementById('result-message-2');
-
-      axios.post(`/ynh/servers/${serverId}/orders/${orderId}`, {})
-      .then(function (data) {
-        resultDiv.className = 'alert alert-dismissible fade show m-2';
-        resultDiv.style.display = 'block';
+      axios.post(`/ynh/servers/${serverId}/orders/${orderId}`, {}).then(function (data) {
         if (data.data.success) {
-          resultDiv.classList.add('alert-success');
-          resultDiv.classList.remove('alert-danger');
-          messageSpan.textContent = data.data.success;
+          toaster.toastSuccess(data.data.success);
         } else if (data.data.error) {
-          resultDiv.classList.add('alert-danger');
-          resultDiv.classList.remove('alert-success');
-          messageSpan.textContent = data.data.error;
+          toaster.toastError(data.data.error);
         } else {
           console.log(data.data);
         }
-      }).catch(error => {
-        console.error('Error:', error);
-        resultDiv.className = 'alert alert-dismissible fade show m-2';
-        resultDiv.style.display = 'block';
-        resultDiv.classList.add('alert-danger');
-        messageSpan.textContent = 'An error occurred.';
-      });
+      }).catch(error => toaster.toastAxiosError(error));
     }
   }
 

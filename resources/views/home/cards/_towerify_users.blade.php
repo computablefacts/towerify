@@ -7,10 +7,6 @@
       </b>
     </h3>
   </div>
-  <div id="result-5" class="alert alert-dismissible fade show m-2" style="display:none;">
-    <button type="button" class="btn-close" aria-label="Close" onclick="closeResult5()"></button>
-    <span id="result-message-5"></span>
-  </div>
   @if($users->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -120,67 +116,28 @@
 </div>
 <script>
 
-  function closeResult5() {
-    const resultDiv = document.getElementById('result-5');
-    resultDiv.style.display = 'none';
-  }
-
   function addUserPermission(serverId, userId, permission) {
-
-    const resultDiv = document.getElementById('result-5');
-    const messageSpan = document.getElementById('result-message-5');
-
-    axios.post(`/ynh/servers/${serverId}/twr-users/${userId}/permissions/${permission}`)
-    .then(function (data) {
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
+    axios.post(`/ynh/servers/${serverId}/twr-users/${userId}/permissions/${permission}`).then(function (data) {
       if (data.data.success) {
-        resultDiv.classList.add('alert-success');
-        resultDiv.classList.remove('alert-danger');
-        messageSpan.textContent = data.data.success;
+        toaster.toastSuccess(data.data.success);
       } else if (data.data.error) {
-        resultDiv.classList.add('alert-danger');
-        resultDiv.classList.remove('alert-success');
-        messageSpan.textContent = data.data.error;
+        toaster.toastError(data.data.error);
       } else {
         console.log(data.data);
       }
-    }).catch(error => {
-      console.error('Error:', error);
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
-      resultDiv.classList.add('alert-danger');
-      messageSpan.textContent = 'An error occurred.';
-    });
+    }).catch(error => toaster.toastAxiosError(error));
   }
 
   function removeUserPermission(serverId, userId, permission) {
-
-    const resultDiv = document.getElementById('result-5');
-    const messageSpan = document.getElementById('result-message-5');
-
-    axios.delete(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`)
-    .then(function (data) {
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
+    axios.delete(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`).then(function (data) {
       if (data.data.success) {
-        resultDiv.classList.add('alert-success');
-        resultDiv.classList.remove('alert-danger');
-        messageSpan.textContent = data.data.success;
+        toaster.toastSuccess(data.data.success);
       } else if (data.data.error) {
-        resultDiv.classList.add('alert-danger');
-        resultDiv.classList.remove('alert-success');
-        messageSpan.textContent = data.data.error;
+        toaster.toastError(data.data.error);
       } else {
         console.log(data.data);
       }
-    }).catch(error => {
-      console.error('Error:', error);
-      resultDiv.className = 'alert alert-dismissible fade show m-2';
-      resultDiv.style.display = 'block';
-      resultDiv.classList.add('alert-danger');
-      messageSpan.textContent = 'An error occurred.';
-    });
+    }).catch(error => toaster.toastAxiosError(error));
   }
 
 </script>

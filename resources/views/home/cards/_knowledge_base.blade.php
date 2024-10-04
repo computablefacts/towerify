@@ -94,7 +94,7 @@
     formData.append('file', file);
     formData.append('collection', collection);
 
-    axios.post("{{ url('/cb/web/files/one') }}", formData, {
+    axios.post('/cb/web/files/one', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
@@ -121,8 +121,7 @@
   elCollections.defaultText = "{{ __('Select or create collection...') }}";
 
   document.addEventListener('DOMContentLoaded', function (event) {
-    axios.get("{{ url('/cb/web/collections') }}")
-    .then(response => {
+    axios.get('/cb/web/collections').then(response => {
       elCollections.items = response.data.map(collection => collection.name);
     }).catch(error => toaster.toastAxiosError(error));
   });

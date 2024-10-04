@@ -14,7 +14,7 @@
   let notifications = @json($notifications);
 
   function dismissNotification(notificationId) {
-    axios.get(`{{ url('/notifications/${notificationId}/dismiss') }}`).then(response => {
+    axios.get(`/notifications/${notificationId}/dismiss`).then(response => {
       toaster.el.toast('The notification has been dismissed!', 'success');
     }).catch(error => {
       toaster.el.toast('An error occurred.', 'danger');
