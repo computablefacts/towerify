@@ -113,7 +113,7 @@
   elFile.buttonText = "{{ __('Browse') }}";
 
   const elCollections = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('collections'), null,
-    null, null, query => console.log(query));
+    null, null, query => query);
   elCollections.onSelectionChange(item => {
     collection = item;
     elSubmit.disabled = !file || !collection;
