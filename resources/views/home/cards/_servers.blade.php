@@ -160,13 +160,13 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
     refreshBtn.classList.add('loading');
     refreshBtn.innerHTML = '<span class=refresh>&#x25cc;</span>';
 
-    axios.post(`/ynh/servers/${serverId}/pull-server-infos`, {}).then(function (data) {
-      if (data.data.success) {
-        toaster.toastSuccess(data.data.success);
-      } else if (data.data.error) {
-        toaster.toastError(data.data.error);
+    axios.post(`/ynh/servers/${serverId}/pull-server-infos`, {}).then(function (response) {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
       } else {
-        console.log(data.data);
+        console.log(response.data);
       }
     }).catch(error => toaster.toastAxiosError(error)).finally(() => {
       refreshBtn.innerHTML = '<span class=refresh>&#x27f3;</span>';

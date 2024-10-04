@@ -176,13 +176,13 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
 
     axios.post("{{ route('ynh.servers.test-ssh-connection', $server) }}", {
       ip: ip, port: port, username: username
-    }).then(data => {
-      if (data.data.success) {
-        toaster.toastSuccess(data.data.success);
-      } else if (data.data.error) {
-        toaster.toastError(data.data.error);
+    }).then(response => {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
       } else {
-        console.log(data.data);
+        console.log(response.data);
       }
     }).catch(error => toaster.toastAxiosError(error));
   }
@@ -203,7 +203,7 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
       } else if (response.data.error) {
         toaster.toastError(response.data.error);
       } else {
-        console.log(data.data);
+        console.log(response.data);
       }
     }).catch(error => toaster.toastAxiosError(error));
   }
@@ -215,7 +215,7 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
       } else if (response.data.error) {
         toaster.toastError(response.data.error);
       } else {
-        console.log(data.data);
+        console.log(response.data);
       }
     }).catch(error => toaster.toastAxiosError(error));
   }
@@ -231,7 +231,7 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
         } else if (response.data.error) {
           toaster.toastError(response.data.error);
         } else {
-          console.log(data.data);
+          console.log(response.data);
         }
       }).catch(error => toaster.toastAxiosError(error));
     }

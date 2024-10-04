@@ -112,7 +112,7 @@
       } else if (response.data.error) {
         toaster.toastError(response.data.error);
       } else {
-        console.log(data.data);
+        console.log(response.data);
       }
     }).catch(error => toaster.toastAxiosError(error));
   }

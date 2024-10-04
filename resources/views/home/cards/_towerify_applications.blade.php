@@ -75,13 +75,13 @@
     const response = confirm(`Are you sure you want to remove ${appName} from the server?`);
 
     if (response) {
-      axios.delete(`/ynh/servers/${serverId}/apps/${appId}`).then(function (data) {
-        if (data.data.success) {
-          toaster.toastSuccess(data.data.success);
-        } else if (data.data.error) {
-          toaster.toastError(data.data.error);
+      axios.delete(`/ynh/servers/${serverId}/apps/${appId}`).then(function (response) {
+        if (response.data.success) {
+          toaster.toastSuccess(response.data.success);
+        } else if (response.data.error) {
+          toaster.toastError(response.data.error);
         } else {
-          console.log(data.data);
+          console.log(response.data);
         }
       }).catch(error => toaster.toastAxiosError(error));
     }

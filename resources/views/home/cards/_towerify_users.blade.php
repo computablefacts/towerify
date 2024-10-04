@@ -117,25 +117,25 @@
 <script>
 
   function addUserPermission(serverId, userId, permission) {
-    axios.post(`/ynh/servers/${serverId}/twr-users/${userId}/permissions/${permission}`).then(function (data) {
-      if (data.data.success) {
-        toaster.toastSuccess(data.data.success);
-      } else if (data.data.error) {
-        toaster.toastError(data.data.error);
+    axios.post(`/ynh/servers/${serverId}/twr-users/${userId}/permissions/${permission}`).then(function (response) {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
       } else {
-        console.log(data.data);
+        console.log(response.data);
       }
     }).catch(error => toaster.toastAxiosError(error));
   }
 
   function removeUserPermission(serverId, userId, permission) {
-    axios.delete(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`).then(function (data) {
-      if (data.data.success) {
-        toaster.toastSuccess(data.data.success);
-      } else if (data.data.error) {
-        toaster.toastError(data.data.error);
+    axios.delete(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`).then(function (response) {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
       } else {
-        console.log(data.data);
+        console.log(response.data);
       }
     }).catch(error => toaster.toastAxiosError(error));
   }
