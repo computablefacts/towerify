@@ -54,39 +54,35 @@ class DeleteEmbeddedChunks implements ShouldQueue
         Collection::where('is_deleted', false)
             ->get()
             ->each(function (Collection $collection) {
-                if ($collection->chunks()->count() <= 0) {
-                    $collection->delete(); // when all chunks have been deleted, delete both the collection and its files
-                } else {
 
-                    // delete chunks that have not been sent to the vector database
-                    $collection->chunks()
-                        ->where('is_embedded', false)
-                        ->where('is_deleted', true)
-                        ->delete();
+                // delete chunks that have not been sent to the vector database
+                $collection->chunks()
+                    ->where('is_embedded', false)
+                    ->where('is_deleted', true)
+                    ->delete();
 
-                    // delete vectors then delete chunks
-                    $collection->chunks()
-                        ->where('is_embedded', true)
-                        ->where('is_deleted', true)
-                        ->chunk(500, function ($chunks) use ($collection) {
+                // delete vectors then delete chunks
+                $collection->chunks()
+                    ->where('is_embedded', true)
+                    ->where('is_deleted', true)
+                    ->chunk(500, function ($chunks) use ($collection) {
 
-                            $uids = [];
+                        $uids = [];
 
-                            foreach ($chunks as $chunk) {
-                                $uids[] = (string)$chunk->id;
+                        foreach ($chunks as $chunk) {
+                            $uids[] = (string)$chunk->id;
+                        }
+                        try {
+                            $response = ApiUtils::delete_chunks($uids, $collection->name);
+                            if ($response['error']) {
+                                Log::error($response['error_details']);
+                            } else {
+                                Chunk::whereIn('id', $uids)->delete();
                             }
-                            try {
-                                $response = ApiUtils::delete_chunks($uids, $collection->name);
-                                if ($response['error']) {
-                                    Log::error($response['error_details']);
-                                } else {
-                                    Chunk::whereIn('id', $uids)->delete();
-                                }
-                            } catch (\Exception $exception) {
-                                Log::error($exception->getMessage());
-                            }
-                        });
-                }
+                        } catch (\Exception $exception) {
+                            Log::error($exception->getMessage());
+                        }
+                    });
             });
     }
 }
