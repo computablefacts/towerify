@@ -6,8 +6,8 @@ use App\Events\AddTwrUserPermission;
 use App\Events\AddUserPermission;
 use App\Events\ConfigureHost;
 use App\Events\CreateBackup;
-use App\Events\ImportLogsFromLogalert;
-use App\Events\ImportLogsFromLogparser;
+use App\Events\ProcessLogalertPayload;
+use App\Events\ProcessLogparserPayload;
 use App\Events\InstallApp;
 use App\Events\PullServerInfos;
 use App\Events\RemoveUserPermission;
@@ -16,8 +16,8 @@ use App\Listeners\AddTwrUserPermissionListener;
 use App\Listeners\AddUserPermissionListener;
 use App\Listeners\ConfigureHostListener;
 use App\Listeners\CreateBackupListener;
-use App\Listeners\ImportLogsFromLogalertListener;
-use App\Listeners\ImportLogsFromLogparserListener;
+use App\Listeners\ProcessLogalertPayloadListener;
+use App\Listeners\ProcessLogparserPayloadListener;
 use App\Listeners\InstallAppListener;
 use App\Listeners\OrderCreatedListener;
 use App\Listeners\RemoveUserPermissionListener;
@@ -83,11 +83,11 @@ class EventServiceProvider extends ServiceProvider
         PullServerInfos::class => [
             UpdateServerInfosListener::class,
         ],
-        ImportLogsFromLogalert::class => [
-            ImportLogsFromLogalertListener::class,
+        ProcessLogalertPayload::class => [
+            ProcessLogalertPayloadListener::class,
         ],
-        ImportLogsFromLogparser::class => [
-            ImportLogsFromLogparserListener::class,
+        ProcessLogparserPayload::class => [
+            ProcessLogparserPayloadListener::class,
         ],
 
         // AdversaryMeter

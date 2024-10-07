@@ -7,19 +7,18 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Collection;
 
-class ImportLogsFromLogparser
+class ProcessLogalertPayload
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public YnhServer $server;
-    public Collection $logs;
+    public array $events;
 
-    public function __construct(YnhServer $server, Collection $logs)
+    public function __construct(YnhServer $server, array $events)
     {
         $this->server = $server;
-        $this->logs = $logs;
+        $this->events = $events;
     }
 
     public function broadcastOn()

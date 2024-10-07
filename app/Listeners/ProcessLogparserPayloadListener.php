@@ -2,16 +2,16 @@
 
 namespace App\Listeners;
 
-use App\Events\ImportLogsFromLogparser;
+use App\Events\ProcessLogparserPayload;
 use App\Models\YnhNginxLogs;
 use App\Models\YnhServer;
 use Illuminate\Support\Facades\DB;
 
-class ImportLogsFromLogparserListener extends AbstractListener
+class ProcessLogparserPayloadListener extends AbstractListener
 {
     protected function handle2($event)
     {
-        if (!($event instanceof ImportLogsFromLogparser)) {
+        if (!($event instanceof ProcessLogparserPayload)) {
             throw new \Exception('Invalid event type!');
         }
 

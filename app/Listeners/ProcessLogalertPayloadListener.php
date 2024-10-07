@@ -2,14 +2,14 @@
 
 namespace App\Listeners;
 
-use App\Events\ImportLogsFromLogalert;
+use App\Events\ProcessLogalertPayload;
 use Illuminate\Support\Facades\Log;
 
-class ImportLogsFromLogalertListener extends AbstractListener
+class ProcessLogalertPayloadListener extends AbstractListener
 {
     protected function handle2($event)
     {
-        if (!($event instanceof ImportLogsFromLogalert)) {
+        if (!($event instanceof ProcessLogalertPayload)) {
             throw new \Exception('Invalid event type!');
         }
 

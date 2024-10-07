@@ -179,7 +179,7 @@ Route::post('/logalert/{secret}', function (string $secret, \Illuminate\Http\Req
             ->filter(fn($event) => $event && count($event) > 0)
             ->all();
 
-        event(new \App\Events\ImportLogsFromLogalert($server, $events));
+        event(new \App\Events\ProcessLogalertPayload($server, $events));
 
     } catch (\Exception $e) {
         \Illuminate\Support\Facades\Log::error($e);
@@ -272,7 +272,7 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
             ->header('Content-Type', 'text/plain');
     }
 
-    event(new \App\Events\ImportLogsFromLogparser($server, $logs));
+    event(new \App\Events\ProcessLogparserPayload($server, $logs));
 
     return response("ok ({$logs->count()} rows in file)", 200)
         ->header('Content-Type', 'text/plain');
