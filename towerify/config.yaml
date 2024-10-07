@@ -2,6 +2,7 @@ name: cywise-ui
 type: laravel-9
 config:
   dockerfile: ./towerify/Dockerfile
+  nginxconf: ./towerify/nginx.conf
   envs:
     prod:
       domain: app.cywise.io
