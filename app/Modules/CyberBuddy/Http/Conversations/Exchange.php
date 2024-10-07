@@ -12,7 +12,7 @@ use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use Illuminate\Support\Str;
 
-class FrameworksConversation extends Conversation
+class Exchange extends Conversation
 {
     public function run(): void
     {
@@ -26,18 +26,21 @@ class FrameworksConversation extends Conversation
 
     private function askForFramework(): void
     {
-        $collections = Collection::all()
+        $collections = Collection::where('is_deleted', false)
+            ->get()
             ->map(fn(Collection $collection) => Button::create($collection->name)->value($collection->id))
             ->toArray();
-        $question = Question::create('Quelle version souhaitez-vous utiliser?')
-            ->fallback('La version sélectionnée est inconnue.')
-            ->callbackId('guide_hygiene_anssi')
+
+        $question = Question::create('Quelle collection de documents souhaitez-vous utiliser?')
+            ->fallback('La collection sélectionnée est inconnue.')
+            ->callbackId('collection')
             ->addButtons($collections);
+
         $this->ask($question, function (Answer $answer) {
             if ($answer->isInteractiveMessageReply()) {
                 $collectionId = $answer->getValue();
                 $collection = Collection::find($collectionId);
-                $this->say("Le référentiel est maintenant <b>{$collection->name}</b>.");
+                $this->say("La collection selectionnée est <b>{$collection->name}</b>.");
                 $this->askQuestion(Str::random(), $collection);
             }
         });

@@ -6,7 +6,7 @@ use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
-use App\Modules\CyberBuddy\Http\Conversations\FrameworksConversation;
+use App\Modules\CyberBuddy\Http\Conversations\Exchange;
 use App\Modules\CyberBuddy\Http\Requests\DownloadOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
@@ -304,7 +304,7 @@ class CyberBuddyController extends Controller
                 $botman->reply($answer);
             }
         })->skipsConversation();
-        $botman->hears('/conversation', fn(BotMan $botman) => $botman->startConversation(new FrameworksConversation()));
+        $botman->hears('/conversation', fn(BotMan $botman) => $botman->startConversation(new Exchange()));
         $botman->fallback(fn(BotMan $botman) => $botman->reply('Désolé, je n\'ai pas compris votre commande.'));
         $botman->listen();
     }
