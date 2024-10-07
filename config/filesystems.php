@@ -90,6 +90,9 @@ return [
             'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
             'bucket' => env('AWS_BUCKET_PUBLIC', 'towerify-public'),
             'prefix' => env('APP_ENV', 'none') . '/images',
+            'options' => [
+                'ACL' => ''
+            ],
         ],
 
         'images-s3' => [
@@ -99,6 +102,9 @@ return [
             'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
             'bucket' => env('AWS_BUCKET_PUBLIC', 'towerify-public'),
             'prefix' => env('APP_ENV', 'none') . '/images',
+            'options' => [
+                'ACL' => ''
+            ],
         ],
 
         'files-s3' => [
@@ -108,6 +114,9 @@ return [
             'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
             'bucket' => env('AWS_BUCKET_PRIVATE', 'towerify-private'),
             'prefix' => env('APP_ENV', 'none') . '/files',
+            'options' => [
+                'ACL' => ''
+            ],
         ],
 
         'backups-s3' => [
@@ -117,6 +126,9 @@ return [
             'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
             'bucket' => env('AWS_BUCKET_PRIVATE', 'towerify-private'),
             'prefix' => env('APP_ENV', 'none') . '/backups',
+            'options' => [
+                'ACL' => ''
+            ],
         ],
 
         'honeypots-s3' => [
@@ -126,6 +138,9 @@ return [
             'region' => env('AWS_DEFAULT_REGION', 'eu-west-3'),
             'bucket' => env('AWS_BUCKET_PRIVATE', 'towerify-private'),
             'prefix' => env('APP_ENV', 'none') . '/honeypots',
+            'options' => [
+                'ACL' => ''
+            ],
         ],
     ],
 
