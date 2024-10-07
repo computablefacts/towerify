@@ -27,7 +27,8 @@ class EmbedChunks implements ShouldQueue
 
     public function handle()
     {
-        Collection::all()
+        Collection::where('is_deleted', false)
+            ->get()
             ->each(function (Collection $collection) {
                 $collection->chunks()
                     ->where('is_embedded', false)
