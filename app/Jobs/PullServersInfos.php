@@ -29,8 +29,11 @@ class PullServersInfos implements ShouldQueue
             ->whereNotNull('ssh_username')
             ->whereNotNull('ssh_public_key')
             ->whereNotNull('ssh_private_key')
-            ->each(function (YnhServer $server) {
-                $server->pullServerInfos();
-            });
+            ->where('is_ready', true)
+            ->where('added_with_curl', false)
+            ->where('is_frozen', false)
+            ->get()
+            ->filter(fn(YnhServer $server) => $server->sshTestConnection())
+            ->each(fn(YnhServer $server) => $server->pullServerInfos());
     }
 }
