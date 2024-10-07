@@ -4,7 +4,7 @@ namespace App\Modules\CyberBuddy\Jobs;
 
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Models\Chunk;
-use App\Modules\CyberBuddy\Models\ChunkCollection;
+use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\File;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -37,9 +37,9 @@ class DeleteEmbeddedChunks implements ShouldQueue
                     $file->chunks()->update(['is_deleted' => true]); // mark chunks as "to be deleted"
                 }
             });
-        ChunkCollection::where('is_deleted', true)
+        Collection::where('is_deleted', true)
             ->get()
-            ->each(function (ChunkCollection $collection) {
+            ->each(function (Collection $collection) {
                 try {
                     $response = ApiUtils::delete_collection($collection->name);
                     if ($response['error']) {
@@ -51,9 +51,9 @@ class DeleteEmbeddedChunks implements ShouldQueue
                     Log::error($exception->getMessage());
                 }
             });
-        ChunkCollection::where('is_deleted', false)
+        Collection::where('is_deleted', false)
             ->get()
-            ->each(function (ChunkCollection $collection) {
+            ->each(function (Collection $collection) {
                 if ($collection->chunks()->count() <= 0) {
                     $collection->delete(); // when all chunks have been deleted, delete both the collection and its files
                 } else {

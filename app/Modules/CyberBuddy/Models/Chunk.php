@@ -49,7 +49,7 @@ class Chunk extends Model
 
     public function collection(): HasOne
     {
-        return $this->hasOne(ChunkCollection::class, 'id', 'collection_id');
+        return $this->hasOne(Collection::class, 'id', 'collection_id');
     }
 
     public function file(): HasOne

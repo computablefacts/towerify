@@ -11,7 +11,6 @@ use App\Modules\CyberBuddy\Http\Requests\DownloadOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadOneFileRequest;
-use App\Modules\CyberBuddy\Models\ChunkCollection;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
@@ -89,9 +88,9 @@ class CyberBuddyController extends Controller
 
     public function collections()
     {
-        return ChunkCollection::orderBy('name', 'asc')
+        return \App\Modules\CyberBuddy\Models\Collection::orderBy('name', 'asc')
             ->get()
-            ->map(function (ChunkCollection $collection) {
+            ->map(function (\App\Modules\CyberBuddy\Models\Collection $collection) {
                 return [
                     'id' => $collection->id,
                     'name' => $collection->name,

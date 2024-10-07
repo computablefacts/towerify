@@ -53,7 +53,7 @@ use App\Modules\AdversaryMeter\Observers\AssetTagObserver;
 use App\Modules\AdversaryMeter\Observers\HiddenAlertObserver;
 use App\Modules\AdversaryMeter\Observers\HoneypotObserver;
 use App\Modules\CyberBuddy\Models\Chunk;
-use App\Modules\CyberBuddy\Models\ChunkCollection;
+use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\ChunkTag;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
@@ -228,7 +228,7 @@ class AppServiceProvider extends ServiceProvider
         // CyberBuddy
         Chunk::observe(ChunkObserver::class);
         ChunkTag::observe(ChunkTagObserver::class);
-        ChunkCollection::observe(CollectionObserver::class);
+        Collection::observe(CollectionObserver::class);
         File::observe(FilesObserver::class);
         Prompt::observe(PromptObserver::class);
     }

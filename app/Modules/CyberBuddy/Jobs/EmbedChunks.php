@@ -4,7 +4,7 @@ namespace App\Modules\CyberBuddy\Jobs;
 
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Models\Chunk;
-use App\Modules\CyberBuddy\Models\ChunkCollection;
+use App\Modules\CyberBuddy\Models\Collection;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,8 +27,8 @@ class EmbedChunks implements ShouldQueue
 
     public function handle()
     {
-        ChunkCollection::all()
-            ->each(function (ChunkCollection $collection) {
+        Collection::all()
+            ->each(function (Collection $collection) {
                 $collection->chunks()
                     ->where('is_embedded', false)
                     ->where('is_deleted', false)

@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property boolean is_deleted
  * @property int created_by
  */
-class ChunkCollection extends Model
+class Collection extends Model
 {
     use HasFactory, HasTenant;
 

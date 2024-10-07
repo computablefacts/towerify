@@ -4,7 +4,7 @@ namespace App\Modules\CyberBuddy\Http\Conversations;
 
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
-use App\Modules\CyberBuddy\Models\ChunkCollection;
+use App\Modules\CyberBuddy\Models\Collection;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
@@ -26,8 +26,8 @@ class FrameworksConversation extends Conversation
 
     private function askForFramework(): void
     {
-        $collections = ChunkCollection::all()
-            ->map(fn(ChunkCollection $collection) => Button::create($collection->name)->value($collection->id))
+        $collections = Collection::all()
+            ->map(fn(Collection $collection) => Button::create($collection->name)->value($collection->id))
             ->toArray();
         $question = Question::create('Quelle version souhaitez-vous utiliser?')
             ->fallback('La version sélectionnée est inconnue.')
@@ -36,14 +36,14 @@ class FrameworksConversation extends Conversation
         $this->ask($question, function (Answer $answer) {
             if ($answer->isInteractiveMessageReply()) {
                 $collectionId = $answer->getValue();
-                $collection = ChunkCollection::find($collectionId);
+                $collection = Collection::find($collectionId);
                 $this->say("Le référentiel est maintenant <b>{$collection->name}</b>.");
                 $this->askQuestion(Str::random(), $collection);
             }
         });
     }
 
-    private function askQuestion(string $historyKey, ChunkCollection $collection): void
+    private function askQuestion(string $historyKey, Collection $collection): void
     {
         $this->ask('Posez-moi une question!', function (Answer $answer) use ($historyKey, $collection) {
             $response = ApiUtils::chat_manual_demo($historyKey, $collection->name, $answer->getText());
@@ -57,7 +57,7 @@ class FrameworksConversation extends Conversation
         });
     }
 
-    private function askAnotherQuestion(string $historyKey, ChunkCollection $collection): void
+    private function askAnotherQuestion(string $historyKey, Collection $collection): void
     {
         $this->ask('Une autre question?', function (Answer $answer) use ($historyKey, $collection) {
             $response = ApiUtils::chat_manual_demo($historyKey, $collection->name, $answer->getText());

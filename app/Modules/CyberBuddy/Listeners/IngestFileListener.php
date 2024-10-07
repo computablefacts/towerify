@@ -6,7 +6,7 @@ use App\Listeners\AbstractListener;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Models\Chunk;
-use App\Modules\CyberBuddy\Models\ChunkCollection;
+use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use Illuminate\Support\Facades\Auth;
@@ -27,12 +27,12 @@ class IngestFileListener extends AbstractListener
         Auth::login($event->user); // otherwise the tenant will not be properly set
 
         try {
-            $collection = ChunkCollection::where('name', $event->collection)
+            $collection = Collection::where('name', $event->collection)
                 ->where('is_deleted', false)
                 ->first();
 
             if (!$collection) {
-                $collection = ChunkCollection::create(['name' => $event->collection]);
+                $collection = Collection::create(['name' => $event->collection]);
             }
 
             /** @var File $file */
