@@ -294,9 +294,9 @@ class CyberBuddyController extends Controller
                 ");
             }
         })->skipsConversation();
-        $botman->hears('/question {question}', function (BotMan $botman, string $question) {
+        $botman->hears('/question {collection} {question}', function (BotMan $botman, string $collection, string $question) {
             $botman->types();
-            $response = ApiUtils::ask_chunks_demo($question);
+            $response = ApiUtils::ask_chunks_demo($collection, $question);
             if ($response['error']) {
                 $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
             } else {
@@ -304,7 +304,7 @@ class CyberBuddyController extends Controller
                 $botman->reply($answer);
             }
         })->skipsConversation();
-        $botman->hears('/frameworks', fn(BotMan $botman) => $botman->startConversation(new FrameworksConversation()));
+        $botman->hears('/conversation', fn(BotMan $botman) => $botman->startConversation(new FrameworksConversation()));
         $botman->fallback(fn(BotMan $botman) => $botman->reply('Désolé, je n\'ai pas compris votre commande.'));
         $botman->listen();
     }
