@@ -180,9 +180,8 @@ Route::post('/logalert/{secret}', function (string $secret, \Illuminate\Http\Req
             ->map(fn($line) => $line ? json_decode($line, true) : [])
             ->filter(fn($event) => $event && count($event) > 0)
             ->all();
-        $nbEventsAdded = $server->addOsqueryEvents($events);
 
-        // \Illuminate\Support\Facades\Log::debug('LogAlert - nb_events_added=' . $nbEventsAdded);
+        event(new \App\Events\ImportLogsFromLogalert($server, $events));
 
     } catch (\Exception $e) {
         \Illuminate\Support\Facades\Log::error($e);

@@ -6,6 +6,7 @@ use App\Events\AddTwrUserPermission;
 use App\Events\AddUserPermission;
 use App\Events\ConfigureHost;
 use App\Events\CreateBackup;
+use App\Events\ImportLogsFromLogalert;
 use App\Events\InstallApp;
 use App\Events\PullServerInfos;
 use App\Events\RemoveUserPermission;
@@ -14,6 +15,7 @@ use App\Listeners\AddTwrUserPermissionListener;
 use App\Listeners\AddUserPermissionListener;
 use App\Listeners\ConfigureHostListener;
 use App\Listeners\CreateBackupListener;
+use App\Listeners\ImportLogsFromLogalertListener;
 use App\Listeners\InstallAppListener;
 use App\Listeners\OrderCreatedListener;
 use App\Listeners\RemoveUserPermissionListener;
@@ -78,6 +80,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         PullServerInfos::class => [
             UpdateServerInfosListener::class,
+        ],
+        ImportLogsFromLogalert::class => [
+            ImportLogsFromLogalertListener::class,
         ],
 
         // AdversaryMeter
