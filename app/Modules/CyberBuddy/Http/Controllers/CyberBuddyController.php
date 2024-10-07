@@ -107,7 +107,7 @@ class CyberBuddyController extends Controller
             return response()->json(['error' => 'Unknown file.'], 500);
         }
 
-        /** @var ChunkCollection $collection */
+        /** @var \App\Modules\CyberBuddy\Models\Collection $collection */
         $collection = $file->collection()->where('is_deleted', false)->first();
 
         if (!$collection) {
@@ -135,7 +135,7 @@ class CyberBuddyController extends Controller
             return response()->json(['error' => 'Unknown file.'], 500);
         }
 
-        /** @var ChunkCollection $collection */
+        /** @var \App\Modules\CyberBuddy\Models\Collection $collection */
         $collection = $file->collection()->where('is_deleted', false)->first();
 
         if (!$collection) {
@@ -156,14 +156,14 @@ class CyberBuddyController extends Controller
 
     public function uploadOneFile(UploadOneFileRequest $request)
     {
-        /** @var ChunkCollection $collection */
-        $collection = ChunkCollection::where('name', $request->string('collection'))->where('is_deleted', false)->first();
+        /** @var \App\Modules\CyberBuddy\Models\Collection $collection */
+        $collection = \App\Modules\CyberBuddy\Models\Collection::where('name', $request->string('collection'))->where('is_deleted', false)->first();
 
         if (!$collection) {
             if (!IsValidCollectionName::test($request->string('collection'))) {
                 return response()->json(['error' => 'Invalid collection name.'], 500);
             }
-            $collection = ChunkCollection::create(['name' => $request->string('collection')]);
+            $collection = \App\Modules\CyberBuddy\Models\Collection::create(['name' => $request->string('collection')]);
         }
         if (!$request->hasFile('file')) {
             return response()->json(['error' => 'Missing file content.'], 500);
@@ -183,14 +183,14 @@ class CyberBuddyController extends Controller
 
     public function uploadManyFiles(UploadManyFilesRequest $request)
     {
-        /** @var ChunkCollection $collection */
-        $collection = ChunkCollection::where('name', $request->string('collection'))->where('is_deleted', false)->first();
+        /** @var \App\Modules\CyberBuddy\Models\Collection $collection */
+        $collection = \App\Modules\CyberBuddy\Models\Collection::where('name', $request->string('collection'))->where('is_deleted', false)->first();
 
         if (!$collection) {
             if (!IsValidCollectionName::test($request->string('collection'))) {
                 return response()->json(['error' => 'Invalid collection name.'], 500);
             }
-            $collection = ChunkCollection::create(['name' => $request->string('collection')]);
+            $collection = \App\Modules\CyberBuddy\Models\Collection::create(['name' => $request->string('collection')]);
         }
 
         $files = $request->file('files');
@@ -322,7 +322,7 @@ class CyberBuddyController extends Controller
         return $user;
     }
 
-    private function saveOneFile(ChunkCollection $collection, UploadedFile $file): ?string
+    private function saveOneFile(\App\Modules\CyberBuddy\Models\Collection $collection, UploadedFile $file): ?string
     {
         // Extract file metadata
         $file_name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -374,12 +374,12 @@ class CyberBuddyController extends Controller
         return $fileRef->downloadUrl();
     }
 
-    private function storagePath(ChunkCollection $collection, File $file): string
+    private function storagePath(\App\Modules\CyberBuddy\Models\Collection $collection, File $file): string
     {
         return "{$this->storageFilePath($collection)}/{$this->storageFileName($file)}";
     }
 
-    private function storageFilePath(ChunkCollection $collection): string
+    private function storageFilePath(\App\Modules\CyberBuddy\Models\Collection $collection): string
     {
         return "/cyber-buddy/{$collection->id}";
     }
