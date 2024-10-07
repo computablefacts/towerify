@@ -66,6 +66,8 @@ class CyberBuddyController extends Controller
     {
         return File::select('cb_files.*')
             ->join('cb_collections', 'cb_collections.id', '=', 'cb_files.collection_id')
+            ->where('cb_files.is_deleted', false)
+            ->where('cb_collections.is_deleted', false)
             ->orderBy('cb_collections.name')
             ->orderBy('name_normalized')
             ->get()
