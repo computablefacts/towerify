@@ -294,7 +294,7 @@ class CyberBuddyController extends Controller
                 ");
             }
         })->skipsConversation();
-        $botman->hears('/question ([a-zA-90-9]+) (.*)', function (BotMan $botman, string $collection, string $question) {
+        $botman->hears('/question ([a-zA-Z0-9]+) (.*)', function (BotMan $botman, string $collection, string $question) {
             $botman->types();
             $response = ApiUtils::ask_chunks_demo($collection, $question);
             if ($response['error']) {
