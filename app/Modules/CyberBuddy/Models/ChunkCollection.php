@@ -20,7 +20,7 @@ class ChunkCollection extends Model
 {
     use HasFactory, HasTenant;
 
-    protected $table = 'cb_chunks_collections';
+    protected $table = 'cb_collections';
 
     protected $fillable = [
         'name',

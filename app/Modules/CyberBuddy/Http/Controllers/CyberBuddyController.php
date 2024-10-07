@@ -66,8 +66,8 @@ class CyberBuddyController extends Controller
     public function files()
     {
         return File::select('cb_files.*')
-            ->join('cb_chunks_collections', 'cb_chunks_collections.id', '=', 'cb_files.collection_id')
-            ->orderBy('cb_chunks_collections.name')
+            ->join('cb_collections', 'cb_collections.id', '=', 'cb_files.collection_id')
+            ->orderBy('cb_collections.name')
             ->orderBy('name_normalized')
             ->get()
             ->map(function (File $file) {
