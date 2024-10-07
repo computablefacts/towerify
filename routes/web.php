@@ -12,13 +12,11 @@
 */
 
 use App\Helpers\SshKeyPair;
-use App\Models\YnhNginxLogs;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -274,49 +272,8 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
             ->header('Content-Type', 'text/plain');
     }
 
-    $toId = $server->id;
-    $toIp = $server->ip();
-    $fromId = [];
+    event(new \App\Events\ImportLogsFromLogparser($server, $logs));
 
-    foreach ($logs as $countServiceAndIp) {
-
-        $count = $countServiceAndIp['count'];
-        $service = $countServiceAndIp['service'];
-        $fromIp = $countServiceAndIp['ip'];
-
-        if (!array_key_exists($fromIp, $fromId)) {
-            $fromServer = YnhServer::where('ip_address', $fromIp)->first();
-            if ($fromServer) {
-                $fromId[$fromIp] = $fromServer->id;
-            } else {
-                $fromServer = YnhServer::where('ip_address_v6', $fromIp)->first();
-                if ($fromServer) {
-                    $fromId[$fromIp] = $fromServer->id;
-                }
-            }
-        }
-
-        YnhNginxLogs::updateOrCreate([
-            'from_ip_address' => $fromIp,
-            'to_ynh_server_id' => $toId,
-            'service' => $service,
-        ], [
-            'from_ynh_server_id' => $fromId[$fromIp] ?? null,
-            'to_ynh_server_id' => $toId,
-            'from_ip_address' => $fromIp,
-            'to_ip_address' => $toIp,
-            'service' => $service,
-            'weight' => $count,
-            'updated' => true,
-        ]);
-    }
-    DB::transaction(function () use ($server) {
-        YnhNginxLogs::where('to_ynh_server_id', $server->id)
-            ->where('updated', false)
-            ->delete();
-        YnhNginxLogs::where('to_ynh_server_id', $server->id)
-            ->update(['updated' => false]);
-    });
     return response("ok ({$logs->count()} rows in file)", 200)
         ->header('Content-Type', 'text/plain');
 });
