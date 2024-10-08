@@ -335,7 +335,7 @@ class CyberBuddyController extends Controller
                             $collection = \App\Modules\CyberBuddy\Models\Collection::find($answer->getValue());
                             $botman->reply("Le corpus selectionné est <b>{$collection->name}</b>. Je vais maintenant pouvoir vous répondre!");
                             $botman->userStorage()->save(['collection' => $collection->name]);
-                            $response = ApiUtils::chat_manual_demo($historyKey, $collection, $message);
+                            $response = ApiUtils::chat_manual_demo($historyKey, $collection->name, $message);
                             if ($response['error']) {
                                 $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
                             } else {
