@@ -6,7 +6,6 @@ use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
-use App\Modules\CyberBuddy\Http\Conversations\Exchange;
 use App\Modules\CyberBuddy\Http\Requests\DownloadOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
@@ -15,6 +14,9 @@ use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;
+use BotMan\BotMan\Messages\Incoming\Answer;
+use BotMan\BotMan\Messages\Outgoing\Actions\Button;
+use BotMan\BotMan\Messages\Outgoing\Question;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -304,7 +306,47 @@ class CyberBuddyController extends Controller
                 $botman->reply($answer);
             }
         })->skipsConversation();
-        $botman->hears('/conversation', fn(BotMan $botman) => $botman->startConversation(new Exchange()));
+        $botman->hears('{message}', function (BotMan $botman, string $message) {
+            $user = $this->user($botman);
+            if (!$user) {
+                $botman->reply('Connectez-vous pour accéder à cette commande.<br>Pour ce faire, vous pouvez utiliser la commande <b>/login {username} {password}</b>');
+            } else {
+                $historyKey = $this->historyKey($botman);
+                $collection = $botman->userStorage()->get('collection');
+                if ($collection) {
+                    $response = ApiUtils::chat_manual_demo($historyKey, $collection, $message);
+                    if ($response['error']) {
+                        $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
+                    } else {
+                        $answer = CyberBuddyController::enhanceAnswerWithSources($response['response'], collect($response['context'] ?? []));
+                        $botman->reply($answer);
+                    }
+                } else {
+                    $collections = \App\Modules\CyberBuddy\Models\Collection::where('is_deleted', false)
+                        ->get()
+                        ->map(fn(\App\Modules\CyberBuddy\Models\Collection $collection) => Button::create($collection->name)->value($collection->id))
+                        ->toArray();
+                    $question = Question::create('Pour commencer, quel corpus de documents souhaitez-vous utiliser?')
+                        ->fallback('Le corpus sélectionné est inconnue.')
+                        ->callbackId('collection')
+                        ->addButtons($collections);
+                    $botman->ask($question, function (Answer $answer) use ($botman, $historyKey, $message) {
+                        if ($answer->isInteractiveMessageReply()) {
+                            $collection = \App\Modules\CyberBuddy\Models\Collection::find($answer->getValue());
+                            $botman->reply("Le corpus selectionné est <b>{$collection->name}</b>. Je vais maintenant pouvoir vous répondre!");
+                            $botman->userStorage()->save(['collection' => $collection->name]);
+                            $response = ApiUtils::chat_manual_demo($historyKey, $collection, $message);
+                            if ($response['error']) {
+                                $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
+                            } else {
+                                $answer = CyberBuddyController::enhanceAnswerWithSources($response['response'], collect($response['context'] ?? []));
+                                $botman->reply($answer);
+                            }
+                        }
+                    });
+                }
+            }
+        });
         $botman->fallback(fn(BotMan $botman) => $botman->reply('Désolé, je n\'ai pas compris votre commande.'));
         $botman->listen();
     }
@@ -322,6 +364,17 @@ class CyberBuddyController extends Controller
             $botman->userStorage()->save(['user_id' => $user->id]);
         }
         return $user;
+    }
+
+    private function historyKey(BotMan $botman): string
+    {
+        /** @var string $historyKey */
+        $historyKey = $botman->userStorage()->get('history_key');
+        if (!$historyKey) {
+            $historyKey = Str::uuid()->toString();
+            $botman->userStorage()->save(['history_key' => $historyKey]);
+        }
+        return $historyKey;
     }
 
     private function saveOneFile(\App\Modules\CyberBuddy\Models\Collection $collection, UploadedFile $file): ?string
