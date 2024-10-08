@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <title>CyberBuddy (Powered by AdversaryMeter)</title>
+  <title>CyberBuddy (Powered by {{ config('app.name') }})</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <meta name="keywords"
         content="honeypot, vulnerability scanner, assets discovery, attack surface management, shadow it">
@@ -14,15 +14,16 @@
 <script>
   window.botmanWidget = {
     title: 'CyberBuddy',
-    aboutText: '⚡ Powered by Towerify',
+    aboutText: "⚡ Powered by {{ config('app.name') }}",
     aboutLink: '{{ app_url() }}',
     userId: '{{ Auth::user() ? Auth::user()->id : \Illuminate\Support\Str::random(10) }}',
     chatServer: '/cb/web/botman',
+    bubbleAvatarUrl: '/images/icons/cyber-buddy.svg',
     frameEndpoint: '/cb/web/cyber-buddy/chat',
-    introMessage: 'Que puis-je faire pour vous?',
+    introMessage: 'Bonjour! Je suis votre cyber assistant. Que puis-je faire pour vous?',
     desktopHeight: 900,
-    desktopWidth: 740,
-    mainColor: '#00264b',
+    desktopWidth: 2 * window.innerWidth / 3,
+    mainColor: '#47627F',
     bubbleBackground: '#00264b',
     headerTextColor: 'white',
   };

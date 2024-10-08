@@ -238,7 +238,7 @@
     chatServer: '/cb/web/botman',
     bubbleAvatarUrl: '/images/icons/cyber-buddy.svg',
     frameEndpoint: '/cb/web/cyber-buddy/chat',
-    introMessage: 'Que puis-je faire pour vous?',
+    introMessage: 'Bonjour! Je suis votre cyber assistant. Que puis-je faire pour vous?',
     desktopHeight: 900,
     desktopWidth: 2 * window.innerWidth / 3,
     mainColor: '#47627F',

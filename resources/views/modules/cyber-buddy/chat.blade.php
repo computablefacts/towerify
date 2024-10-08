@@ -40,7 +40,7 @@
 
     .tooltip .tooltiptext {
       visibility: hidden;
-      width: 250px;
+      width: 460px;
       background-color: #f8b500;
       color: white;
       text-align: left;
