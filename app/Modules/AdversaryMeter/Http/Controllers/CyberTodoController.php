@@ -71,11 +71,11 @@ class CyberTodoController extends Controller
             $hash->views = (int)$hash->views + 1;
             $hash->update();
 
-            $assets = Asset::select('assets.*')
-                ->where('is_monitored', true)
-                ->join('assets_tags', 'assets_tags.asset_id', '=', 'assets.id')
-                ->join('assets_tags_hashes', 'assets_tags_hashes.tag', '=', 'assets_tags.tag')
-                ->where('assets_tags_hashes.hash', $hash->hash)
+            $assets = Asset::select('am_assets.*')
+                ->where('am_assets.is_monitored', true)
+                ->join('am_assets_tags', 'am_assets_tags.asset_id', '=', 'am_assets.id')
+                ->join('am_assets_tags_hashes', 'am_assets_tags_hashes.tag', '=', 'am_assets_tags.tag')
+                ->where('am_assets_tags_hashes.hash', $hash->hash)
                 ->get();
 
             return $assets->flatMap(fn(Asset $asset) => $asset->alerts()->get()->map(function (Alert $alert) use ($asset) {

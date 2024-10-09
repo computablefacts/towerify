@@ -46,7 +46,7 @@
     .header .logo {
       float: left;
       margin: 0;
-      padding: 15px 0 5px 30px;
+      padding: 5px 0 5px 15px;
     }
 
     .content {
@@ -202,24 +202,22 @@
 <div class="page">
   <div class="header">
     <div class="logo">
-      <a href="{{ app_url() }}" rel="noreferrer">
-        <img src="/images/adversarymeter.png" alt="Logo AdversaryMeter" title="Logo AdversaryMeter" height="55">
+      <a href="{{ config('towerify.website') }}" rel="noreferrer">
+        <img src="/favicon-cywise.png" alt="Cywise" title="Cywise" height="55">
       </a>
     </div>
     <br clear="all">
   </div>
   <div class="content">
-    <h1>My Cyber TODO</h1>
+    <h1>Cyber TODO</h1>
     <p>
-      Someone has shared vulnerabilities with you on assets for which you are responsible. Please fix the
-      vulnerabilities below and check the corresponding box. A new scan will verify that the problem has been
-      solved.
+      {{ __('Someone has shared vulnerabilities with you on assets for which you are responsible. Please fix the vulnerabilities below and check the corresponding box. A new scan will verify that the problem has been solved.') }}
     </p>
     <div class="loader" id="loader"></div>
     <div id="vulnerabilities" class="list d-none"></div>
   </div>
   <div class="footer">
-    <span class="copyright">ComputableFacts - 178 boulevard Haussmann 75008 Paris France - 844389882</span>
+    <span class="copyright">{{ config('app.name') }} - 178 boulevard Haussmann 75008 Paris France - 844389882</span>
     <a href="/terms" class="terms">Conditions d'utilisation</a>
   </div>
 </div>

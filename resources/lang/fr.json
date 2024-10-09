@@ -146,5 +146,6 @@
   "An error occurred.": "Une erreur est survenue.",
   "An error occurred. Try again in a moment or contact the support.": "Une erreur est survenue. Réessayez dans un instant ou contactez le support.",
   "Your file has been successfully uploaded. It will be available shortly.": "Votre fichier a bien été importé. Il sera disponible dans quelques instants.",
-  "Text successfully copied to clipboard.": "Le text a été copié dans le presse-papiers."
+  "Text successfully copied to clipboard.": "Le text a été copié dans le presse-papiers.",
+  "Someone has shared vulnerabilities with you on assets for which you are responsible. Please fix the vulnerabilities below and check the corresponding box. A new scan will verify that the problem has been solved.": "Quelqu'un a partagé avec vous des vulnérabilités sur des actifs dont vous êtes responsable. Veuillez corriger les vulnérabilités ci-dessous et cocher la case correspondante. Un nouveau scan vérifiera que le problème a été résolu."
 }
