@@ -370,9 +370,11 @@ class HoneypotController extends Controller
     {
         return [
             'tags' => AssetTag::query()
+                ->orderBy('tag')
                 ->get()
                 ->pluck('tag')
                 ->unique()
+                ->values()
                 ->toArray(),
         ];
     }
