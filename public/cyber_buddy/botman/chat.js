@@ -533,7 +533,7 @@
       input.focus();
     }
   };
-  // ========== HACK : DISPLAY THINKING DOTS /END ==========
+  // ========== HACK : DISPLAY THINKING DOTS / END ==========
 
   var o = n(0), i = n(14), a = {
     "Content-Type": "application/x-www-form-urlencoded"
