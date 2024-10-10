@@ -518,8 +518,8 @@
         `;
         document.querySelector('.chat').appendChild(elLi);
         document.querySelector('#userText').disabled = true;
-        const t = document.getElementById("messageArea");
-        t.scrollTop = t.scrollHeight; // scroll to bottom
+        const input = document.getElementById("messageArea");
+        input.scrollTop = input.scrollHeight; // scroll to bottom
       }
     }, 1500);
   };
@@ -528,7 +528,9 @@
     if (elLi) {
       elLi.remove();
       elLi = null;
-      document.querySelector('#userText').disabled = false;
+      const input = document.querySelector('#userText');
+      input.disabled = false;
+      input.focus();
     }
   };
   // ========== HACK : DISPLAY THINKING DOTS /END ==========
