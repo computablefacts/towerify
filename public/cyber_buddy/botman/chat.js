@@ -496,6 +496,43 @@
     !o.isUndefined(t) && o.isUndefined(t["Content-Type"]) && (t["Content-Type"] = e)
   }
 
+  // ========== HACK : DISPLAY THINKING DOTS / BEGIN ==========
+  let hasReturned = false;
+  let elLi = null;
+  const addThinkingDots = () => {
+    hasReturned = false;
+    setTimeout(() => {
+      if (!hasReturned) {
+        elLi = document.createElement('li');
+        elLi.classList.add('chatbot');
+        elLi.setAttribute('data-message-id', "00000000-0000-0000-0000-000000000000");
+        elLi.innerHTML = `
+          <div class="msg">
+            <div class="loading-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <div class="time">18:25</div>
+          </div>
+        `;
+        document.querySelector('.chat').appendChild(elLi);
+        document.querySelector('#userText').disabled = true;
+        const t = document.getElementById("messageArea");
+        t.scrollTop = t.scrollHeight; // scroll to bottom
+      }
+    }, 1500);
+  };
+  const removeThinkingDots = () => {
+    hasReturned = true;
+    if (elLi) {
+      elLi.remove();
+      elLi = null;
+      document.querySelector('#userText').disabled = false;
+    }
+  };
+  // ========== HACK : DISPLAY THINKING DOTS /END ==========
+
   var o = n(0), i = n(14), a = {
     "Content-Type": "application/x-www-form-urlencoded"
   }, s = {
@@ -504,12 +541,18 @@
       return "undefined" != typeof XMLHttpRequest ? t = n(4) : "undefined" != typeof process && (t = n(4)), t
     }(),
     transformRequest: [function (t, e) {
+      // ========== HACK : DISPLAY THINKING DOTS / BEGIN ==========
+      addThinkingDots();
+      // ========== HACK : DISPLAY THINKING DOTS / END ==========
       return i(e, "Content-Type"), o.isFormData(t) || o.isArrayBuffer(t) || o.isBuffer(t) || o.isStream(t) || o.isFile(
         t) || o.isBlob(t) ? t : o.isArrayBufferView(t) ? t.buffer : o.isURLSearchParams(t) ? (r(e,
         "application/x-www-form-urlencoded;charset=utf-8"), "" + t) : o.isObject(t) ? (r(e,
         "application/json;charset=utf-8"), JSON.stringify(t)) : t
     }],
     transformResponse: [function (t) {
+      // ========== HACK : DISPLAY THINKING DOTS / BEGIN ==========
+      removeThinkingDots();
+      // ========== HACK : DISPLAY THINKING DOTS / END ==========
       if ("string" == typeof t) {
         try {
           t = JSON.parse(t)

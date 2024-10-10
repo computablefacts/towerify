@@ -297,7 +297,6 @@ class CyberBuddyController extends Controller
             }
         })->skipsConversation();
         $botman->hears('/question ([a-zA-Z0-9]+) (.*)', function (BotMan $botman, string $collection, string $question) {
-            $botman->types();
             $response = ApiUtils::ask_chunks_demo($collection, $question);
             if ($response['error']) {
                 $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
@@ -307,6 +306,9 @@ class CyberBuddyController extends Controller
             }
         })->skipsConversation();
         $botman->hears('{message}', function (BotMan $botman, string $message) {
+            if (Str::startsWith($message, "/")) {
+                return;
+            }
             $user = $this->user($botman);
             if (!$user) {
                 $botman->reply('Connectez-vous pour accéder à cette commande.<br>Pour ce faire, vous pouvez utiliser la commande <b>/login {username} {password}</b>');
