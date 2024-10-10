@@ -320,7 +320,6 @@ Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
         Route::post('{server}/pull-server-infos', 'YnhServerController@pullServerInfos')->name('pull-server-infos');
         Route::post('{server}/test-ssh-connection', 'YnhServerController@testSshConnection')->name('test-ssh-connection');
         Route::post('{server}/configure', 'YnhServerController@configure')->name('configure');
-        Route::post('{server}/monitor-server', 'YnhServerController@monitorServer')->name('monitor-server');
         Route::post('{server}/backup', 'YnhServerController@createBackup')->name('create-backup');
         Route::get('{server}/backup/{backup}', 'YnhServerController@downloadBackup')->name('download-backup');
         Route::post('{server}/execute-shell-command', 'YnhServerController@executeShellCommand')->name('execute-shell-command');

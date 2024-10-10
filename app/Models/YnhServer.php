@@ -357,12 +357,12 @@ class YnhServer extends Model
     public function sshMonitorServer(SshConnection2 $ssh): bool
     {
         $installScript = YnhOsquery::monitorServer($this);
-        $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Installing Osquery...');
+        $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Installing tools for monitoring servers...');
         $filename = 'install-yunohost-' . Str::random(10);
         $isOk = $ssh->upload($filename, $installScript);
         $isOk = $isOk && $ssh->executeScript($filename, true);
         if ($isOk) {
-            $ssh->newTrace(SshTraceStateEnum::DONE, 'Osquery installed.');
+            $ssh->newTrace(SshTraceStateEnum::DONE, 'Tools for monitoring servers installed.');
         }
         return $isOk;
     }

@@ -20,7 +20,6 @@ use App\Http\Requests\CreateHostRequest;
 use App\Http\Requests\DownloadBackupRequest;
 use App\Http\Requests\ExecuteShellCommandRequest;
 use App\Http\Requests\InstallAppRequest;
-use App\Http\Requests\MonitorServerRequest;
 use App\Http\Requests\PullServerInfosRequest;
 use App\Http\Requests\RemoveHostRequest;
 use App\Http\Requests\RemoveUserPermissionRequest;
@@ -193,20 +192,6 @@ class YnhServerController extends Controller
         event(new ConfigureHost($uid, $user, $server));
 
         return response()->json(['success' => "Your host is being configured!"]);
-    }
-
-    public function monitorServer(YnhServer $server, MonitorServerRequest $request)
-    {
-        if ($server->isFrozen()) {
-            return response()->json(['error' => "The server configuration is frozen."]);
-        }
-
-        $uid = Str::random(10);
-        $ssh = $server->sshConnection($uid, Auth::user());
-        if ($server->sshMonitorServer($ssh)) {
-            return response()->json(['success' => "Osquery has been installed!"]);
-        }
-        return response()->json(['error' => "An error occurred."]);
     }
 
     public function create(CreateHostRequest $request)

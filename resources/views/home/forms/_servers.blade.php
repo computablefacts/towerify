@@ -143,11 +143,6 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
         {{ __('Configure Host') }}
       </button>
       @endif
-      @if(Auth::user()->canManageServers() && !$server->addedWithCurl())
-      <button type="button" onclick="monitorHost()" class="btn btn-outline-primary mx-4">
-        {{ __('Monitor Host') }}
-      </button>
-      @endif
     </div>
     @if(Auth::user()->canManageServers())
     <div>
@@ -198,18 +193,6 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
     axios.post("{{ route('ynh.servers.configure', $server) }}", {
       name: name, ip: ip, port: port, username: username, domain: domain,
     }).then(function (response) {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
-  }
-
-  function monitorHost() {
-    axios.post("{{ route('ynh.servers.monitor-server', $server) }}", {}).then(function (response) {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
