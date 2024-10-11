@@ -97,7 +97,7 @@
   @include('home.cards._shell', [])
   @endif
   @if($tab === 'domains')
-  @include('home.cards._domains', [ 'domains' => $server->domains ])
+  <x-domains :server="$server"/>
   @endif
   @if($tab === 'applications')
   <div class="row mb-4">

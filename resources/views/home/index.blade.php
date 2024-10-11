@@ -153,7 +153,7 @@
   @include('home.cards._towerify_backups')
   @endif
   @if($tab === 'domains')
-  @include('home.cards._towerify_domains')
+  <x-domains/>
   @endif
   @if($tab === 'applications')
   @include('home.cards._towerify_applications')

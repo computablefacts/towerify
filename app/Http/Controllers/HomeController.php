@@ -79,12 +79,6 @@ class HomeController extends Controller
             }
         }
 
-        $domains = collect();
-
-        if ($tab === 'domains') {
-            $domains = $servers->flatMap(fn(YnhServer $server) => $server->domains);
-        }
-
         $applications = collect();
 
         if ($tab === 'applications') {
@@ -149,7 +143,6 @@ class HomeController extends Controller
             'security_rules',
             'traces',
             'pendingActions',
-            'domains',
             'applications',
             'backups',
             'notifications',
