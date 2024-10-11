@@ -16,6 +16,9 @@
     <table class="table table-hover">
       <thead>
       <tr>
+        <th>{{ __('Server') }}</th>
+        <th>{{ __('IP V4') }}</th>
+        <th>{{ __('IP V6') }}</th>
         <th>
           <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
         </th>
@@ -25,6 +28,19 @@
       <tbody>
       @foreach($domains as $domain)
       <tr>
+        <td>
+          <span class="font-lg mb-3 fw-bold">
+            <a href="{{ route('ynh.servers.edit', $domain->server->id) }}">
+              {{ $domain->server->name }}
+            </a>
+          </span>
+        </td>
+        <td>
+          {{ $domain->server->ip() }}
+        </td>
+        <td>
+          {{ $domain->server->ipv6() }}
+        </td>
         <td>
           {{ $domain->name }}
         </td>
