@@ -1,9 +1,9 @@
 @if(Auth::user()->canListApps())
 <div class="card card-accent-secondary tw-card">
   <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Applications Deployed') }}</b></h3>
+    <h3 class="m-0"><b>{{ __('Applications') }}</b></h3>
   </div>
-  @if($applications->isEmpty())
+  @if($apps->isEmpty())
   <div class="card-body">
     <div class="row">
       <div class="col">
@@ -16,6 +16,7 @@
     <table class="table table-hover">
       <thead>
       <tr>
+        <th>{{ __('Server') }}</th>
         <th>
           <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
         </th>
@@ -26,8 +27,15 @@
       </tr>
       </thead>
       <tbody>
-      @foreach($applications->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $app)
+      @foreach($apps as $app)
       <tr>
+        <td>
+          <span class="font-lg mb-3 fw-bold">
+            <a href="{{ route('ynh.servers.edit', $app->server->id) }}">
+              {{ $app->server->name }}
+            </a>
+          </span>
+        </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
             <a href="https://{{ $app->path }}" target="_blank">
@@ -67,11 +75,11 @@
     const response = confirm(`Are you sure you want to remove ${appName} from the server?`);
 
     if (response) {
-      axios.delete(`/ynh/servers/${serverId}/apps/${appId}`).then(function (data) {
-        if (data.data.success) {
-          toaster.toastSuccess(data.data.success);
-        } else if (data.data.error) {
-          toaster.toastError(data.data.error);
+      axios.delete(`/ynh/servers/${serverId}/apps/${appId}`).then(function (response) {
+        if (response.data.success) {
+          toaster.toastSuccess(response.data.success);
+        } else if (response.data.error) {
+          toaster.toastError(response.data.error);
         } else {
           console.log(response.data);
         }

@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\Summarize;
-use App\Models\Invitation;
-use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
 use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
 use App\User;
@@ -35,12 +32,6 @@ class HomeController extends Controller
         $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'overview' : $tab;
         $servers = YnhServer::forUser($user);
 
-        $applications = collect();
-
-        if ($tab === 'applications') {
-            $applications = $servers->flatMap(fn(YnhServer $server) => $server->applications);
-        }
-
         $knowledge_base = collect();
 
         if ($tab === 'knowledge_base') {
@@ -65,7 +56,6 @@ class HomeController extends Controller
             'tab',
             'limit',
             'servers',
-            'applications',
             'notifications',
             'knowledge_base'
         ));

@@ -102,7 +102,7 @@
   @if($tab === 'applications')
   <div class="row mb-4">
     <div class="col-12">
-      @include('home.cards._applications', [ 'applications' => $server->applications ])
+      <x-applications :server="$server"/>
     </div>
   </div>
   <div class="row">

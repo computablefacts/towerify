@@ -156,7 +156,7 @@
   <x-domains/>
   @endif
   @if($tab === 'applications')
-  @include('home.cards._towerify_applications')
+  <x-applications/>
   @endif
   @if($tab === 'orders')
   <x-orders/>
