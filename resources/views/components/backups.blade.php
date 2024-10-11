@@ -16,7 +16,7 @@
     </div>
     @endif
   </div>
-  @if(count($backups) <= 0)
+  @if($backups->isEmpty())
   <div class="card-body">
     <div class="row">
       <div class="col">
@@ -38,7 +38,7 @@
       </tr>
       </thead>
       <tbody>
-      @foreach($backups->sortByDesc('updated_at') as $backup)
+      @foreach($backups as $backup)
       <tr>
         <td>
           {{ $backup->updated_at->format('Y-m-d H:i:s') }}

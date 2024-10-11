@@ -23,7 +23,7 @@
       </tr>
       </thead>
       <tbody>
-      @foreach($domains->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $domain)
+      @foreach($domains as $domain)
       <tr>
         <td>
           {{ $domain->name }}
