@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Jobs\Summarize;
 use App\Models\Invitation;
-use App\Models\YnhOrder;
 use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
 use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
@@ -54,12 +53,6 @@ class HomeController extends Controller
             $applications = $servers->flatMap(fn(YnhServer $server) => $server->applications);
         }
 
-        $orders = collect();
-
-        if ($tab === 'orders') {
-            $orders = YnhOrder::forUser($user);
-        }
-
         $overview = collect();
 
         if ($tab === 'overview') {
@@ -100,7 +93,6 @@ class HomeController extends Controller
             'tab',
             'limit',
             'servers',
-            'orders',
             'invitations',
             'security_rules',
             'applications',

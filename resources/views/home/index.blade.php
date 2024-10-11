@@ -159,7 +159,7 @@
   @include('home.cards._towerify_applications')
   @endif
   @if($tab === 'orders')
-  @include('home.cards._orders')
+  <x-orders/>
   @endif
   @if($tab === 'users')
   <x-users/>
