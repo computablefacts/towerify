@@ -107,7 +107,7 @@
   </div>
   <div class="row">
     <div class="col-12">
-      @include('home.cards._applications_ready_to_be_deployed', [ 'orders' => $orders ])
+      <x-applications-ready-to-be-deployed :server="$server"/>
     </div>
   </div>
   @endif

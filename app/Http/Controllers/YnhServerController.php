@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ProductTypeEnum;
 use App\Enums\SshTraceStateEnum;
 use App\Events\AddTwrUserPermission;
 use App\Events\AddUserPermission;
@@ -36,7 +35,6 @@ use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -53,22 +51,11 @@ class YnhServerController extends Controller
     {
         $tab = $request->input('tab', 'settings');
         $limit = $request->input('limit', 40);
-        $orders = collect();
 
-        if ($tab === 'applications') {
-            $orders = YnhOrder::where('product_type', ProductTypeEnum::APPLICATION->value)
-                ->whereNotExists(function ($query) {
-                    $query->select(DB::raw('1'))
-                        ->from('ynh_applications')
-                        ->whereRaw('ynh_applications.ynh_order_id = ynh_orders.id');
-                })
-                ->get();
-        }
         return view('home.pages._servers', compact(
             'tab',
             'limit',
             'server',
-            'orders',
         ));
     }
 
