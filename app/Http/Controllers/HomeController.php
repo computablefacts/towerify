@@ -53,22 +53,6 @@ class HomeController extends Controller
             $applications = $servers->flatMap(fn(YnhServer $server) => $server->applications);
         }
 
-        $overview = collect();
-
-        if ($tab === 'overview') {
-            $numberOfVulnerabilitiesByLevel = Summarize::numberOfVulnerabilitiesByLevel();
-            $overview = [
-                'servers_monitored' => Summarize::monitoredServers(),
-                'ip_monitored' => Summarize::monitoredIps(),
-                'dns_monitored' => Summarize::monitoredDns(),
-                'metrics_collected' => Summarize::collectedMetrics($servers),
-                'events_collected' => Summarize::collectedEvents($servers),
-                'vulns_high' => $numberOfVulnerabilitiesByLevel['high'],
-                'vulns_medium' => $numberOfVulnerabilitiesByLevel['medium'],
-                'vulns_low' => $numberOfVulnerabilitiesByLevel['low'],
-            ];
-        }
-
         $knowledge_base = collect();
 
         if ($tab === 'knowledge_base') {
@@ -97,7 +81,6 @@ class HomeController extends Controller
             'security_rules',
             'applications',
             'notifications',
-            'overview',
             'knowledge_base'
         ));
     }

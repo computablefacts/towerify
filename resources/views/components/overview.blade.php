@@ -234,4 +234,5 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
       }
     }).catch((error) => toaster.toastAxiosError(error));
   }
+  
 </script>

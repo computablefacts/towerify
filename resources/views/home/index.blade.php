@@ -141,7 +141,7 @@
     @endif
   </ul>
   @if(!$tab || $tab === 'overview')
-  @include('home.cards._overview')
+  <x-overview/>
   @endif
   @if($tab === 'my-apps')
   <x-my-applications/>
