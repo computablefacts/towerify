@@ -48,20 +48,6 @@ class HomeController extends Controller
             $invitations = Invitation::whereNull('user_id')->get();
         }
 
-        $users = collect();
-
-        if ($tab === 'users') {
-            if ($user->tenant_id) {
-                $users = User::where('is_active', true)->where('tenant_id', $user->tenant_id);
-                if ($user->customer_id) {
-                    $users = $users->where('customer_id', $user->customer_id);
-                }
-                $users = $users->get();
-            } else {
-                $users = User::where('is_active', true)->get();
-            }
-        }
-
         $applications = collect();
 
         if ($tab === 'applications') {
@@ -115,7 +101,6 @@ class HomeController extends Controller
             'limit',
             'servers',
             'orders',
-            'users',
             'invitations',
             'security_rules',
             'applications',

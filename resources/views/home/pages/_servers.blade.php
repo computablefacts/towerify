@@ -115,7 +115,7 @@
   <x-interdependencies :server="$server"/>
   @endif
   @if($tab === 'users')
-  @include('home.cards._users', [ 'users' => $server->users ])
+  <x-users :server="$server"/>
   @endif
 </div>
 @endsection

@@ -162,7 +162,7 @@
   @include('home.cards._orders')
   @endif
   @if($tab === 'users')
-  @include('home.cards._towerify_users')
+  <x-users/>
   @endif
   @if($tab === 'invitations')
   @include('home.cards._towerify_invitations')

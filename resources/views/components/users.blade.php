@@ -1,11 +1,7 @@
 @if(Auth::user()->canListUsers())
 <div class="card card-accent-secondary tw-card">
   <div class="card-header">
-    <h3 class="m-0">
-      <b>
-        {{ __('Towerify\'s Users') }}
-      </b>
-    </h3>
+    <h3 class="m-0"><b>{{ __('Users') }}</b></h3>
   </div>
   @if($users->isEmpty())
   <div class="card-body">
@@ -21,18 +17,24 @@
       <thead>
       <tr>
         <th>
-          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Username') }}
+          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
         </th>
+        <th>{{ __('Username') }}</th>
         <th>{{ __('Email') }}</th>
         <th></th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      @foreach($users->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $user)
+      @foreach($users as $user)
       <tr>
         <td>
-          {{ $user->name }}
+          <span class="font-lg mb-3 fw-bold">
+            {{ isset($user->fullname) ? $user->fullname : $user->name }}
+          </span>
+        </td>
+        <td>
+          {{ isset($user->username) ? $user->username : '-' }}
         </td>
         <td>
           <a href="mailto:{{ $user->email }}" target="_blank">
@@ -42,7 +44,8 @@
         <td>
           @if(Auth::user()->canManageUsers())
           @php
-          $userAvailablePermissions = \App\Models\YnhPermission::availablePermissions($user);
+          $userAvailablePermissions = $server ? $server->availablePermissionsYnh($user) :
+          \App\Models\YnhPermission::availablePermissions($user);
           @endphp
           @if(!$userAvailablePermissions->isEmpty())
           <div class="card-actionbar">
@@ -51,19 +54,17 @@
                       class="btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split"
                       data-bs-toggle="dropdown"
                       aria-expanded="true">
-                {{ __('Add Access') }}
+                {{ __('Add') }}
               </button>
               <div class="dropdown-menu" x-placement="bottom-start">
                 @foreach($userAvailablePermissions as $permission)
-                <a
-                  onclick="addUserPermission('{{ $permission->server_id }}', '{{ $user->id }}', '{{ $permission->permission }}')"
-                  class="dropdown-item">
-                  @if(\Illuminate\Support\Str::after($permission->permission, '.') === 'main')
-                  {{ \Illuminate\Support\Str::before($permission->permission, '.') }} / {{ $permission->server_name }}
+                <a onclick="addUserPermission('{{ $server->id }}', '{{ $user->id }}', '{{ $permission }}')"
+                   class="dropdown-item">
+                  @if(\Illuminate\Support\Str::after($permission, '.') === 'main')
+                  {{ \Illuminate\Support\Str::before($permission, '.') }}
                   @else
-                  {{ \Illuminate\Support\Str::before($permission->permission, '.') }}
-                  &nbsp;({{ \Illuminate\Support\Str::after($permission->permission, '.') }}) / {{
-                  $permission->server_name }}
+                  {{ \Illuminate\Support\Str::before($permission, '.') }}
+                  &nbsp;({{ \Illuminate\Support\Str::after($permission, '.') }})
                   @endif
                 </a>
                 @endforeach
@@ -76,7 +77,8 @@
         <td>
           @if(Auth::user()->canManageUsers())
           @php
-          $userCurrentPermissions = \App\Models\YnhPermission::currentPermissions($user);
+          $userCurrentPermissions = $server ? $server->currentPermissionsYnh($user) :
+          \App\Models\YnhPermission::currentPermissions($user);
           @endphp
           @if(!$userCurrentPermissions->isEmpty())
           <div class="card-actionbar">
@@ -85,19 +87,17 @@
                       class="btn btn-sm btn-outline-danger dropdown-toggle dropdown-toggle-split"
                       data-bs-toggle="dropdown"
                       aria-expanded="true">
-                {{ __('Remove Access') }}
+                {{ __('Remove') }}
               </button>
               <div class="dropdown-menu" x-placement="bottom-start">
                 @foreach($userCurrentPermissions as $permission)
-                <a
-                  onclick="removeUserPermission('{{ $permission->server_id }}', '{{ $permission->ynh_user_id }}', '{{ $permission->permission }}')"
-                  class="dropdown-item">
-                  @if(\Illuminate\Support\Str::after($permission->permission, '.') === 'main')
-                  {{ \Illuminate\Support\Str::before($permission->permission, '.') }} / {{ $permission->server_name }}
+                <a onclick="removeUserPermission('{{ $server->id }}', '{{ $user->id }}', '{{ $permission }}')"
+                   class="dropdown-item">
+                  @if(\Illuminate\Support\Str::after($permission, '.') === 'main')
+                  {{ \Illuminate\Support\Str::before($permission, '.') }}
                   @else
-                  {{ \Illuminate\Support\Str::before($permission->permission, '.') }}
-                  &nbsp;({{ \Illuminate\Support\Str::after($permission->permission, '.') }}) / {{
-                  $permission->server_name }}
+                  {{ \Illuminate\Support\Str::before($permission, '.') }}
+                  &nbsp;({{ \Illuminate\Support\Str::after($permission, '.') }})
                   @endif
                 </a>
                 @endforeach
@@ -106,6 +106,24 @@
           </div>
           @endif
           @endif
+        </td>
+      </tr>
+      <tr>
+        <td colspan="5">
+          @php
+          $userPermissions = $user
+          ->permissions
+          ->where('is_user_specific', true)
+          ->filter(fn($perm) => $perm->application->ynh_server_id === $server->id)
+          ->sortBy('application.name');
+          @endphp
+          @foreach($userPermissions as $permission)
+          <span class="tw-pill rounded-pill bg-primary">
+            <a href="https://{{ $permission->application->path }}" target="_blank" class="text-white">
+              {{ $permission->application->name }}
+            </a>
+          </span>&nbsp;
+          @endforeach
         </td>
       </tr>
       @endforeach
@@ -117,7 +135,7 @@
 <script>
 
   function addUserPermission(serverId, userId, permission) {
-    axios.post(`/ynh/servers/${serverId}/twr-users/${userId}/permissions/${permission}`).then(function (response) {
+    axios.post(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`).then(function (response) {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
