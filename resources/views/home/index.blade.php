@@ -144,7 +144,7 @@
   @include('home.cards._overview')
   @endif
   @if($tab === 'my-apps')
-  @include('home.cards._my_apps')
+  <x-my-applications/>
   @endif
   @if($tab === 'servers')
   <x-servers/>
