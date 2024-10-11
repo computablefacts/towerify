@@ -86,7 +86,7 @@
   </div>
   <div class="row">
     <div class="col-12">
-      @include('home.cards._traces', [ 'traces' => $server->latestTraces() ])
+      <x-traces :server="$server"/>
     </div>
   </div>
   <script>

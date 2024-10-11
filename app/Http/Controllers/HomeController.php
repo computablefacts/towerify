@@ -50,18 +50,12 @@ class HomeController extends Controller
         }
 
         $pendingActions = collect();
-        $traces = collect();
 
         if ($tab === 'traces') {
             $pendingActions = $servers->flatMap(fn(YnhServer $server) => $server->pendingActions())
                 ->sortBy([
                     fn(YnhSshTraces $a, YnhSshTraces $b) => $a->updated_at->diffInMilliseconds($b->updated_at),
                     fn(YnhSshTraces $a, YnhSshTraces $b) => strcmp($a->server->name, $b->server->name),
-                ]);
-            $traces = $servers->flatMap(fn(YnhServer $server) => $server->latestTraces())
-                ->sortBy([
-                    fn(YnhSshTraces $a, YnhSshTraces $b) => strcmp($a->server->name, $b->server->name),
-                    fn(YnhSshTraces $a, YnhSshTraces $b) => $b->order - $a->order,
                 ]);
         }
 
@@ -135,7 +129,6 @@ class HomeController extends Controller
             'users',
             'invitations',
             'security_rules',
-            'traces',
             'pendingActions',
             'applications',
             'notifications',

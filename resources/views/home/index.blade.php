@@ -184,7 +184,7 @@
   </div>
   <div class="row">
     <div class="col-12">
-      @include('home.cards._traces')
+      <x-traces/>
     </div>
   </div>
   <script>
