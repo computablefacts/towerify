@@ -76,7 +76,7 @@
   <x-server :server="$server"/>
   @endif
   @if($tab === 'backups')
-  @include('home.cards._backups', [ 'backups' => $server->backups ])
+  <x-backups :server="$server"/>
   @endif
   @if($tab === 'traces')
   <div class="row">

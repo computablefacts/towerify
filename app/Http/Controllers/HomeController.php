@@ -85,12 +85,6 @@ class HomeController extends Controller
             $applications = $servers->flatMap(fn(YnhServer $server) => $server->applications);
         }
 
-        $backups = collect();
-
-        if ($tab === 'backups') {
-            $backups = $servers->flatMap(fn(YnhServer $server) => $server->backups);
-        }
-
         $orders = collect();
 
         if ($tab === 'orders') {
@@ -144,7 +138,6 @@ class HomeController extends Controller
             'traces',
             'pendingActions',
             'applications',
-            'backups',
             'notifications',
             'overview',
             'knowledge_base'

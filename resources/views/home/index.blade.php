@@ -150,7 +150,7 @@
   <x-servers/>
   @endif
   @if($tab === 'backups')
-  @include('home.cards._towerify_backups')
+  <x-backups/>
   @endif
   @if($tab === 'domains')
   <x-domains/>
