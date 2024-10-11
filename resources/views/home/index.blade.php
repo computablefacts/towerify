@@ -171,7 +171,7 @@
   <x-osquery-rules/>
   @endif
   @if($tab === 'knowledge_base')
-  @include('home.cards._knowledge_base', [ 'files' => $knowledge_base ])
+  <x-knowledge-base/>
   @endif
   @if($tab === 'interdependencies')
   <x-interdependencies/>

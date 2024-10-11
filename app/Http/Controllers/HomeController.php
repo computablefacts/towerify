@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\YnhServer;
-use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,12 +31,6 @@ class HomeController extends Controller
         $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'overview' : $tab;
         $servers = YnhServer::forUser($user);
 
-        $knowledge_base = collect();
-
-        if ($tab === 'knowledge_base') {
-            $knowledge_base = (new CyberBuddyController())->files();
-        }
-
         $notifications = $user->unreadNotifications
             ->map(function ($notification) {
                 return [
@@ -57,7 +50,6 @@ class HomeController extends Controller
             'limit',
             'servers',
             'notifications',
-            'knowledge_base'
         ));
     }
 }
