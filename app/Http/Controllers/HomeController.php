@@ -38,15 +38,7 @@ class HomeController extends Controller
         // Disable a few tabs if Towerify is running as Cywise...
         $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'overview' : $tab;
         $servers = YnhServer::forUser($user);
-        $os_infos = YnhOsquery::osInfos($servers)
-            ->map(function ($osInfos) {
-                return (object)[
-                    'ynh_server_id' => $osInfos->ynh_server_id,
-                    'os' => "{$osInfos->os} {$osInfos->major_version}.{$osInfos->minor_version} ({$osInfos->architecture})",
-                ];
-            })
-            ->groupBy('ynh_server_id');
-
+        
         $memory_usage = collect();
         $disk_usage = collect();
 
@@ -192,7 +184,6 @@ class HomeController extends Controller
             'domains',
             'applications',
             'backups',
-            'os_infos',
             'notifications',
             'overview',
             'knowledge_base'

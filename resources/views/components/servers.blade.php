@@ -84,17 +84,19 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
           </span>
         </td>
         <td>
-          {{ isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-' }}
+          {{ isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-'
+          }}
         </td>
         <td>
           {{ $server->ip() }}
         </td>
         <td>
-          @if($server->isFrozen() || $server->ipv6() === '<unavailable>')
-          -
-          @else
-          {{ $server->ipv6() }}
-          @endif
+          @if($server->isFrozen() || $server->ipv6() === '
+          <unavailable>')
+            -
+            @else
+            {{ $server->ipv6() }}
+            @endif
         </td>
         <td>
           @if($server->isFrozen())

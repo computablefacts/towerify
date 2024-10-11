@@ -167,7 +167,7 @@
   @include('home.cards._my_apps')
   @endif
   @if($tab === 'servers')
-  @include('home.cards._servers')
+  <x-servers/>
   @endif
   @if($tab === 'backups')
   @include('home.cards._towerify_backups')
