@@ -165,7 +165,7 @@
   <x-users/>
   @endif
   @if($tab === 'invitations')
-  @include('home.cards._towerify_invitations')
+  <x-invitations/>
   @endif
   @if($tab === 'security_rules')
   @include('home.cards._osquery_rules', [ 'rules' => $security_rules ])

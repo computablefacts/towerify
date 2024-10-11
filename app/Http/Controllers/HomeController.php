@@ -41,12 +41,6 @@ class HomeController extends Controller
             $security_rules = YnhOsqueryRule::get();
         }
 
-        $invitations = collect();
-
-        if ($tab === 'invitations') {
-            $invitations = Invitation::whereNull('user_id')->get();
-        }
-
         $applications = collect();
 
         if ($tab === 'applications') {
@@ -77,7 +71,6 @@ class HomeController extends Controller
             'tab',
             'limit',
             'servers',
-            'invitations',
             'security_rules',
             'applications',
             'notifications',
