@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>My Cyber TODO (Powered by {{ config('app.name') }})</title>
+  <title>Cyber TODO (Powered by {{ config('app.name') }})</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <meta name="keywords"
         content="honeypot, vulnerability scanner, assets discovery, attack surface management, shadow it">
@@ -211,7 +211,9 @@
   <div class="content">
     <h1>Cyber TODO</h1>
     <p>
-      {{ __('Someone has shared vulnerabilities with you on assets for which you are responsible. Please fix the vulnerabilities below and check the corresponding box. A new scan will verify that the problem has been solved.') }}
+      {{ __('Someone has shared vulnerabilities with you on assets for which you are responsible. Please fix the
+      vulnerabilities below and check the corresponding box. A new scan will verify that the problem has been solved.')
+      }}
     </p>
     <div class="loader" id="loader"></div>
     <div id="vulnerabilities" class="list d-none"></div>

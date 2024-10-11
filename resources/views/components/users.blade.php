@@ -58,13 +58,17 @@
               </button>
               <div class="dropdown-menu" x-placement="bottom-start">
                 @foreach($userAvailablePermissions as $permission)
-                <a onclick="addUserPermission('{{ $server->id }}', '{{ $user->id }}', '{{ $permission }}')"
+                  <?php $serverId = $server ? $server->id : $permission->server_id; ?>
+                  <?php $serverName = $server ? $server->name : $permission->server_name; ?>
+                  <?php $permissionId = $server ? $permission : $permission->permission; ?>
+                  <?php $userId = $server ? $user->id : $permission->ynh_user_id; ?>
+                <a onclick="addUserPermission('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
                    class="dropdown-item">
-                  @if(\Illuminate\Support\Str::after($permission, '.') === 'main')
-                  {{ \Illuminate\Support\Str::before($permission, '.') }}
+                  @if(\Illuminate\Support\Str::after($permissionId, '.') === 'main')
+                  {{ \Illuminate\Support\Str::before($permissionId, '.') }} / {{ $serverName }}
                   @else
-                  {{ \Illuminate\Support\Str::before($permission, '.') }}
-                  &nbsp;({{ \Illuminate\Support\Str::after($permission, '.') }})
+                  {{ \Illuminate\Support\Str::before($permissionId, '.') }}
+                  &nbsp;({{ \Illuminate\Support\Str::after($permissionId, '.') }}) / {{ $serverName }}
                   @endif
                 </a>
                 @endforeach
@@ -91,13 +95,18 @@
               </button>
               <div class="dropdown-menu" x-placement="bottom-start">
                 @foreach($userCurrentPermissions as $permission)
-                <a onclick="removeUserPermission('{{ $server->id }}', '{{ $user->id }}', '{{ $permission }}')"
-                   class="dropdown-item">
-                  @if(\Illuminate\Support\Str::after($permission, '.') === 'main')
-                  {{ \Illuminate\Support\Str::before($permission, '.') }}
+                  <?php $serverId = $server ? $server->id : $permission->server_id; ?>
+                  <?php $serverName = $server ? $server->name : $permission->server_name; ?>
+                  <?php $permissionId = $server ? $permission : $permission->permission; ?>
+                  <?php $userId = $server ? $user->id : $permission->ynh_user_id; ?>
+                <a
+                  onclick="removeUserPermission('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
+                  class="dropdown-item">
+                  @if(\Illuminate\Support\Str::after($permissionId, '.') === 'main')
+                  {{ \Illuminate\Support\Str::before($permissionId, '.') }} / {{ $serverName }}
                   @else
-                  {{ \Illuminate\Support\Str::before($permission, '.') }}
-                  &nbsp;({{ \Illuminate\Support\Str::after($permission, '.') }})
+                  {{ \Illuminate\Support\Str::before($permissionId, '.') }}
+                  &nbsp;({{ \Illuminate\Support\Str::after($permissionId, '.') }}) / {{ $serverName }}
                   @endif
                 </a>
                 @endforeach

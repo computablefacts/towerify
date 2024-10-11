@@ -52,7 +52,7 @@ class YnhServerController extends Controller
         $tab = $request->input('tab', 'settings');
         $limit = $request->input('limit', 40);
 
-        return view('home.pages._servers', compact(
+        return view('_server', compact(
             'tab',
             'limit',
             'server',
@@ -174,7 +174,7 @@ class YnhServerController extends Controller
         }
 
         $tab = 'settings';
-        return view('home.pages._servers', compact('server', 'tab'));
+        return view('_server', compact('server', 'tab'));
     }
 
     public function delete(YnhServer $server, RemoveHostRequest $request)

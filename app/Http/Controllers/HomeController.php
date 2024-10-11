@@ -45,7 +45,7 @@ class HomeController extends Controller
             ->values()
             ->all();
 
-        return view('home.index', compact(
+        return view('index', compact(
             'tab',
             'limit',
             'servers',

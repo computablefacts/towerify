@@ -9,7 +9,6 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
-use Traversable;
 
 class Interdependencies extends Component
 {
@@ -19,7 +18,7 @@ class Interdependencies extends Component
     {
         /** @var User $user */
         $user = Auth::user();
-        if ($server && (is_array($server) || $server instanceof Traversable) && count($server) > 0) {
+        if (isset($server->id)) {
             $this->interdependencies = YnhNginxLogs::interdependencies(YnhServer::forUser($user), $server);
         } else {
             $this->interdependencies = YnhNginxLogs::interdependencies(YnhServer::forUser($user));

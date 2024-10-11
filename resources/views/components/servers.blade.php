@@ -91,12 +91,11 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
           {{ $server->ip() }}
         </td>
         <td>
-          @if($server->isFrozen() || $server->ipv6() === '
-          <unavailable>')
-            -
-            @else
-            {{ $server->ipv6() }}
-            @endif
+          @if($server->isFrozen() || $server->ipv6() === '<unavailable>')
+          -
+          @else
+          {{ $server->ipv6() }}
+          @endif
         </td>
         <td>
           @if($server->isFrozen())
