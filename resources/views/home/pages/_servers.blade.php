@@ -85,7 +85,7 @@
     @endif
   </ul>
   @if(!$tab || $tab === 'settings')
-  @include('home.forms._servers', [ 'server' => $server ])
+  <x-server :server="$server"/>
   @endif
   @if($tab === 'backups')
   @include('home.cards._backups', [ 'backups' => $server->backups ])
