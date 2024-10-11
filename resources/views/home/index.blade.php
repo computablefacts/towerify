@@ -168,7 +168,7 @@
   <x-invitations/>
   @endif
   @if($tab === 'security_rules')
-  @include('home.cards._osquery_rules', [ 'rules' => $security_rules ])
+  <x-osquery-rules/>
   @endif
   @if($tab === 'knowledge_base')
   @include('home.cards._knowledge_base', [ 'files' => $knowledge_base ])

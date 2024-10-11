@@ -35,12 +35,6 @@ class HomeController extends Controller
         $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'overview' : $tab;
         $servers = YnhServer::forUser($user);
 
-        $security_rules = collect();
-
-        if ($tab === 'security_rules') {
-            $security_rules = YnhOsqueryRule::get();
-        }
-
         $applications = collect();
 
         if ($tab === 'applications') {
@@ -71,7 +65,6 @@ class HomeController extends Controller
             'tab',
             'limit',
             'servers',
-            'security_rules',
             'applications',
             'notifications',
             'knowledge_base'

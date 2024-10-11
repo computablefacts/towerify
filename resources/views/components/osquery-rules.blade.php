@@ -22,7 +22,7 @@
       </tr>
       </thead>
       <tbody>
-      @foreach($rules->sortBy('name', SORT_NATURAL|SORT_FLAG_CASE) as $rule)
+      @foreach($rules as $rule)
       <tr>
         <td>
           <span class="font-lg mb-3 fw-bold">
