@@ -94,7 +94,7 @@
   </script>
   @endif
   @if(Auth::user()->canManageServers() && $tab === 'shell')
-  @include('home.cards._shell', [])
+  <x-shell :server="$server"/>
   @endif
   @if($tab === 'domains')
   <x-domains :server="$server"/>
