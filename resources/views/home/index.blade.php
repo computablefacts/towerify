@@ -18,10 +18,6 @@
   <span class="breadcrumb-item active">{{ __('Traces') }}</span>
   @elseif($tab === 'interdependencies')
   <span class="breadcrumb-item active">{{ __('Interdependencies') }}</span>
-  @elseif($tab === 'resources_usage')
-  <span class="breadcrumb-item active">{{ __('Resources Usage') }}</span>
-  @elseif($tab === 'security')
-  <span class="breadcrumb-item active">{{ __('Security') }}</span>
   @elseif($tab === 'security_rules')
   <span class="breadcrumb-item active">{{ __('Security Rules') }}</span>
   @elseif($tab === 'knowledge_base')
@@ -107,22 +103,6 @@
       </a>
     </li>
     @endif
-    @if(Auth::user()->canListServers())
-    <li class="nav-item">
-      <a class="nav-link {{ $tab === 'resources_usage' ? 'active' : '' }}"
-         href="/home?tab=resources_usage">
-        {{ __('Resources Usage') }}
-      </a>
-    </li>
-    @endif
-    @if(Auth::user()->canListServers())
-    <li class="nav-item">
-      <a class="nav-link {{ $tab === 'security' ? 'active' : '' }}"
-         href="/home?tab=security&limit=20">
-        {{ __('Security') }}
-      </a>
-    </li>
-    @endif
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'security_rules' ? 'active' : '' }}"
          href="/home?tab=security_rules">
@@ -186,12 +166,6 @@
   @endif
   @if($tab === 'invitations')
   @include('home.cards._towerify_invitations')
-  @endif
-  @if($tab === 'resources_usage')
-  @include('home.cards._resources_usage')
-  @endif
-  @if($tab === 'security')
-  @include('home.cards._security')
   @endif
   @if($tab === 'security_rules')
   @include('home.cards._osquery_rules', [ 'rules' => $security_rules ])

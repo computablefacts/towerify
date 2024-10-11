@@ -29,7 +29,6 @@ use App\Models\YnhApplication;
 use App\Models\YnhBackup;
 use App\Models\YnhDomain;
 use App\Models\YnhOrder;
-use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use App\Models\YnhUser;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
@@ -54,28 +53,6 @@ class YnhServerController extends Controller
     {
         $tab = $request->input('tab', 'settings');
         $limit = $request->input('limit', 40);
-        $user = Auth::user();
-        $servers = collect([$server]);
-        $memory_usage = collect();
-        $disk_usage = collect();
-
-        if ($tab === 'resources_usage') {
-            $memory_usage = YnhOsquery::memoryUsage($servers)->groupBy('ynh_server_name');
-            $disk_usage = YnhOsquery::diskUsage($servers)->groupBy('ynh_server_name');
-        }
-
-        $security_events = collect();
-
-        if ($tab === 'security') {
-            $security_events = [
-                'authorized_keys' => YnhOsquery::authorizedKeys($servers, $limit),
-                'kernel_modules' => YnhOsquery::kernelModules($servers, $limit),
-                'suid_bin' => YnhOsquery::suidBinaries($servers, $limit),
-                'last_logins_and_logouts' => YnhOsquery::loginsAndLogouts($servers, $limit),
-                'users' => YnhOsquery::users($servers, $limit),
-            ];
-        }
-
         $orders = collect();
 
         if ($tab === 'applications') {
@@ -91,9 +68,6 @@ class YnhServerController extends Controller
             'tab',
             'limit',
             'server',
-            'memory_usage',
-            'disk_usage',
-            'security_events',
             'orders',
         ));
     }

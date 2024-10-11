@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Jobs\Summarize;
 use App\Models\Invitation;
 use App\Models\YnhOrder;
-use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
@@ -37,26 +36,6 @@ class HomeController extends Controller
         // Disable a few tabs if Towerify is running as Cywise...
         $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'overview' : $tab;
         $servers = YnhServer::forUser($user);
-
-        $memory_usage = collect();
-        $disk_usage = collect();
-
-        if ($tab === 'resources_usage') {
-            $memory_usage = YnhOsquery::memoryUsage($servers)->groupBy('ynh_server_name');
-            $disk_usage = YnhOsquery::diskUsage($servers)->groupBy('ynh_server_name');
-        }
-
-        $security_events = collect();
-
-        if ($tab === 'security') {
-            $security_events = [
-                'authorized_keys' => YnhOsquery::authorizedKeys($servers, $limit),
-                'kernel_modules' => YnhOsquery::kernelModules($servers, $limit),
-                'suid_bin' => YnhOsquery::suidBinaries($servers, $limit),
-                'last_logins_and_logouts' => YnhOsquery::loginsAndLogouts($servers, $limit),
-                'users' => YnhOsquery::users($servers, $limit),
-            ];
-        }
 
         $security_rules = collect();
 
@@ -167,9 +146,6 @@ class HomeController extends Controller
             'orders',
             'users',
             'invitations',
-            'memory_usage',
-            'disk_usage',
-            'security_events',
             'security_rules',
             'traces',
             'pendingActions',

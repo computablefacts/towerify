@@ -55,18 +55,6 @@
       </a>
     </li>
     @endif
-    <li class="nav-item">
-      <a class="nav-link {{ $tab === 'resources_usage' ? 'active' : '' }}"
-         href="{{ route('ynh.servers.edit', $server) }}?tab=resources_usage">
-        {{ __('Resources Usage') }}
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {{ $tab === 'security' ? 'active' : '' }}"
-         href="{{ route('ynh.servers.edit', $server) }}?tab=security&limit=40">
-        {{ __('Security') }}
-      </a>
-    </li>
     @if(!$server->addedWithCurl())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'users' ? 'active' : '' }}"
@@ -125,12 +113,6 @@
   @endif
   @if($tab === 'interdependencies')
   <x-interdependencies :server="$server"/>
-  @endif
-  @if($tab === 'resources_usage')
-  @include('home.cards._resources_usage')
-  @endif
-  @if($tab === 'security')
-  @include('home.cards._security')
   @endif
   @if($tab === 'users')
   @include('home.cards._users', [ 'users' => $server->users ])
