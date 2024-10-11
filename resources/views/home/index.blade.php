@@ -179,7 +179,7 @@
   @if($tab === 'traces')
   <div class="row">
     <div class="col-12">
-      @include('home.cards._pending_actions')
+      <x-pending-actions/>
     </div>
   </div>
   <div class="row">

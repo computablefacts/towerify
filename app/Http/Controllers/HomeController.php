@@ -7,7 +7,6 @@ use App\Models\Invitation;
 use App\Models\YnhOrder;
 use App\Models\YnhOsqueryRule;
 use App\Models\YnhServer;
-use App\Models\YnhSshTraces;
 use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
 use App\User;
 use Illuminate\Http\Request;
@@ -47,16 +46,6 @@ class HomeController extends Controller
 
         if ($tab === 'invitations') {
             $invitations = Invitation::whereNull('user_id')->get();
-        }
-
-        $pendingActions = collect();
-
-        if ($tab === 'traces') {
-            $pendingActions = $servers->flatMap(fn(YnhServer $server) => $server->pendingActions())
-                ->sortBy([
-                    fn(YnhSshTraces $a, YnhSshTraces $b) => $a->updated_at->diffInMilliseconds($b->updated_at),
-                    fn(YnhSshTraces $a, YnhSshTraces $b) => strcmp($a->server->name, $b->server->name),
-                ]);
         }
 
         $users = collect();
@@ -129,7 +118,6 @@ class HomeController extends Controller
             'users',
             'invitations',
             'security_rules',
-            'pendingActions',
             'applications',
             'notifications',
             'overview',

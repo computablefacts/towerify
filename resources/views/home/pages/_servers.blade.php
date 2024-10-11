@@ -81,7 +81,7 @@
   @if($tab === 'traces')
   <div class="row">
     <div class="col-12">
-      @include('home.cards._pending_actions', [ 'pendingActions' => $server->pendingActions() ])
+      <x-pending-actions :server="$server"/>
     </div>
   </div>
   <div class="row">
