@@ -28,7 +28,6 @@ use App\Http\Requests\UninstallAppRequest;
 use App\Models\YnhApplication;
 use App\Models\YnhBackup;
 use App\Models\YnhDomain;
-use App\Models\YnhNginxLogs;
 use App\Models\YnhOrder;
 use App\Models\YnhOsquery;
 use App\Models\YnhServer;
@@ -77,12 +76,6 @@ class YnhServerController extends Controller
             ];
         }
 
-        $interdependencies = collect();
-
-        if ($tab === 'interdependencies') {
-            $interdependencies = YnhNginxLogs::interdependencies(YnhServer::forUser($user), $server);
-        }
-
         $orders = collect();
 
         if ($tab === 'applications') {
@@ -102,7 +95,6 @@ class YnhServerController extends Controller
             'disk_usage',
             'security_events',
             'orders',
-            'interdependencies'
         ));
     }
 

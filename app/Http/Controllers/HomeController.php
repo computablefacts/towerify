@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Jobs\Summarize;
 use App\Models\Invitation;
-use App\Models\YnhNginxLogs;
 use App\Models\YnhOrder;
 use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryRule;
@@ -38,7 +37,7 @@ class HomeController extends Controller
         // Disable a few tabs if Towerify is running as Cywise...
         $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'overview' : $tab;
         $servers = YnhServer::forUser($user);
-        
+
         $memory_usage = collect();
         $disk_usage = collect();
 
@@ -63,12 +62,6 @@ class HomeController extends Controller
 
         if ($tab === 'security_rules') {
             $security_rules = YnhOsqueryRule::get();
-        }
-
-        $interdependencies = collect();
-
-        if ($tab === 'interdependencies') {
-            $interdependencies = YnhNginxLogs::interdependencies($servers);
         }
 
         $invitations = collect();
@@ -178,7 +171,6 @@ class HomeController extends Controller
             'disk_usage',
             'security_events',
             'security_rules',
-            'interdependencies',
             'traces',
             'pendingActions',
             'domains',

@@ -124,7 +124,7 @@
   </div>
   @endif
   @if($tab === 'interdependencies')
-  @include('home.cards._interdependencies')
+  <x-interdependencies :server="$server"/>
   @endif
   @if($tab === 'resources_usage')
   @include('home.cards._resources_usage')

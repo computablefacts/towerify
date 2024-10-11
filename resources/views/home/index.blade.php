@@ -200,7 +200,7 @@
   @include('home.cards._knowledge_base', [ 'files' => $knowledge_base ])
   @endif
   @if($tab === 'interdependencies')
-  @include('home.cards._interdependencies')
+  <x-interdependencies/>
   @endif
   @if($tab === 'traces')
   <div class="row">
