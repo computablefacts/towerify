@@ -1,4 +1,4 @@
-@if(Auth::user()->canManageServers())
+@if(Auth::user()->canManageServers() && !$is_yunohost)
 <div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
   <div class="card-body">
     <div class="row">
@@ -21,7 +21,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
         {{ __('Servers') }}
       </h3>
     </div>
-    @if(Auth::user()->canManageServers() && !Auth::user()->isCywiseUser())
+    @if(Auth::user()->canManageServers() && $is_yunohost)
     <div class="align-items-end">
       <h3 class="m-0">
         <a href="{{ route('ynh.servers.create') }}" class="float-end">
@@ -91,11 +91,12 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
           {{ $server->ip() }}
         </td>
         <td>
-          @if($server->isFrozen() || $server->ipv6() === '<unavailable>')
-          -
-          @else
-          {{ $server->ipv6() }}
-          @endif
+          @if($server->isFrozen() || $server->ipv6() === '
+          <unavailable>')
+            -
+            @else
+            {{ $server->ipv6() }}
+            @endif
         </td>
         <td>
           @if($server->isFrozen())

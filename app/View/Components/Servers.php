@@ -15,12 +15,15 @@ class Servers extends Component
 {
     public Collection $os_infos;
     public Collection $servers;
+    public string $is_yunohost;
 
-    public function __construct()
+    public function __construct(string $type = null)
     {
         /** @var User $user */
         $user = Auth::user();
-        $this->servers = YnhServer::forUser($user);
+        $this->is_yunohost = $type === 'ynh';
+        $this->servers = YnhServer::forUser($user)
+            ->filter(fn(YnhServer $server) => !$this->is_yunohost || $server->isYunoHost());
         $this->os_infos = YnhOsquery::osInfos($this->servers)
             ->map(function ($osInfos) {
                 return (object)[

@@ -24,11 +24,11 @@
     if (notification) {
       notifications = notifications.filter(notif => notif.data.group !== notification.data.group);
     }
-    drawer33.redraw();
+    drawer.redraw();
   }
 
   function showNotifications() {
-    drawer33.render = () => {
+    drawer.render = () => {
       const rows = notifications.map(notification => {
         let details = '';
         for (let key in notification.data.details) {
@@ -50,10 +50,10 @@
                   ${details}
                 </ul>
                 <div class="row">
-                  <div class="col text-left">
+                  <div class="col">
                     <a id="${notification.id}" href="#" onclick="event.preventDefault();dismissNotification(event.target.id)">dismiss</a>
                   </div>
-                  <div class="col text-right">
+                  <div class="col text-end">
                     ${action}
                   </div>
                 </div>
@@ -63,6 +63,6 @@
       });
       return `<div class="container p-0 overflow-y-scroll" style="height:100vh;">${rows.join('')}</div>`;
     };
-    drawer33.el.show = true;
+    drawer.el.show = true;
   }
 </script>

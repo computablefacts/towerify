@@ -3,6 +3,7 @@
 return [
     'website' => env('WEBSITE_URL'),
     'freshdesk' => env('FRESHDESK_ID'),
+    'reports' => env('REPORTS_URL'),
     'hasher' => [
         'nonce' => env('HASHER_NONCE'),
     ],

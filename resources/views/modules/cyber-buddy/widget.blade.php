@@ -1,16 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <title>CyberBuddy (Powered by {{ config('app.name') }})</title>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <meta name="keywords"
-        content="honeypot, vulnerability scanner, assets discovery, attack surface management, shadow it">
-  <meta name="description"
-        content="AdversaryMeter is a hybrid between a Honeypot and a Vulnerability Scanner that helps you get a better understanding of your organization's security posture and what should be done to take it to the next level. No installation required.">
-</head>
-<body>
-<!-- TODO -->
-</body>
+@if(Auth::check() && Auth::user()->canUseCyberBuddy())
 <script>
   window.botmanWidget = {
     title: 'CyberBuddy',
@@ -29,4 +17,15 @@
   };
 </script>
 <script src='/cyber_buddy/botman/widget.js'></script>
-</html>
+<script>
+
+  const botmanInterval = setInterval(checkBotman, 300);
+
+  function checkBotman() {
+    if (window.botmanChatWidget) {
+      clearInterval(botmanInterval);
+      window.botmanChatWidget.open();
+    }
+  }
+</script>
+@endif

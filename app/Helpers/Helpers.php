@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
+
 if (!function_exists('tw_random_string')) {
     function tw_random_string($length): string
     {
@@ -69,5 +71,238 @@ if (!function_exists('is_cywise')) {
     function is_cywise(): bool
     {
         return mb_strtolower(config('app.name')) === 'cywise';
+    }
+}
+if (!function_exists('app_header')) {
+    function app_header(): array
+    {
+        if (Auth::check()) {
+            return [
+                [
+                    'label' => __('Logout'),
+                    'route' => route('logout'),
+                    'post_form' => true,
+                ]
+            ];
+        }
+        return [
+            [
+                'label' => __('Login'),
+                'route' => route('login'),
+                'active' => request()->route()->named('login'),
+            ], [
+                'label' => __('Register'),
+                'route' => route('register'),
+                'active' => request()->route()->named('register'),
+            ]
+        ];
+    }
+}
+if (!function_exists('app_menu')) {
+    function app_menu(): array
+    {
+        if (Auth::check()) {
+            return [
+                [
+                    'label' => __('Terms'),
+                    'route' => route('terms'),
+                ], [
+                    'label' => __('Logout'),
+                    'route' => route('logout'),
+                    'post_form' => true,
+                ]
+            ];
+        }
+        return [
+            [
+                'label' => __('Login'),
+                'route' => route('login'),
+            ], [
+                'label' => __('Register'),
+                'route' => route('register'),
+            ]
+        ];
+    }
+}
+if (!function_exists('app_sidebar')) {
+    function app_sidebar(): array
+    {
+        if (Auth::check()) {
+            return [
+                [
+                    'section_name' => __('Home'),
+                    'section_items' => [
+                        [
+                            'label' => __('Overview'),
+                            'route' => route('home', ['tab' => 'overview']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'overview',
+                        ], [
+                            'label' => __('Reports & Alerts'),
+                            'route' => config('towerify.reports'),
+                            'active' => false,
+                            'hidden' => !Auth::user()->isCywiseUser(),
+                            'target' => '_blank',
+                        ]
+                    ]
+                ], [
+                    'section_name' => __('AdversaryMeter'),
+                    'section_items' => [
+                        [
+                            'label' => __('Assets'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('assets'),
+                            'active' => false,
+                            'target' => '_blank',
+                        ], [
+                            'label' => __('Vulnerabilities'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('vulnerabilities'),
+                            'active' => false,
+                            'target' => '_blank',
+                        ], [
+                            'label' => __('Honeypots'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('honeypots'),
+                            'active' => false,
+                            'target' => '_blank',
+                        ], [
+                            'label' => __('Attackers'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('attackers'),
+                            'active' => false,
+                            'target' => '_blank',
+                        ], [
+                            'label' => __('Service Provider Delegation'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('delegation'),
+                            'active' => false,
+                            'target' => '_blank',
+                        ], [
+                            'label' => __('IP Blacklist'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('blacklist'),
+                            'active' => false,
+                            'target' => '_blank',
+                        ],
+                    ],
+                ], [
+                    'section_name' => __('Sentinel'),
+                    'section_items' => [
+                        [
+                            'label' => __('Servers'),
+                            'route' => route('home', ['tab' => 'servers', 'servers_type' => 'instrumented']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'servers' && request()->get('servers_type') === 'instrumented',
+                        ], [
+                            'label' => __('Security Rules'),
+                            'route' => route('home', ['tab' => 'security_rules']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'security_rules',
+                        ]
+                    ],
+                ], [
+                    'section_name' => __('CyberBuddy'),
+                    'hidden' => !Auth::user()->canUseCyberBuddy(),
+                    'section_items' => [
+                        [
+                            'label' => __('AMA'),
+                            'route' => route('home', ['tab' => 'ama']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'ama',
+                        ], [
+                            'label' => __('Knowledge Base'),
+                            'route' => route('home', ['tab' => 'knowledge_base']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'knowledge_base',
+                        ]
+                    ],
+                ], [
+                    'section_name' => __('YunoHost'),
+                    'hidden' => !Auth::user()->canListServers(),
+                    'section_items' => [
+                        [
+                            'label' => __('Desktop'),
+                            'route' => route('home', ['tab' => 'my-apps']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'my-apps',
+                        ], [
+                            'label' => __('Servers'),
+                            'route' => route('home', ['tab' => 'servers', 'servers_type' => 'ynh']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'servers' && request()->get('servers_type') === 'ynh',
+                            'hidden' => !Auth::user()->canListServers()
+                        ], [
+                            'label' => __('Applications'),
+                            'route' => route('home', ['tab' => 'applications']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'applications',
+                            'hidden' => !Auth::user()->canListServers(),
+                        ], [
+                            'label' => __('Domains'),
+                            'route' => route('home', ['tab' => 'domains']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'domains',
+                            'hidden' => !Auth::user()->canListServers(),
+                        ], [
+                            'label' => __('Backups'),
+                            'route' => route('home', ['tab' => 'backups']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'backups',
+                            'hidden' => !Auth::user()->canListServers(),
+                        ], [
+                            'label' => __('Interdependencies'),
+                            'route' => route('home', ['tab' => 'interdependencies']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'interdependencies',
+                            'hidden' => !Auth::user()->canListServers(),
+                        ], [
+                            'label' => __('Traces'),
+                            'route' => route('home', ['tab' => 'traces']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'traces',
+                            'hidden' => !Auth::user()->canListServers(),
+                        ]
+                    ]
+                ], [
+                    'section_name' => __('E-Commerce'),
+                    'hidden' => !Auth::user()->isAdmin() &&
+                        !Auth::user()->canBuyStuff() &&
+                        !Auth::user()->canListOrders(),
+                    'section_items' => [
+                        [
+                            'label' => __('Admin'),
+                            'route' => config('konekt.app_shell.ui.url'),
+                            'active' => request()->route()->named('admin'),
+                            'hidden' => !Auth::user()->isAdmin(),
+                        ], [
+                            'label' => __('Store'),
+                            'route' => route('product.index'),
+                            'active' => request()->route()->named('product.index'),
+                            'hidden' => !Auth::user()->canBuyStuff(),
+                        ], [
+                            'label' => __('Cart'),
+                            'route' => route('cart.show'),
+                            'active' => request()->route()->named('cart.show'),
+                            'hidden' => !Auth::user()->canBuyStuff(),
+                        ], [
+                            'label' => __('Orders'),
+                            'route' => route('home', ['tab' => 'orders']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'orders',
+                            'hidden' => !Auth::user()->canListOrders()
+                        ]
+                    ]
+                ], [
+                    'section_name' => __('Settings'),
+                    'section_items' => [
+                        [
+                            'label' => __('Users'),
+                            'route' => route('home', ['tab' => 'users']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'users',
+                            'hidden' => !Auth::user()->canListUsers(),
+                        ], [
+                            'label' => __('Invitations'),
+                            'route' => route('home', ['tab' => 'invitations']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'invitations',
+                            'hidden' => !Auth::user()->canListUsers(),
+                        ], [
+                            'label' => __('Terms'),
+                            'route' => route('terms'),
+                            'active' => request()->route()->named('terms'),
+                        ], [
+                            'label' => __('Reset Password'),
+                            'route' => route('reset-password'),
+                            'active' => request()->route()->named('reset-password'),
+                            'post_form' => true,
+                        ]
+                    ]
+                ]
+            ];
+        }
+        return [
+            //
+        ];
     }
 }

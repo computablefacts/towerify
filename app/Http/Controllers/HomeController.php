@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('auth');
@@ -22,14 +17,13 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $tab = $request->input('tab', 'overview');
+        $servers_type = $request->input('servers_type', '');
         $limit = $request->input('limit', 20);
 
         /** @var User $user */
         $user = Auth::user();
-
-        // Disable a few tabs if Towerify is running as Cywise...
-        $tab = $user->isCywiseUser() && ($tab === 'backups' || $tab === 'domains' || $tab === 'applications' || $tab === 'orders' || $tab === 'traces') ? 'overview' : $tab;
-        $servers = YnhServer::forUser($user);
+        $servers = YnhServer::forUser($user)
+            ->filter(fn(YnhServer $server) => $servers_type !== 'ynh' || $server->isYunoHost());
 
         $notifications = $user->unreadNotifications
             ->map(function ($notification) {
@@ -49,6 +43,7 @@ class HomeController extends Controller
             'tab',
             'limit',
             'servers',
+            'servers_type',
             'notifications',
         ));
     }

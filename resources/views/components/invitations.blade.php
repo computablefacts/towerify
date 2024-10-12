@@ -3,7 +3,7 @@
   <div class="card-header d-flex flex-row">
     <div class="align-items-start">
       <h3 class="m-0">
-        {{ __('Towerify\'s Invitations') }}
+        {{ __('Invitations') }}
       </h3>
     </div>
     @if(Auth::user()->canManageUsers())

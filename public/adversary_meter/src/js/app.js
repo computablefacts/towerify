@@ -15,10 +15,9 @@ import {TabAssetsImporter} from "./_assets/tab-assets-importer.js";
 import {TabHoneypots} from "./_honeypots/tab-honeypots.js";
 import {TabDelegation} from "./_service-provider-delegation/tab-service-provider-delegation.js";
 
-
 export class App {
 
-  static PREVIEW = i18next.t('APERÇU');
+  static PREVIEW = i18next.t('HONEYPOTS');
   static DIRECTORY_ADVERSARIES = i18next.t('ANNUAIRE DES ATTAQUANTS');
   static ACTIVITY_ADVERSARIES = i18next.t('ACTIVITÉ DES ATTAQUANTS');
   static IP_BLACKLIST = i18next.t('IP À BLACKLISTER');
@@ -109,7 +108,8 @@ export class App {
         <div id="app-header" class="d-flex flex-column justify-content-end mb-1">
             <div class="d-flex py-2 mt-auto d-none flex-grow-1 justify-content-center" id="trial-status">
               ${i18next.t('Votre période d\'essai a expiré. Rendez-vous')}&nbsp;
-              <a href="${this.user_ && this.user_.link_subscribe ? this.user_.link_subscribe : '#'}" target="_blank">${i18next.t('ici')}</a>&nbsp;
+              <a href="${this.user_ && this.user_.link_subscribe ? this.user_.link_subscribe
+      : '#'}" target="_blank">${i18next.t('ici')}</a>&nbsp;
               ${i18next.t('pour souscrire à un abonnement.')}
             </div>
             <div class="d-flex py-2 mt-auto d-none" id="back-button">
@@ -124,7 +124,8 @@ export class App {
                 <div id="app-menu" class="d-flex d-none">
                     <!-- FILLED DYNAMICALLY -->
                 </div>
-                <button id="add-assets" type="button" class="d-none btn btn-primary ms-auto rounded-0 mb-1">${i18next.t('+ Ajouter des actifs')}</button>
+                <button id="add-assets" type="button" class="d-none btn btn-primary ms-auto rounded-0 mb-1">${i18next.t(
+      '+ Ajouter des actifs')}</button>
             </div>
             <div id="main-loader" class="my-auto flex-grow-1"></div>
             <div id="app-body" class="d-none d-flex flex-column flex-grow-1 bg-white border">
@@ -159,6 +160,7 @@ export class App {
     const button = container.querySelector('#add-assets')
     const url = new URL(window.location.href);
     const alertType = url.searchParams.get('type');
+    const tab = url.searchParams.get('tab');
     let widget = null;
     let level = alertType && alertType !== '' ? alertType : null;
     let asset = null;
@@ -316,8 +318,7 @@ export class App {
       header.classList.add('d-none');
       honeypot.classList.remove('d-none')
 
-      widget = new TabHoneypots(honeypot, this.datastore_, this.honeypotsStatus_.current_user,
-        status, honeypots)
+      widget = new TabHoneypots(honeypot, this.datastore_, this.honeypotsStatus_.current_user, status, honeypots)
       widget.onCancelConfiguration(() => {
         this.getAssets().then(() => {
           loader.destroy();
@@ -337,7 +338,8 @@ export class App {
       });
     }
 
-    if (!conf.SKIP_HONEYPOT && (this.honeypotsStatus_ && this.honeypotsStatus_.integration_status !== "setup_complete")) {
+    if (!conf.SKIP_HONEYPOT && (this.honeypotsStatus_ && this.honeypotsStatus_.integration_status
+      !== "setup_complete")) {
       openHoneypot.bind(this)(this.honeypotsStatus_.honeypots, this.honeypotsStatus_.integration_status);
     } else {
       await this.getAssets();
@@ -348,12 +350,28 @@ export class App {
       body.classList.remove('d-none');
       honeypot.classList.add('d-none')
       if (this.assets_.length) {
-        if (level) {
-          menu.selectTab(App.VULNERABILITIES);
-        } else if (conf.SKIP_HONEYPOT) {
-          menu.selectTab(App.VULNERABILITIES);
+        if (tab) {
+          if (tab === 'honeypots') {
+            menu.selectTab(App.PREVIEW);
+          } else if (tab === 'assets') {
+            menu.selectTab(App.ASSETS);
+          } else if (tab === 'attackers') {
+            menu.selectTab(App.ASSETS);
+          } else if (tab === 'blacklist') {
+            menu.selectTab(App.IP_BLACKLIST);
+          } else if (tab === 'delegation') {
+            menu.selectTab(App.DELEGATION);
+          } else {
+            menu.selectTab(App.VULNERABILITIES);
+          }
         } else {
-          menu.selectTab(App.PREVIEW);
+          if (level) {
+            menu.selectTab(App.VULNERABILITIES);
+          } else if (conf.SKIP_HONEYPOT) {
+            menu.selectTab(App.VULNERABILITIES);
+          } else {
+            menu.selectTab(App.PREVIEW);
+          }
         }
       } else {
         initImporter.bind(this)()

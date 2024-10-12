@@ -88,9 +88,6 @@ class YnhServer extends Model
 
     public static function forUser(User $user, bool $readyOnly = false): Collection
     {
-        if (!$user) {
-            return collect();
-        }
         if ($user->tenant_id) {
             if ($user->customer_id) {
                 return YnhServer::with('applications', 'domains', 'users')
@@ -159,11 +156,18 @@ class YnhServer extends Model
         return $this->is_ready !== null && $this->is_ready;
     }
 
+    public function isYunoHost(): bool
+    {
+        return !$this->addedWithCurl() && !$this->isFrozen();
+    }
+
+    /** @deprecated */
     public function isFrozen(): bool
     {
         return $this->is_frozen != null && $this->is_frozen;
     }
 
+    /** @deprecated */
     public function addedWithCurl(): bool
     {
         return $this->added_with_curl != null && $this->added_with_curl;

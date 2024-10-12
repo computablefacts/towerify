@@ -2,6 +2,7 @@
 
 @section('content')
 <style>
+
   .switch {
     position: relative;
     display: inline-block;
@@ -60,6 +61,11 @@
   .slider.round:before {
     border-radius: 50%;
   }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
 </style>
 <div id="the-cypher-brief" class="container">
   <div class="row justify-content-center">
@@ -86,12 +92,13 @@
       @foreach ($briefes as $brief)
       <div class="card mb-4">
         <div class="card-body">
-          <h5 id="toggle-{{ $brief->id }}" class="card-title cursor-pointer">
-            <span style="color:#f8b502">&gt;</span>&nbsp;{{ Illuminate\Support\Str::upper($brief->brief($lang)['teaser']) }}
-          </h5>
-          <h6 class="card-subtitle text-muted">
-            {{ $brief->brief($lang)['opener'] }}
+          <h6 id="toggle-{{ $brief->id }}" class="cursor-pointer">
+            <span style="color:#f8b502">&gt;</span>&nbsp;{{
+            Illuminate\Support\Str::upper($brief->brief($lang)['teaser']) }}
           </h6>
+          <div class="mt-3 card-text">
+            {{ $brief->brief($lang)['opener'] }}
+          </div>
           @if($brief->brief($lang)['why_it_matters'])
           <div id="why-it-matters-{{ $brief->id }}" class="mt-3 d-none">
               <?php $whyItMatters = preg_split("/\r\n|\n|\r/", $brief->brief($lang)['why_it_matters']) ?>
@@ -136,7 +143,7 @@
           @endif
           @if($brief->brief($lang)['website'])
           <div id="website-{{ $brief->id }}" class="mt-3 d-none">
-            <a href="{{ $brief->brief($lang)['link'] }}" class="card-link" target="_blank">
+            <a href="{{ $brief->brief($lang)['link'] }}" target="_blank">
               {{ $brief->brief($lang)['website'] }}
             </a>
           </div>
@@ -196,7 +203,7 @@
 
   const root = document.getElementById('the-cypher-brief');
   root.addEventListener('click', event => {
-    if (event.target.tagName === 'H5') {
+    if (event.target.tagName === 'H6') {
       compactOrExpandOne(event.target.id.substring(event.target.id.lastIndexOf('-') + 1));
       event.preventDefault();
       event.stopPropagation();
