@@ -1,39 +1,5 @@
+<x-monitor-asset/>
 <div class="container">
-  <div class="row">
-    <div class="col card card-accent-secondary tw-card p-0">
-      <div class="card-header">
-        <h3 class="m-0"><b>{{ __('Excited to get started ?') }}</b></h3>
-      </div>
-      <div class="card-body">
-        <div class="row mt-2">
-          <div class="col">
-            {{ __('Enter a domain name or an IP address belonging to you below :') }}
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col">
-            <div id="form-invitation" class="container-fluid">
-              <div class="row">
-                <div class="col-10 p-0 align-content-center">
-                  <input type="text"
-                         class="form-control"
-                         id="asset"
-                         placeholder="www.example.com ou 93.184.215.14">
-                </div>
-                <div class="col align-content-center">
-                  <button type="button"
-                          onclick="createAsset()"
-                          class="form-control btn btn-xs btn-outline-success">
-                    {{ __('Monitor >') }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="row mt-2">
     <div class="col-6 mr-1">
       <div class="row">
@@ -211,28 +177,3 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
     @endif
   </div>
 </div>
-<script>
-
-  function createAsset() {
-
-    const asset = document.querySelector('#asset').value;
-
-    axios.post('/am/api/v2/inventory/assets', {
-      asset: asset, watch: true,
-    }, {
-      headers: {
-        'Authorization': 'Bearer {{Auth::user()->adversaryMeterApiToken()}}'
-      }
-    }).then(function (asset) {
-      toaster.toastSuccess(`La surveillance de ${asset.data.asset.asset} a commencé.`);
-      if (asset.data.asset.type === 'IP') {
-        const div = document.getElementById('ip-monitored');
-        div.innerText = parseInt(div.innerText) + 1;
-      } else if (asset.data.asset.type === 'DNS') {
-        const div = document.getElementById('dns-monitored');
-        div.innerText = parseInt(div.innerText, 10) + 1;
-      }
-    }).catch((error) => toaster.toastAxiosError(error));
-  }
-  
-</script>
