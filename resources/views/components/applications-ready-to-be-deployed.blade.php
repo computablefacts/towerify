@@ -1,8 +1,5 @@
 @if(Auth::user()->canListApps())
-<div class="card card-accent-secondary tw-card">
-  <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Applications Ready To Be Deployed') }}</b></h3>
-  </div>
+<div class="card">
   @if($orders->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -12,8 +9,8 @@
     </div>
   </div>
   @else
-  <div class="card-body p-0">
-    <table class="table table-hover">
+  <div class="card-body">
+    <table class="table table-hover" style="margin-bottom:0">
       <thead>
       <tr>
         <th class="ps-4" width="25px"></th>

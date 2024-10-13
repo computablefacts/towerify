@@ -1,21 +1,16 @@
 @if(Auth::user()->canListUsers())
-<div class="card card-accent-secondary tw-card">
+<div class="card">
+  @if(Auth::user()->canManageUsers())
   <div class="card-header d-flex flex-row">
-    <div class="align-items-start">
-      <h3 class="m-0">
-        {{ __('Invitations') }}
-      </h3>
-    </div>
-    @if(Auth::user()->canManageUsers())
     <div class="align-items-end">
-      <h3 class="m-0 cursor-pointer">
+      <h6 class="m-0">
         <a onclick="toggleForm()">
           {{ __('+ new') }}
         </a>
-      </h3>
+      </h6>
     </div>
-    @endif
   </div>
+  @endif
   <div id="form-invitation" class="container-fluid mt-2 d-none">
     <div class="row">
       <div class="mb-3 col-5 col-md-5">
@@ -45,7 +40,7 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover">
+    <table class="table table-hover" style="margin-bottom:0">
       <thead>
       <tr>
         <th>

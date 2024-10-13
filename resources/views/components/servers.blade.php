@@ -14,23 +14,18 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
 </div>
 @endif
 @if(Auth::user()->canListServers())
-<div class="card card-accent-secondary tw-card">
+<div class="card">
+  @if(Auth::user()->canManageServers() && $is_yunohost)
   <div class="card-header d-flex flex-row">
-    <div class="align-items-start">
-      <h3 class="m-0">
-        {{ __('Servers') }}
-      </h3>
-    </div>
-    @if(Auth::user()->canManageServers() && $is_yunohost)
-    <div class="align-items-end">
-      <h3 class="m-0">
-        <a href="{{ route('ynh.servers.create') }}" class="float-end">
+    <div class="d-flex align-content-end">
+      <h6 class="m-0">
+        <a href="{{ route('ynh.servers.create') }}">
           {{ __('+ new') }}
         </a>
-      </h3>
+      </h6>
     </div>
-    @endif
   </div>
+  @endif
   @if($servers->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -41,12 +36,12 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover">
+    <table class="table table-hover" style="margin-bottom:0">
       <thead>
       <tr>
         <th class="ps-4" width="25px"></th>
         <th>
-          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
+          {{ __('Name') }}
         </th>
         <th>{{ __('OS') }}</th>
         <th>{{ __('IP V4') }}</th>
@@ -91,8 +86,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
           {{ $server->ip() }}
         </td>
         <td>
-          @if($server->isFrozen() || $server->ipv6() === '
-          <unavailable>')
+          @if($server->isFrozen() || $server->ipv6() === '<unavailable>')
             -
             @else
             {{ $server->ipv6() }}

@@ -1,8 +1,6 @@
-<div class="card card-accent-secondary tw-card">
-  <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Import your documents !') }}</b></h3>
-  </div>
+<div class="card">
   <div class="card-body p-3">
+    <h6 class="card-title">{{ __('Import your documents !') }}</h6>
     <div class="row">
       <div class="col-3">
         <div id="collections"></div>
@@ -17,10 +15,7 @@
     </div>
   </div>
 </div>
-<div class="card card-accent-secondary tw-card mt-3">
-  <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Knowledge Base') }}</b></h3>
-  </div>
+<div class="card mt-3">
   @if($files->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -31,11 +26,11 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover">
+    <table class="table table-hover" style="margin-bottom:0">
       <thead>
       <tr>
         <th>{{ __('Collection') }}</th>
-        <th><i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Filename') }}</th>
+        <th>{{ __('Filename') }}</th>
         <th style="text-align:right">{{ __('File Size') }}</th>
         <th style="text-align:right">{{ __('Number of Chunks') }}</th>
         <th style="text-align:right">{{ __('Number of Vectors') }}</th>
@@ -46,7 +41,7 @@
       @foreach($files as $file)
       <tr>
         <td>
-          <span class="tw-pill pill bg-primary">{{ $file['collection'] }}</span>
+          <span class="lozenge new">{{ $file['collection'] }}</span>
         </td>
         <td>
           <a href="{{ $file['download_url'] }}">
@@ -64,9 +59,9 @@
         </td>
         <td style="text-align:right">
           @if($file['status'] === 'processed')
-          <span class="tw-pill rounded-pill bg-success">{{ __($file['status']) }}</span>
+          <span class="lozenge success">{{ __($file['status']) }}</span>
           @else
-          <span class="tw-pill-blue-text rounded-pill bg-warning">{{ __($file['status']) }}</span>
+          <span class="lozenge information">{{ __($file['status']) }}</span>
           @endif
         </td>
       </tr>

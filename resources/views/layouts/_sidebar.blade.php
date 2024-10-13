@@ -69,18 +69,6 @@
     z-index: 2
   }
 
-  .lozenge.new {
-    background-color: var(--ds-background-discovery);
-    color: var(--ds-text-discovery);
-  }
-
-  .lozenge {
-    display: inline-block;
-    padding: 0 4px;
-    border-radius: var(--bs-border-radius);
-    font-size: 14px;
-  }
-
 </style>
 <aside class="bd-sidebar border-end">
   <div class="sidebar">

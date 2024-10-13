@@ -62,10 +62,71 @@
       background-color: var(--ds-background-neutral);
     }
 
+    .lozenge {
+      display: inline-block;
+      padding: 0 4px;
+      border-radius: var(--bs-border-radius);
+      font-size: 14px;
+    }
+
+    .lozenge.new {
+      background-color: var(--ds-background-discovery);
+      color: var(--ds-text-discovery);
+    }
+
+    .lozenge.information {
+      background-color: var(--ds-background-information);
+      color: var(--ds-text-information);
+    }
+
+    .lozenge.success {
+      background-color: var(--ds-background-success);
+      color: var(--ds-text-success);
+    }
+
+    .lozenge.error {
+      background-color: var(--ds-background-danger);
+      color: var(--ds-text-danger);
+    }
+
     /* CyberBuddy */
 
     #botmanWidgetRoot .desktop-closed-message-avatar {
       background: unset !important;
+    }
+
+    /* Towerify */
+
+    .tw-dot-red {
+      height: 10px;
+      width: 10px;
+      background-color: #ff4d4d;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .tw-dot-green {
+      height: 10px;
+      width: 10px;
+      background-color: #4bd28f;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .tw-dot-blue {
+      height: 10px;
+      width: 10px;
+      background-color: #0194ff;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .tw-dot-orange {
+      height: 10px;
+      width: 10px;
+      background-color: #ffaa00;
+      border-radius: 50%;
+      display: inline-block;
     }
 
   </style>

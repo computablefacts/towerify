@@ -84,9 +84,6 @@
 
 </style>
 <div class="card card-accent-secondary tw-card">
-  <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Shell') }}</b></h3>
-  </div>
   <div class="p-3" style="background-color:#fff3cd;">
     {{ __('This shell does not allow you to execute interactive commands. Shell commands cannot exceed 255 characters.')
     }}

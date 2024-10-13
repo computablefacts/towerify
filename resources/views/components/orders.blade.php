@@ -8,11 +8,11 @@
     </div>
     @if(Auth::user()->canBuyStuff())
     <div class="align-items-end">
-      <h3 class="m-0">
-        <a href="{{ route('product.index') }}" class="float-end">
+      <h6 class="m-0">
+        <a href="{{ route('product.index') }}">
           {{ __('+ new') }}
         </a>
-      </h3>
+      </h6>
     </div>
     @endif
   </div>

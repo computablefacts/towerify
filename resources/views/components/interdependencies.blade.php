@@ -4,15 +4,10 @@
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://unpkg.com/cytoscape-popper@2/cytoscape-popper.js"></script>
 @endonce
-<div class="card card-accent-secondary tw-card mt-4">
-  <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Interdependencies') }}</b></h3>
-  </div>
+<div class="card">
   <div class="card-body">
     <div class="row">
-      <div class="col" id="cy" style="width:100%;height:800px">
-
-      </div>
+      <div class="col" id="cy" style="width:100%;height:800px"></div>
     </div>
   </div>
 </div>

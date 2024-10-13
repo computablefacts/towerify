@@ -9,11 +9,11 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover">
+    <table class="table table-hover" style="margin-bottom:0">
       <thead>
       <tr>
         <th>
-          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
+          {{ __('Name') }}
         </th>
         <th>{{ __('Version') }}</th>
         <th>{{ __('Interval') }}</th>
@@ -44,7 +44,7 @@
           {{ \Carbon\CarbonInterval::seconds($rule->interval)->cascade()->forHumans(); }}
         </td>
         <td>
-          <span class="tw-pill rounded-pill bg-primary">
+          <span class="lozenge new">
             {{ $rule->platform->value }}
           </span>
         </td>

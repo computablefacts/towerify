@@ -1,7 +1,4 @@
-<div class="card card-accent-secondary tw-card">
-  <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Applications') }}</b></h3>
-  </div>
+<div class="card">
   @if($apps->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -12,7 +9,7 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover">
+    <table class="table table-hover" style="border-bottom:0">
       <thead>
       <tr>
         <th width="70px"></th>
@@ -43,7 +40,6 @@
               @else
               {{ $app->application->name }}
               @endif
-              &nbsp;&nbsp;<i class="zmdi zmdi-open-in-new"></i>
             </a>
           </span>
           <div class="text-muted">

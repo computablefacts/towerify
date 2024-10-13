@@ -356,7 +356,7 @@ export class App {
           } else if (tab === 'assets') {
             menu.selectTab(App.ASSETS);
           } else if (tab === 'attackers') {
-            menu.selectTab(App.ASSETS);
+            menu.selectTab(App.DIRECTORY_ADVERSARIES);
           } else if (tab === 'blacklist') {
             menu.selectTab(App.IP_BLACKLIST);
           } else if (tab === 'delegation') {

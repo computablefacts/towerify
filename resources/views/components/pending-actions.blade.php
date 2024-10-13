@@ -1,11 +1,9 @@
 @if(Auth::user()->canListServers())
-<div class="card card-accent-secondary tw-card">
-  <div class="card-header">
-    <h3 class="m-0"><b>{{ __('Pending Actions') }}</b></h3>
-  </div>
+<div class="card">
   <div class="card-body">
+    <h6 class="card-title">{{ __('Pending Actions') }}</h6>
     <div class="row">
-      <div class="mb-3 col">
+      <div class="col">
         @if($pendingActions->isEmpty())
         <div class="row">
           <div class="col">
@@ -16,13 +14,13 @@
         @foreach($pendingActions as $pendingAction)
         <div>
           @if($pendingAction->state === \App\Enums\SshTraceStateEnum::PENDING)
-          <span class="me-2 tw-dot-blue"></span>
+          <span class="tw-dot-blue"></span>
           @elseif ($pendingAction->state === \App\Enums\SshTraceStateEnum::IN_PROGRESS)
-          <span class="me-2 tw-dot-orange"></span>
+          <span class="tw-dot-orange"></span>
           @elseif ($pendingAction->state === \App\Enums\SshTraceStateEnum::DONE)
-          <span class="me-2 tw-dot-green"></span>
+          <span class="tw-dot-green"></span>
           @else
-          <span class="me-2 tw-dot-red"></span>
+          <span class="tw-dot-red"></span>
           @endif
           {{ $pendingAction->updated_at }} - {{ $pendingAction->server->name }} - {{ $pendingAction->trace }}
         </div>

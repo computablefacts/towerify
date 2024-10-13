@@ -1,21 +1,16 @@
 @if(Auth::user()->canListServers())
-<div class="card card-accent-secondary tw-card">
+<div class="card">
+  @if(Auth::user()->canManageServers() && isset($url))
   <div class="card-header d-flex flex-row">
-    <div class="align-items-start">
-      <h3 class="m-0">
-        {{ __('Backups') }}
-      </h3>
-    </div>
-    @if(Auth::user()->canManageServers() && isset($url))
     <div class="align-items-end">
-      <h3 class="m-0">
+      <h6 class="m-0">
         <a href="#" class="float-end" onclick="createBackup()">
           {{ __('+ new') }}
         </a>
-      </h3>
+      </h6>
     </div>
-    @endif
   </div>
+  @endif
   @if($backups->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -26,12 +21,10 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover">
+    <table class="table table-hover" style="margin-bottom:0">
       <thead>
       <tr>
-        <th>
-          <i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Date') }}
-        </th>
+        <th>{{ __('Date') }}</th>
         <th>{{ __('Name') }}</th>
         <th>{{ __('Size') }}</th>
         <th></th>
