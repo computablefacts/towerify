@@ -1,6 +1,6 @@
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">{{ __('Excited to get started ?') }}</h5>
+    <h6 class="card-title">{{ __('Excited to get started ?') }}</h6>
     <div class="card-text mb-3">
       {{ __('Enter a domain name or an IP address belonging to you below :') }}
     </div>

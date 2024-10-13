@@ -82,7 +82,7 @@
   @endauth
   <main class="bd-main">
     <div class="bd-main-content">
-      <div class="bd-content px-4 px-md-6 px-lg-10 px-xl-10 py-8">
+      <div class="bd-content py-3">
         @yield('content')
       </div>
     </div>

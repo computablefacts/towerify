@@ -161,5 +161,8 @@
   "Attackers": "Attaquants",
   "Reports & Alerts": "Rapports & Alertes",
   "IP Blacklist": "IP à blacklister",
-  "Service Provider Delegation": "Délégation"
+  "Service Provider Delegation": "Délégation",
+  "Agents Deployed": "Agents déployés",
+  "AdversaryMeter protects your external perimeter": "AdversaryMeter protège votre périmètre externe",
+  "Sentinel protects your internal perimeter": "Sentinel protège votre périmètre interne"
 }

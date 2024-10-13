@@ -1,178 +1,109 @@
-<x-monitor-asset/>
-<div class="container">
-  <div class="row mt-2">
-    <div class="col-6 mr-1">
-      <div class="row">
-        <div class="col col-6 card card-accent-secondary tw-card mr-1">
-          <div class="fs-1 text-end" style="opacity: .55">
-            <i class="zmdi zmdi-shield-security"></i>
-          </div>
-          <div id="ip-monitored" class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $overview['ip_monitored'] ? Illuminate\Support\Number::format($overview['ip_monitored'], locale: 'sv') :
-            0
-            }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('IP Monitored') }}
-          </small>
-        </div>
-        <div class="col card card-accent-secondary tw-card ml-1">
-          <div class="fs-1 text-end" style="opacity: .55">
-            <i class="zmdi zmdi-shield-security"></i>
-          </div>
-          <div id="dns-monitored" class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $overview['dns_monitored'] ? Illuminate\Support\Number::format($overview['dns_monitored'], locale: 'sv')
-            :
-            0 }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('DNS Monitored') }}
-          </small>
-        </div>
-      </div>
-    </div>
-    <div class="col ml-1">
-      <div class="row">
-        <div class="col card card-accent-secondary tw-card">
-          <div class="fs-1 text-end" style="opacity: .55">
-            <i class="zmdi zmdi-dns"></i>
-          </div>
-          <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $overview['servers_monitored'] ? Illuminate\Support\Number::format($overview['servers_monitored'],
-            locale:
-            'sv') : 0 }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Servers Monitored') }}
-          </small>
-        </div>
-      </div>
+<style>
+
+  .pr-0 {
+    padding-right: 0 !important;
+  }
+
+  .pl-2 {
+    padding-left: .5rem !important;
+  }
+
+</style>
+<div class="container p-0">
+  <div class="row">
+    <div class="col">
+      <x-monitor-asset/>
     </div>
   </div>
   <div class="row mt-2">
-    <div class="col-6 mr-1">
+    <div class="col-6">
       <div class="row">
-        <div class="col col-4 card card-accent-secondary tw-card mr-1">
-          <div class="fs-1 text-end" style="color: red;">
-            <i class="zmdi zmdi-gps-dot"></i>
-          </div>
-          <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $overview['vulns_high'] ? Illuminate\Support\Number::format($overview['vulns_high'], locale:
-            'sv') : 0 }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Vulnerabilities high') }}
-          </small>
+        <div class="col col-6 pr-0">
+            <?php $ip_monitored = $overview['ip_monitored'] ? $overview['ip_monitored'] : 0 ?>
+          <x-big-number
+            :number="$ip_monitored"
+            :title="__('IP Monitored')"
+            icon="ip"
+            color="var(--ds-background-brand-bold)"/>
         </div>
-        <div class="col col-4 card card-accent-secondary tw-card ml-1 mr-1">
-          <div class="fs-1 text-end" style="color: orange">
-            <i class="zmdi zmdi-gps-dot"></i>
-          </div>
-          <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $overview['vulns_medium'] ? Illuminate\Support\Number::format($overview['vulns_medium'], locale:
-            'sv') : 0 }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Vulnerabilities medium') }}
-          </small>
-        </div>
-        <div class="col card card-accent-secondary tw-card ml-1">
-          <div class="fs-1 text-end" style="color: blue">
-            <i class="zmdi zmdi-gps-dot"></i>
-          </div>
-          <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $overview['vulns_low'] ? Illuminate\Support\Number::format($overview['vulns_low'], locale:
-            'sv') : 0 }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Vulnerabilities low') }}
-          </small>
+        <div class="col pr-0 pl-2">
+            <?php $dns_monitored = $overview['dns_monitored'] ? $overview['dns_monitored'] : 0 ?>
+          <x-big-number
+            :number="$dns_monitored"
+            :title="__('DNS Monitored')"
+            icon="dns"
+            color="var(--ds-background-brand-bold)"/>
         </div>
       </div>
     </div>
-    <div class="col ml-1">
+    <div class="col pl-2">
+        <?php $servers_monitored = $overview['servers_monitored'] ? $overview['servers_monitored'] : 0 ?>
+      <x-big-number
+        :number="$servers_monitored"
+        :title="__('Agents Deployed')"
+        icon="server"
+        color="var(--ds-background-brand-bold)"/>
+    </div>
+  </div>
+  <div class="row mt-2">
+    <div class="col-6 pr-0">
       <div class="row">
-        <div class="col col-6 card card-accent-secondary tw-card mr-1">
-          <div class="fs-1 text-end" style="opacity: .55">
-            <i class="zmdi zmdi-layers"></i>
-          </div>
-          <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $overview['metrics_collected'] ? Illuminate\Support\Number::format($overview['metrics_collected'],
-            locale:
-            'sv') : 0 }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Metrics Collected') }}
-          </small>
+        <div class="col col-4 pr-0">
+            <?php $vulns_high = $overview['vulns_high'] ? $overview['vulns_high'] : 0 ?>
+          <x-big-number
+            :number="$vulns_high"
+            :title="__('High')"
+            icon="vulnerability"
+            color="#dc3545"/>
         </div>
-        <div class="col card card-accent-secondary tw-card ml-1">
-          <div class="fs-1 text-end" style="opacity: .55">
-            <i class="zmdi zmdi-layers "></i>
-          </div>
-          <div class="fs-4 mb-0 fw-bold text-uppercase">
-            {{ $overview['events_collected'] ? Illuminate\Support\Number::format($overview['events_collected'], locale:
-            'sv') : 0 }}
-          </div>
-          <small class="text-uppercase fw-bold mb-3" style="opacity: .55">
-            {{ __('Events Collected') }}
-          </small>
+        <div class="col col-4 pl-2 pr-0">
+            <?php $vulns_medium = $overview['vulns_medium'] ? $overview['vulns_medium'] : 0 ?>
+          <x-big-number
+            :number="$vulns_medium"
+            :title="__('Medium')"
+            icon="vulnerability"
+            color="#fd7e14"/>
+        </div>
+        <div class="col pl-2">
+            <?php $vulns_low = $overview['vulns_low'] ? $overview['vulns_low'] : 0 ?>
+          <x-big-number
+            :number="$vulns_low"
+            :title="__('Low')"
+            icon="vulnerability"
+            color="#fff700"/>
+        </div>
+      </div>
+    </div>
+    <div class="col pl-2">
+      <div class="row">
+        <div class="col col-6 pr-0">
+            <?php $metrics_collected = $overview['metrics_collected'] ? $overview['metrics_collected'] : 0 ?>
+          <x-big-number
+            :number="$metrics_collected"
+            :title="__('Metrics Collected')"
+            icon="metric"
+            color="var(--ds-background-brand-bold)"/>
+        </div>
+        <div class="col pl-2">
+            <?php $events_collected = $overview['events_collected'] ? $overview['events_collected'] : 0 ?>
+          <x-big-number
+            :number="$events_collected"
+            :title="__('Events Collected')"
+            icon="event"
+            color="var(--ds-background-brand-bold)"/>
         </div>
       </div>
     </div>
   </div>
   <div class="row mt-2">
     @if(Auth::user()->canUseAdversaryMeter())
-    <div class="col col-6 card card-accent-secondary tw-card p-0 mr-1">
-      <div class="card-header">
-        <h3 class="m-0"><b>{{ __('AdversaryMeter') }}</b></h3>
-      </div>
-      <div class="card-body">
-        <div class="row mt-2">
-          <div class="col">
-            AdversaryMeter est votre garde du corps numérique. <b>Il veille sur vos serveurs exposés sur Internet</b> en
-            détectant les vulnérabilités avant que des acteurs malveillants ne les exploitent.
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col">
-            Pour configurer AdversaryMeter, cliquez <a
-              href="{{ App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl() }}" target="_blank">ici</a>.
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col">
-            Pour accéder à la documentation détaillée, cliquez <a
-              href="https://computablefacts.notion.site/AdversaryMeter-a30527edc0554ea8aabf7cb7d0137258?pvs=4"
-              target="_blank">ici</a>.
-          </div>
-        </div>
-      </div>
+    <div class="col col-6 pr-0">
+      <x-faq-adversary-meter/>
     </div>
     @endif
     @if(Auth::user()->canManageServers())
-    <div class="col card card-accent-secondary tw-card p-0 ml-1">
-      <div class="card-header">
-        <h3 class="m-0"><b>{{ __('Sentinel') }}</b></h3>
-      </div>
-      <div class="card-body">
-        <div class="row mt-2">
-          <div class="col">
-            Sentinel est votre vigile numérique. <b>Il surveille en continu l'état de vos serveurs</b>, remontant
-            rapidement toute anomalie ou non-conformité afin de prévenir les risques avant qu'ils ne deviennent des
-            menaces réelles.
-          </div>
-        </div>
-        <div class="row mt-2">
-          <div class="col">
-            Pour configurer Sentinel, connectez-vous en <i>root</i> au serveur que vous souhaitez surveiller et exécutez
-            cette ligne de commande :
-            <br><br>
-            <pre>
-curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')" | bash
-            </pre>
-          </div>
-        </div>
-      </div>
+    <div class="col col-6 pl-2">
+      <x-faq-sentinel/>
     </div>
     @endif
   </div>
