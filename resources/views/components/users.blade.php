@@ -1,5 +1,5 @@
 @if(Auth::user()->canListUsers())
-<div class="card card-accent-secondary tw-card">
+<div class="card">
   @if($users->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -10,12 +10,10 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover" style="margin-bottom:0">
+    <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
-        <th>
-          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Name') }}
-        </th>
+        <th>{{ __('Name') }}</th>
         <th>{{ __('Username') }}</th>
         <th>{{ __('Email') }}</th>
         <th></th>
@@ -35,7 +33,7 @@
         </td>
         <td>
           <a href="mailto:{{ $user->email }}" target="_blank">
-            {{ $user->email }}&nbsp;&nbsp;<i class="zmdi zmdi-open-in-new"></i>
+            {{ $user->email }}
           </a>
         </td>
         <td>
@@ -44,32 +42,34 @@
           $userAvailablePermissions = $server ? $server->availablePermissionsYnh($user) :
           \App\Models\YnhPermission::availablePermissions($user);
           @endphp
-          @if(!$userAvailablePermissions->isEmpty())
+          @if($userAvailablePermissions->isNotEmpty())
           <div class="card-actionbar">
-            <div class="btn-group">
+            <div class="dropdown">
               <button type="button"
-                      class="btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split"
+                      class="btn btn-sm btn-outline-success dropdown-toggle"
                       data-bs-toggle="dropdown"
-                      aria-expanded="true">
+                      aria-expanded="false">
                 {{ __('Add') }}
               </button>
-              <div class="dropdown-menu" x-placement="bottom-start">
+              <ul class="dropdown-menu" role="menu">
                 @foreach($userAvailablePermissions as $permission)
                   <?php $serverId = $server ? $server->id : $permission->server_id; ?>
                   <?php $serverName = $server ? $server->name : $permission->server_name; ?>
                   <?php $permissionId = $server ? $permission : $permission->permission; ?>
                   <?php $userId = $server ? $user->id : $permission->ynh_user_id; ?>
-                <a onclick="addUserPermission('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
-                   class="dropdown-item">
-                  @if(\Illuminate\Support\Str::after($permissionId, '.') === 'main')
-                  {{ \Illuminate\Support\Str::before($permissionId, '.') }} / {{ $serverName }}
-                  @else
-                  {{ \Illuminate\Support\Str::before($permissionId, '.') }}
-                  &nbsp;({{ \Illuminate\Support\Str::after($permissionId, '.') }}) / {{ $serverName }}
-                  @endif
-                </a>
+                <li>
+                  <a onclick="addUserPermission('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
+                     class="dropdown-item">
+                    @if(\Illuminate\Support\Str::after($permissionId, '.') === 'main')
+                    {{ \Illuminate\Support\Str::before($permissionId, '.') }} / {{ $serverName }}
+                    @else
+                    {{ \Illuminate\Support\Str::before($permissionId, '.') }}
+                    &nbsp;({{ \Illuminate\Support\Str::after($permissionId, '.') }}) / {{ $serverName }}
+                    @endif
+                  </a>
+                </li>
                 @endforeach
-              </div>
+              </ul>
             </div>
           </div>
           @endif
@@ -83,55 +83,59 @@
           @endphp
           @if(!$userCurrentPermissions->isEmpty())
           <div class="card-actionbar">
-            <div class="btn-group">
+            <div class="dropdown">
               <button type="button"
-                      class="btn btn-sm btn-outline-danger dropdown-toggle dropdown-toggle-split"
+                      class="btn btn-sm btn-outline-danger dropdown-toggle"
                       data-bs-toggle="dropdown"
-                      aria-expanded="true">
+                      aria-expanded="false">
                 {{ __('Remove') }}
               </button>
-              <div class="dropdown-menu" x-placement="bottom-start">
+              <ul class="dropdown-menu" role="menu">
                 @foreach($userCurrentPermissions as $permission)
                   <?php $serverId = $server ? $server->id : $permission->server_id; ?>
                   <?php $serverName = $server ? $server->name : $permission->server_name; ?>
                   <?php $permissionId = $server ? $permission : $permission->permission; ?>
                   <?php $userId = $server ? $user->id : $permission->ynh_user_id; ?>
-                <a
-                  onclick="removeUserPermission('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
-                  class="dropdown-item">
-                  @if(\Illuminate\Support\Str::after($permissionId, '.') === 'main')
-                  {{ \Illuminate\Support\Str::before($permissionId, '.') }} / {{ $serverName }}
-                  @else
-                  {{ \Illuminate\Support\Str::before($permissionId, '.') }}
-                  &nbsp;({{ \Illuminate\Support\Str::after($permissionId, '.') }}) / {{ $serverName }}
-                  @endif
-                </a>
+                <li>
+                  <a
+                    onclick="removeUserPermission('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
+                    class="dropdown-item">
+                    @if(\Illuminate\Support\Str::after($permissionId, '.') === 'main')
+                    {{ \Illuminate\Support\Str::before($permissionId, '.') }} / {{ $serverName }}
+                    @else
+                    {{ \Illuminate\Support\Str::before($permissionId, '.') }}
+                    &nbsp;({{ \Illuminate\Support\Str::after($permissionId, '.') }}) / {{ $serverName }}
+                    @endif
+                  </a>
+                </li>
                 @endforeach
-              </div>
+              </ul>
             </div>
           </div>
           @endif
           @endif
         </td>
       </tr>
+      @php
+      $userPermissions = $user
+      ->permissions
+      ->where('is_user_specific', true)
+      ->filter(fn($perm) => $perm->application->ynh_server_id === $server->id)
+      ->sortBy('application.name');
+      @endphp
+      @if($userPermissions->isNotEmpty())
       <tr>
         <td colspan="5">
-          @php
-          $userPermissions = $user
-          ->permissions
-          ->where('is_user_specific', true)
-          ->filter(fn($perm) => $perm->application->ynh_server_id === $server->id)
-          ->sortBy('application.name');
-          @endphp
           @foreach($userPermissions as $permission)
-          <span class="tw-pill rounded-pill bg-primary">
-            <a href="https://{{ $permission->application->path }}" target="_blank" class="text-white">
+          <span class="lozenge new">
+            <a href="https://{{ $permission->application->path }}" target="_blank">
               {{ $permission->application->name }}
             </a>
           </span>&nbsp;
           @endforeach
         </td>
       </tr>
+      @endif
       @endforeach
       </tbody>
     </table>

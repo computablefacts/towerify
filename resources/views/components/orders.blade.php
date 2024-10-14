@@ -1,21 +1,18 @@
 @if(Auth::user()->canListOrders())
-<div class="card card-accent-secondary tw-card">
+<div class="card">
+  @if(Auth::user()->canBuyStuff())
   <div class="card-header d-flex flex-row">
     <div class="align-items-start">
-      <h3 class="m-0">
-        {{ __('Orders') }}
-      </h3>
+      <div class="align-items-end">
+        <h6 class="m-0">
+          <a href="{{ route('product.index') }}">
+            {{ __('+ new') }}
+          </a>
+        </h6>
+      </div>
     </div>
-    @if(Auth::user()->canBuyStuff())
-    <div class="align-items-end">
-      <h6 class="m-0">
-        <a href="{{ route('product.index') }}">
-          {{ __('+ new') }}
-        </a>
-      </h6>
-    </div>
-    @endif
   </div>
+  @endif
   @if($orders->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -31,9 +28,7 @@
       <tr>
         <th class="ps-4" width="25px"></th>
         <th width="70px"></th>
-        <th>
-          <i class="zmdi zmdi-long-arrow-up"></i>&nbsp;{{ __('Date') }}
-        </th>
+        <th>{{ __('Date') }}</th>
         <th>{{ __('Name') }}</th>
         <th>{{ __('Categories') }}</th>
         <th>{{ __('Order') }}</th>
@@ -66,37 +61,37 @@
         </td>
         <td>
           @foreach($order->taxons() as $taxon)
-          <span class="tw-pill rounded-pill bg-dark">
-              {{ $taxon->name }}
-            </span>
+          <span class="lozenge new">
+            {{ $taxon->name }}
+          </span>
           @endforeach
         </td>
         <td>
           <span class="text-muted">{{ $order->orderIdentifier() }}</span>
         </td>
         <td>
-          <span class="tw-pill rounded-pill bg-{{
+          <span class="lozenge {{
             $order->orderIsCompleted() ? 'success' :
-              ($order->orderIsCancelled() ? 'warning' :
-                ($order->orderIsProcessing() ? 'info' : 'secondary')) }}">
+              ($order->orderIsCancelled() ? 'error' :
+                ($order->orderIsProcessing() ? 'information' : 'information')) }}">
             {{ $order->orderStatus() }}
           </span>
         </td>
         <td>
           @if($order->isApplicationDeployable())
-          <span class="tw-pill rounded-pill bg-info">
+          <span class="lozenge information">
               {{ __('deployable') }}
             <span>
             @elseif($order->isApplicationDeployed())
-            <span class="tw-pill rounded-pill bg-success">
+            <span class="lozenge success">
               {{ __('deployed') }}
             <span>
             @elseif($order->isServerDeployable())
-            <span class="tw-pill rounded-pill bg-info">
+            <span class="lozenge information">
               {{ __('deployable') }}
             <span>
             @elseif($order->isServerDeployed())
-            <span class="tw-pill rounded-pill bg-success">
+            <span class="lozenge success">
               {{ __('deployed') }}
             <span>
             @endif
@@ -104,20 +99,22 @@
         <td>
           @if(Auth::user()->canManageApps() && $order->isApplicationDeployable())
           <div class="card-actionbar">
-            <div class="btn-group">
+            <div class="dropdown">
               <button type="button"
-                      class="btn btn-sm btn-outline-success dropdown-toggle dropdown-toggle-split"
+                      class="btn btn-sm btn-outline-success dropdown-toggle"
                       data-bs-toggle="dropdown"
-                      aria-expanded="true">
+                      aria-expanded="false">
                 {{ __('Deploy') }}
               </button>
-              <div class="dropdown-menu" x-placement="bottom-start">
+              <ul class="dropdown-menu" role="menu">
                 @foreach(\App\Models\YnhServer::forUser(Auth::user(), true) as $server)
-                <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=applications" class="dropdown-item">
-                  {{ $server->name }} ({{ $server->ip() }})
-                </a>
+                <li>
+                  <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=applications" class="dropdown-item">
+                    {{ $server->name }} ({{ $server->ip() }})
+                  </a>
+                </li>
                 @endforeach
-              </div>
+              </ul>
             </div>
           </div>
           @elseif(Auth::user()->canManageApps() && $order->isApplicationDeployed())

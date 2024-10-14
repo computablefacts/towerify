@@ -62,10 +62,6 @@
     border-radius: 50%;
   }
 
-  .cursor-pointer {
-    cursor: pointer;
-  }
-
 </style>
 <div id="the-cypher-brief" class="container">
   <div class="row justify-content-center">

@@ -64,7 +64,7 @@
                 @endif
 
                 @if(!$products->isEmpty())
-                <div class="card card-default card-accent-secondary tw-card">
+                <div class="card card-default">
                     <div class="card-header">{{ $taxon ?  'Products in ' . $taxon->name : __('All Products') }}</div>
 
                     <div class="card-body">

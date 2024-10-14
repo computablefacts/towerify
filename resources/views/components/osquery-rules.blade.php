@@ -1,4 +1,4 @@
-<div class="card card-accent-secondary tw-card">
+<div class="card">
   @if($rules->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -9,7 +9,7 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover" style="margin-bottom:0">
+    <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
         <th>

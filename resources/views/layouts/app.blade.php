@@ -20,116 +20,9 @@
   <!-- Axios -->
   <script src="{{ asset('js/app.js') }}"></script>
 
-  <style>
+  <!-- App-specific -->
+  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
-    /* Pages Layout */
-
-    .bd-layout {
-      display: flex;
-      flex-direction: column
-    }
-
-    @media (min-width: 992px) {
-      .bd-layout {
-        display: grid;
-        grid-template-areas: "sidebar main";
-        grid-template-columns: min-content 1fr;
-        gap: 0
-      }
-    }
-
-    .bd-main {
-      grid-area: main;
-      display: grid;
-      grid-template-areas: "intro" "content" "footer";
-      grid-template-rows: auto 1fr
-    }
-
-    .bd-main-content {
-      display: grid;
-      grid-area: content;
-      grid-template-areas: "content toc";
-      grid-template-columns: 1fr min-content;
-    }
-
-    .bd-content {
-      min-width: 1px;
-      grid-area: content;
-      position: relative;
-    }
-
-    .bd-bg-light {
-      background-color: var(--ds-background-neutral);
-    }
-
-    .lozenge {
-      display: inline-block;
-      padding: 0 4px;
-      border-radius: var(--bs-border-radius);
-      font-size: 14px;
-    }
-
-    .lozenge.new {
-      background-color: var(--ds-background-discovery);
-      color: var(--ds-text-discovery);
-    }
-
-    .lozenge.information {
-      background-color: var(--ds-background-information);
-      color: var(--ds-text-information);
-    }
-
-    .lozenge.success {
-      background-color: var(--ds-background-success);
-      color: var(--ds-text-success);
-    }
-
-    .lozenge.error {
-      background-color: var(--ds-background-danger);
-      color: var(--ds-text-danger);
-    }
-
-    /* CyberBuddy */
-
-    #botmanWidgetRoot .desktop-closed-message-avatar {
-      background: unset !important;
-    }
-
-    /* Towerify */
-
-    .tw-dot-red {
-      height: 10px;
-      width: 10px;
-      background-color: #ff4d4d;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .tw-dot-green {
-      height: 10px;
-      width: 10px;
-      background-color: #4bd28f;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .tw-dot-blue {
-      height: 10px;
-      width: 10px;
-      background-color: #0194ff;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .tw-dot-orange {
-      height: 10px;
-      width: 10px;
-      background-color: #ffaa00;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-  </style>
 </head>
 <body class="bd-bg-light">
 @auth
@@ -149,8 +42,10 @@
     </div>
   </main>
 </div>
+@auth
 @include('layouts._toaster')
 @include('layouts._drawer')
+@endauth
 @include('layouts._freshdesk')
 </body>
 </html>

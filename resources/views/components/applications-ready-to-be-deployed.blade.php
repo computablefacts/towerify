@@ -9,15 +9,13 @@
     </div>
   </div>
   @else
-  <div class="card-body">
-    <table class="table table-hover" style="margin-bottom:0">
+  <div class="card-body p-0">
+    <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
         <th class="ps-4" width="25px"></th>
         <th width="70px"></th>
-        <th>
-          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Date') }}
-        </th>
+        <th>{{ __('Date') }}</th>
         <th>{{ __('Name') }}</th>
         <th>{{ __('Categories') }}</th>
         <th>{{ __('Order') }}</th>
@@ -49,7 +47,7 @@
         </td>
         <td>
           @foreach($order->taxons() as $taxon)
-          <span class="tw-pill rounded-pill bg-dark">
+          <span class="lozenge new">
             {{ $taxon->name }}
           </span>
           @endforeach
@@ -60,10 +58,10 @@
           </div>
         </td>
         <td>
-          <span class="tw-pill rounded-pill bg-{{
+          <span class="lozenge {{
             $order->orderIsCompleted() ? 'success' :
-              ($order->orderIsCancelled() ? 'warning' :
-                ($order->orderIsProcessing() ? 'info' : 'secondary')) }}">
+              ($order->orderIsCancelled() ? 'error' :
+                ($order->orderIsProcessing() ? 'information' : 'information')) }}">
             {{ $order->orderStatus() }}
           </span>
         </td>

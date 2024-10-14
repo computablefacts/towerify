@@ -1,4 +1,4 @@
-<article class="card shadow-sm card-accent-secondary tw-card mb-0">
+<article class="card shadow-sm mb-0">
   <div class="row">
     <div class="col-sm-2 align-self-center">
       <div class="card-body p-2">

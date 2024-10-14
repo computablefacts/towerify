@@ -1,11 +1,11 @@
 @if(Auth::user()->canManageServers() && !$is_yunohost)
-<div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+<div class="card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
   <div class="card-body">
     <div class="row">
       <div class="col">
         {{ __('To monitor a new server, log in as root and execute this command line :') }}
         <br><br>
-        <pre style="margin-bottom:0">
+        <pre class="no-bottom-margin">
 curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')" | bash
         </pre>
       </div>
@@ -36,13 +36,11 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover" style="margin-bottom:0">
+    <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
         <th class="ps-4" width="25px"></th>
-        <th>
-          {{ __('Name') }}
-        </th>
+        <th>{{ __('Name') }}</th>
         <th>{{ __('OS') }}</th>
         <th>{{ __('IP V4') }}</th>
         <th>{{ __('IP V6') }}</th>
@@ -69,12 +67,12 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
         </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
-            @if($server->isFrozen())
-            {{ $server->name }}
-            @else
+            @if($server->isYunoHost())
             <a href="{{ route('ynh.servers.edit', $server->id) }}">
               {{ $server->name }}
             </a>
+            @else
+            {{ $server->name }}
             @endif
           </span>
         </td>
@@ -86,47 +84,35 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
           {{ $server->ip() }}
         </td>
         <td>
-          @if($server->isFrozen() || $server->ipv6() === '<unavailable>')
-            -
-            @else
-            {{ $server->ipv6() }}
-            @endif
+          {{ $server->ipv6() }}
         </td>
         <td>
-          @if($server->isFrozen())
-          -
-          @else
+          @if($server->isYunoHost())
           {{ $server->domain()?->name }}
           @endif
         </td>
         <td>
-          @if($server->isFrozen() || $server->addedWithCurl())
-          -
-          @else
+          @if($server->isYunoHost())
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=domains">
             {{ $server->domains->count() }}
           </a>
           @endif
         </td>
         <td>
-          @if($server->isFrozen() || $server->addedWithCurl())
-          -
-          @else
+          @if($server->isYunoHost())
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=applications">
             {{ $server->applications->count() }}
           </a>
           @endif
         </td>
         <td>
-          @if($server->isFrozen() || $server->addedWithCurl())
-          -
-          @else
+          @if($server->isYunoHost())
           <a href="{{ route('ynh.servers.edit', $server->id) }}?tab=users">
             {{ $server->users->count() }}
           </a>
           @endif
         </td>
-        <th>
+        <td>
           @if($server->isReady() && !$server->addedWithCurl() && Auth::user()->canManageServers())
           <a id="refresh-{{ $server->id }}"
              onclick="refresh('{{ $server->id }}')"
@@ -135,7 +121,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
             <span class=refresh>&#x27f3;</span>
           </a>
           @endif
-        </th>
+        </td>
       </tr>
       @endforeach
       </tbody>

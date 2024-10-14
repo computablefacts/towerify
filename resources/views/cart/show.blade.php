@@ -22,7 +22,7 @@
         @else
         <div class="row">
             <div class="col-md-8">
-                <div class="card bg-light card-accent-secondary tw-card">
+                <div class="card bg-light">
                     <div class="card-header">{{ __('Cart Items') }}</div>
 
                     <div class="card-body">
@@ -95,7 +95,7 @@
             </div>
 
             <div class="col-md-4">
-                <div class="card bg-white card-accent-secondary tw-card">
+                <div class="card bg-white">
                     <div class="card-header">{{ __('Summary') }}</div>
                     <div class="card-body">
                         @include('cart._summary')

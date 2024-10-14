@@ -19,7 +19,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8">
-                <div class="card card-accent-secondary tw-card">
+                <div class="card">
                     <div class="card-header">Checkout</div>
 
                     <div class="card-body">
@@ -72,7 +72,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card card-accent-secondary bg-white tw-card">
+                <div class="card bg-white">
                     <div class="card-header">Summary</div>
                     <div class="card-body">
                         @include('cart._summary')

@@ -180,7 +180,7 @@ class YnhServer extends Model
 
     public function ipv6(): ?string
     {
-        return $this->ip_address_v6;
+        return $this->ip_address_v6 === '<unavailable>' ? null : $this->ip_address_v6;
     }
 
     public function domain(): ?YnhDomain

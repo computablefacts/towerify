@@ -255,7 +255,7 @@ class CyberBuddyController extends Controller
                         $name = $server->name;
                         $os = isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-';
                         $ipv4 = $server->ip();
-                        $ipv6 = $server->isFrozen() || $server->ipv6() === '<unavailable>' ? '-' : $server->ipv6();
+                        $ipv6 = !$server->ipv6() ? '-' : $server->ipv6();
                         $domains = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->domains->count();
                         $applications = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->applications->count();
                         $users = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->users->count();

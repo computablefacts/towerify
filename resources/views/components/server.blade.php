@@ -1,5 +1,5 @@
 @if(Auth::user()->canManageServers() && $server->secret)
-<div class="card tw-card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+<div class="card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
   <div class="card-body">
     <div class="row">
       <div class="col">
@@ -23,7 +23,7 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
 'method' => 'POST',
 'id' => 'server-update-form'
 ]) !!}
-<div class="card card-accent-secondary tw-card">
+<div class="card">
   <div class="card-header">
     <h3 class="m-0">
       <b>

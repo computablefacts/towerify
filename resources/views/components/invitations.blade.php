@@ -40,12 +40,10 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover" style="margin-bottom:0">
+    <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
-        <th>
-          <i class="zmdi zmdi-long-arrow-down"></i>&nbsp;{{ __('Username') }}
-        </th>
+        <th>{{ __('Username') }}</th>
         <th>{{ __('Email') }}</th>
         <th></th>
       </tr>
@@ -58,7 +56,7 @@
         </td>
         <td>
           <a href="mailto:{{ $invitation->email }}" target="_blank">
-            {{ $invitation->email }}&nbsp;&nbsp;<i class="zmdi zmdi-open-in-new"></i>
+            {{ $invitation->email }}
           </a>
         </td>
         <td>

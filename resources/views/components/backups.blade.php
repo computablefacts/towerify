@@ -21,7 +21,7 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover" style="margin-bottom:0">
+    <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
         <th>{{ __('Date') }}</th>
@@ -47,22 +47,24 @@
           <a href="/ynh/servers/{{ $backup->server->id }}/backup/{{ $backup->id }}"
              class="cursor-pointer"
              title="download">
-            <i class="zmdi zmdi-download"></i>
+            {{ __('open') }}
           </a>
           @endif
         </td>
       </tr>
+      @if(count($backup->result['apps']) > 0)
       <tr>
         <td colspan="4">
           @foreach($backup->result['apps'] as $app => $status)
           @if($status === 'Success')
-          <span class="tw-pill rounded-pill bg-success">{{ $app }}</span>
+          <span class="lozenge success">{{ $app }}</span>
           @else
-          <span class="tw-pill rounded-pill bg-danger">{{ $app }}</span>
+          <span class="lozenge error">{{ $app }}</span>
           @endif
           @endforeach
         </td>
       </tr>
+      @endif
       @endforeach
       </tbody>
     </table>

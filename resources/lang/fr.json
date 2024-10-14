@@ -164,5 +164,7 @@
   "Service Provider Delegation": "Délégation",
   "Agents Deployed": "Agents déployés",
   "AdversaryMeter protects your external perimeter": "AdversaryMeter protège votre périmètre externe",
-  "Sentinel protects your internal perimeter": "Sentinel protège votre périmètre interne"
+  "Sentinel protects your internal perimeter": "Sentinel protège votre périmètre interne",
+  "Applications Ready To Be Deployed": "Applications prêtes à être déployées",
+  "Applications Installed": "Applications installées"
 }
