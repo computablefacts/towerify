@@ -820,7 +820,8 @@ blueprintjs.Blueprintjs = class extends widgets.Widget {
         break;
       }
       case 'FileInput': {
-        obj.el = new blueprintjs.MinimalFileInput(container);
+        const multiple = obj.multiple;
+        obj.el = new blueprintjs.MinimalFileInput(container, multiple);
         break;
       }
       case 'RadioGroup': {
@@ -2931,15 +2932,17 @@ blueprintjs.MinimalFileInput = class extends blueprintjs.Blueprintjs {
 
   /**
    * @param {Element} container the parent element.
+   * @param {boolean} multiple true iif the user must be able to select one or more files.
    * @constructor
    */
-  constructor(container) {
+  constructor(container, multiple) {
     super(container);
     this.observers_ = new observers.Subject();
     this.disabled_ = false;
     this.text_ = null;
     this.buttonText_ = null;
     this.fill_ = true;
+    this.multiple_ = multiple === true;
     this.render();
   }
 
@@ -2979,6 +2982,15 @@ blueprintjs.MinimalFileInput = class extends blueprintjs.Blueprintjs {
     this.render();
   }
 
+  get multiple() {
+    return this.multiple_;
+  }
+
+  set multiple(value) {
+    this.multiple_ = value;
+    this.render();
+  }
+
   /**
    * Listen to the `selection-change` event.
    *
@@ -2997,11 +3009,20 @@ blueprintjs.MinimalFileInput = class extends blueprintjs.Blueprintjs {
   }
 
   _newElement() {
+    const props = {};
+    if (this.multiple) {
+      props.multiple = 'multiple';
+    }
     return React__default["default"].createElement(core.FileInput, {
-      disabled: this.disabled, text: this.text, buttonText: this.buttonText, fill: this.fill, onInputChange: (el) => {
+      inputProps: props,
+      disabled: this.disabled,
+      text: this.text,
+      buttonText: this.buttonText,
+      fill: this.fill,
+      onInputChange: (el) => {
         this.text = el.target.files[0].name;
         this.render();
-        this.observers_.notify('selection-change', el.target.files[0]);
+        this.observers_.notify('selection-change', this.multiple ? el.target.files : el.target.files[0]);
       },
     });
   }
