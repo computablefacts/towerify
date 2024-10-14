@@ -197,11 +197,11 @@ class CyberBuddyController extends Controller
             $collection = \App\Modules\CyberBuddy\Models\Collection::create(['name' => $request->string('collection')]);
         }
 
-        $files = $request->file('files');
+        $files = $request->allFiles();
         $successes = [];
         $errors = [];
 
-        foreach ($files as $file) {
+        foreach ($files['files'] as $file) {
             $url = $this->saveOneFile($collection, $file);
             if ($url) {
                 $successes[] = $url;
@@ -209,7 +209,7 @@ class CyberBuddyController extends Controller
                 $errors[] = $file->getClientOriginalName();
             }
         }
-        if (count($errors) > 0) {
+        if (count($errors) <= 0) {
             return response()->json([
                 'success' => 'All files have been saved and will be processed soon.',
                 'urls' => $successes,

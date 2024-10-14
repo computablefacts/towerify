@@ -73,7 +73,7 @@
 </div>
 <script>
 
-  let file = null;
+  let files = null;
   let collection = null;
 
   const elSubmit = new com.computablefacts.blueprintjs.MinimalButton(document.getElementById('submit'),
@@ -85,10 +85,13 @@
     elSubmit.disabled = true;
 
     const formData = new FormData();
-    formData.append('file', file);
     formData.append('collection', collection);
 
-    axios.post('/cb/web/files/one', formData, {
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files[]', files[i]);
+    }
+
+    axios.post('/cb/web/files/many', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
@@ -100,10 +103,10 @@
     });
   });
 
-  const elFile = new com.computablefacts.blueprintjs.MinimalFileInput(document.getElementById('files'));
-  elFile.onSelectionChange(item => {
-    file = item;
-    elSubmit.disabled = !file || !collection;
+  const elFile = new com.computablefacts.blueprintjs.MinimalFileInput(document.getElementById('files'), true);
+  elFile.onSelectionChange(items => {
+    files = items;
+    elSubmit.disabled = !files || !collection;
   });
   elFile.buttonText = "{{ __('Browse') }}";
 
@@ -111,7 +114,7 @@
     null, null, query => query);
   elCollections.onSelectionChange(item => {
     collection = item;
-    elSubmit.disabled = !file || !collection;
+    elSubmit.disabled = !files || !collection;
   });
   elCollections.defaultText = "{{ __('Select or create collection...') }}";
 
