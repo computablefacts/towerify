@@ -208,7 +208,6 @@ if (!function_exists('app_sidebar')) {
                     ],
                 ], [
                     'section_name' => __('YunoHost'),
-                    'hidden' => !Auth::user()->canListServers(),
                     'section_items' => [
                         [
                             'label' => __('Desktop'),
@@ -248,9 +247,6 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('E-Commerce'),
-                    'hidden' => !Auth::user()->isAdmin() &&
-                        !Auth::user()->canBuyStuff() &&
-                        !Auth::user()->canListOrders(),
                     'section_items' => [
                         [
                             'label' => __('Admin'),
@@ -261,17 +257,14 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Store'),
                             'route' => route('product.index'),
                             'active' => request()->route()->named('product.index'),
-                            'hidden' => !Auth::user()->canBuyStuff(),
                         ], [
                             'label' => __('Cart'),
                             'route' => route('cart.show'),
                             'active' => request()->route()->named('cart.show'),
-                            'hidden' => !Auth::user()->canBuyStuff(),
                         ], [
                             'label' => __('Orders'),
                             'route' => route('home', ['tab' => 'orders']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'orders',
-                            'hidden' => !Auth::user()->canListOrders()
                         ]
                     ]
                 ], [
