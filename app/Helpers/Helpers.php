@@ -138,7 +138,7 @@ if (!function_exists('app_sidebar')) {
                             'active' => request()->route()->named('home') && request()->get('tab') === 'overview',
                         ], [
                             'label' => __('Reports & Alerts'),
-                            'route' => config('towerify.reports'),
+                            'route' => config('towerify.reports.url'),
                             'active' => false,
                             'hidden' => !Auth::user()->isCywiseUser(),
                             'target' => '_blank',
