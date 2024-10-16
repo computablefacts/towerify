@@ -70,7 +70,7 @@ class QuestionsAndAnswers extends Conversation
 
     private function waitTheNextQuestion(): void
     {
-        $this->ask('Que puis-je faire pour vous maintenant?', fn(Answer $response) => $this->answerQuestion($response->getText()));
+        $this->ask('Que puis-je faire d\'autre pour vous maintenant?', fn(Answer $response) => $this->answerQuestion($response->getText()));
     }
 
     private function answerQuestion(string $question): void
