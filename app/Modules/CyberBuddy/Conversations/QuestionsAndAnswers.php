@@ -38,6 +38,8 @@ class QuestionsAndAnswers extends Conversation
 
                 if ($this->message) {
                     $this->answerQuestion($this->message);
+                } else {
+                    $this->waitTheNextQuestion();
                 }
             } else {
 
