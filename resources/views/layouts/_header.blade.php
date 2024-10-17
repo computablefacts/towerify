@@ -14,7 +14,8 @@
 </style>
 <header class="navbar navbar-expand-lg py-0 sticky-top bd-navbar">
   <nav class="container-fluid px-md-3 px-lg-4">
-    <a class="navbar-brand d-inline-flex align-items-center m-0 p-0 me-lg-6 me-xl-9 p-1 rounded text-reset" href="/">
+    <a class="navbar-brand d-inline-flex align-items-center m-0 p-0 me-lg-6 me-xl-9 p-1 rounded text-reset"
+       href="{{ Auth::check() ? '/' : config('towerify.website') }}">
       <span class="text-primary">
         <img src="{{ asset('images/logo.png') }}" alt="Cywise's logo" height="32">
       </span>
