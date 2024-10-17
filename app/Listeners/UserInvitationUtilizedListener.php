@@ -44,14 +44,6 @@ class UserInvitationUtilizedListener extends AbstractListener
                 if ($basicEndUser) {
                     $created->roles()->syncWithoutDetaching($basicEndUser);
                 }
-                if ($creator->isCywiseUser()) {
-                    
-                    $cywiseUser = Role::where('name', Role::CYWISE_USER)->first();
-
-                    if ($cywiseUser) {
-                        $created->roles()->syncWithoutDetaching($cywiseUser);
-                    }
-                }
 
                 $created->save();
             }

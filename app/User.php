@@ -29,12 +29,6 @@ class User extends \Konekt\AppShell\Models\User
         return $this->type->isAdmin();
     }
 
-    /** @deprecated */
-    public function isCywiseUser(): bool
-    {
-        return $this->hasRole(Role::CYWISE_USER);
-    }
-
     public function adversaryMeterApiToken(): ?string
     {
         if (!$this->canUseAdversaryMeter()) {
