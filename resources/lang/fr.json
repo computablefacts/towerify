@@ -179,5 +179,6 @@
   "Zip code": "Code postal",
   "City": "Ville",
   "Payment Method": "Moyen de paiement",
-  "Offline": "Hors ligne"
+  "Offline": "Hors ligne",
+  "Shipping Address": "Adresse de livraison"
 }
