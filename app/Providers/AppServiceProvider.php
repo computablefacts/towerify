@@ -53,8 +53,8 @@ use App\Modules\AdversaryMeter\Observers\AssetTagObserver;
 use App\Modules\AdversaryMeter\Observers\HiddenAlertObserver;
 use App\Modules\AdversaryMeter\Observers\HoneypotObserver;
 use App\Modules\CyberBuddy\Models\Chunk;
-use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\ChunkTag;
+use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
 use App\Modules\CyberBuddy\Observers\ChunkObserver;
@@ -248,6 +248,11 @@ class AppServiceProvider extends ServiceProvider
         // CyberBuddy
         $this->app->bind('cb_api_utils', function () {
             return new \App\Modules\CyberBuddy\Helpers\ApiUtils();
+        });
+
+        // Reports
+        $this->app->bind('re_api_utils', function () {
+            return new \App\Modules\Reports\Helpers\ApiUtils();
         });
     }
 }
