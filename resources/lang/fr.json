@@ -166,5 +166,11 @@
   "AdversaryMeter protects your external perimeter": "AdversaryMeter protège votre périmètre externe",
   "Sentinel protects your internal perimeter": "Sentinel protège votre périmètre interne",
   "Applications Ready To Be Deployed": "Applications prêtes à être déployées",
-  "Applications Installed": "Applications installées"
+  "Applications Installed": "Applications installées",
+  "Bill To": "Facturer à",
+  "Bill to Company": "Entreprise à facturer",
+  "First name": "Prénom",
+  "Last name": "Nom",
+  "Company name": "Nom de l'entreprise",
+  "Tax no.": "Numéro de TVA"
 }
