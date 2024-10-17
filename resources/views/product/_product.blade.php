@@ -1,8 +1,9 @@
-<article class="card shadow-sm mb-0">
+<article class="card mb-3">
   <div class="row">
-    <div class="col-sm-2 align-self-center">
+    <div class="col-2">
       <div class="card-body p-2">
-        <a href="{{ route('product.show', $product->slug) }}">
+        <a
+          href="@if($taxon) {{ route('product.show-with-taxon', [$product->slug, $taxon]) }} : {{ route('product.show', $product->slug) }} @endif">
           <img class="card-img"
                @if($product->hasImage())
           src="{{ $product->getThumbnailUrl() }}"
@@ -13,16 +14,15 @@
         </a>
       </div>
     </div>
-    <div class="col-sm-10">
+    <div class="col-10">
       <div class="card-body p-2">
         <h5>
-          <a href="{{ route('product.show', $product->slug) }}">
+          <a
+            href="@if($taxon) {{ route('product.show-with-taxon', [$product->slug, $taxon]) }} @else {{ route('product.show', $product->slug) }} @endif">
             {{ $product->name }}
           </a>
           <span class="float-end">
-            @if($product->price > 0)
             {{ format_subscription_price($product->price) }}
-            @endif
           </span>
         </h5>
         <p class="card-text mb-0">

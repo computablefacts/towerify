@@ -46,6 +46,6 @@
 @include('layouts._freshdesk')
 @stack('alpine')
 <script src="{{ asset('js/app.js') }}"></script> <!-- Axios, Alpine, etc. -->
-@endstack
+@stack('scripts')
 </body>
 </html>

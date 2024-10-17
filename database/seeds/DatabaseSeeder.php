@@ -154,23 +154,21 @@ class DatabaseSeeder extends Seeder
     // See https://vanilo.io/docs/3.x/categorization for details
     private function setupProductCategories(): void
     {
-        // Create the 'IT' product category
+        // Delete the 'IT' product category
         $it = \App\Models\Taxonomy::where('name', \App\Models\Taxonomy::APPLICATIONS)->first();
-        if (!$it) {
-            $it = \App\Models\Taxonomy::firstOrCreate(['name' => \App\Models\Taxonomy::IT]);
-        } else {
-            $it->name = \App\Models\Taxonomy::IT;
-            $it->save();
+        if ($it) {
+            $it->delete();
         }
 
-        // Create the 'Business' product category
+        // Delete the 'Business' product category
         $business = \App\Models\Taxonomy::where('name', \App\Models\Taxonomy::SERVERS)->first();
-        if (!$business) {
-            $business = \App\Models\Taxonomy::firstOrCreate(['name' => \App\Models\Taxonomy::BUSINESS]);
-        } else {
-            $business->name = \App\Models\Taxonomy::BUSINESS;
-            $business->save();
+        if ($business) {
+            $business->delete();
         }
+
+        // Create the 'YunoHost' product category
+        /** @var \App\Models\Taxonomy $all */
+        $yunohost = \App\Models\Taxonomy::firstOrCreate(['name' => \App\Models\Taxonomy::YUNOHOST]);
 
         // Load categories from the AppStore
         $priority = 1;
@@ -179,7 +177,7 @@ class DatabaseSeeder extends Seeder
             $tag = \App\Models\Taxon::updateOrCreate(
                 ['name' => $category],
                 [
-                    'taxonomy_id' => $it->id,
+                    'taxonomy_id' => $yunohost->id,
                     'name' => $category,
                     'priority' => $priority++,
                 ]
@@ -195,23 +193,23 @@ class DatabaseSeeder extends Seeder
 
     private function setupProductProperties(): void
     {
-        // Create the 'ram' product property
-        $ram = \App\Models\Property::firstOrCreate(
-            ['slug' => \App\Models\Property::RAM_SLUG],
-            ['name' => 'RAM', 'slug' => \App\Models\Property::RAM_SLUG, 'type' => 'number']
-        );
+        // Delete the 'ram' product property
+        $ram = \App\Models\Property::where('slug', \App\Models\Property::RAM_SLUG)->first();
+        if ($ram) {
+            $ram->delete();
+        }
 
-        // Create the 'cpu' product property
-        $cpu = \App\Models\Property::firstOrCreate(
-            ['slug' => \App\Models\Property::CPU_SLUG],
-            ['name' => 'CPU', 'slug' => \App\Models\Property::CPU_SLUG, 'type' => 'number']
-        );
+        // Delete the 'cpu' product property
+        $cpu = \App\Models\Property::where('slug', \App\Models\Property::CPU_SLUG)->first();
+        if ($cpu) {
+            $cpu->delete();
+        }
 
-        // Create the 'storage' product property
-        $disk = \App\Models\Property::firstOrCreate(
-            ['slug' => \App\Models\Property::STORAGE_SLUG],
-            ['name' => 'Storage', 'slug' => \App\Models\Property::STORAGE_SLUG, 'type' => 'number']
-        );
+        // Delete the 'storage' product property
+        $disk = \App\Models\Property::where('slug', \App\Models\Property::STORAGE_SLUG)->first();
+        if ($disk) {
+            $disk->delete();
+        }
     }
 
     private function setupProducts(): void

@@ -246,7 +246,7 @@ if (!function_exists('app_sidebar')) {
                             'active' => request()->route()->named('admin'),
                             'hidden' => !Auth::user()->isAdmin(),
                         ], [
-                            'label' => __('Store'),
+                            'label' => __('Products'),
                             'route' => route('product.index'),
                             'active' => request()->route()->named('product.index'),
                         ], [

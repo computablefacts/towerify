@@ -39,7 +39,7 @@
   <x-interdependencies/>
   @endif
   @if($tab === 'traces')
-  <div class="row">
+  <div class="row mb-2">
     <div class="col-12">
       <x-pending-actions/>
     </div>

@@ -14,7 +14,6 @@
   <div class="row">
     <div class="col-md-8">
       <div class="card">
-        <div class="card-header">{{ __('Checkout') }}</div>
         <div class="card-body">
           @unless ($checkout)
           <div class="alert alert-warning">
@@ -48,7 +47,7 @@
             </div>
             <hr>
             <div>
-              <button class="btn btn-lg btn-success">{{ __('Submit Order') }}</button>
+              <button class="btn btn-lg btn-primary text-white">{{ __('Submit Order') }}</button>
             </div>
           </form>
           @endif

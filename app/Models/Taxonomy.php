@@ -9,7 +9,10 @@ class Taxonomy extends TaxonomyBase
 {
     use HasTenant;
 
+    const YUNOHOST = 'YunoHost';
+    /** @deprecated */
     const IT = 'IT';
+    /** @deprecated */
     const BUSINESS = 'Business';
     /** @deprecated */
     const APPLICATIONS = 'Applications';

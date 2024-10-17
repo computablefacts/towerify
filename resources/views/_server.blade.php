@@ -1,14 +1,5 @@
 @extends('layouts.app')
 
-@section('breadcrumbs')
-<nav class="breadcrumb mb-0 pt-0 pb-0 ps-0">
-  <a class="breadcrumb-item" href="/">{{ __('Home') }}</a>
-  <a class="breadcrumb-item" href="/home?tab=servers">{{ __('Servers') }}</a>
-  <span class="breadcrumb-item active">{{ $server->name }}</span>
-  <span class="breadcrumb-menu"></span>
-</nav>
-@endsection
-
 @section('content')
 <style>
   .nav-link.active {
@@ -79,7 +70,7 @@
   <x-backups :server="$server"/>
   @endif
   @if($tab === 'traces')
-  <div class="row">
+  <div class="row mb-2">
     <div class="col-12">
       <x-pending-actions :server="$server"/>
     </div>

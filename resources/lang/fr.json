@@ -167,7 +167,7 @@
   "Sentinel protects your internal perimeter": "Sentinel protège votre périmètre interne",
   "Applications Ready To Be Deployed": "Applications prêtes à être déployées",
   "Applications Installed": "Applications installées",
-  "Bill To": "Facturer à",
+  "Bill To": "Destinataire de la facture",
   "Bill to Company": "Entreprise à facturer",
   "First name": "Prénom",
   "Last name": "Nom",
@@ -184,7 +184,7 @@
   "Submit Order": "Soumettre la commande",
   "Ship to the same address": "Livrer à la même adresse",
   "Order Notes": "Ajouter une note",
-  "Continue Shopping": "Continuer vos achats",
+  "Continue Shopping": "Continuez vos achats",
   "Product Name": "Nom du produit",
   "Price": "Prix",
   "Qty": "Qté",
@@ -193,5 +193,11 @@
   "Wonderful": "Merveilleux",
   "Your order has been registered with number": "Votre commande a été enregistrée avec le numéro",
   "Hey, nothing to check out here!": "Hey, il n'y a rien à payer ici !",
-  "Cart Items": "Articles dans le panier"
+  "Cart Items": "Articles dans le panier",
+  "Subcategories": "Sous-catégories",
+  "Apply": "Appliquer",
+  "Products in ": "Produits de la catégorie ",
+  "Deploy": "Déployer",
+  "The store is empty.": "Il n'y a aucun produit pour le moment.",
+  "Add To Cart": "Ajouter au panier"
 }

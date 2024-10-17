@@ -338,6 +338,7 @@ Route::group(['prefix' => 'shop', 'as' => 'product.'], function () {
     Route::get('index', 'ProductController@index')->name('index');
     Route::get('c/{taxonomyName}/{taxon}', 'ProductController@index')->name('category');
     Route::get('p/{slug}', 'ProductController@show')->name('show');
+    Route::get('p/{slug}/{taxon}', 'ProductController@show')->name('show-with-taxon');
 });
 
 Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {

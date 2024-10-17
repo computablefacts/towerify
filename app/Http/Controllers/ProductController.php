@@ -40,13 +40,15 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show(string $slug)
+    public function show(string $slug, Taxon $taxon = null)
     {
         if (!$product = $this->productFinder->findBySlug($slug)) {
             abort(404);
         }
         return view('product.show', [
             'product' => $product,
+            'taxon' => $taxon,
+            'taxonomies' => TaxonomyProxy::get(),
             'productType' => shorten($product::class),
         ]);
     }
