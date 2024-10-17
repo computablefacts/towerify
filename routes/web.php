@@ -88,7 +88,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
                 'added_with_curl' => true,
             ]);
             $server->save();
-            event(new \App\Modules\AdversaryMeter\Events\CreateAsset($user, $server->$ip, true, [$server->name]));
+            event(new \App\Modules\AdversaryMeter\Events\CreateAsset($user, $server->ip(), true, [$server->name]));
         }
     }
     if ($server->is_ready) {
