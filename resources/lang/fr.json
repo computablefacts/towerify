@@ -63,7 +63,7 @@
   "You are receiving this email because we received a password reset request for your account.": "Vous recevez cet e-mail car nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.",
   "Cart": "Panier",
   "Home": "Accueil",
-  "Summary": "Résumé",
+  "Summary": "Récapitulatif",
   "Servers": "Serveurs",
   "Interdependencies": "Interdépendances",
   "Resources Usage": "Utilisation des ressources",
@@ -180,5 +180,18 @@
   "City": "Ville",
   "Payment Method": "Moyen de paiement",
   "Offline": "Hors ligne",
-  "Shipping Address": "Adresse de livraison"
+  "Shipping Address": "Adresse de livraison",
+  "Submit Order": "Soumettre la commande",
+  "Ship to the same address": "Livrer à la même adresse",
+  "Order Notes": "Ajouter une note",
+  "Continue Shopping": "Continuer vos achats",
+  "Product Name": "Nom du produit",
+  "Price": "Prix",
+  "Qty": "Qté",
+  "Products": "Produits",
+  "Proceed To Checkout": "Procéder au règlement",
+  "Wonderful": "Merveilleux",
+  "Your order has been registered with number": "Votre commande a été enregistrée avec le numéro",
+  "Hey, nothing to check out here!": "Hey, il n'y a rien à payer ici !",
+  "Cart Items": "Articles dans le panier"
 }

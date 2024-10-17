@@ -17,9 +17,6 @@
           integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
           crossorigin="anonymous"></script>
 
-  <!-- Axios -->
-  <script src="{{ asset('js/app.js') }}"></script>
-
   <!-- App-specific -->
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
@@ -47,5 +44,8 @@
 @include('layouts._drawer')
 @endauth
 @include('layouts._freshdesk')
+@stack('alpine')
+<script src="{{ asset('js/app.js') }}"></script> <!-- Axios, Alpine, etc. -->
+@endstack
 </body>
 </html>
