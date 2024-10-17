@@ -42,8 +42,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
         <th class="ps-4" width="25px"></th>
         <th>{{ __('Name') }}</th>
         <th>{{ __('OS') }}</th>
-        <th>{{ __('IP V4') }}</th>
-        <th>{{ __('IP V6') }}</th>
+        <th>{{ __('IP') }}</th>
         <th>{{ __('Domain') }}</th>
         <th>{{ __('Domains') }}</th>
         <th>{{ __('Applications') }}</th>
@@ -81,10 +80,12 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
           }}
         </td>
         <td>
+          <span class="font-lg mb-3 fw-bold">
           {{ $server->ip() }}
-        </td>
-        <td>
-          {{ $server->ipv6() }}
+          </span>
+          <div class="text-muted">
+            {{ $server->ipv6() }}
+          </div>
         </td>
         <td>
           @if($server->isYunoHost())
