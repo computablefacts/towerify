@@ -172,5 +172,10 @@
   "First name": "Prénom",
   "Last name": "Nom",
   "Company name": "Nom de l'entreprise",
-  "Tax no.": "Numéro de TVA"
+  "Tax no.": "Numéro de TVA",
+  "Billing Address": "Adresse de facturation",
+  "Address": "Adresse",
+  "Country": "Pays",
+  "Zip code": "Code postal",
+  "City": "Ville"
 }
