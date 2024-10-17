@@ -139,8 +139,6 @@ if (!function_exists('app_sidebar')) {
                         ], [
                             'label' => __('Reports & Alerts'),
                             'route' => config('towerify.reports.url'),
-                            'active' => false,
-                            'hidden' => !Auth::user()->isCywiseUser(),
                             'target' => '_blank',
                         ]
                     ]
@@ -150,32 +148,26 @@ if (!function_exists('app_sidebar')) {
                         [
                             'label' => __('Assets'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('assets'),
-                            'active' => false,
                             'target' => '_blank',
                         ], [
                             'label' => __('Vulnerabilities'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('vulnerabilities'),
-                            'active' => false,
                             'target' => '_blank',
                         ], [
                             'label' => __('Honeypots'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('honeypots'),
-                            'active' => false,
                             'target' => '_blank',
                         ], [
                             'label' => __('Attackers'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('attackers'),
-                            'active' => false,
                             'target' => '_blank',
                         ], [
                             'label' => __('Service Provider Delegation'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('delegation'),
-                            'active' => false,
                             'target' => '_blank',
                         ], [
                             'label' => __('IP Blacklist'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('blacklist'),
-                            'active' => false,
                             'target' => '_blank',
                         ],
                     ],
