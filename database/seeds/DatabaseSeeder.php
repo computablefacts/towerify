@@ -1,5 +1,16 @@
 <?php
 
+use App\Hashing\TwHasher;
+use App\Helpers\AppStore;
+use App\Models\Permission;
+use App\Models\Product;
+use App\Models\Property;
+use App\Models\Role;
+use App\Models\TaxCategory;
+use App\Models\Taxon;
+use App\Models\Taxonomy;
+use App\Models\TaxRate;
+use App\Models\Zone;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Konekt\Address\Models\ZoneScope;
@@ -35,17 +46,17 @@ class DatabaseSeeder extends Seeder
     private function setupPermissions(): void
     {
         // Remove support for legacy permissions
-        \App\Models\Permission::where('name', 'configure ssh connections')->delete();
-        \App\Models\Permission::where('name', 'configure app permissions')->delete();
-        \App\Models\Permission::where('name', 'configure user apps')->delete();
-        \App\Models\Permission::where('name', 'deploy apps')->delete();
-        \App\Models\Permission::where('name', 'launch apps')->delete();
-        \App\Models\Permission::where('name', 'send invitations')->delete();
+        Permission::where('name', 'configure ssh connections')->delete();
+        Permission::where('name', 'configure app permissions')->delete();
+        Permission::where('name', 'configure user apps')->delete();
+        Permission::where('name', 'deploy apps')->delete();
+        Permission::where('name', 'launch apps')->delete();
+        Permission::where('name', 'send invitations')->delete();
 
         // Create missing permissions
-        foreach (\App\Models\Role::ROLES as $role => $permissions) {
+        foreach (Role::ROLES as $role => $permissions) {
             foreach ($permissions as $permission) {
-                $perm = \App\Models\Permission::firstOrCreate(
+                $perm = Permission::firstOrCreate(
                     ['name' => $permission],
                     [
                         'name' => $permission,
@@ -59,12 +70,12 @@ class DatabaseSeeder extends Seeder
     private function setupRoles(): void
     {
         // Create missing roles
-        foreach (\App\Models\Role::ROLES as $role => $permissions) {
-            $role = \App\Models\Role::firstOrcreate([
+        foreach (Role::ROLES as $role => $permissions) {
+            $role = Role::firstOrcreate([
                 'name' => $role
             ]);
             foreach ($permissions as $permission) {
-                $perm = \App\Models\Permission::where('name', $permission)->firstOrFail();
+                $perm = Permission::where('name', $permission)->firstOrFail();
                 $role->permissions()->syncWithoutDetaching($perm);
             }
         }
@@ -81,14 +92,14 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => $username,
                 'email' => $email,
-                'password' => \App\Hashing\TwHasher::hash($password),
+                'password' => TwHasher::hash($password),
                 'type' => 'admin',
                 'is_active' => true,
             ]
         );
 
         // Add the 'admin' role to the user
-        $admin = \App\Models\Role::where('name', \App\Models\Role::ADMIN)->first();
+        $admin = Role::where('name', Role::ADMIN)->first();
 
         if ($admin) {
             if (!DB::table('model_roles')
@@ -108,7 +119,7 @@ class DatabaseSeeder extends Seeder
     private function setupPaymentMethods(): void
     {
         // Create zone
-        $zoneIsEu = \App\Models\Zone::firstOrCreate(['name' => 'EU']);
+        $zoneIsEu = Zone::firstOrCreate(['name' => 'EU']);
         $zoneIsEu->scope = ZoneScope::TAXATION();
         \Konekt\Address\Models\Country::where('is_eu_member', true)
             ->get()
@@ -118,7 +129,7 @@ class DatabaseSeeder extends Seeder
         $zoneIsEu->save();
 
         // Create tax category
-        $taxCategoryIsVat = \App\Models\TaxCategory::firstOrCreate(
+        $taxCategoryIsVat = TaxCategory::firstOrCreate(
             ['name' => 'VAT'],
             [
                 'is_active' => true,
@@ -126,7 +137,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // Create tax rate
-        $taxRateForEuVat = \App\Models\TaxRate::firstOrCreate(
+        $taxRateForEuVat = TaxRate::firstOrCreate(
             ['name' => 'EU VAT'],
             [
                 'zone_id' => $zoneIsEu->id,
@@ -151,76 +162,212 @@ class DatabaseSeeder extends Seeder
         );
     }
 
-    // See https://vanilo.io/docs/3.x/categorization for details
+    // See https://vanilo.io/docs/4.x/categorization for details
     private function setupProductCategories(): void
     {
-        // Delete the 'IT' product category
-        $it = \App\Models\Taxonomy::where('name', \App\Models\Taxonomy::APPLICATIONS)->first();
-        if ($it) {
-            $it->delete();
-        }
+        // Remove support for legacy taxonomies and taxons
+        Taxonomy::where('name', Taxonomy::APPLICATIONS)->delete();
+        Taxonomy::where('name', Taxonomy::APPLICATIONS)->delete();
+        Taxonomy::where('name', Taxonomy::SERVERS)->delete();
+        Taxonomy::where('name', Taxonomy::SERVERS)->delete();
+        Taxonomy::where('name', Taxon::SUBSCRIPTIONS)->delete();
+        Taxonomy::where('name', Taxon::YUNOHOST)->delete();
+        Taxon::where('name', 'Baremetal')->delete();
 
-        // Delete the 'Business' product category
-        $business = \App\Models\Taxonomy::where('name', \App\Models\Taxonomy::SERVERS)->first();
-        if ($business) {
-            $business->delete();
-        }
-
-        // Create the 'YunoHost' product category
+        // Create the 'Root' product category
         /** @var \App\Models\Taxonomy $all */
-        $yunohost = \App\Models\Taxonomy::firstOrCreate(['name' => \App\Models\Taxonomy::YUNOHOST]);
+        $root = Taxonomy::firstOrCreate(['name' => Taxonomy::ROOT]);
 
-        // Load categories from the AppStore
+        // Under the 'Root' product category, create two entries : 'Subscriptions' and 'YunoHost'
+        $subscriptions = Taxon::firstOrCreate(
+            ['name' => Taxon::SUBSCRIPTIONS],
+            ['name' => Taxon::SUBSCRIPTIONS, 'taxonomy_id' => $root->id]
+        );
+
+        $yunohost = Taxon::firstOrCreate(
+            ['name' => Taxon::YUNOHOST],
+            ['name' => Taxon::YUNOHOST, 'taxonomy_id' => $root->id]
+        );
+
+        // Under the 'Subscriptions' subcategory, create two entries : 'Yearly' and 'Monthly'
+        $yearly = Taxon::firstOrCreate(
+            ['name' => Taxon::YEARLY],
+            ['name' => Taxon::YEARLY, 'taxonomy_id' => $root->id, 'parent_id' => $subscriptions->id]
+        );
+
+        $monthly = Taxon::firstOrCreate(
+            ['name' => Taxon::MONTHLY],
+            ['name' => Taxon::MONTHLY, 'taxonomy_id' => $root->id, 'parent_id' => $subscriptions->id]
+        );
+
+        // Under the 'YunoHost' subcategory, import categories from the AppStore
         $priority = 1;
 
-        foreach (\App\Helpers\AppStore::categories() as $category) {
-            $tag = \App\Models\Taxon::updateOrCreate(
+        foreach (AppStore::categories() as $category) {
+            $taxon = Taxon::updateOrCreate(
                 ['name' => $category],
                 [
-                    'taxonomy_id' => $yunohost->id,
+                    'taxonomy_id' => $root->id,
+                    'parent_id' => $yunohost->id,
                     'name' => $category,
                     'priority' => $priority++,
                 ]
             );
         }
-
-        // Set categories from the InfraStore
-        $tag = \App\Models\Taxon::where('name', 'Baremetal')->first();
-        if ($tag) {
-            $tag->delete();
-        }
     }
 
+    /** @deprecated */
     private function setupProductProperties(): void
     {
-        // Delete the 'ram' product property
-        $ram = \App\Models\Property::where('slug', \App\Models\Property::RAM_SLUG)->first();
-        if ($ram) {
-            $ram->delete();
-        }
-
-        // Delete the 'cpu' product property
-        $cpu = \App\Models\Property::where('slug', \App\Models\Property::CPU_SLUG)->first();
-        if ($cpu) {
-            $cpu->delete();
-        }
-
-        // Delete the 'storage' product property
-        $disk = \App\Models\Property::where('slug', \App\Models\Property::STORAGE_SLUG)->first();
-        if ($disk) {
-            $disk->delete();
-        }
+        // Remove support for legacy properties
+        Property::where('slug', Property::RAM_SLUG)->delete();
+        Property::where('slug', Property::CPU_SLUG)->delete();
+        Property::where('slug', Property::STORAGE_SLUG)->delete();
     }
 
     private function setupProducts(): void
     {
         // Load tax rate
-        $taxCategory = \App\Models\TaxCategory::findByName('VAT');
+        $taxCategory = TaxCategory::findByName('VAT');
+
+        // Create misc. properties
+        $assets = Property::firstOrCreate(['name' => 'Assets', 'type' => 'integer']);
+        $assets->propertyValues()->delete();
+        $assets->propertyValues()->createMany([
+            ['title' => '100'],
+            ['title' => '200'],
+            ['title' => '400']
+        ]);
+
+        $honeypots = Property::firstOrCreate(['name' => 'Honeypots', 'type' => 'text']);
+        $honeypots->propertyValues()->delete();
+        $honeypots->propertyValues()->createMany([
+            ['title' => 'HTTP'],
+            ['title' => 'HTTPS'],
+            ['title' => 'SSH'],
+        ]);
+
+        $agents = Property::firstOrCreate(['name' => 'Agents', 'type' => 'integer']);
+        $agents->propertyValues()->delete();
+        $agents->propertyValues()->createMany([
+            ['title' => '5'],
+            ['title' => '20'],
+            ['title' => '50'],
+        ]);
+
+        $pssi = Property::firstOrCreate(['name' => 'PSSI', 'type' => 'boolean']);
+        $pssi->propertyValues()->delete();
+        $pssi->propertyValues()->createMany([
+            ['title' => 'true'],
+            ['title' => 'false'],
+        ]);
+
+        $frameworks = Property::firstOrCreate(['name' => 'Frameworks', 'type' => 'text']);
+        $frameworks->propertyValues()->delete();
+        $frameworks->propertyValues()->createMany([
+            ['title' => 'ANSSI'],
+            ['title' => 'NIST'],
+        ]);
+
+        // Load subscriptions
+        $essentiel = Product::updateOrCreate(
+            ['sku' => 'essentiel'],
+            [
+                'sku' => 'essentiel',
+                'name' => 'Essentiel',
+                'description' => "Cette offre inclut la protection de 5 serveurs (avec la possibilité d'ajouter des serveurs pour 15€/mois/serveur). Elle propose un scanner de vulnérabilités jusqu'à 100 IP ou DNS et des honeypots pour les protocoles HTTP, HTTPS et SSH.",
+                'state' => 'active',
+                'price' => 100,
+                'tax_category_id' => $taxCategory->id,
+                'weight' => 1,
+            ]
+        );
+
+        $essentiel->propertyValues()->sync(
+            $assets->propertyValues()->where('title', '100')->pluck('id')
+                ->concat($honeypots->propertyValues()->pluck('id'))
+                ->concat($agents->propertyValues()->where('title', '5')->pluck('id'))
+                ->concat($pssi->propertyValues()->where('title', 'true')->pluck('id'))
+                ->toArray()
+        );
+
+        $standard = Product::updateOrCreate(
+            ['sku' => 'standard'],
+            [
+                'sku' => 'standard',
+                'name' => 'Standard',
+                'description' => "Cette option couvre 20 serveurs (avec des serveurs supplémentaires à 12€/mois/serveur). Elle offre un scanner de vulnérabilités pour 200 IP ou DNS, avec les mêmes services de honeypots que l'offre Essentiel. Elle fournit également la possibilité d'intégrer la Politique de Sécurité des Systèmes d'Information (PSSI) de l'entreprise et de l'interroger en langage naturel.",
+                'state' => 'active',
+                'price' => 300,
+                'tax_category_id' => $taxCategory->id,
+                'weight' => 2,
+            ]
+        );
+
+        $standard->propertyValues()->sync(
+            $assets->propertyValues()->where('title', '200')->pluck('id')
+                ->concat($honeypots->propertyValues()->pluck('id'))
+                ->concat($agents->propertyValues()->where('title', '20')->pluck('id'))
+                ->concat($pssi->propertyValues()->where('title', 'false')->pluck('id'))
+                ->concat($frameworks->propertyValues()->pluck('id'))
+                ->toArray()
+        );
+
+        $premium = Product::updateOrCreate(
+            ['sku' => 'premium'],
+            [
+                'sku' => 'premium',
+                'name' => 'Premium',
+                'description' => "Pour les entreprises plus grandes, cette offre gère 50 serveurs (avec des ajouts à 8€/mois/serveur). Elle étend le scanner de vulnérabilités à 400 IP ou DNS et une plage d'adresses IP. Les honeypots sont également disponibles pour les mêmes protocoles ainsi que la possibilité d'intégrer et d'interroger la PSSI de l'entreprise.",
+                'state' => 'active',
+                'price' => 500,
+                'tax_category_id' => $taxCategory->id,
+                'weight' => 3,
+            ]
+        );
+
+        $premium->propertyValues()->sync(
+            $assets->propertyValues()->where('title', '400')->pluck('id')
+                ->concat($honeypots->propertyValues()->pluck('id'))
+                ->concat($agents->propertyValues()->where('title', '50')->pluck('id'))
+                ->concat($pssi->propertyValues()->where('title', 'false')->pluck('id'))
+                ->concat($frameworks->propertyValues()->pluck('id'))
+                ->toArray()
+        );
+
+        $essentiel->clearMediaCollection();
+
+        $media = $essentiel
+            ->copyMedia(public_path('/images/cywise.png'))
+            ->toMediaCollection();
+
+        $standard->clearMediaCollection();
+
+        $media = $standard
+            ->copyMedia(public_path('/images/cywise.png'))
+            ->toMediaCollection();
+
+        $premium->clearMediaCollection();
+
+        $media = $premium
+            ->copyMedia(public_path('/images/cywise.png'))
+            ->toMediaCollection();
+
+        $monthly = Taxon::where('name', Taxon::MONTHLY)->get()->firstOrFail();
+        $yearly = Taxon::where('name', Taxon::YEARLY)->get()->firstOrFail();
+
+        $essentiel->taxons()->detach($yearly);
+        $standard->taxons()->detach($yearly);
+        $premium->taxons()->detach($yearly);
+
+        $essentiel->taxons()->syncWithoutDetaching($monthly);
+        $standard->taxons()->syncWithoutDetaching($monthly);
+        $premium->taxons()->syncWithoutDetaching($monthly);
 
         // Load apps from the AppStore
-        foreach (\App\Helpers\AppStore::catalog() as $app) {
+        foreach (AppStore::catalog() as $app) {
 
-            $product = \App\Models\Product::updateOrCreate(
+            $product = Product::updateOrCreate(
                 ['sku' => $app['sku']],
                 [
                     'name' => $app['name'],
@@ -239,7 +386,7 @@ class DatabaseSeeder extends Seeder
                 ->copyMedia(public_path('/images/' . $app['logo']))
                 ->toMediaCollection();
 
-            $taxon = \App\Models\Taxon::where('name', $app['category'])
+            $taxon = Taxon::where('name', $app['category'])
                 ->get()
                 ->firstOrFail();
 

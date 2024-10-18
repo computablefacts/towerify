@@ -24,7 +24,12 @@ class ProductController extends Controller
         $properties = PropertyProxy::get();
 
         if ($taxon) {
+
             $this->productFinder->withinTaxon($taxon);
+
+            foreach ($taxon->children as $child) {
+                $this->productFinder->orWithinTaxon($child);
+            }
         }
 
         foreach ($request->filters($properties) as $property => $values) {
@@ -32,7 +37,7 @@ class ProductController extends Controller
         }
 
         return view('product.index', [
-            'products' => $this->productFinder->getResults()->sortBy('name'),
+            'products' => $this->productFinder->getResults()->sortBy('price'),
             'taxonomies' => $taxonomies,
             'taxon' => $taxon,
             'properties' => $properties,

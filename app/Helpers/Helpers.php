@@ -47,7 +47,7 @@ if (!function_exists('format_subscription_price')) {
                 config('vanilo.foundation.currency.format'),
                 $price,
                 $currency ?? config('vanilo.foundation.currency.sign')
-            ) . ' / month' . ($taxIncluded ? ' (incl. taxes)' : ' (excl. taxes)');
+            ) . ' <span style="color:#ffaa00">/</span> month' . ($taxIncluded ? ' (incl. taxes)' : ' (excl. taxes)');
     }
 }
 if (!function_exists('format_bytes')) {
@@ -136,10 +136,12 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Overview'),
                             'route' => route('home', ['tab' => 'overview']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'overview',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                         ], [
                             'label' => __('Reports & Alerts'),
                             'route' => config('towerify.reports.url'),
                             'target' => '_blank',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                         ]
                     ]
                 ], [
@@ -148,26 +150,32 @@ if (!function_exists('app_sidebar')) {
                         [
                             'label' => __('Assets'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('assets'),
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'target' => '_blank',
                         ], [
                             'label' => __('Vulnerabilities'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('vulnerabilities'),
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'target' => '_blank',
                         ], [
                             'label' => __('Honeypots'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('honeypots'),
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'target' => '_blank',
                         ], [
                             'label' => __('Attackers'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('attackers'),
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'target' => '_blank',
                         ], [
                             'label' => __('Service Provider Delegation'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('delegation'),
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'target' => '_blank',
                         ], [
                             'label' => __('IP Blacklist'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('blacklist'),
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'target' => '_blank',
                         ],
                     ],
@@ -178,10 +186,12 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Servers'),
                             'route' => route('home', ['tab' => 'servers', 'servers_type' => 'instrumented']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'servers' && request()->get('servers_type') === 'instrumented',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                         ], [
                             'label' => __('Security Rules'),
                             'route' => route('home', ['tab' => 'security_rules']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'security_rules',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                         ]
                     ],
                 ], [
@@ -192,10 +202,12 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('AMA'),
                             'route' => route('home', ['tab' => 'ama']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ama',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                         ], [
                             'label' => __('Knowledge Base'),
                             'route' => route('home', ['tab' => 'knowledge_base']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'knowledge_base',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                         ]
                     ],
                 ], [
@@ -205,35 +217,42 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Desktop'),
                             'route' => route('home', ['tab' => 'my-apps']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'my-apps',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                         ], [
                             'label' => __('Servers'),
                             'route' => route('home', ['tab' => 'servers', 'servers_type' => 'ynh']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'servers' && request()->get('servers_type') === 'ynh',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'hidden' => !Auth::user()->canListServers()
                         ], [
                             'label' => __('Applications'),
                             'route' => route('home', ['tab' => 'applications']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'applications',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'hidden' => !Auth::user()->canListServers(),
                         ], [
                             'label' => __('Domains'),
                             'route' => route('home', ['tab' => 'domains']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'domains',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'hidden' => !Auth::user()->canListServers(),
                         ], [
                             'label' => __('Backups'),
                             'route' => route('home', ['tab' => 'backups']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'backups',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'hidden' => !Auth::user()->canListServers(),
                         ], [
                             'label' => __('Interdependencies'),
                             'route' => route('home', ['tab' => 'interdependencies']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'interdependencies',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'hidden' => !Auth::user()->canListServers(),
                         ], [
                             'label' => __('Traces'),
                             'route' => route('home', ['tab' => 'traces']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'traces',
+                            'disabled' => !Auth::user()->isProfileComplete(),
                             'hidden' => !Auth::user()->canListServers(),
                         ]
                     ]

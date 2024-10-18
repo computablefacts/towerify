@@ -40,7 +40,7 @@
   "Regards,": "Cordialement,",
   "Register": "Inscription",
   "Remember Me": "Se souvenir de moi",
-  "Reset Password": "Nouveau du mot de passe",
+  "Reset Password": "Nouveau mot de passe",
   "Reset Password Notification": "Notification de réinitialisation du mot de passe",
   "results": "résultats",
   "Send Password Reset Link": "Envoyer le lien de réinitialisation du mot de passe",
@@ -199,5 +199,10 @@
   "Products in ": "Produits de la catégorie ",
   "Deploy": "Déployer",
   "The store is empty.": "Il n'y a aucun produit pour le moment.",
-  "Add To Cart": "Ajouter au panier"
+  "Add To Cart": "Ajouter au panier",
+  "Subscriptions": "Souscriptions",
+  "Monthly": "Mensuel",
+  "Yearly": "Annuel",
+  "true": "oui",
+  "false": "non"
 }

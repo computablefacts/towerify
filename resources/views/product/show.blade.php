@@ -4,53 +4,7 @@
 <div class="container">
   <div class="row">
     <div class="col">
-      <nav class="navbar navbar-expand-lg border-0 p-0" style="background-color:transparent;min-height:30px;">
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-target="#navbarNav"
-                aria-controls="navbarNav"
-                aria-expanded="false">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse">
-          <ul class="navbar-nav">
-            <li class="nav-item dropdown" style="min-height:30px;">
-              <a href="{{ route('product.index') }}">{{ __('Home') }}</a>
-            </li>
-            <li class="nav-item dropdown" style="min-height:30px;color:#ffaa00;">
-              /
-            </li>
-            @foreach($taxonomies as $taxonomy)
-            @if($taxonomy->rootLevelTaxons()->count() > 0)
-            <li class="nav-item dropdown" style="min-height:30px;">
-              <a class="nav-link dropdown-toggle p-0" href="#" id="navbarDropdown" role="button"
-                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                {{ $taxonomy->name }}
-              </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                @include('product._category_level', ['taxons' => $taxonomy->rootLevelTaxons()])
-              </div>
-            </li>
-            @endif
-            @endforeach
-            @if($taxon)
-            <li class="nav-item dropdown" style="min-height:30px;color:#ffaa00;">
-              /
-            </li>
-            <li class="nav-item dropdown" style="min-height:30px;">
-              <a href="{{ route('product.category', [$taxon->taxonomy->slug, $taxon]) }}">{{ $taxon->name }}</a>
-            </li>
-            @endif
-            <li class="nav-item dropdown" style="min-height:30px;color:#ffaa00;">
-              /
-            </li>
-            <li class="nav-item dropdown" style="min-height:30px;">
-              {{ $product->name }}
-            </li>
-          </ul>
-        </div>
-      </nav>
+      @include('product._breadcrumbs')
     </div>
   </div>
   <hr>
@@ -71,7 +25,7 @@
       <form action="{{ route('cart.add', $product) }}" method="post" class="mb-4 float-end">
         {{ csrf_field() }}
         <span class="me-2 fw-bold">
-        {{ format_subscription_price($product->price) }}
+        {!! format_subscription_price($product->price) !!}
         </span>
         <button type="submit" class="btn btn-primary text-white">{{ __('Add To Cart') }}</button>
       </form>
@@ -102,17 +56,21 @@
           <th><a href="{{ $package }}" target="_blank">{{ $package }}</a></th>
         </tr>
         @endif
-        @foreach($product->propertyValues as $propertyValue)
+        @foreach($product->propertyValues->sortBy('title')->groupBy(fn($p) => $p->property->name) as $key => $values)
         <tr>
-          <th>{{ $propertyValue->property->name }}</th>
-          <td>{{ $propertyValue->title }}</td>
+          <th>{{ __($key) }}</th>
+          <td>
+            @foreach($values as $value)
+            {{ __($value->title) }}
+            @endforeach
+          </td>
         </tr>
         @endforeach
         </tbody>
       </table>
       @endunless
       @unless(empty($product->description))
-      <p class="text-primary">{!! nl2br($product->description) !!}</p>
+      <p class="text-muted">{!! nl2br($product->description) !!}</p>
       @endunless
     </div>
   </div>

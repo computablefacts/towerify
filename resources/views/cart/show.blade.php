@@ -79,7 +79,7 @@
               <tr>
                 <th colspan="4"></th>
                 <th colspan="2">
-                  {{ format_subscription_price(Cart::total(), isset($euVat)) }}
+                  {!! format_subscription_price(Cart::total(), isset($euVat)) !!}
                 </th>
               </tr>
               </tfoot>

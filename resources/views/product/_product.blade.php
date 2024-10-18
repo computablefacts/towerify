@@ -22,10 +22,10 @@
             {{ $product->name }}
           </a>
           <span class="float-end">
-            {{ format_subscription_price($product->price) }}
+            {!! format_subscription_price($product->price) !!}
           </span>
         </h5>
-        <p class="card-text mb-0">
+        <p class="card-text mb-0 text-muted">
           {{ $product->description }}
         </p>
       </div>

@@ -34,7 +34,7 @@
   </thead>
   <tbody>
   <tr>
-    <td class="pt-0 pb-0">{{ format_subscription_price(Cart::total(), isset($euVat)) }}</td>
+    <td class="pt-0 pb-0">{!! format_subscription_price(Cart::total(), isset($euVat)) !!}</td>
   </tr>
   </tbody>
 </table>
