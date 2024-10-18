@@ -82,11 +82,7 @@
         @foreach($section['section_items'] as $item)
         @if(!isset($item['hidden']) || !$item['hidden'])
         <li>
-          @if(isset($item['disabled']) && $item['disabled'])
-          <span class="sidebar__link d-flex justify-content-between text-muted">
-          {{ $item['label'] }}
-          </span>
-          @elseif(isset($item['post_form']) && $item['post_form'])
+          @if(isset($item['post_form']) && $item['post_form'])
             <?php $id = \Illuminate\Support\Str::random(10) ?>
           <a href="{{ $item['route'] }}"
              class="sidebar__link d-flex justify-content-between {{ isset($item['active']) && $item['active'] ? 'active' : '' }}"

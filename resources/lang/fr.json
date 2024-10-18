@@ -204,5 +204,7 @@
   "Monthly": "Mensuel",
   "Yearly": "Annuel",
   "true": "oui",
-  "false": "non"
+  "false": "non",
+  "Your account is in the trial period until :date.": "Votre compte est en période d'essai jusqu'au :date.",
+  "Your trial ended on :date.": "Votre période d'essai s'est terminée le :date."
 }

@@ -29,11 +29,24 @@
 @include('layouts._menu')
 <div class="bd-layout">
   @auth
+  @if(Auth::user() && !Auth::user()->isBarredFromAccessingTheApp())
   @include('layouts._sidebar')
+  @endif
   @endauth
   <main class="bd-main">
     <div class="bd-main-content">
       <div class="bd-content py-3">
+        @if(Auth::user() && Auth::user()->isBarredFromAccessingTheApp())
+        <div class="container">
+          <div class="row">
+            <div class="col">
+              <div class="alert alert-danger">
+                {{ __('Your trial ended on :date.', ['date' => Auth::user()->endOfTrial()->format('Y-m-d')]) }}
+              </div>
+            </div>
+          </div>
+        </div>
+        @endif
         @yield('content')
       </div>
     </div>

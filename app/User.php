@@ -4,8 +4,9 @@ namespace App;
 
 use App\Hashing\TwHasher;
 use App\Models\Permission;
-use App\Models\Role;
+use App\Models\Taxon;
 use App\Models\Tenant;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -22,6 +23,27 @@ class User extends \Konekt\AppShell\Models\User
             return Tenant::where('id', $this->tenant_id)->first();
         }
         return null;
+    }
+
+    public function redirectUrlWhenUserIsBarredFromAccessingTheApp(): string
+    {
+        $taxon = Taxon::findBySlug(Str::lower(Taxon::MONTHLY));
+        return route('product.category', [$taxon->taxonomy->slug, $taxon]);
+    }
+
+    public function isBarredFromAccessingTheApp(): bool
+    {
+        return is_cywise() && !$this->isAdmin() && !$this->isInTrial();
+    }
+
+    public function isInTrial(): bool
+    {
+        return $this->customer_id == null && \Carbon\Carbon::now()->startOfDay()->lte($this->endOfTrial());
+    }
+
+    public function endOfTrial(): Carbon
+    {
+        return $this->created_at->startOfDay()->addDays(15);
     }
 
     public function isAdmin(): bool

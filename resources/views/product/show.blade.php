@@ -2,12 +2,14 @@
 
 @section('content')
 <div class="container">
+  @if(!Auth::user()->isBarredFromAccessingTheApp())
   <div class="row">
     <div class="col">
       @include('product._breadcrumbs')
     </div>
   </div>
   <hr>
+  @endif
   <h1 class="mt-0 mb-3">{{ $product->name }}</h1>
   <hr>
     <?php $website = App\Helpers\AppStore::findWebsiteFromSku($product->sku) ?>

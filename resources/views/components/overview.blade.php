@@ -10,6 +10,12 @@
 
 </style>
 <div class="container p-0">
+  @if(Auth::user()->isInTrial())
+  <div class="alert alert-danger">
+    {{ __('Your account is in the trial period until :date.', ['date' => Auth::user()->endOfTrial()->format('Y-m-d')])
+    }}
+  </div>
+  @endif
   <div class="row">
     <div class="col">
       <x-monitor-asset/>
