@@ -238,7 +238,7 @@ if (!function_exists('app_sidebar')) {
                         ]
                     ]
                 ], [
-                    'section_name' => __('E-Commerce'),
+                    'section_name' => __('Marketplace'),
                     'section_items' => [
                         [
                             'label' => __('Admin'),
@@ -272,6 +272,12 @@ if (!function_exists('app_sidebar')) {
                             'route' => route('home', ['tab' => 'invitations']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'invitations',
                             'hidden' => !Auth::user()->canListUsers(),
+                        ], [
+                            'label' => __('Plans'),
+                            'route' => route('plans'),
+                        ], [
+                            'label' => __('My Subscription'),
+                            'route' => route('customer-portal'),
                         ], [
                             'label' => __('Terms'),
                             'route' => route('terms'),

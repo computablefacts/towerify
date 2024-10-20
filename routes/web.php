@@ -12,6 +12,7 @@
 */
 
 use App\Helpers\SshKeyPair;
+use App\Http\Middleware\Subscribed;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Http\JsonResponse;
@@ -283,25 +284,25 @@ Route::get('', function () {
         return redirect()->route('home');
     }
     return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
-});
+})->middleware([Subscribed::class]);
 
 Route::get('/', function () {
     if (\Illuminate\Support\Facades\Auth::user()) {
         return redirect()->route('home');
     }
     return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
-});
+})->middleware([Subscribed::class]);
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'HomeController@index')->name('home')->middleware([Subscribed::class]);
 
 Route::get('/terms', 'TermsController@show')->name('terms');
 
 Route::post('/reset-password', function () {
     $email = \Illuminate\Support\Facades\Auth::user()->email;
     return view('auth.passwords.email', compact('email'));
-})->middleware('auth')->name('reset-password');
+})->middleware(['auth', Subscribed::class])->name('reset-password');
 
 Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
     \Illuminate\Notifications\DatabaseNotification::query()
@@ -309,7 +310,7 @@ Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifi
         ->whereJsonContains('data->group', $notification->data['group'])
         ->get()
         ->each(fn($notif) => $notif->markAsRead());
-})->middleware('auth');
+})->middleware(['auth', Subscribed::class]);
 
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
@@ -332,14 +333,14 @@ Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'invitations', 'as' => 'invitations.'], function () {
         Route::post('create', 'YnhInvitationController@create')->name('create');
     });
-});
+})->middleware([Subscribed::class]);
 
 Route::group(['prefix' => 'shop', 'as' => 'product.'], function () {
     Route::get('index', 'ProductController@index')->name('index');
     Route::get('c/{taxonomyName}/{taxon}', 'ProductController@index')->name('category');
     Route::get('p/{slug}', 'ProductController@show')->name('show');
     Route::get('p/{slug}/{taxon}', 'ProductController@show')->name('show-with-taxon');
-});
+})->middleware([Subscribed::class]);
 
 Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
     Route::get('show', 'CartController@show')->name('show');
@@ -347,9 +348,15 @@ Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
     Route::post('adv/{masterProductVariant}', 'CartController@addVariant')->name('add-variant');
     Route::post('update/{cart_item}', 'CartController@update')->name('update');
     Route::post('remove/{cart_item}', 'CartController@remove')->name('remove');
-});
+})->middleware([Subscribed::class]);
 
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
     Route::get('show', 'CheckoutController@show')->name('show');
     Route::post('submit', 'CheckoutController@submit')->name('submit');
-});
+})->middleware([Subscribed::class]);
+
+Route::get('/plans', 'StripeController@plan')->name('plans');
+Route::get('/subscribe', 'StripeController@subscribe')->name('subscribe');
+Route::get('/subscribe/success/{tx_id}', 'StripeController@subscribed')->name('subscribed');
+Route::get('/customer-portal', 'StripeController@customerPortal')->middleware('auth')->name('customer-portal');
+

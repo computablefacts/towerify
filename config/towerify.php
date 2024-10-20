@@ -43,4 +43,13 @@ return [
     'scraperapi' => [
         'api_key' => env('SCRAPERAPI_API_KEY'),
     ],
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'plans' => [
+            'essential' => env('STRIPE_PLAN_ESSENTIAL'),
+            'standard' => env('STRIPE_PLAN_STANDARD'),
+            'premium' => env('STRIPE_PLAN_PREMIUM'),
+        ],
+    ],
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\Subscribed;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ class HomeController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware(['auth', Subscribed::class]);
     }
 
     public function index(Request $request)
@@ -21,11 +22,6 @@ class HomeController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-
-        if ($user->isBarredFromAccessingTheApp()) {
-            return redirect($user->redirectUrlWhenUserIsBarredFromAccessingTheApp());
-        }
-
         $tab = $request->input('tab', 'overview');
         $servers_type = $request->input('servers_type', '');
         $limit = $request->input('limit', 20);

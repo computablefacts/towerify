@@ -113,6 +113,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Cashier\Cashier;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -125,6 +126,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
+        Cashier::useCustomerModel(User::class);
+        Cashier::calculateTaxes();
+        
         if (Str::startsWith(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }

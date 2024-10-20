@@ -11,7 +11,7 @@
 </style>
 <div class="container p-0">
   @if(Auth::user()->isInTrial())
-  <div class="alert alert-danger">
+  <div class="alert alert-danger border border-danger">
     {{ __('Your account is in the trial period until :date.', ['date' => Auth::user()->endOfTrial()->format('Y-m-d')])
     }}
   </div>

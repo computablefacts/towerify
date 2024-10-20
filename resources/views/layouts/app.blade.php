@@ -37,15 +37,7 @@
     <div class="bd-main-content">
       <div class="bd-content py-3">
         @if(Auth::user() && Auth::user()->isBarredFromAccessingTheApp())
-        <div class="container">
-          <div class="row">
-            <div class="col">
-              <div class="alert alert-danger">
-                {{ __('Your trial ended on :date.', ['date' => Auth::user()->endOfTrial()->format('Y-m-d')]) }}
-              </div>
-            </div>
-          </div>
-        </div>
+        @include('layouts._trial-ended')
         @endif
         @yield('content')
       </div>

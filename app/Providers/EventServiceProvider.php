@@ -6,9 +6,9 @@ use App\Events\AddTwrUserPermission;
 use App\Events\AddUserPermission;
 use App\Events\ConfigureHost;
 use App\Events\CreateBackup;
+use App\Events\InstallApp;
 use App\Events\ProcessLogalertPayload;
 use App\Events\ProcessLogparserPayload;
-use App\Events\InstallApp;
 use App\Events\PullServerInfos;
 use App\Events\RemoveUserPermission;
 use App\Events\UninstallApp;
@@ -16,11 +16,12 @@ use App\Listeners\AddTwrUserPermissionListener;
 use App\Listeners\AddUserPermissionListener;
 use App\Listeners\ConfigureHostListener;
 use App\Listeners\CreateBackupListener;
-use App\Listeners\ProcessLogalertPayloadListener;
-use App\Listeners\ProcessLogparserPayloadListener;
 use App\Listeners\InstallAppListener;
 use App\Listeners\OrderCreatedListener;
+use App\Listeners\ProcessLogalertPayloadListener;
+use App\Listeners\ProcessLogparserPayloadListener;
 use App\Listeners\RemoveUserPermissionListener;
+use App\Listeners\StripeEventListener;
 use App\Listeners\UninstallAppListener;
 use App\Listeners\UpdateServerInfosListener;
 use App\Listeners\UserInvitationUtilizedListener;
@@ -40,6 +41,7 @@ use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Listeners\IngestFileListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Konekt\User\Events\UserInvitationUtilized;
+use Laravel\Cashier\Events\WebhookReceived;
 use Vanilo\Order\Events\OrderWasCreated;
 
 class EventServiceProvider extends ServiceProvider
@@ -113,6 +115,11 @@ class EventServiceProvider extends ServiceProvider
         // CyberBuddy
         IngestFile::class => [
             IngestFileListener::class,
+        ],
+
+        // Stripe
+        WebhookReceived::class => [
+            StripeEventListener::class,
         ],
     ];
 

@@ -15,6 +15,7 @@
         "botman/driver-web": "^1.5",
         "erusev/parsedown": "^1.7",
         "guzzlehttp/guzzle": "^7.5",
+        "laravel/cashier": "^15.4",
         "laravel/framework": "^11.20",
         "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.0",

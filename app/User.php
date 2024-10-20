@@ -4,10 +4,10 @@ namespace App;
 
 use App\Hashing\TwHasher;
 use App\Models\Permission;
-use App\Models\Taxon;
 use App\Models\Tenant;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -15,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class User extends \Konekt\AppShell\Models\User
 {
-    use HasApiTokens;
+    use HasApiTokens, Billable;
 
     public function tenant(): ?Tenant
     {
@@ -25,15 +25,13 @@ class User extends \Konekt\AppShell\Models\User
         return null;
     }
 
-    public function redirectUrlWhenUserIsBarredFromAccessingTheApp(): string
-    {
-        $taxon = Taxon::findBySlug(Str::lower(Taxon::MONTHLY));
-        return route('product.category', [$taxon->taxonomy->slug, $taxon]);
-    }
-
     public function isBarredFromAccessingTheApp(): bool
     {
-        return is_cywise() && !$this->isAdmin() && !$this->isInTrial();
+        return is_cywise() && // only applies to Cywise deployment
+            !$this->isAdmin() && // the admin is always allowed to login
+            !$this->isInTrial() && // the trial ended
+            $this->customer_id == null && // the customer has not been set yet (automatically set after a successful subscription)
+            !$this->subscribed(); // the customer has been set but the subscription ended
     }
 
     public function isInTrial(): bool
