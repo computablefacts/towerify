@@ -89,9 +89,8 @@ export class TabVulnerabilities extends com.computablefacts.widgets.Widget {
                 });
 
                 this.vulnerabilities_ = data;
-                table.data = data;
+                table.data = data.filter(vuln => !vuln.is_hidden);
             });
-
         }
 
         const template = `
@@ -244,7 +243,7 @@ export class TabVulnerabilities extends com.computablefacts.widgets.Widget {
 
         searchInput.addEventListener('input', debounce(() => {
             const filter = searchInput.value.toLowerCase();
-            table.data = this.vulnerabilities_.filter(item => {
+            table.data = this.vulnerabilities_.filter(vuln => !vuln.is_hidden).filter(item => {
                 const assetMatch = item.asset.toLowerCase().includes(filter);
                 const ipMatch = item.ip.toLowerCase().includes(filter);
                 const vulnerabilityMatch = item.type.toLowerCase().includes(filter);
@@ -253,7 +252,7 @@ export class TabVulnerabilities extends com.computablefacts.widgets.Widget {
         }));
 
         select.onSelectionChange((selection) => {
-            table.data = this.vulnerabilities_.filter(vuln => {
+            table.data = this.vulnerabilities_.filter(vuln => !vuln.is_hidden).filter(vuln => {
                 return selection.every(tag => vuln.tags.includes(tag));
             });
         })
@@ -276,8 +275,8 @@ export class TabVulnerabilities extends com.computablefacts.widgets.Widget {
                     }
                 }
 
-                table.data = filters[riskLevel] ? this.vulnerabilities_.filter(vuln => vuln.level === riskLevel)
-                    : this.vulnerabilities_;
+                table.data = filters[riskLevel] ? this.vulnerabilities_.filter(vuln => !vuln.is_hidden).filter(vuln => vuln.level === riskLevel)
+                    : this.vulnerabilities_.filter(vuln => !vuln.is_hidden);
             }
         });
         return tab;

@@ -9,6 +9,7 @@ use App\Modules\AdversaryMeter\Listeners\DeleteAssetListener;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\AssetTag;
+use App\Modules\AdversaryMeter\Models\HiddenAlert;
 use App\Modules\AdversaryMeter\Models\Port;
 use App\Modules\AdversaryMeter\Models\PortTag;
 use App\Modules\AdversaryMeter\Models\Screenshot;
@@ -338,7 +339,7 @@ class AssetController extends Controller
             ]],
             'tags' => $tags,
             'ports' => $ports,
-            'vulnerabilities' => $alerts->filter(fn(array $alert) => !$alert['is_hidden'])->toArray(),
+            'vulnerabilities' => $alerts->toArray(),
             'timeline' => [
                 'nmap' => [
                     'id' => $scans->first()?->ports_scan_id,
@@ -352,7 +353,7 @@ class AssetController extends Controller
                 ],
                 'next_scan' => $nextScanDate,
             ],
-            'hiddenAlerts' => $alerts->filter(fn(array $alert) => $alert['is_hidden'])->toArray(),
+            'hiddenAlerts' => HiddenAlert::all()->toArray(),
         ];
     }
 

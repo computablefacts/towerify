@@ -114,6 +114,7 @@ class HoneypotController extends Controller
                 return $asset->alerts()
                     ->get()
                     ->filter(fn(Alert $alert) => !$attackerId || ($alert->cve_id && $alert->events($attackerId)->exists()))
+                    ->filter(fn(Alert $alert) => $attackerId || !$alert->is_hidden)
                     ->map(function (Alert $alert) use ($asset, $attackerId) {
                         return [
                             'alert' => $alert,
@@ -409,21 +410,21 @@ class HoneypotController extends Controller
             'title' => 'nullable|string',
         ]);
 
-        $uid = $request->string('uid');
-        $type = $request->string('type');
-        $title = $request->string('title');
+        $uid = trim($request->string('uid'));
+        $type = trim($request->string('type'));
+        $title = trim($request->string('title'));
 
-        if (!$uid && !$type && !$title) {
+        if (empty($uid) && empty($type) && empty($title)) {
             abort(500, 'At least one of uid, type or title must be present.');
         }
 
         $hiddenAlerts = HiddenAlert::query();
 
-        if ($uid) {
+        if (!empty($uid)) {
             $hiddenAlerts->where('uid', $uid);
-        } else if ($type) {
+        } else if (!empty($type)) {
             $hiddenAlerts->where('type', $type);
-        } else if ($title) {
+        } else if (!empty($title)) {
             $hiddenAlerts->where('title', $title);
         }
 

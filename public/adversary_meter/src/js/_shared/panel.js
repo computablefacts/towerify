@@ -148,9 +148,9 @@ export class Panel extends com.computablefacts.widgets.Widget {
         loader.style.display = 'inline-block';
 
         const existingAlertsMap = {
-          uid: infos.hiddenAlerts.some(alert => alert.value_0 === this.selectedVuln_.uid),
-          type: infos.hiddenAlerts.some(alert => alert.value_1 === this.selectedVuln_.fullType),
-          title: infos.hiddenAlerts.some(alert => alert.value_2 === this.selectedVuln_.title2),
+          uid: infos.hiddenAlerts.some(alert => alert.uid === this.selectedVuln_.uid),
+          type: infos.hiddenAlerts.some(alert => alert.type === this.selectedVuln_.fullType),
+          title: infos.hiddenAlerts.some(alert => alert.title === this.selectedVuln_.title2),
         };
 
         const alertsToAdd = selectedOptions.filter(option => !existingAlertsMap[option]);
@@ -176,11 +176,11 @@ export class Panel extends com.computablefacts.widgets.Widget {
         const removePromises = alertsToRemove.map(option => {
           let alertToRemove;
           if (option === 'uid') {
-            alertToRemove = infos.hiddenAlerts.find(alert => alert.value_0 === this.selectedVuln_.uid);
+            alertToRemove = infos.hiddenAlerts.find(alert => alert.uid === this.selectedVuln_.uid);
           } else if (option === 'type') {
-            alertToRemove = infos.hiddenAlerts.find(alert => alert.value_1 === this.selectedVuln_.fullType);
+            alertToRemove = infos.hiddenAlerts.find(alert => alert.type === this.selectedVuln_.fullType);
           } else if (option === 'title') {
-            alertToRemove = infos.hiddenAlerts.find(alert => alert.value_2 === this.selectedVuln_.title2);
+            alertToRemove = infos.hiddenAlerts.find(alert => alert.title === this.selectedVuln_.title2);
           }
 
           if (alertToRemove && alertToRemove.id) {
