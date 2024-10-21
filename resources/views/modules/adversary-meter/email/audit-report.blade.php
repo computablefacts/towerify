@@ -132,6 +132,7 @@
   </li>
   <li><a href="#assets">Actifs</a>
     <ul>
+      <li><a href="#assets-discovered">Découverts ({{ $assets_discovered->count() }})</a></li>
       <li><a href="#assets-monitored">Surveillés ({{ $assets_monitored->count() }})</a></li>
       <li><a href="#assets-not-monitored">À surveiller ({{ $assets_not_monitored->count() }})</a></li>
     </ul>
@@ -313,7 +314,44 @@
   <a name="assets">2. Actifs</a>
 </div>
 <div class="section">
-  <a name="assets-monitored">2.1. Surveillés ({{ $assets_monitored->count() }})</a>
+  <a name="assets-discovered">2.1. Découverts ({{ $assets_discovered->count() }})</a>
+</div>
+@if($assets_discovered->count())
+<table>
+  <colgroup>
+    <col span="1">
+  </colgroup>
+  <thead>
+  <tr>
+    <th>Actif</th>
+  </tr>
+  </thead>
+  <tbody>
+  @foreach ($assets_discovered as $asset)
+  <tr>
+    <td class="ellipsis" title="{{$asset->asset}}">
+      {{ $asset->asset }}
+      @if($asset->scanInProgress()->isEmpty())
+      <span class="badge" style="float:right;color:#00264b;background-color:#4bd28f">
+        scan terminé
+      </span>
+      @else
+      <span class="badge" style="float:right;color:#00264b;background-color:#ffaa00">
+        scan en cours
+      </span>
+      @endif
+    </td>
+  </tr>
+  @endforeach
+  </tbody>
+</table>
+@else
+<div class="grey">
+  <p>Aucun actif n'a été découvert récemment.</p>
+</div>
+@endif
+<div class="section">
+  <a name="assets-monitored">2.2. Surveillés ({{ $assets_monitored->count() }})</a>
 </div>
 @if($assets_monitored->count())
 <table>
@@ -350,7 +388,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="assets-not-monitored">2.2. À surveiller ({{ $assets_not_monitored->count() }})</a>
+  <a name="assets-not-monitored">2.3. À surveiller ({{ $assets_not_monitored->count() }})</a>
 </div>
 @if($assets_not_monitored->count())
 <table>

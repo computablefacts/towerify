@@ -6,6 +6,7 @@ use App\Modules\AdversaryMeter\Mail\AuditReport;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -43,9 +44,10 @@ class SendAuditReport implements ShouldQueue
                 $alertsLow = $alerts->filter(fn(Alert $alert) => $alert->level === 'Low');
                 $assetsMonitored = Asset::where('is_monitored', true)->orderBy('asset')->get();
                 $assetsNotMonitored = Asset::where('is_monitored', false)->orderBy('asset')->get();
+                $assetsDiscovered = Asset::where('created_by', '>=', Carbon::now()->subDay())->orderBy('asset')->get();
 
-                if ($alerts->count() > 0 || $assetsMonitored->count() > 0 || $assetsNotMonitored->count() > 0) {
-                    Mail::to($user->email)->send(new AuditReport($alertsHigh, $alertsMedium, $alertsLow, $assetsMonitored, $assetsNotMonitored));
+                if ($alerts->count() > 0 || $assetsMonitored->count() > 0 || $assetsNotMonitored->count() > 0 || $assetsDiscovered->count() > 0) {
+                    Mail::to($user->email)->send(new AuditReport($alertsHigh, $alertsMedium, $alertsLow, $assetsMonitored, $assetsNotMonitored, $assetsDiscovered));
                 }
             });
     }
