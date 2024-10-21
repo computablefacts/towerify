@@ -5,13 +5,63 @@ namespace App\Modules\Reports\Helpers;
 use App\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ApiUtils
 {
     public function get_or_add_user(User $user): ?array
     {
         $userSuperset = $this->user_exists($user->email);
-        return $userSuperset ?: $this->create_user($user->ynhUsername(), $user->email, $user->ynhPassword());
+        return $userSuperset ?: $this->create_user(Str::before($user->email, '@'), $user->email, $user->ynhPassword());
+    }
+
+    /** @deprecated */
+    public function get_or_add_role(string $role): ?array
+    {
+        $roleSuperset = $this->role_exists($role);
+        return $roleSuperset ?: $this->create_role($role);
+    }
+
+    /** @deprecated */
+    private function create_role(string $role): ?array
+    {
+        $tokens = $this->tokens();
+
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$tokens['access_token']}",
+            'X-CSRFToken' => $tokens['csrf_token'],
+        ])->post("{$this->api()}/security/roles", [
+            "name" => $role,
+        ]);
+
+        if ($response->successful()) {
+            // $json = $response->json();
+            // Log::debug($json);
+            return $this->role_exists($role);
+        }
+        Log::error($response->body());
+        return null;
+    }
+
+    /** @deprecated */
+    private function role_exists(string $role): ?array
+    {
+        $tokens = $this->tokens();
+
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer {$tokens['access_token']}",
+            'X-CSRFToken' => $tokens['csrf_token'],
+        ])->get("{$this->api()}/security/roles/?q=%28filters%3A%21%28%28col%3Aname%2Copr%3Aeq%2Cvalue%3A%27{$role}%27%29%29%29");
+
+        if ($response->successful()) {
+            $json = $response->json();
+            // Log::debug($json);
+            return isset($json['result']) && count($json['result']) === 1 ? $json['result'][0] : null;
+        }
+        Log::error($response->body());
+        return null;
     }
 
     private function create_user(string $username, string $email, string $password): ?array
@@ -22,6 +72,7 @@ class ApiUtils
         $gamma = collect($roles)->first(fn(array $role) => $role['name'] === 'Gamma');
         $public = collect($roles)->first(fn(array $role) => $role['name'] === 'Public');
         $sqlLab = collect($roles)->first(fn(array $role) => $role['name'] === 'sql_lab');
+        $cywise = collect($roles)->first(fn(array $role) => $role['name'] === 'cywise');
 
         $tokens = $this->tokens();
 
@@ -36,7 +87,7 @@ class ApiUtils
             "email" => $email,
             "password" => $password,
             "active" => true,
-            "roles" => [$gamma['id']],
+            "roles" => [$gamma['id'], $cywise['id']],
         ]);
 
         if ($response->successful()) {
@@ -71,11 +122,13 @@ class ApiUtils
     {
         $tokens = $this->tokens();
 
+        $escaped = Str::replace('+', '%2B', $email);
+
         $response = Http::withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$tokens['access_token']}",
             'X-CSRFToken' => $tokens['csrf_token'],
-        ])->get("{$this->api()}/security/users/?q=%28filters%3A%21%28%28col%3Aemail%2Copr%3Aeq%2Cvalue%3A%27{$email}%27%29%29%29");
+        ])->get("{$this->api()}/security/users/?q=%28filters%3A%21%28%28col%3Aemail%2Copr%3Aeq%2Cvalue%3A%27{$escaped}%27%29%29%29");
 
         if ($response->successful()) {
             $json = $response->json();

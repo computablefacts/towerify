@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\Subscribed;
 use App\Models\YnhServer;
+use App\Modules\Reports\Helpers\ApiUtilsFacade as ApiUtils;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -17,11 +19,23 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        // $json = ApiUtils::get_or_add_user(Auth::user());
-        // Log::debug($json);
-
         /** @var User $user */
         $user = Auth::user();
+
+        // LEGACY CODE BEGINS : AUTOMATICALLY CREATE A PROPER SUPERSET ACCOUNT FOR ALL USERS
+        try {
+            if (!$user->superset_id) {
+
+                $json = ApiUtils::get_or_add_user($user);
+
+                $user->superset_id = $json['id'];
+                $user->save();
+            }
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+        }
+        // LEGACY CODE ENDS
+
         $tab = $request->input('tab', 'overview');
         $servers_type = $request->input('servers_type', '');
         $limit = $request->input('limit', 20);
