@@ -94,7 +94,7 @@
             </span>
             <span class="ps-3">Rapports personnalisés</span>
           </div>
-          <a href="{{ route('subscribe', ['plan' => config('towerify.stripe.plans.standard')]) }}"
+          <a href="{{ route('subscribe', ['plan' => config('towerify.stripe.plans.essential')]) }}"
              class="btn btn-icon btn-outline-danger d-lg-block mt-3 mb-0 select-plan-btn">
             {{ __('Subscribe') }}
             <i class="fas fa-arrow-right ms-1"></i>
