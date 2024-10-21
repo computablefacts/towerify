@@ -30,7 +30,7 @@ class ProductShowPageTest extends TestCase
 
         $response->assertSee('Dacia Logan');
         $response->assertSee(format_price($product->price));
-        $response->assertSee('Deploy');
+        $response->assertSee('Add To Cart');
         $response->assertSee(route('cart.add', $product));
     }
 }
