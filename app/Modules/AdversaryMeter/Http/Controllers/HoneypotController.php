@@ -401,7 +401,7 @@ class HoneypotController extends Controller
         return response()->json(['message' => 'Hash successfully deleted']);
     }
 
-    public function createHiddenAlert(Request $request): array
+    public function createHiddenAlert(Request $request): HiddenAlert
     {
         $payload = $request->validate([
             'uid' => 'nullable|string',

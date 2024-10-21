@@ -119,7 +119,7 @@ class Asset extends Model
             ->map(fn(HiddenAlert $marker) => $marker->type);
         $hiddenTitles = $hiddenAlerts
             ->filter(fn(HiddenAlert $marker) => !empty($marker->title))
-            ->map(fn(HiddenAlert $marker) => $marker->title);
+            ->map(fn(HiddenAlert $marker) => addslashes($marker->title));
 
         $ifUids = $hiddenUids->isEmpty() ? 'false' : "am_alerts.uid IN ('{$hiddenUids->join("','")}')";
         $ifTypes = $hiddenTypes->isEmpty() ? 'false' : "am_alerts.type IN ('{$hiddenTypes->join("','")}')";
