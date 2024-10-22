@@ -174,9 +174,8 @@ class AuditReport extends Mailable
                 ->orderBy('calendar_time', 'desc')
                 ->first();
 
-            if ($metric && $metric->columns['%_available'] <= 60) {
+            if ($metric && $metric->columns['%_available'] <= 20) {
                 return [
-                    'id' => $metric->id,
                     'timestamp' => $metric->calendar_time->format('Y-m-d H:i:s'),
                     'server' => $metric->server->name,
                     'message' => "Il vous reste {$metric->columns['%_available']}% d'espace disque disponible, soit {$metric->columns['space_left_gb']} Gb.",

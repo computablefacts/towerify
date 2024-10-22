@@ -154,7 +154,7 @@
 @if($events->count())
 <table>
   <colgroup>
-    <col span="1" style="width: 50px">
+    <col span="1" style="width: 200px">
     <col span="1" style="width: 200px">
     <col span="1">
   </colgroup>
@@ -191,13 +191,11 @@
 @if($metrics->count())
 <table>
   <colgroup>
-    <col span="1" style="width: 50px">
     <col span="1" style="width: 200px">
     <col span="1">
   </colgroup>
   <thead>
   <tr>
-    <th>Ref.</th>
     <th>Date</th>
     <th>Server</th>
   </tr>
@@ -205,12 +203,11 @@
   <tbody>
   @foreach ($metrics as $metric)
   <tr>
-    <td>{{ $metric['id'] }}</td>
     <td>{{ $metric['timestamp'] }}</td>
     <td>{{ $metric['server'] }}</td>
   </tr>
   <tr class="end-of-block">
-    <td colspan="3">
+    <td colspan="2">
       {{ $metric['message'] }}
     </td>
   </tr>
