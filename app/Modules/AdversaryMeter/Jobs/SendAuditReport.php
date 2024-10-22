@@ -3,10 +3,7 @@
 namespace App\Modules\AdversaryMeter\Jobs;
 
 use App\Modules\AdversaryMeter\Mail\AuditReport;
-use App\Modules\AdversaryMeter\Models\Alert;
-use App\Modules\AdversaryMeter\Models\Asset;
 use App\User;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -37,17 +34,10 @@ class SendAuditReport implements ShouldQueue
             ->each(function (User $user) {
 
                 Auth::login($user); // otherwise the tenant will not be properly set
+                $report = AuditReport::create();
 
-                $alerts = Asset::where('is_monitored', true)->get()->flatMap(fn(Asset $asset) => $asset->alerts()->get());
-                $alertsHigh = $alerts->filter(fn(Alert $alert) => $alert->level === 'High');
-                $alertsMedium = $alerts->filter(fn(Alert $alert) => $alert->level === 'Medium');
-                $alertsLow = $alerts->filter(fn(Alert $alert) => $alert->level === 'Low');
-                $assetsMonitored = Asset::where('is_monitored', true)->orderBy('asset')->get();
-                $assetsNotMonitored = Asset::where('is_monitored', false)->orderBy('asset')->get();
-                $assetsDiscovered = Asset::where('created_by', '>=', Carbon::now()->subDay())->orderBy('asset')->get();
-
-                if ($alerts->count() > 0 || $assetsMonitored->count() > 0 || $assetsNotMonitored->count() > 0 || $assetsDiscovered->count() > 0) {
-                    Mail::to($user->email)->send(new AuditReport($alertsHigh, $alertsMedium, $alertsLow, $assetsMonitored, $assetsNotMonitored, $assetsDiscovered));
+                if (!$report['is_empty']) {
+                    Mail::to($user->email)->send($report['report']);
                 }
             });
     }

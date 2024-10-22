@@ -123,6 +123,12 @@
   Table des matières
 </div>
 <ol>
+  <li><a href="#anomalies">Activités suspectes</a>
+    <ul>
+      <li><a href="#events">Evènements ({{ $events->count() }})</a></li>
+      <li><a href="#metrics">Métriques ({{ $metrics->count() }})</a></li>
+    </ul>
+  </li>
   <li><a href="#vulns">Vulnérabilités</a>
     <ul>
       <li><a href="#vulns-high">Hautes ({{ $alerts_high->count() }})</a></li>
@@ -140,10 +146,87 @@
 </ol>
 <hr/>
 <div class='heading'>
-  <a name="vulns">1. Vulnérabilités</a>
+  <a name="anomalies">1. Activités suspectes</a>
 </div>
 <div class="section">
-  <a name="vulns-high">1.1. Hautes ({{ $alerts_high->count() }})</a><br>
+  <a name="events">1.1. Evènements ({{ $events->count() }})</a><br>
+</div>
+@if($events->count())
+<table>
+  <colgroup>
+    <col span="1" style="width: 50px">
+    <col span="1" style="width: 200px">
+    <col span="1">
+  </colgroup>
+  <thead>
+  <tr>
+    <th>Ref.</th>
+    <th>Date</th>
+    <th>Server</th>
+  </tr>
+  </thead>
+  <tbody>
+  @foreach ($events as $event)
+  <tr>
+    <td>{{ $event['id'] }}</td>
+    <td>{{ $event['timestamp'] }}</td>
+    <td>{{ $event['server'] }}</td>
+  </tr>
+  <tr class="end-of-block">
+    <td colspan="3">
+      {{ $event['message'] }}
+    </td>
+  </tr>
+  @endforeach
+  </tbody>
+</table>
+@else
+<div class="grey">
+  <p>Aucun évènement anormal n'a été détecté pour le moment.</p>
+</div>
+@endif
+<div class="section">
+  <a name="metrics">1.2. Métriques ({{ $metrics->count() }})</a><br>
+</div>
+@if($metrics->count())
+<table>
+  <colgroup>
+    <col span="1" style="width: 50px">
+    <col span="1" style="width: 200px">
+    <col span="1">
+  </colgroup>
+  <thead>
+  <tr>
+    <th>Ref.</th>
+    <th>Date</th>
+    <th>Server</th>
+  </tr>
+  </thead>
+  <tbody>
+  @foreach ($metrics as $metric)
+  <tr>
+    <td>{{ $metric['id'] }}</td>
+    <td>{{ $metric['timestamp'] }}</td>
+    <td>{{ $metric['server'] }}</td>
+  </tr>
+  <tr class="end-of-block">
+    <td colspan="3">
+      {{ $metric['message'] }}
+    </td>
+  </tr>
+  @endforeach
+  </tbody>
+</table>
+@else
+<div class="grey">
+  <p>Aucune métrique anormale n'a été détectée pour le moment.</p>
+</div>
+@endif
+<div class='heading'>
+  <a name="vulns">2. Vulnérabilités</a>
+</div>
+<div class="section">
+  <a name="vulns-high">2.1. Hautes ({{ $alerts_high->count() }})</a><br>
 </div>
 @if($alerts_high->count())
 <table>
@@ -199,7 +282,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="vulns-medium">1.2. Moyennes ({{ $alerts_medium->count() }})</a>
+  <a name="vulns-medium">2.2. Moyennes ({{ $alerts_medium->count() }})</a>
 </div>
 @if($alerts_medium->count())
 <table>
@@ -255,7 +338,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="vulns-low">1.3. Basses ({{ $alerts_low->count() }})</a>
+  <a name="vulns-low">2.3. Basses ({{ $alerts_low->count() }})</a>
 </div>
 @if($alerts_low->count())
 <table>
@@ -311,10 +394,10 @@
 </div>
 @endif
 <div class='heading'>
-  <a name="assets">2. Actifs</a>
+  <a name="assets">3. Actifs</a>
 </div>
 <div class="section">
-  <a name="assets-discovered">2.1. Découverts ({{ $assets_discovered->count() }})</a>
+  <a name="assets-discovered">3.1. Découverts ({{ $assets_discovered->count() }})</a>
 </div>
 @if($assets_discovered->count())
 <table>
@@ -351,7 +434,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="assets-monitored">2.2. Surveillés ({{ $assets_monitored->count() }})</a>
+  <a name="assets-monitored">3.2. Surveillés ({{ $assets_monitored->count() }})</a>
 </div>
 @if($assets_monitored->count())
 <table>
@@ -388,7 +471,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="assets-not-monitored">2.3. À surveiller ({{ $assets_not_monitored->count() }})</a>
+  <a name="assets-not-monitored">3.3. À surveiller ({{ $assets_not_monitored->count() }})</a>
 </div>
 @if($assets_not_monitored->count())
 <table>

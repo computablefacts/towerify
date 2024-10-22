@@ -597,6 +597,6 @@ EOT;
 
     public function server(): BelongsTo
     {
-        return $this->belongsTo(YnhServer::class);
+        return $this->belongsTo(YnhServer::class, 'ynh_server_id', 'id');
     }
 }
