@@ -27,6 +27,7 @@ class AgeOffOsqueryEvents implements ShouldQueue
     {
         $this->historizeDiskUsage();
         $this->historizeMemoryUsage();
+        $this->historizeProcessorUsage();
     }
 
     private function historizeDiskUsage(): void
@@ -100,6 +101,40 @@ class AgeOffOsqueryEvents implements ShouldQueue
             ");
 
             YnhOsquery::where('name', 'memory_available_snapshot')
+                ->where('packed', false)
+                ->delete();
+        });
+    }
+
+    private function historizeProcessorUsage(): void
+    {
+        DB::transaction(function () {
+
+            YnhOsquery::where('name', 'processor_available_snapshot')
+                ->where('packed', true)
+                ->update(['packed' => false]);
+
+            DB::unprepared("
+                INSERT INTO ynh_osquery_processor_usage (
+                  ynh_server_id,
+                  timestamp,
+                  system_workloads_pct,
+                  user_workloads_pct,
+                  idle_pct
+                )
+                SELECT 
+                  ynh_osquery.ynh_server_id,
+                  TIMESTAMP(ynh_osquery.calendar_time - SECOND(ynh_osquery.calendar_time)) AS `timestamp`,
+                  ROUND(AVG(json_unquote(json_extract(ynh_osquery.columns, '$.time_spent_on_system_workloads_pct'))), 2) AS system_workloads_pct,
+                  ROUND(AVG(json_unquote(json_extract(ynh_osquery.columns, '$.time_spent_on_user_workloads_pct'))), 2) AS user_workloads_pct,
+                  ROUND(AVG(json_unquote(json_extract(ynh_osquery.columns, '$.time_spent_idle_pct'))), 2) AS idle_pct
+                FROM ynh_osquery
+                WHERE ynh_osquery.name = 'processor_available_snapshot'
+                AND ynh_osquery.packed = 0
+                GROUP BY ynh_osquery.ynh_server_id, ynh_osquery.calendar_time
+            ");
+
+            YnhOsquery::where('name', 'processor_available_snapshot')
                 ->where('packed', false)
                 ->delete();
         });

@@ -301,6 +301,7 @@ EOT;
         "));
     }
 
+    /** @deprecated */
     public static function memoryUsage(Collection $servers, int $limit = 1000): Collection
     {
         return $servers->isEmpty() ? collect() : collect(DB::select("
@@ -342,6 +343,7 @@ EOT;
         "));
     }
 
+    /** @deprecated */
     public static function diskUsage(Collection $servers, int $limit = 1000): Collection
     {
         return $servers->isEmpty() ? collect() : collect(DB::select("
@@ -383,6 +385,45 @@ EOT;
         "));
     }
 
+    /** @deprecated */
+    public static function processorUsage(Collection $servers, int $limit = 1000): Collection
+    {
+        return $servers->isEmpty() ? collect() : collect(DB::select("
+            SELECT 
+              ynh_servers.name AS ynh_server_name, 
+              t.* 
+            FROM (
+                SELECT 
+                  ynh_osquery.ynh_server_id,
+                  TIMESTAMP(ynh_osquery.calendar_time - SECOND(ynh_osquery.calendar_time)) AS `timestamp`,
+                  ROUND(AVG(json_unquote(json_extract(ynh_osquery.columns, '$.time_spent_on_system_workloads_pct'))), 2) AS system_workloads_pct,
+                  ROUND(AVG(json_unquote(json_extract(ynh_osquery.columns, '$.time_spent_on_user_workloads_pct'))), 2) AS user_workloads_pct,
+                  ROUND(AVG(json_unquote(json_extract(ynh_osquery.columns, '$.time_spent_idle_pct'))), 2) AS idle_pct
+                FROM ynh_osquery
+                WHERE ynh_osquery.name = 'processor_available_snapshot'
+                AND ynh_osquery.packed = 0
+                GROUP BY ynh_osquery.ynh_server_id, ynh_osquery.calendar_time
+            
+                UNION
+
+                SELECT 
+                  ynh_server_id,
+                  timestamp,
+                  system_workloads_pct,
+                  user_workloads_pct,
+                  idle_pct
+                FROM ynh_osquery_processor_usage
+
+                ORDER BY timestamp DESC
+                LIMIT {$limit}
+            ) AS t
+            INNER JOIN ynh_servers ON ynh_servers.id = t.ynh_server_id
+            WHERE ynh_servers.id IN ({$servers->pluck('id')->join(',')})
+            ORDER BY t.timestamp ASC;
+        "));
+    }
+
+    /** @deprecated */
     public static function users(Collection $servers, int $limit): Collection
     {
         // {
@@ -416,6 +457,7 @@ EOT;
         "));
     }
 
+    /** @deprecated */
     public static function loginsAndLogouts(Collection $servers, int $limit): Collection
     {
         // {
@@ -454,6 +496,7 @@ EOT;
         "));
     }
 
+    /** @deprecated */
     public static function suidBinaries(Collection $servers, int $limit): Collection
     {
         // {
@@ -481,6 +524,7 @@ EOT;
         "));
     }
 
+    /** @deprecated */
     public static function kernelModules(Collection $servers, int $limit): Collection
     {
         // {
@@ -510,6 +554,7 @@ EOT;
         "));
     }
 
+    /** @deprecated */
     public static function authorizedKeys(Collection $servers, int $limit): Collection
     {
         // {

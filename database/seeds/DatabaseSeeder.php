@@ -340,6 +340,12 @@ class DatabaseSeeder extends Seeder
             'interval' => 86400,
             'snapshot' => true,
         ], [
+            'name' => 'processor_available_snapshot',
+            'query' => "SELECT printf(ROUND((CAST(SUM(system) AS FLOAT)/(SUM(idle)+SUM(system)+SUM(USER)))*100,2)) AS time_spent_on_system_workloads_pct, printf(ROUND((CAST(SUM(USER) AS FLOAT)/(SUM(idle)+SUM(system)+SUM(USER)))*100,2)) AS time_spent_on_user_workloads_pct, printf(ROUND((CAST(SUM(idle) AS FLOAT)/(SUM(idle)+SUM(system)+SUM(USER)))*100,2)) AS time_spent_idle_pct FROM cpu_time;",
+            'description' => 'Track processor usage.',
+            'interval' => 300,
+            'snapshot' => true,
+        ], [
             'name' => "memory_available_snapshot",
             'query' => "SELECT printf('%.2f',((memory_total - memory_available) * 1.0)/1073741824) AS used_space_gb, printf('%.2f',(1.0 * memory_available / 1073741824)) AS space_left_gb, printf('%.2f',(1.0 * memory_total / 1073741824)) AS total_space_gb, printf('%.2f',(((memory_total - memory_available) * 1.0)/1073741824)/(1.0 * memory_total / 1073741824)) * 100 AS '%_used', printf('%.2f',(1.0 * memory_available / 1073741824)/(1.0 * memory_total / 1073741824)) * 100 AS '%_available' FROM memory_info;",
             'description' => "Track memory usage.",

@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryDiskUsage;
 use App\Models\YnhOsqueryMemoryUsage;
+use App\Models\YnhOsqueryProcessorUsage;
 use App\Models\YnhOverview;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
@@ -91,14 +92,21 @@ class Summarize implements ShouldQueue
             $memoryUsage->where('updated_at', '>=', $cutOffTime);
         }
 
+        $processorUsage = YnhOsqueryProcessorUsage::query()
+            ->whereIn('ynh_server_id', $servers->pluck('id'));
+
+        if ($cutOffTime) {
+            $processorUsage->where('updated_at', '>=', $cutOffTime);
+        }
+
         $osquery = YnhOsquery::select('ynh_osquery.*')
-            ->whereIn('name', ['disk_available_snapshot', 'memory_available_snapshot'])
+            ->whereIn('name', ['disk_available_snapshot', 'memory_available_snapshot', 'processor_available_snapshot'])
             ->whereIn('ynh_server_id', $servers->pluck('id'));
 
         if ($cutOffTime) {
             $osquery->where('updated_at', '>=', $cutOffTime);
         }
-        return ($summary ? $summary->collected_metrics : 0) + $diskUsage->count() + $memoryUsage->count() + $osquery->count();
+        return ($summary ? $summary->collected_metrics : 0) + $diskUsage->count() + $memoryUsage->count() + $processorUsage->count() + $osquery->count();
     }
 
     public static function collectedEvents(Collection $servers): int
@@ -107,7 +115,7 @@ class Summarize implements ShouldQueue
         $cutOffTime = $summary?->updated_at;
 
         $query = YnhOsquery::select('ynh_osquery.*')
-            ->whereNotIn('name', ['disk_available_snapshot', 'memory_available_snapshot'])
+            ->whereNotIn('name', ['disk_available_snapshot', 'memory_available_snapshot', 'processor_available_snapshot'])
             ->whereIn('ynh_server_id', $servers->pluck('id'));
 
         if ($cutOffTime) {
