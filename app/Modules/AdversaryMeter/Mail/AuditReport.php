@@ -47,7 +47,10 @@ class AuditReport extends Mailable
     {
         $serverIds = YnhServer::forUser(Auth::user())->pluck('id');
         $cutOffTime = Carbon::now()->subDay();
-        $alerts = Asset::where('is_monitored', true)->get()->flatMap(fn(Asset $asset) => $asset->alerts()->get());
+        $alerts = Asset::where('is_monitored', true)
+            ->get()
+            ->flatMap(fn(Asset $asset) => $asset->alerts()->get())
+            ->filter(fn(Alert $alert) => $alert->is_hidden === 0);
         $alertsHigh = $alerts->filter(fn(Alert $alert) => $alert->level === 'High');
         $alertsMedium = $alerts->filter(fn(Alert $alert) => $alert->level === 'Medium');
         $alertsLow = $alerts->filter(fn(Alert $alert) => $alert->level === 'Low');
