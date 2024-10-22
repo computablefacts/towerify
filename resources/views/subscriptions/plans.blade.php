@@ -2,6 +2,13 @@
 
 @section('content')
 <div class="container">
+  <div class="row mt-6 mb-6">
+    <div class="col text-center">
+      <h6>
+        50% de remise pour les 6 premiers mois d’un contrat de 12 mois avec le coupon <span style="color:#ffaa00">50OFF</span> !
+      </h6>
+    </div>
+  </div>
   <div class="row">
     <div class="col-lg-4 mb-lg-0 mb-4">
       <div class="card shadow-lg">
