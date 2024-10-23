@@ -100,7 +100,8 @@ EOT;
     public static function configOsquery(): array
     {
         $schedule = [];
-        YnhOsqueryRule::orderBy('name', 'asc')
+        YnhOsqueryRule::where('enabled', true)
+            ->orderBy('name', 'asc')
             ->get()
             ->each(function (YnhOsqueryRule $rule) use (&$schedule) {
                 $schedule[$rule->name] = [

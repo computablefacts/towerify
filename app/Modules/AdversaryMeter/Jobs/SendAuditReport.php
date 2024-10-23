@@ -12,7 +12,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
-/** @deprecated */
 class SendAuditReport implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;

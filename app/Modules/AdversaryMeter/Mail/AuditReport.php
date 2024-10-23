@@ -66,6 +66,8 @@ class AuditReport extends Mailable
                 'ld_preload',
                 'kernel_modules',
                 'crontab',
+                'etc_hosts',
+                'mounts',
             ])
             ->whereIn('ynh_server_id', $serverIds)
             ->orderBy('calendar_time', 'desc')
@@ -162,6 +164,38 @@ class AuditReport extends Mailable
                             'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
                             'server' => $event->server->name,
                             'message' => "Une tâche planifiée a été supprimée: {$event->columns['command']}",
+                        ];
+                    }
+                } elseif ($event->name === 'etc_hosts') {
+                    if ($event->action === 'added') {
+                        return [
+                            'id' => $event->id,
+                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
+                            'server' => $event->server->name,
+                            'message' => "Le traffic réseau vers {$event->columns['hostnames']} est maintenant redirigé vers {$event->columns['address']}.",
+                        ];
+                    } elseif ($event->action === 'removed') {
+                        return [
+                            'id' => $event->id,
+                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
+                            'server' => $event->server->name,
+                            'message' => "Le traffic réseau vers {$event->columns['hostnames']} n'est maintenant plus redirigé vers {$event->columns['address']}.",
+                        ];
+                    }
+                } elseif ($event->name === 'mounts') {
+                    if ($event->action === 'added') {
+                        return [
+                            'id' => $event->id,
+                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
+                            'server' => $event->server->name,
+                            'message' => "Le répertoire {$event->columns['path']} pointe maintenant vers un système de fichiers de type {$event->columns['type']}.",
+                        ];
+                    } elseif ($event->action === 'removed') {
+                        return [
+                            'id' => $event->id,
+                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
+                            'server' => $event->server->name,
+                            'message' => "Le répertoire {$event->columns['path']} ne pointe maintenant plus vers un système de fichiers de type {$event->columns['type']}.",
                         ];
                     }
                 }

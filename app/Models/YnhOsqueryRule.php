@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool snapshot
  * @property OsqueryPlatformEnum platform
  * @property ?string category
+ * @property bool enabled
+ * @property ?string attck
  */
 class YnhOsqueryRule extends Model
 {
@@ -39,9 +41,12 @@ class YnhOsqueryRule extends Model
         'snapshot',
         'platform',
         'category',
+        'enabled',
+        'attck',
     ];
 
     protected $casts = [
+        'enabled' => 'boolean',
         'removed' => 'boolean',
         'snapshot' => 'boolean',
         'platform' => OsqueryPlatformEnum::class,

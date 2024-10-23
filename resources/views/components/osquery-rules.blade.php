@@ -36,6 +36,18 @@
             {{ $rule->value }}
           </div>
           @endif
+          @if($rule->attck)
+          <div class="text-muted">
+              <?php $first = true ?>
+            @foreach(explode(',', $rule->attck) as $attck)
+            @if(!$first),@endif
+              <?php $first = false ?>
+            <a href="https://attack.mitre.org/techniques/{{ $attck }}/">
+              {{ $attck }}
+            </a>
+            @endforeach
+          </div>
+          @endif
         </td>
         <td>
           {{ $rule->version ? $rule->version : '-' }}

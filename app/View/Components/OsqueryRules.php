@@ -14,7 +14,7 @@ class OsqueryRules extends Component
 
     public function __construct()
     {
-        $this->rules = YnhOsqueryRule::get()->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE);
+        $this->rules = YnhOsqueryRule::where('enabled', true)->get()->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE);
     }
 
     public function render(): View|Closure|string
