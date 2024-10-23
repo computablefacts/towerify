@@ -227,6 +227,10 @@ else
   rm /etc/osquery/osquery2.conf
 fi
 
+# Set Osquery flags
+grep -qxF '\-\-disable_events=false' /etc/osquery/osquery.flags || echo '--disable_events=false' >> /etc/osquery/osquery.flags
+grep -qxF '\-\-enable_file_events=true' /etc/osquery/osquery.flags || echo '--enable_file_events=true' >> /etc/osquery/osquery.flags
+
 # Parse web logs every hour
 cat <(fgrep -i -v '/opt/logparser/parser' <(crontab -l)) <(echo '0 * * * * /opt/logparser/parser') | crontab -
 
