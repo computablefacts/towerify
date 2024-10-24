@@ -54,6 +54,11 @@ class File extends Model
         'updated_at' => 'datetime',
     ];
 
+    public function isPdf(): bool
+    {
+        return $this->mime_type === 'application/pdf';
+    }
+
     public function collection(): HasOne
     {
         return $this->hasOne(Collection::class, 'id', 'collection_id');
