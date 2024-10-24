@@ -41,7 +41,12 @@
       @foreach($files as $file)
       <tr>
         <td>
-          <span class="lozenge new">{{ $file['collection'] }}</span>
+          <span class="lozenge new">
+            <a
+              href="{{ route('home', ['tab' => 'chunks', 'page' => 1, 'collection' => $file['collection']]) }}">
+            {{ $file['collection'] }}
+            </a>
+          </span>
         </td>
         <td>
           <a href="{{ $file['download_url'] }}">

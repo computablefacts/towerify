@@ -11,6 +11,7 @@ use App\Modules\CyberBuddy\Http\Requests\DownloadOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadOneFileRequest;
+use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
@@ -20,6 +21,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\Process\Process;
 
 class CyberBuddyController extends Controller
 {
@@ -151,6 +153,49 @@ class CyberBuddyController extends Controller
         if (!$storage->exists($path)) {
             return response()->json(['error' => 'Unknown storage path.'], 500);
         }
+
+        $page = $request->integer('page', -1);
+
+        if ($file->isPdf() && $page > 0) {
+
+            $rawFile = $this->storageFileName($file);
+
+            if (!file_exists("/tmp/{$rawFile}")) {
+                file_put_contents("/tmp/{$rawFile}", $storage->get($path));
+            }
+            if (file_exists("/tmp/{$rawFile}")) {
+
+                $extractedPage = $this->tmpFileName($file, $page);
+
+                if (!file_exists("/tmp/{$extractedPage}")) {
+
+                    $process = Process::fromShellCommandline("pdfseparate -f \"{$page}\" -l \"$page\" \"/tmp/{$rawFile}\" \"/tmp/{$extractedPage}\"");
+                    $process->run();
+
+                    if (!$process->isSuccessful()) {
+                        return $storage->download($path, null, [
+                            'pragma' => 'private',
+                            'Cache-Control' => 'private, max-age=3600',
+                        ]);
+                    }
+                }
+                if (file_exists("/tmp/{$extractedPage}")) {
+                    return response()->download("/tmp/{$extractedPage}", null, [
+                        'pragma' => 'private',
+                        'Cache-Control' => 'private, max-age=3600',
+                    ]);
+                }
+            }
+        }
+
+        $rawFile = $this->storageFileName($file);
+
+        if (file_exists("/tmp/{$rawFile}")) { // bypass S3 if possible
+            return response()->download("/tmp/{$rawFile}", null, [
+                'pragma' => 'private',
+                'Cache-Control' => 'private, max-age=3600',
+            ]);
+        }
         return $storage->download($path, null, [
             'pragma' => 'private',
             'Cache-Control' => 'private, max-age=3600',
@@ -219,6 +264,14 @@ class CyberBuddyController extends Controller
             'urls_success' => $successes,
             'filenames_error' => $errors,
         ], 500);
+    }
+
+    public function deleteChunk(int $id)
+    {
+        Chunk::where('id', $id)->update(['is_deleted' => true]);
+        return response()->json([
+            'success' => __('The chunk will be deleted soon!'),
+        ]);
     }
 
     public function handle(): void
@@ -406,5 +459,10 @@ class CyberBuddyController extends Controller
     private function storageFileName(File $file): string
     {
         return "{$file->id}_{$file->name_normalized}.{$file->extension}";
+    }
+
+    private function tmpFileName(File $file, int $page): string
+    {
+        return "{$file->id}_{$page}_{$file->name_normalized}.{$file->extension}";
     }
 }

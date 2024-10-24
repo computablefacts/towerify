@@ -25,7 +25,7 @@ class DownloadOneFileRequest extends FormRequest implements DownloadOneFile
     public function rules()
     {
         return [
-            //
+            'page' => 'integer|min:1',
         ];
     }
 }

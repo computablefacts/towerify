@@ -196,6 +196,10 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Knowledge Base'),
                             'route' => route('home', ['tab' => 'knowledge_base']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'knowledge_base',
+                        ], [
+                            'label' => __('Chunks'),
+                            'route' => route('home', ['tab' => 'chunks']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'chunks',
                         ]
                     ],
                 ], [
