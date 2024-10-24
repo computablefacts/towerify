@@ -34,6 +34,8 @@
         <th style="text-align:right">{{ __('File Size') }}</th>
         <th style="text-align:right">{{ __('Number of Chunks') }}</th>
         <th style="text-align:right">{{ __('Number of Vectors') }}</th>
+        <th>{{ __('Imported At') }}</th>
+        <th>{{ __('Imported By') }}</th>
         <th style="text-align:right">{{ __('Integration Status') }}</th>
       </tr>
       </thead>
@@ -62,6 +64,8 @@
         <td style="text-align:right">
           {{ Illuminate\Support\Number::format($file['nb_vectors'], locale:'sv') }}
         </td>
+        <td>{{ $file['created_at']->format('Y-m-d H:i') }}</td>
+        <td>{{ $file['created_by']->name }}</td>
         <td style="text-align:right">
           @if($file['status'] === 'processed')
           <span class="lozenge success">{{ __($file['status']) }}</span>
@@ -73,6 +77,59 @@
       @endforeach
       </tbody>
     </table>
+    <div class="row">
+      <div class="col">
+        <ul class="pagination justify-content-center mt-3 mb-3">
+          <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
+            <a class="page-link"
+               href="{{ route('home', ['tab' => 'knowledge_base', 'page' => 1, 'collection' => $collection]) }}">
+              <span>&laquo;&nbsp;{{ __('First') }}</span>
+            </a>
+          </li>
+          <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
+            <a class="page-link"
+               href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage <= 1 ? 1 : $currentPage - 1, 'collection' => $collection]) }}">
+              <span>&lt;&nbsp;{{ __('Previous') }}</span>
+            </a>
+          </li>
+          <!--
+          @if($currentPage > 1)
+          <li class="page-item">
+            <a class="page-link" href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage - 1, 'collection' => $collection]) }}">
+              {{ $currentPage - 1 }}
+            </a>
+          </li>
+          @endif
+          -->
+          <li class="page-item">
+            <a class="page-link active"
+               href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage, 'collection' => $collection]) }}">
+              {{ $currentPage }}
+            </a>
+          </li>
+          <!--
+          @if($currentPage < $nbPages)
+          <li class="page-item">
+            <a class="page-link" href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage + 1, 'collection' => $collection]) }}">
+              {{ $currentPage + 1 }}
+            </a>
+          </li>
+          @endif
+          -->
+          <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
+            <a class="page-link"
+               href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage >= $nbPages ? $nbPages : $currentPage + 1, 'collection' => $collection])}}">
+              <span>{{ __('Next') }}&nbsp;&gt;</span>
+            </a>
+          </li>
+          <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
+            <a class="page-link" href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $nbPages]) }}">
+              <span>{{ __('Last') }}&nbsp;&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
   @endif
 </div>

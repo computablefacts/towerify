@@ -66,32 +66,6 @@ class CyberBuddyController extends Controller
         return view('modules.cyber-buddy.chat');
     }
 
-    public function files()
-    {
-        return File::select('cb_files.*')
-            ->join('cb_collections', 'cb_collections.id', '=', 'cb_files.collection_id')
-            ->where('cb_files.is_deleted', false)
-            ->where('cb_collections.is_deleted', false)
-            ->orderBy('cb_collections.name')
-            ->orderBy('name_normalized')
-            ->get()
-            ->map(function (File $file) {
-                $nbChunks = $file->chunks()->count();
-                $nbVectors = $file->chunks()->where('is_embedded', true)->count();
-                $nbNotVectors = $file->chunks()->where('is_embedded', false)->count();
-                return [
-                    'collection' => $file->collection->name,
-                    'filename' => "{$file->name_normalized}.{$file->extension}",
-                    'size' => $file->size,
-                    'nb_chunks' => $nbChunks,
-                    'nb_vectors' => $nbVectors,
-                    'nb_not_vectors' => $nbNotVectors,
-                    'status' => $nbVectors != 0 && $nbNotVectors === 0 ? 'processed' : 'processing',
-                    'download_url' => $file->downloadUrl(),
-                ];
-            });
-    }
-
     public function collections()
     {
         return \App\Modules\CyberBuddy\Models\Collection::orderBy('name', 'asc')

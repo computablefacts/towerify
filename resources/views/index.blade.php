@@ -33,7 +33,8 @@
   <x-osquery-rules/>
   @endif
   @if($tab === 'knowledge_base')
-  <x-knowledge-base/>
+  <x-knowledge-base :collection="request()->input('collection') ? request()->input('collection') : ''"
+                    :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
   @if($tab === 'chunks')
   <x-chunks :collection="request()->input('collection') ? request()->input('collection') : ''"
