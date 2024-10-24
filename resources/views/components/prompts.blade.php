@@ -14,6 +14,8 @@
       <tr>
         <th>{{ __('Name') }}</th>
         <th class="text-end">{{ __('Length') }}</th>
+        <th>{{ __('Created At') }}</th>
+        <th>{{ __('Created By') }}</th>
         <th></th>
       </tr>
       </thead>
@@ -21,7 +23,9 @@
       @foreach($prompts as $prompt)
       <tr>
         <td>{{ $prompt->name }}</td>
-        <td class="text-end">{{ \Illuminate\Support\Str::length($prompt->template) }}</td>
+        <td class="text-end">{{ Illuminate\Support\Number::format(\Illuminate\Support\Str::length($prompt->template), locale:'sv') }}</td>
+        <td>{{ $prompt->created_at->format('Y-m-d H:i') }}</td>
+        <td>{{ $prompt->createdBy()->name }}</td>
         <td class="text-end">
           <a data-bs-toggle="collapse" href="#prompt{{ $prompt->id }}" class="text-decoration-none">
             <a href="#" onclick="deletePrompt({{ $prompt->id }})" class="text-decoration-none" style="color:red">
@@ -47,7 +51,7 @@
         </td>
       </tr>
       <tr class="collapse" id="prompt{{ $prompt->id }}">
-        <td colspan="3" style="background-color:#fff3cd;">
+        <td colspan="5" style="background-color:#fff3cd;">
           <div style="display:grid;">
             <div class="overflow-auto">
               <pre class="mb-0 w-100">{{ $prompt->template }}</pre>
@@ -117,7 +121,7 @@
 
   function deletePrompt(promptId) {
 
-    const response = confirm(`Are you sure you want to delete this prompt?`);
+    const response = confirm("{{ __('Are you sure you want to delete this prompt?') }}");
 
     if (response) {
       axios.delete(`/cb/web/prompts/${promptId}`).then(function (response) {

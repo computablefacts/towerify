@@ -17,6 +17,7 @@
         <th>{{ __('Filename') }}</th>
         <th class="text-end">{{ __('Page') }}</th>
         <th class="text-end">{{ __('Length') }}</th>
+        <th>{{ __('Created At') }}</th>
         <th></th>
       </tr>
       </thead>
@@ -39,7 +40,8 @@
             {{ $chunk->page }}
           </a>
         </td>
-        <td class="text-end">{{ \Illuminate\Support\Str::length($chunk->text) }}</td>
+        <td class="text-end">{{ Illuminate\Support\Number::format(\Illuminate\Support\Str::length($chunk->text), locale:'sv') }}</td>
+        <td>{{ $chunk->created_at->format('Y-m-d H:i') }}</td>
         <td class="text-end">
           <a href="#" onclick="deleteChunk({{ $chunk->id }})" class="text-decoration-none" style="color:red">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -63,14 +65,14 @@
         </td>
       </tr>
       <tr>
-        <td colspan="6">
+        <td colspan="7">
           @foreach($chunk->tags()->orderBy('id')->get() as $tag)
           <span class="lozenge information">{{ $tag->tag }}</span>&nbsp;
           @endforeach
         </td>
       </tr>
       <tr class="collapse" id="chunk{{ $chunk->id }}">
-        <td colspan="6" style="background-color:#fff3cd;">
+        <td colspan="7" style="background-color:#fff3cd;">
           <div style="display:grid;">
             <div class="overflow-auto">
               <pre class="mb-0 w-100">{{ $chunk->text }}</pre>
@@ -140,7 +142,7 @@
 
   function deleteChunk(chunkId) {
 
-    const response = confirm(`Are you sure you want to remove this chunk?`);
+    const response = confirm("{{ __('Are you sure you want to delete this chunk?') }}");
 
     if (response) {
       axios.delete(`/cb/web/chunks/${chunkId}`).then(function (response) {
