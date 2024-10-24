@@ -47,6 +47,11 @@ class Chunk extends Model
         'updated_at' => 'datetime',
     ];
 
+    public function isEmbedded(): bool
+    {
+        return $this->is_embedded;
+    }
+
     public function collection(): HasOne
     {
         return $this->hasOne(Collection::class, 'id', 'collection_id');
