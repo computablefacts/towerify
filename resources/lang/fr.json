@@ -178,6 +178,7 @@
     "The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.": "La commande est idempotente, ce qui signifie que vous pouvez l'exécuter plusieurs fois, mais elle produira le même résultat à chaque fois sans créer de changements ou d'effets supplémentaires au-delà de l'exécution initiale. Cela garantit la cohérence et évite la duplication des paramètres ou des données à chaque exécution.",
     "The filters are not available.": "Les filtres ne sont pas disponibles.",
     "The given data was invalid.": "La donnée renseignée est incorrecte.",
+    "The prompt has been deleted!": "Le prompt a été supprimé!",
     "The response is not a streamed response.": "La réponse n'est pas une réponse diffusée.",
     "The response is not a view.": "La réponse n'est pas une vue.",
     "The store is empty.": "Il n'y a aucun produit pour le moment.",

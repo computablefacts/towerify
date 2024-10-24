@@ -39,6 +39,9 @@
   <x-chunks :collection="request()->input('collection') ? request()->input('collection') : ''"
             :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
+  @if($tab === 'prompts')
+  <x-prompts :currentPage="request()->input('page') ? request()->input('page') : 1"/>
+  @endif
   @if($tab === 'interdependencies')
   <x-interdependencies/>
   @endif

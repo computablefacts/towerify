@@ -193,13 +193,17 @@ if (!function_exists('app_sidebar')) {
                             'route' => route('home', ['tab' => 'ama']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ama',
                         ], [
-                            'label' => __('Knowledge Base'),
+                            'label' => __('Documents'),
                             'route' => route('home', ['tab' => 'knowledge_base']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'knowledge_base',
                         ], [
                             'label' => __('Chunks'),
                             'route' => route('home', ['tab' => 'chunks']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'chunks',
+                        ], [
+                            'label' => __('Prompts'),
+                            'route' => route('home', ['tab' => 'prompts']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'prompts',
                         ]
                     ],
                 ], [

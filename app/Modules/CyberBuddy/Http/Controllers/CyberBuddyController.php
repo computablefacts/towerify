@@ -13,6 +13,7 @@ use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadOneFileRequest;
 use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\File;
+use App\Modules\CyberBuddy\Models\Prompt;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;
@@ -271,6 +272,14 @@ class CyberBuddyController extends Controller
         Chunk::where('id', $id)->update(['is_deleted' => true]);
         return response()->json([
             'success' => __('The chunk will be deleted soon!'),
+        ]);
+    }
+
+    public function deletePrompt(int $id)
+    {
+        Prompt::where('id', $id)->update(['is_deleted' => true]);
+        return response()->json([
+            'success' => __('The prompt has been deleted!'),
         ]);
     }
 
