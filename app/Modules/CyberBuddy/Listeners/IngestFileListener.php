@@ -11,6 +11,7 @@ use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class IngestFileListener extends AbstractListener
 {
@@ -70,7 +71,7 @@ class IngestFileListener extends AbstractListener
                         ]);
 
                         foreach ($tags as $tag) {
-                            $chunk->tags()->create(['tag' => $tag]);
+                            $chunk->tags()->create(['tag' => Str::lower($tag)]);
                         }
                     }
                 }
