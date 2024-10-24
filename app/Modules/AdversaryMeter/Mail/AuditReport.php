@@ -12,6 +12,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AuditReport extends Mailable
 {
@@ -183,20 +184,22 @@ class AuditReport extends Mailable
                         ];
                     }
                 } elseif ($event->name === 'mounts') {
-                    if ($event->action === 'added') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Le répertoire {$event->columns['path']} pointe maintenant vers un système de fichiers de type {$event->columns['type']}.",
-                        ];
-                    } elseif ($event->action === 'removed') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Le répertoire {$event->columns['path']} ne pointe maintenant plus vers un système de fichiers de type {$event->columns['type']}.",
-                        ];
+                    if (Str::startsWith($event->columns['path'], '/var/lib/docker/') && $event->columns['type'] === 'overlay') { // Docker-generated 'mounts' events
+                        if ($event->action === 'added') {
+                            return [
+                                'id' => $event->id,
+                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
+                                'server' => $event->server->name,
+                                'message' => "Le répertoire {$event->columns['path']} pointe maintenant vers un système de fichiers de type {$event->columns['type']}.",
+                            ];
+                        } elseif ($event->action === 'removed') {
+                            return [
+                                'id' => $event->id,
+                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
+                                'server' => $event->server->name,
+                                'message' => "Le répertoire {$event->columns['path']} ne pointe maintenant plus vers un système de fichiers de type {$event->columns['type']}.",
+                            ];
+                        }
                     }
                 }
                 return [];
