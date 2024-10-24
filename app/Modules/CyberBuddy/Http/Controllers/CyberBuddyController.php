@@ -31,7 +31,8 @@ class CyberBuddyController extends Controller
     public static function enhanceAnswerWithSources(string $answer, Collection $sources): string
     {
         $matches = [];
-        $isOk = preg_match_all("/\[\[\d+]]/", $answer, $matches);
+        // Extract: [12] from [[12]] or [[12] and [13]] from [[12],[13]]
+        $isOk = preg_match_all("/\[\[\d+]]|\[\[\d+]|\[\d+]]/", $answer, $matches);
         if (!$isOk) {
             return Str::replace(["\n\n", "\n-"], "<br>", $answer);
         }
