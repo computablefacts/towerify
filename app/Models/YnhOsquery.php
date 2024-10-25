@@ -462,7 +462,7 @@ EOT;
                         (Str::startsWith($event->columns['path'], '/run/docker/') && $event->columns['type'] === 'nsfs');
 
                     if (!$isDockerMountEvent) { // drop Docker-generated 'mounts' events
-                        if ($event->action === 'added') {
+                        /* if ($event->action === 'added') {
                             return [
                                 'id' => $event->id,
                                 'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
@@ -478,7 +478,7 @@ EOT;
                                 'ip' => $event->server->ip(),
                                 'message' => "Le répertoire {$event->columns['path']} ne pointe maintenant plus vers un système de fichiers de type {$event->columns['type']}.",
                             ];
-                        }
+                        } */
                     }
                 } elseif ($event->name === 'shell_check' || $event->name === 'sudoers_shell' || $event->name === 'sudoers_sha1') {
                     return [

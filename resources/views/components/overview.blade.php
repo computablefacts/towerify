@@ -25,7 +25,7 @@
     <div class="col-6">
       <div class="row">
         <div class="col col-6 pr-0">
-            <?php $ip_monitored = $overview['ip_monitored'] ? $overview['ip_monitored'] : 0 ?>
+            <?php $ip_monitored = $overview['ip_monitored'] ?: 0 ?>
           <x-big-number
             :number="$ip_monitored"
             :title="__('IP Monitored')"
@@ -33,7 +33,7 @@
             color="var(--ds-background-brand-bold)"/>
         </div>
         <div class="col pr-0 pl-2">
-            <?php $dns_monitored = $overview['dns_monitored'] ? $overview['dns_monitored'] : 0 ?>
+            <?php $dns_monitored = $overview['dns_monitored'] ?: 0 ?>
           <x-big-number
             :number="$dns_monitored"
             :title="__('DNS Monitored')"
@@ -43,7 +43,7 @@
       </div>
     </div>
     <div class="col pl-2">
-        <?php $servers_monitored = $overview['servers_monitored'] ? $overview['servers_monitored'] : 0 ?>
+        <?php $servers_monitored = $overview['servers_monitored'] ?: 0 ?>
       <x-big-number
         :number="$servers_monitored"
         :title="__('Agents Deployed')"
@@ -55,7 +55,7 @@
     <div class="col-6 pr-0">
       <div class="row">
         <div class="col col-4 pr-0">
-            <?php $vulns_high = $overview['vulns_high'] ? $overview['vulns_high'] : 0 ?>
+            <?php $vulns_high = $overview['vulns_high'] ?: 0 ?>
           <x-big-number
             :number="$vulns_high"
             :title="__('High')"
@@ -63,7 +63,7 @@
             color="#dc3545"/>
         </div>
         <div class="col col-4 pl-2 pr-0">
-            <?php $vulns_medium = $overview['vulns_medium'] ? $overview['vulns_medium'] : 0 ?>
+            <?php $vulns_medium = $overview['vulns_medium'] ?: 0 ?>
           <x-big-number
             :number="$vulns_medium"
             :title="__('Medium')"
@@ -71,7 +71,7 @@
             color="#fd7e14"/>
         </div>
         <div class="col pl-2">
-            <?php $vulns_low = $overview['vulns_low'] ? $overview['vulns_low'] : 0 ?>
+            <?php $vulns_low = $overview['vulns_low'] ?: 0 ?>
           <x-big-number
             :number="$vulns_low"
             :title="__('Low')"
@@ -83,24 +83,29 @@
     <div class="col pl-2">
       <div class="row">
         <div class="col col-6 pr-0">
-            <?php $metrics_collected = $overview['metrics_collected'] ? $overview['metrics_collected'] : 0 ?>
-          <x-big-number
-            :number="$metrics_collected"
-            :title="__('Metrics Collected')"
-            icon="metric"
-            color="var(--ds-background-brand-bold)"/>
-        </div>
-        <div class="col pl-2">
-            <?php $events_collected = $overview['events_collected'] ? $overview['events_collected'] : 0 ?>
+            <?php $events_collected = $overview['events_collected'] ?: 0 ?>
           <x-big-number
             :number="$events_collected"
             :title="__('Events Collected')"
             icon="event"
             color="var(--ds-background-brand-bold)"/>
         </div>
+        <div class="col pl-2">
+            <?php $metrics_collected = $overview['metrics_collected'] ?: 0 ?>
+          <x-big-number
+            :number="$metrics_collected"
+            :title="__('Metrics Collected')"
+            icon="metric"
+            color="var(--ds-background-brand-bold)"/>
+        </div>
       </div>
     </div>
   </div>
+  @if(App\Modules\AdversaryMeter\Models\Asset::exists() > 0 || App\Models\YnhServer::exists() > 0)
+  <div class="row mt-2">
+    <x-suspicious-activity/>
+  </div>
+  @endif
   <div class="row mt-2">
     @if(Auth::user()->canUseAdversaryMeter())
     <div class="col col-6 pr-0">
