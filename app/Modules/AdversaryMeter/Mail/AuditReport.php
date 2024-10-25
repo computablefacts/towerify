@@ -184,7 +184,7 @@ class AuditReport extends Mailable
                         ];
                     }
                 } elseif ($event->name === 'mounts') {
-                    if (Str::startsWith($event->columns['path'], '/var/lib/docker/') && $event->columns['type'] === 'overlay') { // Docker-generated 'mounts' events
+                    if (!Str::startsWith($event->columns['path'], '/var/lib/docker/') || !$event->columns['type'] === 'overlay') { // Docker-generated 'mounts' events
                         if ($event->action === 'added') {
                             return [
                                 'id' => $event->id,
