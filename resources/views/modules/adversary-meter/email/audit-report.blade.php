@@ -155,25 +155,30 @@
 <table>
   <colgroup>
     <col span="1" style="width: 200px">
+    <col span="1">
     <col span="1" style="width: 200px">
     <col span="1">
   </colgroup>
   <thead>
   <tr>
-    <th>Ref.</th>
-    <th>Date</th>
-    <th>Server</th>
+    <th>{{ __('Date') }}</th>
+    <th>{{ __('Server') }}</th>
+    <th>{{ __('IP') }}</th>
+    <th>{{ __('Ref.') }}</th>
   </tr>
   </thead>
   <tbody>
   @foreach ($events as $event)
   <tr>
-    <td>{{ $event['id'] }}</td>
-    <td>{{ $event['timestamp'] }}</td>
+    <td>
+      <span style="color:#f8b502;font-weight:bolder">{{ $event['timestamp'] }}</span>
+    </td>
     <td>{{ $event['server'] }}</td>
+    <td>{{ $event['ip'] }}</td>
+    <td>{{ $event['id'] }}</td>
   </tr>
   <tr class="end-of-block">
-    <td colspan="3">
+    <td colspan="4">
       {{ $event['message'] }}
     </td>
   </tr>
@@ -193,21 +198,29 @@
   <colgroup>
     <col span="1" style="width: 200px">
     <col span="1">
+    <col span="1" style="width: 200px">
+    <col span="1">
   </colgroup>
   <thead>
   <tr>
-    <th>Date</th>
-    <th>Server</th>
+    <th>{{ __('Date') }}</th>
+    <th>{{ __('Server') }}</th>
+    <th>{{ __('IP') }}</th>
+    <th>{{ __('Ref.') }}</th>
   </tr>
   </thead>
   <tbody>
   @foreach ($metrics as $metric)
   <tr>
-    <td>{{ $metric['timestamp'] }}</td>
+    <td>
+      <span style="color:#f8b502;font-weight:bolder">{{ $metric['timestamp'] }}</span>
+    </td>
     <td>{{ $metric['server'] }}</td>
+    <td>{{ $metric['ip'] }}</td>
+    <td>{{ $metric['id'] }}</td>
   </tr>
   <tr class="end-of-block">
-    <td colspan="2">
+    <td colspan="4">
       {{ $metric['message'] }}
     </td>
   </tr>

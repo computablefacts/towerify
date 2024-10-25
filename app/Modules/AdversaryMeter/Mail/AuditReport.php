@@ -6,13 +6,13 @@ use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class AuditReport extends Mailable
 {
@@ -46,7 +46,9 @@ class AuditReport extends Mailable
 
     public static function create(): array
     {
-        $serverIds = YnhServer::forUser(Auth::user())->pluck('id');
+        /** @var User $user */
+        $user = Auth::user();
+        $servers = YnhServer::forUser($user);
         $cutOffTime = Carbon::now()->subDay();
         $alerts = Asset::where('is_monitored', true)
             ->get()
@@ -58,172 +60,8 @@ class AuditReport extends Mailable
         $assetsMonitored = Asset::where('is_monitored', true)->orderBy('asset')->get();
         $assetsNotMonitored = Asset::where('is_monitored', false)->orderBy('asset')->get();
         $assetsDiscovered = Asset::where('created_at', '>=', $cutOffTime)->orderBy('asset')->get();
-        $events = YnhOsquery::where('calendar_time', '>=', $cutOffTime)
-            ->whereIn('name', [
-                'authorized_keys',
-                'last',
-                'users',
-                'suid_bin',
-                'ld_preload',
-                'kernel_modules',
-                'crontab',
-                'etc_hosts',
-                'mounts',
-            ])
-            ->whereIn('ynh_server_id', $serverIds)
-            ->orderBy('calendar_time', 'desc')
-            ->get()
-            ->map(function (YnhOsquery $event) {
-                if ($event->name === 'authorized_keys') {
-                    if ($event->action === 'added') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Une clef SSH a été ajoutée au trousseau de l'utilisateur {$event->columns['username']}.",
-                        ];
-                    } elseif ($event->action === 'removed') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Une clef SSH a été supprimée du trousseau de l'utilisateur {$event->columns['username']}.",
-                        ];
-                    }
-                } elseif ($event->name === 'last') {
-                    if ($event->action === 'added') {
-                        if ($event->columns['type_name'] === 'user-process') {
-                            return [
-                                'id' => $event->id,
-                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                                'server' => $event->server->name,
-                                'message' => "L'utilisateur {$event->columns['username']} s'est connecté au serveur."
-                            ];
-                        }
-                    }
-                } elseif ($event->name === 'users') {
-                    if ($event->action === 'added') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "L'utilisateur {$event->columns['username']} a été créé.",
-                        ];
-                    } elseif ($event->action === 'removed') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "L'utilisateur {$event->columns['username']} a été supprimé.",
-                        ];
-                    }
-                } elseif ($event->name === 'suid_bin') {
-                    if ($event->action === 'added') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Les privilèges du binaire {$event->columns['path']} ont été élevés.",
-                        ];
-                    }
-                } elseif ($event->name === 'ld_preload') {
-                    if ($event->action === 'added') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Le binaire {$event->columns['value']} a été ajouté à la variable d'environnement LD_PRELOAD.",
-                        ];
-                    }
-                } elseif ($event->name === 'kernel_modules') {
-                    if ($event->action === 'added') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Le module {$event->columns['name']} a été ajouté au noyau.",
-                        ];
-                    } elseif ($event->action === 'removed') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Le module {$event->columns['name']} a été enlevé du noyau.",
-                        ];
-                    }
-                } elseif ($event->name === 'crontab') {
-                    if ($event->action === 'added') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Une tâche planifiée a été ajoutée: {$event->columns['command']}",
-                        ];
-                    } elseif ($event->action === 'removed') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Une tâche planifiée a été supprimée: {$event->columns['command']}",
-                        ];
-                    }
-                } elseif ($event->name === 'etc_hosts') {
-                    if ($event->action === 'added') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Le traffic réseau vers {$event->columns['hostnames']} est maintenant redirigé vers {$event->columns['address']}.",
-                        ];
-                    } elseif ($event->action === 'removed') {
-                        return [
-                            'id' => $event->id,
-                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                            'server' => $event->server->name,
-                            'message' => "Le traffic réseau vers {$event->columns['hostnames']} n'est maintenant plus redirigé vers {$event->columns['address']}.",
-                        ];
-                    }
-                } elseif ($event->name === 'mounts') {
-                    if (!Str::startsWith($event->columns['path'], '/var/lib/docker/') || !$event->columns['type'] === 'overlay') { // Docker-generated 'mounts' events
-                        if ($event->action === 'added') {
-                            return [
-                                'id' => $event->id,
-                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                                'server' => $event->server->name,
-                                'message' => "Le répertoire {$event->columns['path']} pointe maintenant vers un système de fichiers de type {$event->columns['type']}.",
-                            ];
-                        } elseif ($event->action === 'removed') {
-                            return [
-                                'id' => $event->id,
-                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                                'server' => $event->server->name,
-                                'message' => "Le répertoire {$event->columns['path']} ne pointe maintenant plus vers un système de fichiers de type {$event->columns['type']}.",
-                            ];
-                        }
-                    }
-                }
-                return [];
-            })
-            ->filter(fn(array $event) => count($event) >= 1);
-        $metrics = $serverIds->map(function (int $serverId) use ($cutOffTime) {
-
-            /** @var YnhOsquery $metric */
-            $metric = YnhOsquery::where('calendar_time', '>=', $cutOffTime)
-                ->where('name', 'disk_available_snapshot')
-                ->where('ynh_server_id', $serverId)
-                ->orderBy('calendar_time', 'desc')
-                ->first();
-
-            if ($metric && $metric->columns['%_available'] <= 20) {
-                return [
-                    'timestamp' => $metric->calendar_time->format('Y-m-d H:i:s'),
-                    'server' => $metric->server->name,
-                    'message' => "Il vous reste {$metric->columns['%_available']}% d'espace disque disponible, soit {$metric->columns['space_left_gb']} Gb.",
-                ];
-            }
-            return [];
-        })
-            ->filter(fn(array $event) => count($event) >= 1);
+        $events = YnhOsquery::suspiciousEvents($servers, $cutOffTime);
+        $metrics = YnhOsquery::suspiciousMetrics($servers, $cutOffTime);
 
         return [
             'is_empty' => $events->count() <= 0 &&
