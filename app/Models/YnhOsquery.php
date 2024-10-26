@@ -344,7 +344,8 @@ EOT;
                 'mounts',
                 'shell_check',
                 'sudoers_shell',
-                'sudoers_sha1'
+                'sudoers_sha1',
+                'deb_packages',
             ])
             ->whereIn('ynh_server_id', $servers->pluck('id'))
             ->orderBy('calendar_time', 'desc')
@@ -504,6 +505,24 @@ EOT;
                         'ip' => $event->server->ip(),
                         'message' => "Possible \"reverse shell\" (bash) transféré à un attaquant!",
                     ];
+                } elseif ($event->name === 'deb_packages') {
+                    if ($event->action === 'added') {
+                        return [
+                            'id' => $event->id,
+                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
+                            'server' => $event->server->name,
+                            'ip' => $event->server->ip(),
+                            'message' => "Le paquet {$event->columns['name']} ({$event->columns['version']}) a été installé.",
+                        ];
+                    } elseif ($event->action === 'removed') {
+                        return [
+                            'id' => $event->id,
+                            'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
+                            'server' => $event->server->name,
+                            'ip' => $event->server->ip(),
+                            'message' => "Le paquet {$event->columns['name']} ({$event->columns['version']}) a été désinstallé.",
+                        ];
+                    }
                 }
                 return [];
             })
