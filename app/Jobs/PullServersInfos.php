@@ -33,6 +33,7 @@ class PullServersInfos implements ShouldQueue
             ->where('added_with_curl', false)
             ->where('is_frozen', false)
             ->get()
+            ->filter(fn(YnhServer $server) => $server->isYunoHost())
             ->filter(fn(YnhServer $server) => $server->sshTestConnection())
             ->each(fn(YnhServer $server) => $server->pullServerInfos());
     }
