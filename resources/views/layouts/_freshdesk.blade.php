@@ -1,7 +1,7 @@
-@if(Auth::check() && config('towerify.freshdesk'))
+@if(Auth::check() && config('towerify.freshdesk.widget_id'))
 <script>
   window.fwSettings = {
-    widget_id: "{{ config('towerify.freshdesk') }}",
+    widget_id: "{{ config('towerify.freshdesk.widget_id') }}",
   };
   !function () {
     if ("function" != typeof window.FreshworksWidget) {
@@ -15,6 +15,6 @@
     name: "{{ Auth::user()->name }}", email: "{{ Auth::user()->email }}",
   });
 </script>
-<script src="https://widget.freshworks.com/widgets/{{ config('towerify.freshdesk') }}.js" async defer>
+<script src="https://widget.freshworks.com/widgets/{{ config('towerify.freshdesk.widget_id') }}.js" async defer>
 </script>
 @endif

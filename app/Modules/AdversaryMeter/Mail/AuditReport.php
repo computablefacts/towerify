@@ -121,7 +121,7 @@ class AuditReport extends Mailable
         }
         $events = empty($events) ? '' : "({$events})";
         return $this
-            ->from('support@computablefacts.freshdesk.com', 'Support')
+            ->from(config('towerify.freshdesk.from_email'), 'Support')
             ->subject("Cywise : Rapport d'audit {$events}")
             ->markdown('modules.adversary-meter.email.audit-report', [
                 "events" => $this->events,

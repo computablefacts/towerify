@@ -2,7 +2,11 @@
 
 return [
     'website' => env('WEBSITE_URL'),
-    'freshdesk' => env('FRESHDESK_ID'),
+    'freshdesk' => [
+        'widget_id' => env('FRESHDESK_ID'),
+        'to_email' => env('FRESHDESK_TO_EMAIL'),
+        'from_email' => env('FRESHDESK_FROM_EMAIL'),
+    ],
     'reports' => [
         'url' => env('REPORTS_URL'),
         'api' => env('REPORTS_API'),
