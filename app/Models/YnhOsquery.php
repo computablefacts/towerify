@@ -166,7 +166,7 @@ EOT;
         return <<<EOT
 #!/bin/bash
 
-apt install wget curl tmux jq -y
+apt install wget curl jq -y
 
 # Install Osquery
 if [ ! -f /etc/osquery/osquery.conf ]; then
@@ -188,7 +188,14 @@ if [ ! -f /opt/logalert/config.json ]; then
 fi
 
 # Stop LogAlert then Osquery
-sudo -H -u root bash -c 'tmux kill-ses -t logalert'
+tmux has-session -t "logalert" 2>/dev/null
+
+if [ $? != 0 ]; then
+  systemctl stop logalert
+else
+  sudo -H -u root bash -c 'tmux kill-ses -t logalert'
+fi
+
 osqueryctl stop osqueryd
 
 # Update LogAlert configuration
@@ -213,6 +220,14 @@ if [ -s /opt/logparser/parser2 ]; then
 else
     rm /opt/logparser/parser2
 fi
+
+# Set LogAlert as a daemon
+echo '[Unit]' > /etc/systemd/system/logalert.service
+echo 'Description=LogAlert (cywise)' >> /etc/systemd/system/logalert.service
+echo '[Service]' >> /etc/systemd/system/logalert.service
+echo 'ExecStart=/opt/logalert/logalert.bin' >> /etc/systemd/system/logalert.service
+echo '[Install]' >> /etc/systemd/system/logalert.service
+echo 'WantedBy=multi-user.target' >> /etc/systemd/system/logalert.service
 
 # Update Osquery configuration
 wget -O /etc/osquery/osquery2.conf {$url}/osquery/{$server->secret}
@@ -256,8 +271,9 @@ crontab -l | grep -v "app\.towerify\.io" | crontab -
 
 # Start Osquery then LogAlert 
 osqueryctl start osqueryd
-sudo -H -u root bash -c 'tmux new-session -A -d -s logalert'
-tmux send-keys -t logalert "/opt/logalert/logalert.bin" C-m
+systemctl start logalert
+# sudo -H -u root bash -c 'tmux new-session -A -d -s logalert'
+# tmux send-keys -t logalert "/opt/logalert/logalert.bin" C-m
 
 # If fail2ban is up-and-running, whitelist AdversaryMeter IP addresses
 if systemctl is-active --quiet fail2ban; then
