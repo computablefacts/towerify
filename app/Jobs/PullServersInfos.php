@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class PullServersInfos implements ShouldQueue
 {
@@ -35,6 +36,12 @@ class PullServersInfos implements ShouldQueue
             ->get()
             ->filter(fn(YnhServer $server) => $server->isYunoHost())
             ->filter(fn(YnhServer $server) => $server->sshTestConnection())
-            ->each(fn(YnhServer $server) => $server->pullServerInfos());
+            ->each(function (YnhServer $server) {
+                try {
+                    $server->pullServerInfos();
+                } catch (\Exception $exception) {
+                    Log::error($exception->getMessage());
+                }
+            });
     }
 }

@@ -18,6 +18,7 @@ use App\Listeners\ConfigureHostListener;
 use App\Listeners\CreateBackupListener;
 use App\Listeners\InstallAppListener;
 use App\Listeners\OrderCreatedListener;
+use App\Listeners\PasswordResetListener;
 use App\Listeners\ProcessLogalertPayloadListener;
 use App\Listeners\ProcessLogparserPayloadListener;
 use App\Listeners\RemoveUserPermissionListener;
@@ -39,6 +40,7 @@ use App\Modules\AdversaryMeter\Listeners\EndPortsScanListener;
 use App\Modules\AdversaryMeter\Listeners\EndVulnsScanListener;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Listeners\IngestFileListener;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Konekt\User\Events\UserInvitationUtilized;
 use Laravel\Cashier\Events\WebhookReceived;
@@ -54,6 +56,9 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         'App\Events\Event' => [
             'App\Listeners\EventListener',
+        ],
+        PasswordReset::class => [
+            PasswordResetListener::class,
         ],
         ConfigureHost::class => [
             ConfigureHostListener::class,
