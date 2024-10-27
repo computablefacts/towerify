@@ -6,6 +6,7 @@ use App\Jobs\AgeOffOsqueryEvents;
 use App\Jobs\CheckServersHealth;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Jobs\PullServersInfos;
+use App\Jobs\RebuildPackagesList;
 use App\Jobs\Summarize;
 use App\Modules\AdversaryMeter\Jobs\FixDanglingScans;
 use App\Modules\AdversaryMeter\Jobs\ImportHoneypotsEvents;
@@ -41,6 +42,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new AgeOffOsqueryEvents())->hourly();
         $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
         $schedule->job(new Summarize())->daily();
+        $schedule->job(new RebuildPackagesList())->daily();
         $schedule->command('telescope:prune --hours=48')->daily();
 
         // AdversaryMeter

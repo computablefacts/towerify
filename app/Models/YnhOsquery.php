@@ -507,12 +507,25 @@ EOT;
                     ];
                 } elseif ($event->name === 'deb_packages') {
                     if ($event->action === 'added') {
+
+                        $osInfo = YnhOsquery::osInfos(collect([$event->server]))->first();
+
+                        if (!$osInfo) {
+                            $cves = '';
+                        } else {
+                            $cves = YnhCve::appCves($osInfo->os, $osInfo->codename, $event->columns['name'], $event->columns['version'])
+                                ->pluck('cve')
+                                ->join(', ');
+                        }
+
+                        $warning = empty($cves) ? '' : "Attention, ce paquet est vulnérable: {$cves}.";
+
                         return [
                             'id' => $event->id,
                             'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
                             'server' => $event->server->name,
                             'ip' => $event->server->ip(),
-                            'message' => "Le paquet {$event->columns['name']} ({$event->columns['version']}) a été installé.",
+                            'message' => "Le paquet {$event->columns['name']} ({$event->columns['version']}) a été installé. {$warning}",
                         ];
                     } elseif ($event->action === 'removed') {
                         return [

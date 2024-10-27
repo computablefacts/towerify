@@ -8,7 +8,6 @@ use App\Hashing\TwHasher;
 use App\Helpers\AppStore;
 use App\Helpers\SshConnection2;
 use App\Helpers\SshKeyPair;
-use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Traits\HasTenant2;
 use App\User;
@@ -731,9 +730,6 @@ EOT;
         $nbEvents = 0;
 
         foreach ($events as $event) {
-            if ($event['name'] === 'deb_packages') {
-                $event['columns']['cves'] = DownloadDebianSecurityBugTracker::cves($this, $event['columns']['name'], $event['columns']['version']);
-            }
             YnhOsquery::create([
                 'ynh_server_id' => $this->id,
                 'row' => 0,
