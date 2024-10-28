@@ -11,7 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RebuildPackagesList implements ShouldQueue
 {
@@ -19,7 +19,7 @@ class RebuildPackagesList implements ShouldQueue
 
     public $tries = 1;
     public $maxExceptions = 1;
-    public $timeout = 3 * 180; // 9mn
+    public $timeout = 15 * 60; // 15mn
 
     public function __construct()
     {
@@ -29,7 +29,7 @@ class RebuildPackagesList implements ShouldQueue
     public function handle()
     {
         YnhServer::all()->each(function (YnhServer $server) {
-            DB::transaction(function () use ($server) {
+            try {
 
                 $osInfo = YnhOsquery::osInfos(collect([$server]))->first();
 
@@ -56,24 +56,31 @@ class RebuildPackagesList implements ShouldQueue
                             $key = $event->columns['name'] . $event->columns['version'];
 
                             if (isset($uninstalled[$key])) {
-                                return !collect($uninstalled[$key])->hasAny(fn(YnhOsquery $e) => $e->calendar_time->isAfter($event->calendar_time));
+                                return !collect($uninstalled[$key])->contains(fn(YnhOsquery $e) => $e->calendar_time->isAfter($event->calendar_time));
                             }
                             return true;
                         });
 
                     // Save snapshot!
                     $installed->each(function (YnhOsquery $event) use ($server, $osInfo) {
+
+                        $cves = YnhCve::appCves($osInfo->os, $osInfo->codename, $event->columns['name'], $event->columns['version'])
+                            ->pluck('id')
+                            ->toArray();
+
                         YnhOsqueryPackage::create([
                             'ynh_server_id' => $server->id,
                             'os' => $osInfo->os,
                             'os_version' => $osInfo->codename,
                             'package' => $event->columns['name'],
                             'package_version' => $event->columns['version'],
-                            'cves' => YnhCve::appCves($osInfo->os, $osInfo->codename, $event->columns['name'], $event->columns['version']),
+                            'cves' => $cves,
                         ]);
                     });
                 }
-            });
+            } catch (\Exception $exception) {
+                Log::error($exception->getMessage());
+            }
         });
     }
 }

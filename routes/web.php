@@ -18,6 +18,7 @@ use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -278,6 +279,29 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
     return response("ok ({$logs->count()} rows in file)", 200)
         ->header('Content-Type', 'text/plain');
 });
+
+/** @deprecated */
+Route::get('/dispatch/{job}', function (string $job) {
+
+    /** @var User $user */
+    $user = Auth::user();
+    $usernames = collect(config('towerify.telescope.whitelist.usernames'))->map(fn(string $username) => $username . '@')->toArray();
+    $domains = collect(config('towerify.telescope.whitelist.domains'))->map(fn(string $domain) => '@' . $domain)->toArray();
+
+    if (Str::startsWith($user->email, $usernames) && Str::endsWith($user->email, $domains)) {
+        try {
+            if ($job === 'dl_debian_security_bug_tracker') {
+                \App\Jobs\DownloadDebianSecurityBugTracker::dispatch();
+            } elseif ($job === 'rebuild_packages_list') {
+                \App\Jobs\RebuildPackagesList::dispatch();
+            }
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+        }
+        return response('ok', 200)->header('Content-Type', 'text/plain');
+    }
+    return response('Unauthorized', 403)->header('Content-Type', 'text/plain');
+})->middleware('auth');
 
 Route::get('', function () {
     if (\Illuminate\Support\Facades\Auth::user()) {

@@ -44,7 +44,9 @@ MAINTAINER Patrick Brisacier <pbrisacier@mncc.fr>
 
 RUN apt-get update && apt-get install -y \
     poppler-utils \
-    dnsutils
+    dnsutils \
+    wget \
+    jq
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 

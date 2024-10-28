@@ -8,7 +8,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DownloadDebianSecurityBugTracker implements ShouldQueue
@@ -19,7 +18,7 @@ class DownloadDebianSecurityBugTracker implements ShouldQueue
 
     public $tries = 1;
     public $maxExceptions = 1;
-    public $timeout = 3 * 180; // 9mn
+    public $timeout = 15 * 60; // 15mn
 
     public function __construct()
     {
@@ -28,43 +27,44 @@ class DownloadDebianSecurityBugTracker implements ShouldQueue
 
     public function handle()
     {
+        // Get the output directory
+        $directory = storage_path('app/public');
+
         // Cleanup
-        shell_exec("rm -rf /tmp/deb-cve-*.json");
+        shell_exec("rm -rf {$directory}/deb-cve-*.json");
 
         // Download the feed and create one json for each app
         $url = self::SECURITY_BUG_TRACKER;
-        shell_exec("wget -qO- {$url} | jq -r 'to_entries[] | \"\(.key)\\t\(.value)\"' | awk -F'\\t' '{print $2 >\"/tmp/deb-cve-\"$1\".json\"}'");
+        shell_exec("wget -qO- {$url} | jq -r 'to_entries[] | \"\(.key)\\t\(.value)\"' | awk -F'\\t' '{print $2 >\"{$directory}/deb-cve-\"$1\".json\"}'");
 
-        // Update the database of CVE
-        DB::transaction(function () {
+        // Empty the table of CVE
+        YnhCve::query()->truncate();
 
-            YnhCve::query()->truncate();
+        // Fill the table of CVE
+        $files = glob("{$directory}/deb-cve-*.json");
 
-            $files = glob('/tmp/deb-cve-*.json');
+        foreach ($files as $file) {
 
-            foreach ($files as $file) {
+            $package = Str::after($file, "{$directory}/deb-cve-");
+            $package = Str::before($package, '.json');
+            $json = json_decode(file_get_contents($file), true);
 
-                $package = Str::after($file, '/tmp/deb-cve-');
-                $package = Str::before($package, '.json');
-                $json = json_decode(file_get_contents($file), true);
-
-                foreach ($json as $cve => $obj) {
-                    foreach ($obj['releases'] as $release => $obj2) {
-                        if ($obj2['status'] === 'resolved') {
-                            YnhCve::create([
-                                'os' => 'debian',
-                                'version' => $release,
-                                'package' => $package,
-                                'cve' => $cve,
-                                'status' => $obj2['status'],
-                                'urgency' => $obj2['urgency'],
-                                'fixed_version' => $obj2['fixed_version'],
-                                'tracker' => "https://security-tracker.debian.org/tracker/{$cve}",
-                            ]);
-                        }
+            foreach ($json as $cve => $obj) {
+                foreach ($obj['releases'] as $release => $obj2) {
+                    if ($obj2['status'] === 'resolved') {
+                        YnhCve::create([
+                            'os' => 'debian',
+                            'version' => $release,
+                            'package' => $package,
+                            'cve' => $cve,
+                            'status' => $obj2['status'],
+                            'urgency' => $obj2['urgency'],
+                            'fixed_version' => $obj2['fixed_version'],
+                            'tracker' => "https://security-tracker.debian.org/tracker/{$cve}",
+                        ]);
                     }
                 }
             }
-        });
+        }
     }
 }
