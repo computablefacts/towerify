@@ -82,12 +82,14 @@ class YnhPermission extends Model
 
     public static function availablePermissions(User $user): Collection
     {
+        /** @var YnhUser $ynhUser */
+        $ynhUser = YnhUser::from($user)->first();
         return YnhServer::forUser($user)
-            ->flatMap(function (YnhServer $server) use ($user) {
+            ->flatMap(function (YnhServer $server) use ($user, $ynhUser) {
                 return $server->availablePermissions($user)
-                    ->map(function (string $permission) use ($server) {
+                    ->map(function (string $permission) use ($server, $ynhUser) {
                         return (object)[
-                            'ynh_user_id' => null,
+                            'ynh_user_id' => $ynhUser?->id,
                             'server_id' => $server->id,
                             'server_name' => $server->name,
                             'server_ip_address' => $server->ip_address,
