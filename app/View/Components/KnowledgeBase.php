@@ -6,7 +6,6 @@ use App\Modules\CyberBuddy\Models\File;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 
 class KnowledgeBase extends Component
@@ -26,8 +25,6 @@ class KnowledgeBase extends Component
             ->orderBy('cb_collections.name')
             ->orderBy('name_normalized')
             ->forPage($currentPage <= 0 ? 1 : $currentPage, $pagesSize <= 0 ? 25 : $pagesSize);
-
-        Log::debug($collection);
 
         if (!empty($collection)) {
             $query->where('cb_collections.name', $collection);

@@ -241,6 +241,14 @@ class CyberBuddyController extends Controller
         ], 500);
     }
 
+    public function deleteCollection(int $id)
+    {
+        \App\Modules\CyberBuddy\Models\Collection::where('id', $id)->update(['is_deleted' => true]);
+        return response()->json([
+            'success' => __('The collection will be deleted soon!'),
+        ]);
+    }
+
     public function deleteChunk(int $id)
     {
         Chunk::where('id', $id)->update(['is_deleted' => true]);

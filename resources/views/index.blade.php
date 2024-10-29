@@ -32,6 +32,9 @@
   @if($tab === 'security_rules')
   <x-osquery-rules/>
   @endif
+  @if($tab === 'collections')
+  <x-collections :currentPage="request()->input('page') ? request()->input('page') : 1"/>
+  @endif
   @if($tab === 'knowledge_base')
   <x-knowledge-base :collection="request()->input('collection') ? request()->input('collection') : ''"
                     :currentPage="request()->input('page') ? request()->input('page') : 1"/>

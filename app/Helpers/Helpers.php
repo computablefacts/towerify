@@ -193,6 +193,10 @@ if (!function_exists('app_sidebar')) {
                             'route' => route('home', ['tab' => 'ama']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ama',
                         ], [
+                            'label' => __('Collections'),
+                            'route' => route('home', ['tab' => 'collections']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'collections',
+                        ], [
                             'label' => __('Documents'),
                             'route' => route('home', ['tab' => 'knowledge_base']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'knowledge_base',

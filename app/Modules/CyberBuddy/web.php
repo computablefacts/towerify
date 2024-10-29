@@ -14,6 +14,8 @@ Route::post('/files/many', 'CyberBuddyController@uploadManyFiles')->middleware('
 
 Route::get('/collections', 'CyberBuddyController@collections')->middleware('auth');
 
+Route::delete('/collections/{id}', 'CyberBuddyController@deleteCollection')->middleware('auth');
+
 Route::delete('/chunks/{id}', 'CyberBuddyController@deleteChunk')->middleware('auth');
 
 Route::delete('/prompts/{id}', 'CyberBuddyController@deletePrompt')->middleware('auth');
