@@ -336,6 +336,17 @@ Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifi
         ->each(fn($notif) => $notif->markAsRead());
 })->middleware(['auth', Subscribed::class]);
 
+Route::get('/events/{osquery}/dismiss', function (\App\Models\YnhOsquery $osquery, \Illuminate\Http\Request $request) {
+    /** @var YnhServer $server */
+    $server = YnhServer::find($osquery->ynh_server_id);
+    if ($server) {
+        $osquery->dismissed = true;
+        $osquery->save();
+        return response()->json(['success' => "The event has been dismissed!"]);
+    }
+    return response()->json(['error' => "Unknown event."], 500);
+})->middleware(['auth', Subscribed::class]);
+
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
         Route::get('', 'YnhServerController@create')->name('create');

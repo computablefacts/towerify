@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
  * @property array columns
  * @property string action
  * @property bool packed
+ * @property bool dismissed
  */
 class YnhOsquery extends Model
 {
@@ -46,6 +47,7 @@ class YnhOsquery extends Model
         'columns',
         'action',
         'packed',
+        'dismissed',
     ];
 
     protected $casts = [
@@ -55,6 +57,7 @@ class YnhOsquery extends Model
         'packed' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'dismissed' => 'boolean',
     ];
 
     public static function configLogParser(YnhServer $server): string
@@ -347,6 +350,7 @@ EOT;
                 'sudoers_sha1',
                 'deb_packages',
             ])
+            ->where('dismissed', false)
             ->whereIn('ynh_server_id', $servers->pluck('id'))
             ->orderBy('calendar_time', 'desc')
             ->get()

@@ -90,16 +90,22 @@
           <th>{{ __('Server') }}</th>
           <th style="width:75px">{{ __('IP') }}</th>
           <th>{{ __('Message') }}</th>
+          <th></th>
           <th class="text-end" style="width:100px">{{ __('Event Id') }}</th>
         </tr>
         </thead>
         <tbody>
         @foreach($events as $event)
-        <tr>
+        <tr id="eid-{{ $event['id'] }}">
           <td>{{ $event['timestamp'] }}</td>
           <td>{{ $event['server'] }}</td>
           <td>{{ $event['ip'] }}</td>
           <td class="text-muted">{{ $event['message'] }}</td>
+          <th>
+            <a href="javascript:;" onclick="dismissEvent({{ $event['id'] }})">
+              {{ __('dismiss') }}
+            </a>
+          </th>
           <td class="text-end">
             <span class="lozenge new">
               {{ Illuminate\Support\Number::format($event['id'], locale:'sv') }}
@@ -152,3 +158,20 @@
     </div>
   </div>
 </div>
+<script>
+
+  // set a.href to "javascript:;" in order to avoid scrolling the page
+  function dismissEvent(eventId) {
+    axios.get(`/events/${eventId}/dismiss`).then(function (response) {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
+        document.getElementById(`eid-${eventId}`).remove();
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
+      } else {
+        console.log(response.data);
+      }
+    }).catch(error => toaster.toastAxiosError(error));
+  }
+
+</script>
