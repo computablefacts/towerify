@@ -175,7 +175,7 @@
     </td>
     <td>{{ $event['server'] }}</td>
     <td>{{ $event['ip'] }}</td>
-    <td>{{ $event['id'] }}</td>
+    <td>{{ Illuminate\Support\Number::format($event['id'], locale:'sv') }}</td>
   </tr>
   <tr class="end-of-block">
     <td colspan="4">
@@ -217,7 +217,7 @@
     </td>
     <td>{{ $metric['server'] }}</td>
     <td>{{ $metric['ip'] }}</td>
-    <td>{{ $metric['id'] }}</td>
+    <td>{{ Illuminate\Support\Number::format($metric['id'], locale:'sv') }}</td>
   </tr>
   <tr class="end-of-block">
     <td colspan="4">
