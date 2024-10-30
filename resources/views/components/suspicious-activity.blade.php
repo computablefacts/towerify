@@ -101,7 +101,7 @@
           <td>{{ $event['server'] }}</td>
           <td>{{ $event['ip'] }}</td>
           <td class="text-muted">{{ $event['message'] }}</td>
-          <th>
+          <th class="align-content-center">
             <a href="javascript:;" onclick="dismissEvent({{ $event['id'] }})">
               {{ __('dismiss') }}
             </a>
