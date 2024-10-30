@@ -44,6 +44,9 @@ return [
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
     ],
+    'scrapfly' => [
+        'api_key' => env('SCRAPFLY_API_KEY'),
+    ],
     'scraperapi' => [
         'api_key' => env('SCRAPERAPI_API_KEY'),
     ],

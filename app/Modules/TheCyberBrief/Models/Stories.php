@@ -113,7 +113,15 @@ class Stories extends Model
     private function summary(LanguageEnum $language): array
     {
         if ($this->isHyperlink()) {
-            $news = Http::get('http://api.scraperapi.com?api_key=' . config('towerify.scraperapi.api_key') . '&url=' . $this->news);
+            if (config('towerify.scrapfly.api_key')) {
+                $news = Http::get('https://api.scrapfly.io/scrape?render_js=true&key=' . config('towerify.scrapfly.api_key') . '&url=' . $this->news);
+                $news = json_decode($news, true)['result']['content'];
+            } else if (config('towerify.scraperapi.api_key')) {
+                $news = Http::get('http://api.scraperapi.com?api_key=' . config('towerify.scraperapi.api_key') . '&url=' . $this->news);
+            } else {
+                Log::error('Missing scraper API key!');
+                return [];
+            }
         } else {
             $news = $this->news;
         }
