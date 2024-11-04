@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class MonitorAsset extends Component
+class OnboardingMonitorAsset extends Component
 {
     public function __construct()
     {
@@ -15,6 +15,6 @@ class MonitorAsset extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.monitor-asset');
+        return view('components.onboarding-monitor-asset');
     }
 }

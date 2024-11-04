@@ -177,7 +177,7 @@ if (!function_exists('app_sidebar')) {
                     'section_items' => [
                         [
                             'label' => __('Honeypots'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('honeypots'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('setup_honeypots'),
                             'target' => '_blank',
                         ], [
                             'label' => __('Attackers'),
@@ -295,6 +295,10 @@ if (!function_exists('app_sidebar')) {
                         ], [
                             'label' => __('My Subscription'),
                             'route' => route('customer-portal'),
+                        ], [
+                            'label' => __('Documentation'),
+                            'route' => 'https://computablefacts.notion.site/AdversaryMeter-a30527edc0554ea8aabf7cb7d0137258?pvs=4',
+                            'target' => '_blank',
                         ], [
                             'label' => __('Terms'),
                             'route' => route('terms'),

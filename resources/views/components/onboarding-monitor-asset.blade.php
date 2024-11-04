@@ -1,6 +1,10 @@
 <div class="card">
   <div class="card-body">
-    <h6 class="card-title">{{ __('Excited to get started ?') }}</h6>
+    <h6 class="card-title">{{ __('Vulnerability Scanner') }}</h6>
+    <div class="card-text mb-3">
+      Le scanner de vulnérabilités est votre garde du corps numérique. <b>Il veille sur vos serveurs exposés sur
+        Internet</b> en détectant les vulnérabilités avant que des acteurs malveillants ne les exploitent.
+    </div>
     <div class="card-text mb-3">
       {{ __('Enter a domain name or an IP address belonging to you below :') }}
     </div>
@@ -10,7 +14,7 @@
           <input type="text"
                  class="form-control"
                  id="asset"
-                 placeholder="www.example.com ou 93.184.215.14"
+                 placeholder="example.com ou 93.184.215.14"
                  autofocus>
         </div>
         <div class="col-md-3 align-content-center">

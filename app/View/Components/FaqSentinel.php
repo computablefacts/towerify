@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
+/** @deprecated */
 class FaqSentinel extends Component
 {
     public function __construct()

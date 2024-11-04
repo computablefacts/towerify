@@ -9,6 +9,7 @@
   }
 
 </style>
+<x-onboarding/>
 <div class="container p-0">
   @if(Auth::user()->isInTrial())
   <div class="alert alert-danger border border-danger">
@@ -17,11 +18,6 @@
   </div>
   @endif
   <div class="row">
-    <div class="col">
-      <x-monitor-asset/>
-    </div>
-  </div>
-  <div class="row mt-2">
     <div class="col-6">
       <div class="row">
         <div class="col col-6 pr-0">
@@ -106,6 +102,7 @@
     <x-suspicious-activity/>
   </div>
   @endif
+  <!--
   <div class="row mt-2">
     @if(Auth::user()->canUseAdversaryMeter())
     <div class="col col-6 pr-0">
@@ -118,4 +115,5 @@
     </div>
     @endif
   </div>
+  -->
 </div>

@@ -351,7 +351,13 @@ export class App {
       honeypot.classList.add('d-none')
       if (this.assets_.length) {
         if (tab) {
-          if (tab === 'honeypots') {
+          if (tab === 'setup_honeypots') {
+            if (this.honeypotsStatus_ && this.honeypotsStatus_.integration_status !== "setup_complete") {
+              openHoneypot.bind(this)(this.honeypotsStatus_.honeypots, this.honeypotsStatus_.integration_status);
+            } else {
+              menu.selectTab(App.PREVIEW);
+            }
+          } else if (tab === 'honeypots') {
             menu.selectTab(App.PREVIEW);
           } else if (tab === 'assets') {
             menu.selectTab(App.ASSETS);
