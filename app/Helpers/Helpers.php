@@ -143,7 +143,7 @@ if (!function_exists('app_sidebar')) {
                         ]
                     ]
                 ], [
-                    'section_name' => __('AdversaryMeter'),
+                    'section_name' => __('Vulnerability Scanner'),
                     'section_items' => [
                         [
                             'label' => __('Assets'),
@@ -154,25 +154,13 @@ if (!function_exists('app_sidebar')) {
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('vulnerabilities'),
                             'target' => '_blank',
                         ], [
-                            'label' => __('Honeypots'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('honeypots'),
-                            'target' => '_blank',
-                        ], [
-                            'label' => __('Attackers'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('attackers'),
-                            'target' => '_blank',
-                        ], [
                             'label' => __('Service Provider Delegation'),
                             'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('delegation'),
                             'target' => '_blank',
-                        ], [
-                            'label' => __('IP Blacklist'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('blacklist'),
-                            'target' => '_blank',
                         ],
-                    ],
+                    ]
                 ], [
-                    'section_name' => __('Sentinel'),
+                    'section_name' => __('Agents'),
                     'section_items' => [
                         [
                             'label' => __('Servers'),
@@ -182,10 +170,27 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Security Rules'),
                             'route' => route('home', ['tab' => 'security_rules']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'security_rules',
-                        ]
+                        ],
+                    ]
+                ], [
+                    'section_name' => __('Honeypots'),
+                    'section_items' => [
+                        [
+                            'label' => __('Honeypots'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('honeypots'),
+                            'target' => '_blank',
+                        ], [
+                            'label' => __('Attackers'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('attackers'),
+                            'target' => '_blank',
+                        ], [
+                            'label' => __('IP Blacklist'),
+                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('blacklist'),
+                            'target' => '_blank',
+                        ],
                     ],
                 ], [
-                    'section_name' => __('CyberBuddy'),
+                    'section_name' => __('ISSP'),
                     'hidden' => !Auth::user()->canUseCyberBuddy(),
                     'section_items' => [
                         [
