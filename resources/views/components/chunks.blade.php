@@ -1,3 +1,10 @@
+<style>
+
+  .pre-light {
+    color: #565656;
+  }
+
+</style>
 <div class="card">
   @if($chunks->isEmpty())
   <div class="card-body">
@@ -40,7 +47,9 @@
             {{ $chunk->page }}
           </a>
         </td>
-        <td class="text-end">{{ Illuminate\Support\Number::format(\Illuminate\Support\Str::length($chunk->text), locale:'sv') }}</td>
+        <td class="text-end">
+          {{ Illuminate\Support\Number::format(\Illuminate\Support\Str::length($chunk->text), locale:'sv') }}
+        </td>
         <td>{{ $chunk->created_at->format('Y-m-d H:i') }}</td>
         <td class="text-end">
           <a href="#" onclick="deleteChunk({{ $chunk->id }})" class="text-decoration-none" style="color:red">
@@ -75,7 +84,7 @@
         <td colspan="7" style="background-color:#fff3cd;">
           <div style="display:grid;">
             <div class="overflow-auto">
-              <pre class="mb-0 w-100">{{ $chunk->text }}</pre>
+              <pre class="mb-0 w-100 pre-light" onclick="editChunk(this, {{ $chunk->id }})">{{ $chunk->text }}</pre>
             </div>
           </div>
         </td>
@@ -87,7 +96,8 @@
       <div class="col">
         <ul class="pagination justify-content-center mt-3 mb-3">
           <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
-            <a class="page-link" href="{{ route('home', ['tab' => 'chunks', 'page' => 1, 'collection' => $collection]) }}">
+            <a class="page-link"
+               href="{{ route('home', ['tab' => 'chunks', 'page' => 1, 'collection' => $collection]) }}">
               <span>&laquo;&nbsp;{{ __('First') }}</span>
             </a>
           </li>
@@ -128,7 +138,8 @@
             </a>
           </li>
           <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
-            <a class="page-link" href="{{ route('home', ['tab' => 'chunks', 'page' => $nbPages, 'collection' => $collection]) }}">
+            <a class="page-link"
+               href="{{ route('home', ['tab' => 'chunks', 'page' => $nbPages, 'collection' => $collection]) }}">
               <span>{{ __('Last') }}&nbsp;&raquo;</span>
             </a>
           </li>
@@ -154,6 +165,45 @@
           console.log(response.data);
         }
       }).catch(error => toaster.toastAxiosError(error));
+    }
+  }
+
+  function editChunk(pre, chunkId) {
+
+    if (pre.getAttribute('contenteditable') === 'true') {
+      return; // Prevent multiple edits
+    }
+
+    const originalText = pre.innerText;
+
+    pre.classList.toggle('pre-light');
+    pre.setAttribute('contenteditable', 'true');
+    pre.focus();
+    pre.onblur = () => {
+      pre.removeAttribute('contenteditable');
+      pre.classList.toggle('pre-light');
+      saveChunk(pre, chunkId, originalText, pre.innerText);
+    }
+  }
+
+  function saveChunk(pre, chunkId, oldValue, newValue) {
+    if (oldValue.trim() !== newValue.trim()) {
+
+      const response = confirm("{{ __('Are you sure you want to edit this chunk?') }}");
+
+      if (!response) {
+        pre.innerText = oldValue;
+      } else {
+        axios.post(`/cb/web/chunks/${chunkId}`, {text: newValue}).then(function (response) {
+          if (response.data.success) {
+            toaster.toastSuccess(response.data.success);
+          } else if (response.data.error) {
+            toaster.toastError(response.data.error);
+          } else {
+            console.log(response.data);
+          }
+        }).catch(error => toaster.toastAxiosError(error));
+      }
     }
   }
 

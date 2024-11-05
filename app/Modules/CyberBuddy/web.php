@@ -18,6 +18,8 @@ Route::delete('/collections/{id}', 'CyberBuddyController@deleteCollection')->mid
 
 Route::delete('/chunks/{id}', 'CyberBuddyController@deleteChunk')->middleware('auth');
 
+Route::post('/chunks/{id}', 'CyberBuddyController@saveChunk')->middleware('auth');
+
 Route::delete('/prompts/{id}', 'CyberBuddyController@deletePrompt')->middleware('auth');
 
 Route::post('/prompts/{id}', 'CyberBuddyController@savePrompt')->middleware('auth');

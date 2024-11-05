@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
@@ -255,6 +256,55 @@ class CyberBuddyController extends Controller
         Chunk::where('id', $id)->update(['is_deleted' => true]);
         return response()->json([
             'success' => __('The chunk will be deleted soon!'),
+        ]);
+    }
+
+    public function saveChunk(int $id, Request $request)
+    {
+        $this->validate($request, [
+            'text' => 'required|string|min:0|max:5000',
+        ]);
+        $text = $request->string('text');
+
+        /** @var Chunk $chunk */
+        $chunk = Chunk::find($id);
+        $chunk->text = $text;
+        $chunk->save();
+
+        $response = ApiUtils::delete_chunks([$id], $chunk->collection->name);
+
+        if ($response['error']) {
+
+            Log::error($response['error_details']);
+
+            return response()->json([
+                'error' => __('The chunk has been saved but the embeddings could not be updated.'),
+            ]);
+        }
+
+        $chunk->is_embedded = false;
+        $chunk->save();
+
+        $response = ApiUtils::import_chunks([[
+            'uid' => (string)$chunk->id,
+            'text' => $chunk->text,
+            'tags' => $chunk->tags()->pluck('tag')->toArray(),
+        ]], $chunk->collection->name);
+
+        if ($response['error']) {
+
+            Log::error($response['error_details']);
+
+            return response()->json([
+                'error' => __('The chunk has been saved but the embeddings could not be updated.'),
+            ]);
+        }
+
+        $chunk->is_embedded = true;
+        $chunk->save();
+
+        return response()->json([
+            'success' => __('The chunk has been saved!'),
         ]);
     }
 
