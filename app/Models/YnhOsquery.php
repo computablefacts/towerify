@@ -67,33 +67,77 @@ class YnhOsquery extends Model
 #!/bin/bash
 
 if [ -d /etc/nginx ]; then
-    for conf_file in "/etc/nginx/"{sites-available,conf.d}"/"*; do
-      if [ -f "\$conf_file" ]; then
+  for conf_file in "/etc/nginx/"{sites-available,conf.d}"/"*; do
+    if [ -f "\$conf_file" ]; then
     
-        server_name=$(grep -E "^\s*server_name\s+" "\$conf_file" | awk '{print $2}' | tr -d ';' | head -1)
-        access_log_info=$(grep -E "^\s*access_log\s+" "\$conf_file")
+      server_name=$(grep -E "^\s*server_name\s+" "\$conf_file" | awk '{print $2}' | tr -d ';' | head -1)
+      access_log_info=$(grep -E "^\s*access_log\s+" "\$conf_file")
     
-        if [ -n "\$access_log_info" ]; then
+      if [ -z "\$server_name" ]; then
+        server_name="vhost.unk"
+      fi
+      if [ -n "\$access_log_info" ]; then
     
-          access_log_path=$(echo "\$access_log_info" | awk '{print $2}' | tr -d ';' | head -1)
-          log_format=$(echo "\$access_log_info" | awk '{print $3}' | tr -d ';' | head -1)
+        access_log_path=$(echo "\$access_log_info" | awk '{print $2}' | tr -d ';' | head -1)
+        log_format=$(echo "\$access_log_info" | awk '{print $3}' | tr -d ';' | head -1)
     
-          if [ "\$log_format" == "combined" ] || [ "\$log_format" == "" ]; then
-            while read file; do
-              if [[ "\$file" == *.gz ]]; then
-                zcat "\$file" | awk -v fname="\$server_name" '{print fname" "$1}'
-              else
-                cat "\$file" | awk -v fname="\$server_name" '{print fname" "$1}'
-              fi
-            done< <(find "$(dirname \$access_log_path)" -type f -name "$(basename \$access_log_path)*")
-          fi
+        if [ "\$log_format" == "combined" ] || [ "\$log_format" == "" ]; then
+          while read file; do
+            if [[ "\$file" == *.gz ]]; then
+              zcat "\$file" | awk -v fname="\$server_name" '{print fname" "$1}'
+            else
+              cat "\$file" | awk -v fname="\$server_name" '{print fname" "$1}'
+            fi
+          done< <(find "$(dirname \$access_log_path)" -type f -name "$(basename \$access_log_path)*")
         fi
       fi
-    done | sort | uniq -c | awk '$1 >= 3' | sort -nr | gzip -c >/opt/logparser/nginx.txt.gz
-    curl -X POST \
-        -H "Content-Type: multipart/form-data" \
-        -F "data=@/opt/logparser/nginx.txt.gz" \
-        {$url}/logparser/{$server->secret}
+    fi
+  done | sort | uniq -c | awk '$1 >= 3' | sort -nr | gzip -c >/opt/logparser/nginx.txt.gz
+  curl -X POST \
+    -H "Content-Type: multipart/form-data" \
+    -F "data=@/opt/logparser/nginx.txt.gz" \
+    {$url}/logparser/{$server->secret}
+fi
+if [ -d /etc/apache2 ]; then
+  if [ -f /etc/apache2/envvars ]; then
+    apache_log_dir=$(grep -R "APACHE_LOG_DIR" /etc/apache2/envvars | awk -F'=' '{print $2}' | awk -F'$' '{print $1}')
+  else
+    apache_log_dir="/var/log/apache2"
+  fi
+  for conf_file in "/etc/apache2/sites-available/"*; do
+    if [ -f "\$conf_file" ]; then
+
+      server_name=$(grep -E "^\s*ServerName\s+" "\$conf_file" | awk '{print $2}')
+      server_alias=$(grep -E "^\s*ServerAlias\s+" "\$conf_file" | awk '{print $2}')
+      custom_log_info=$(grep -E "^\s*CustomLog\s+" "\$conf_file")
+
+      if [ -z "\$server_name" ]; then
+        server_name="\$server_alias"
+      fi
+      if [ -z "\$server_name" ]; then
+        server_name="vhost.unk"
+      fi
+      if [ -n "\$custom_log_info" ]; then
+
+        custom_log_path=$(echo "\$custom_log_info" | awk '{print $2}' | tr -d '"' | sed "s|\\\${APACHE_LOG_DIR}|\$apache_log_dir|g")
+        log_format=$(echo "\$custom_log_info" | awk '{print $3}')
+
+        if [ "\$log_format" == "combined" ] || [ "\$log_format" == "common" ] || [ -z "\$log_format" ]; then
+          while read file; do
+            if [[ "\$file" == *.gz ]]; then
+              zcat "\$file" | awk -v fname="\$server_name" '{print fname" "$1}'
+            else
+              cat "\$file" | awk -v fname="\$server_name" '{print fname" "$1}'
+            fi
+          done< <(find "$(dirname \$custom_log_path)" -type f -name "$(basename \$custom_log_path)*")
+        fi
+      fi
+    fi
+  done | sort | uniq -c | awk '$1 >= 3' | sort -nr | gzip -c >/opt/logparser/apache.txt.gz
+  curl -X POST \
+    -H "Content-Type: multipart/form-data" \
+    -F "data=@/opt/logparser/apache.txt.gz" \
+    {$url}/logparser/{$server->secret}
 fi
 
 EOT;
