@@ -113,7 +113,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
           </a>
           @endif
         </td>
-        <td>
+        <td class="text-end">
           @if($server->isReady() && !$server->addedWithCurl() && Auth::user()->canManageServers())
           <a id="refresh-{{ $server->id }}"
              onclick="refresh('{{ $server->id }}')"
@@ -121,9 +121,35 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
              title="refresh">
             <span class=refresh>&#x27f3;</span>
           </a>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          @endif
+          @if(Auth::user()->canManageServers() && $server->secret)
+          <a data-bs-toggle="collapse" href="#server{{ $server->id }}" class="text-decoration-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M9 6l6 6l-6 6"/>
+            </svg>
+          </a>
           @endif
         </td>
       </tr>
+      @if(Auth::user()->canManageServers() && $server->secret)
+      <tr class="collapse" id="server{{ $server->id }}">
+        <td colspan="9" style="background-color:#fff3cd;">
+          <div class="row p-3">
+            <div class="col">
+              {{ __('To configure or restore metrics and security event collection on this server, execute the following command with root privileges:') }}
+              <br><br>
+              <pre class="m-0">
+curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/update/{{ $server->secret }}</a> | bash</pre>
+              <br>
+              {{ __('The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.') }}
+            </div>
+          </div>
+        </td>
+      </tr>
+      @endif
       @endforeach
       </tbody>
     </table>

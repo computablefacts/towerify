@@ -3,15 +3,12 @@
   <div class="card-body">
     <div class="row">
       <div class="col">
-        {{ __('To configure or restore metrics and security event collection on this server, execute the following
-        command with root privileges:') }}
+        {{ __('To configure or restore metrics and security event collection on this server, execute the following command with root privileges:') }}
         <br><br>
         <pre class="m-0">
 curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/update/{{ $server->secret }}</a> | bash</pre>
         <br>
-        {{ __('The command is idempotent, meaning you can run it multiple times, but it will produce the same result
-        each time without creating additional changes or effects beyond the initial execution. This ensures consistency
-        and prevents duplication of settings or data each time it is run.') }}
+        {{ __('The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.') }}
       </div>
     </div>
   </div>
