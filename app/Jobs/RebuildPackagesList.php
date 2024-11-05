@@ -37,29 +37,46 @@ class RebuildPackagesList implements ShouldQueue
 
                     YnhOsqueryPackage::where('ynh_server_id', $server->id)->delete();
 
-                    // The list of uninstalled packages
-                    $uninstalled = YnhOsquery::where('ynh_server_id', $server->id)
-                        ->where('name', 'deb_packages')
-                        ->where('action', 'removed')
+                    /** @var YnhOsquery $latest */
+                    $latest = YnhOsquery::where('ynh_server_id', $server->id)
+                        ->where('name', 'deb_packages_installed_snapshot')
                         ->orderBy('calendar_time', 'desc')
-                        ->get()
-                        ->groupBy(fn(YnhOsquery $event) => $event->columns['name'] . $event->columns['version']);
+                        ->first();
 
-                    // The list of installed packages
-                    $installed = YnhOsquery::where('ynh_server_id', $server->id)
-                        ->where('name', 'deb_packages')
-                        ->where('action', 'added')
-                        ->orderBy('calendar_time', 'desc')
-                        ->get()
-                        ->filter(function (YnhOsquery $event) use ($uninstalled) { // filter out installed then uninstalled packages
+                    if ($latest) { // use our debian-specific implementation because we deal with apt, snap, dpkg, etc.
+                        $installed = YnhOsquery::where('ynh_server_id', $server->id)
+                            ->where('name', 'deb_packages_installed_snapshot')
+                            ->where('unix_time', $latest->unix_time)
+                            ->where('calendar_time', $latest->calendar_time)
+                            ->whereJsonContains('columns', ['uid' => $latest->columns['uid']])
+                            ->orderBy('calendar_time', 'desc')
+                            ->get();
+                    } else {
 
-                            $key = $event->columns['name'] . $event->columns['version'];
+                        // The list of uninstalled packages
+                        $uninstalled = YnhOsquery::where('ynh_server_id', $server->id)
+                            ->where('name', 'deb_packages')
+                            ->where('action', 'removed')
+                            ->orderBy('calendar_time', 'desc')
+                            ->get()
+                            ->groupBy(fn(YnhOsquery $event) => $event->columns['name'] . $event->columns['version']);
 
-                            if (isset($uninstalled[$key])) {
-                                return !collect($uninstalled[$key])->contains(fn(YnhOsquery $e) => $e->calendar_time->isAfter($event->calendar_time));
-                            }
-                            return true;
-                        });
+                        // The list of installed packages
+                        $installed = YnhOsquery::where('ynh_server_id', $server->id)
+                            ->where('name', 'deb_packages')
+                            ->where('action', 'added')
+                            ->orderBy('calendar_time', 'desc')
+                            ->get()
+                            ->filter(function (YnhOsquery $event) use ($uninstalled) { // filter out installed then uninstalled packages
+
+                                $key = $event->columns['name'] . $event->columns['version'];
+
+                                if (isset($uninstalled[$key])) {
+                                    return !collect($uninstalled[$key])->contains(fn(YnhOsquery $e) => $e->calendar_time->isAfter($event->calendar_time));
+                                }
+                                return true;
+                            });
+                    }
 
                     // Save snapshot!
                     $installed->each(function (YnhOsquery $event) use ($server, $osInfo) {

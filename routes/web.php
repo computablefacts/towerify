@@ -273,22 +273,42 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
             ->header('Content-Type', 'text/plain');
     }
 
-    $logs = collect(gzfile($file->getRealPath()))
-        ->map(fn(string $line) => Str::of(trim($line))->split('/\s+/'))
-        ->filter(fn(Collection $lines) => $lines->count() === 3 && filter_var($lines->last(), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6))
-        ->map(fn(Collection $lines) => [
-            'count' => $lines->first(),
-            'service' => $lines->get(1),
-            'ip' => YnhServer::expandIp($lines->last()),
-        ]);
+    $filename = $file->getClientOriginalName();
 
-    if ($logs->isEmpty()) {
-        return response('ok (empty file)', 200)
+    if ($filename === "apache.txt.gz" || $filename === "nginx.txt.gz") {
+
+        $logs = collect(gzfile($file->getRealPath()))
+            ->map(fn(string $line) => Str::of(trim($line))->split('/\s+/'))
+            ->filter(fn(Collection $lines) => $lines->count() === 3 && filter_var($lines->last(), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6))
+            ->map(fn(Collection $lines) => [
+                'count' => $lines->first(),
+                'service' => $lines->get(1),
+                'ip' => YnhServer::expandIp($lines->last()),
+            ]);
+
+        if ($logs->isEmpty()) {
+            return response('ok (empty file)', 200)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        event(new \App\Events\ProcessLogparserPayload($server, $logs));
+
+    } else if ($filename === "osquery.jsonl.gz") {
+
+        $logs = collect(gzfile($file->getRealPath()))
+            ->map(fn(string $line) => json_decode(trim($line), true));
+
+        if ($logs->isEmpty()) {
+            return response('ok (empty file)', 200)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        event(new \App\Events\ProcessLogalertPayload($server, $logs->toArray()));
+
+    } else {
+        return response('Invalid attachment', 500)
             ->header('Content-Type', 'text/plain');
     }
-
-    event(new \App\Events\ProcessLogparserPayload($server, $logs));
-
     return response("ok ({$logs->count()} rows in file)", 200)
         ->header('Content-Type', 'text/plain');
 });
