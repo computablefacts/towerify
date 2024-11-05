@@ -66,18 +66,34 @@ class YnhOsquery extends Model
         return <<< EOT
 #!/bin/bash
 
-if [ -d /var/log/nginx ]; then
-  while read file; do
-    if [[ "\$file" == *.gz ]]; then
-      zcat "\$file" | awk -v fname="\$file" 'function basename(file,a,n){n=split(file,a,"/");return a[n]}BEGIN{fname=basename(fname);if(fname=="access.log"){sub(/.log/,"",fname)}else{sub(/-access.*/,"",fname)}}{print fname" "$1}'
-    else
-      cat "\$file" | awk -v fname="\$file" 'function basename(file,a,n){n=split(file,a,"/");return a[n]}BEGIN{fname=basename(fname);if(fname=="access.log"){sub(/.log/,"",fname)}else{sub(/-access.*/,"",fname)}}{print fname" "$1}'
-    fi
-  done< <(find /var/log/nginx -type f -name '*-access.log*') | sort | uniq -c | awk '$1 >= 3' | sort -nr | gzip -c >/opt/logparser/nginx.txt.gz
-  curl -X POST \
-    -H "Content-Type: multipart/form-data" \
-    -F "data=@/opt/logparser/nginx.txt.gz" \
-    {$url}/logparser/{$server->secret}
+if [ -d /etc/nginx ]; then
+    for conf_file in "/etc/nginx/"{sites-available,conf.d}"/"*; do
+      if [ -f "\$conf_file" ]; then
+    
+        server_name=$(grep -E "^\s*server_name\s+" "\$conf_file" | awk '{print $2}' | tr -d ';' | head -1)
+        access_log_info=$(grep -E "^\s*access_log\s+" "\$conf_file")
+    
+        if [ -n "\$access_log_info" ]; then
+    
+          access_log_path=$(echo "\$access_log_info" | awk '{print $2}' | tr -d ';' | head -1)
+          log_format=$(echo "\$access_log_info" | awk '{print $3}' | tr -d ';' | head -1)
+    
+          if [ "\$log_format" == "combined" ] || [ "\$log_format" == "" ]; then
+            while read file; do
+              if [[ "\$file" == *.gz ]]; then
+                zcat "\$file" | awk -v fname="\$server_name" '{print fname" "$1}'
+              else
+                cat "\$file" | awk -v fname="\$server_name" '{print fname" "$1}'
+              fi
+            done< <(find "$(dirname \$access_log_path)" -type f -name "$(basename \$access_log_path)*")
+          fi
+        fi
+      fi
+    done | sort | uniq -c | awk '$1 >= 3' | sort -nr | gzip -c >/opt/logparser/nginx.txt.gz
+    curl -X POST \
+        -H "Content-Type: multipart/form-data" \
+        -F "data=@/opt/logparser/nginx.txt.gz" \
+        {$url}/logparser/{$server->secret}
 fi
 
 EOT;
