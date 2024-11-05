@@ -6,7 +6,7 @@
         {{ __('To monitor a new server, log in as root and execute this command line :') }}
         <br><br>
         <pre class="no-bottom-margin">
-curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')" | bash
+curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')&server_name=$(hostname)" | bash
         </pre>
       </div>
     </div>

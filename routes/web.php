@@ -74,12 +74,25 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
             ->header('Content-Type', 'text/plain');
     }
 
-    $server = \App\Models\YnhServer::where('ip_address', $ip)->first();
+    $name = $request->input('server_name');
+
+    if (!$name) {
+        return response('Invalid server name', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $server = \App\Models\YnhServer::where('ip_address', $ip)
+        ->where('name', $name)
+        ->first();
 
     if (!$server) {
-        $server = \App\Models\YnhServer::where('ip_address_v6', $ip)->first();
+
+        $server = \App\Models\YnhServer::where('ip_address_v6', $ip)
+            ->where('name', $name)
+            ->first();
+
         if (!$server) {
-            $name = $request->input('server_name', "cURL/{$ip}");
+
             $server = YnhServer::create([
                 'name' => $name,
                 'ip_address' => $ip,
@@ -89,7 +102,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
                 'is_frozen' => true,
                 'added_with_curl' => true,
             ]);
-            $server->save();
+
             event(new \App\Modules\AdversaryMeter\Events\CreateAsset($user, $server->ip(), true, [$server->name]));
         }
     }
