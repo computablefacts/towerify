@@ -20,6 +20,8 @@ Route::delete('/chunks/{id}', 'CyberBuddyController@deleteChunk')->middleware('a
 
 Route::delete('/prompts/{id}', 'CyberBuddyController@deletePrompt')->middleware('auth');
 
+Route::post('/prompts/{id}', 'CyberBuddyController@savePrompt')->middleware('auth');
+
 Route::get('/cyber-buddy', 'CyberBuddyController@showPage')->middleware('auth');
 
 Route::get('/cyber-buddy/chat', 'CyberBuddyController@showChat');

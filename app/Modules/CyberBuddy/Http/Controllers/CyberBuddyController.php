@@ -17,6 +17,7 @@ use App\Modules\CyberBuddy\Models\Prompt;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -262,6 +263,18 @@ class CyberBuddyController extends Controller
         Prompt::where('id', $id)->update(['is_deleted' => true]);
         return response()->json([
             'success' => __('The prompt has been deleted!'),
+        ]);
+    }
+
+    public function savePrompt(int $id, Request $request)
+    {
+        $this->validate($request, [
+            'template' => 'required|string|min:0|max:5000',
+        ]);
+        $text = $request->string('template');
+        Prompt::where('id', $id)->update(['template' => $text]);
+        return response()->json([
+            'success' => __('The prompt has been saved!'),
         ]);
     }
 
