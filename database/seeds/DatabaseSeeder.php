@@ -326,6 +326,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'processor_available_snapshot',
             'query' => "SELECT printf(ROUND((CAST(SUM(system) AS FLOAT)/(SUM(idle)+SUM(system)+SUM(USER)))*100,2)) AS time_spent_on_system_workloads_pct, printf(ROUND((CAST(SUM(USER) AS FLOAT)/(SUM(idle)+SUM(system)+SUM(USER)))*100,2)) AS time_spent_on_user_workloads_pct, printf(ROUND((CAST(SUM(idle) AS FLOAT)/(SUM(idle)+SUM(system)+SUM(USER)))*100,2)) AS time_spent_idle_pct FROM cpu_time;",
             'description' => 'Track processor usage.',
+            'attck' => 'T1496',
             'interval' => 300,
             'snapshot' => true,
             'enabled' => true,
@@ -333,6 +334,7 @@ class DatabaseSeeder extends Seeder
             'name' => "memory_available_snapshot",
             'query' => "SELECT printf('%.2f',((memory_total - memory_available) * 1.0)/1073741824) AS used_space_gb, printf('%.2f',(1.0 * memory_available / 1073741824)) AS space_left_gb, printf('%.2f',(1.0 * memory_total / 1073741824)) AS total_space_gb, printf('%.2f',(((memory_total - memory_available) * 1.0)/1073741824)/(1.0 * memory_total / 1073741824)) * 100 AS '%_used', printf('%.2f',(1.0 * memory_available / 1073741824)/(1.0 * memory_total / 1073741824)) * 100 AS '%_available' FROM memory_info;",
             'description' => "Track memory usage.",
+            'attck' => 'T1496',
             'interval' => 300,
             'snapshot' => true,
             'enabled' => true,
@@ -340,6 +342,7 @@ class DatabaseSeeder extends Seeder
             'name' => "disk_available_snapshot",
             'query' => "SELECT printf('%.2f',((blocks - blocks_available * 1.0) * blocks_size)/1073741824) AS used_space_gb, printf('%.2f',(1.0 * blocks_available * blocks_size / 1073741824)) AS space_left_gb, printf('%.2f',(1.0 * blocks * blocks_size / 1073741824)) AS total_space_gb, printf('%.2f',(((blocks - blocks_available * 1.0) * blocks_size)/1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 AS '%_used', printf('%.2f',(1.0 * blocks_available * blocks_size / 1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 AS '%_available' FROM mounts WHERE path = '/';",
             'description' => "Track disk usage.",
+            'attck' => 'T1496',
             'interval' => 300,
             'snapshot' => true,
             'enabled' => true,
@@ -366,6 +369,7 @@ class DatabaseSeeder extends Seeder
             "query" => "SELECT * FROM users;",
             "interval" => 3600,
             "description" => "Retrieves the list of local system users.",
+            "attck" => "T1136,T1078",
             'enabled' => true,
         ], [
             "name" => "last",
@@ -402,6 +406,7 @@ class DatabaseSeeder extends Seeder
             "version" => "1.4.5",
             "description" => "Retrieves all the information for the current kernel modules in the target Linux system.",
             "value" => "Identify malware that has a kernel module component.",
+            "attck" => "T1547",
             "enabled" => true,
         ], [
             'name' => 'crontab',
@@ -429,6 +434,7 @@ class DatabaseSeeder extends Seeder
             "version" => "1.4.5",
             "description" => "Retrieves the command history, per user, by parsing the shell history files.",
             "value" => "Identify actions taken. Useful for compromised hosts.",
+            "attck" => "T1059",
             "enabled" => true,
         ], [
             'name' => "logged_in_users",
@@ -545,6 +551,7 @@ class DatabaseSeeder extends Seeder
             "version" => "1.4.5",
             "description" => "Retrieves all the installed DEB packages in the target Linux system.",
             "value" => "General security posture.",
+            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "apt_sources",
@@ -554,6 +561,7 @@ class DatabaseSeeder extends Seeder
             "version" => "1.4.5",
             "description" => "Retrieves all the APT sources to install packages from in the target Linux system.",
             "value" => "General security posture.",
+            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "portage_packages",
@@ -563,6 +571,7 @@ class DatabaseSeeder extends Seeder
             "version" => "2.0.0",
             "description" => "Retrieves all the packages installed with portage from the target Linux system.",
             "value" => "General security posture.",
+            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "rpm_packages",
@@ -572,6 +581,7 @@ class DatabaseSeeder extends Seeder
             "version" => "1.4.5",
             "description" => "Retrieves all the installed RPM packages in the target Linux system.",
             "value" => "General security posture.",
+            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "homebrew_packages",
@@ -581,6 +591,7 @@ class DatabaseSeeder extends Seeder
             "version" => "1.4.5",
             "description" => "Retrieves the list of brew packages installed in the target OSX system.",
             "value" => "This, with the help of a vulnerability feed, can help tell if a vulnerable application is installed.",
+            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "mounts",
@@ -629,13 +640,66 @@ class DatabaseSeeder extends Seeder
             "description" => "Retrieves the list of local system users.",
             "attck" => "T1136,T1078,T1184,T1021",
             'enabled' => true,
+        ], [
+            'name' => 'groups',
+            "query" => "SELECT * FROM groups;",
+            "interval" => 3600,
+            "platform" => "posix",
+            "description" => "Retrieves the list of groups.",
+            "attck" => "T1136,T1078",
+            "enabled" => true
+        ], [
+            'name' => 'dns_resolvers',
+            "query" => "SELECT * FROM dns_resolvers;",
+            "interval" => 3600,
+            "platform" => "posix",
+            "description" => "Retrieves the list of DNS resolvers.",
+            "enabled" => true
+        ], [
+            'name' => 'etc_services',
+            "query" => "SELECT * FROM etc_services;",
+            "interval" => 3600,
+            "platform" => "posix",
+            "description" => "Retrieves the list of runninf Etc services.",
+            "enabled" => true
+        ], [
+            'name' => 'python_packages',
+            "query" => "SELECT * FROM python_packages;",
+            "interval" => 86400,
+            "platform" => "posix",
+            "description" => "Retrieves the list of Python packages.",
+            "attck" => "T1059",
+            "enabled" => true
+        ], [
+            'name' => 'interface_addresses',
+            "query" => "SELECT * FROM interface_addresses;",
+            "interval" => 3600,
+            "platform" => "posix",
+            "description" => "Retrieves the list of network interfaces.",
+            "attck" => "T1040",
+            "enabled" => true
+        ], [
+            'name' => 'startup_items',
+            "query" => "SELECT * FROM startup_items;",
+            "interval" => 3600,
+            "platform" => "posix",
+            "description" => "Retrieves the list of systemd services.",
+            "attck" => "T1543",
+            "enabled" => true
+        ], [
+            'name' => 'certificates',
+            "query" => "SELECT * FROM certificates;",
+            "interval" => 3600,
+            "platform" => "posix",
+            "description" => "Retrieves the list of certificates.",
+            "enabled" => true
         ]];
     }
 
     private function mitreAttckRules(): array
     {
         return [[
-            'name' => "process_listening_lort",
+            'name' => "process_listening_port",
             "query" => "SELECT p.name, p.path, lp.port, lp.address, lp.protocol  FROM listening_ports lp LEFT JOIN processes p ON lp.pid = p.pid WHERE lp.port != 0 AND p.name != '';",
             "interval" => 3600,
             "platform" => "linux",
@@ -667,7 +731,7 @@ class DatabaseSeeder extends Seeder
             "interval" => 3600,
             "platform" => "linux",
             "description" => "Linux sudoers information.",
-            "attck" => "T1169,T1206",
+            "attck" => "T1169,T1206,T1548",
             "enabled" => true,
         ], [
             'name' => "sudoers_shell",
@@ -699,7 +763,7 @@ class DatabaseSeeder extends Seeder
             "interval" => 3600,
             "platform" => "linux",
             "description" => "Lists hidden files in relevant path.",
-            "attck" => "T1158,T1100",
+            "attck" => "T1158",
             "enabled" => true,
         ], [
             'name' => "hidden_directories",
