@@ -21,7 +21,17 @@ class PasswordResetListener extends AbstractListener
         YnhServer::select('ynh_servers.*')
             ->join('ynh_users', 'ynh_users.ynh_server_id', '=', 'ynh_servers.id')
             ->where('ynh_users.email', $user->email)
+            ->whereNotNull('ynh_servers.ip_address')
+            ->whereNotNull('ynh_servers.ssh_port')
+            ->whereNotNull('ynh_servers.ssh_username')
+            ->whereNotNull('ynh_servers.ssh_public_key')
+            ->whereNotNull('ynh_servers.ssh_private_key')
+            ->where('ynh_servers.is_ready', true)
+            ->where('ynh_servers.added_with_curl', false)
+            ->where('ynh_servers.is_frozen', false)
             ->get()
+            ->filter(fn(YnhServer $server) => $server->isYunoHost())
+            ->filter(fn(YnhServer $server) => $server->sshTestConnection())
             ->each(function (YnhServer $server) use ($user) {
                 $ssh = $server->sshConnection(Str::random(10), null);
                 $server->sshCreateOrUpdateUserProfile($ssh, $user->name, $user->email, $user->ynhUsername(), $user->ynhPassword());

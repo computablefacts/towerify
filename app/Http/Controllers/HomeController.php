@@ -6,6 +6,7 @@ use App\Http\Middleware\Subscribed;
 use App\Models\YnhServer;
 use App\Modules\Reports\Helpers\ApiUtilsFacade as ApiUtils;
 use App\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +23,13 @@ class HomeController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        // LEGACY CODE BEGINS : AUTOMATICALLY SYNC THE USER'S ACCOUNT ACROSS YNH SERVERS
+        try {
+            event(new PasswordReset($user));
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+        }
+        // LEGACY CODE ENDS
         // LEGACY CODE BEGINS : AUTOMATICALLY CREATE A PROPER SUPERSET ACCOUNT FOR ALL USERS
         try {
             if (!$user->superset_id) {
