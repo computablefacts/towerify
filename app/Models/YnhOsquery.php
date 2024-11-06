@@ -332,7 +332,7 @@ if [ -d /opt/logparser ] && [ ! -f /opt/logparser/12408bd3.jsonl.gz ]; then
   
   # Restore backup 
   if [ -f /opt/logparser/osquery-tmp.jsonl.gz ]; then
-    cp /opt/logparser/osquery-tmp.jsonl.gz /opt/logparser/osquery.jsonl.gz
+    mv /opt/logparser/osquery-tmp.jsonl.gz /opt/logparser/osquery.jsonl.gz
   fi
 fi
 
