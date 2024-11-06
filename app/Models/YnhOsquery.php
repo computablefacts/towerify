@@ -192,7 +192,7 @@ if [ -f /etc/os-release ]; then
                 -H "Content-Type: multipart/form-data" \
                 -F "data=@/opt/logparser/osquery.jsonl.gz" \
                 {$url}/logparser/{$server->secret}
-          fi
+            fi
           fi
         fi
     fi
@@ -306,6 +306,34 @@ if [ ! -f /opt/logalert/config.json ]; then
   mkdir -p /opt/logalert
   curl -L https://github.com/jhuckaby/logalert/releases/latest/download/logalert-linux-x64 >/opt/logalert/logalert.bin
   chmod 755 /opt/logalert/logalert.bin
+fi
+
+# See commit #12408bd3 for details
+if [ -d /opt/logparser ] && [ ! -f /opt/logparser/12408bd3.jsonl.gz ]; then
+
+  # Backup existing file
+  if [ -f /opt/logparser/osquery.jsonl.gz ]; then
+    mv /opt/logparser/osquery.jsonl.gz /opt/logparser/osquery-tmp.jsonl.gz
+  fi
+  
+  # Parse history to get back dropped events after commit #1bd199b3
+  cat /var/log/osquery/osqueryd.results.log \
+    | grep -Eai '"(groups|dns_resolvers|etc_services|python_packages|interface_addresses|startup_items|certificates|process_listening_port)"' \
+    | gzip -c >/opt/logparser/osquery.jsonl.gz
+  
+  # Send dropped events to the server
+  curl -X POST \
+    -H "Content-Type: multipart/form-data" \
+    -F "data=@/opt/logparser/osquery.jsonl.gz" \
+    {$url}/logparser/{$server->secret}
+  
+  # Set marker in order to prevent re-execution  
+  mv /opt/logparser/osquery.jsonl.gz /opt/logparser/12408bd3.jsonl.gz
+  
+  # Restore backup 
+  if [ -f /opt/logparser/osquery-tmp.jsonl.gz ]; then
+    cp /opt/logparser/osquery-tmp.jsonl.gz /opt/logparser/osquery.jsonl.gz
+  fi
 fi
 
 # Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
