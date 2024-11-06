@@ -308,7 +308,9 @@ if [ ! -f /opt/logalert/config.json ]; then
   chmod 755 /opt/logalert/logalert.bin
 fi
 
-# Stop LogAlert then Osquery
+# Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
+osqueryctl stop osqueryd
+
 tmux has-session -t "logalert" 2>/dev/null
 
 if [ $? != 0 ]; then
@@ -316,8 +318,6 @@ if [ $? != 0 ]; then
 else
   sudo -H -u root bash -c 'tmux kill-ses -t logalert'
 fi
-
-osqueryctl stop osqueryd
 
 # Update LogAlert configuration
 wget -O /opt/logalert/config2.json {$url}/logalert/{$server->secret}
@@ -390,11 +390,11 @@ cat <(fgrep -i -v 'curl -s {$url}/update/{$server->secret} | bash' <(crontab -l)
 # Delete entry that call old domain app.towerify.io
 crontab -l | grep -v "app\.towerify\.io" | crontab -
 
-# Start Osquery then LogAlert 
-osqueryctl start osqueryd
-systemctl start logalert
+# Start LogAlert then Osquery because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
 # sudo -H -u root bash -c 'tmux new-session -A -d -s logalert'
 # tmux send-keys -t logalert "/opt/logalert/logalert.bin" C-m
+systemctl start logalert
+osqueryctl start osqueryd
 
 # If fail2ban is up-and-running, whitelist AdversaryMeter IP addresses
 if systemctl is-active --quiet fail2ban; then
