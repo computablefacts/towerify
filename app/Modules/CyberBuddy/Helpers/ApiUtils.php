@@ -58,7 +58,7 @@ class ApiUtils
         return $this->ask_chunks($question, $collection, $prompt->template, true, true, 'fr');
     }
 
-    public function ask_chunks(string $question, string $collectionName, string $prompt, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 5): array
+    public function ask_chunks(string $question, string $collectionName, string $prompt, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
     {
         $response = $this->post('/ask_chunks', [
             'question' => $question,
@@ -72,7 +72,7 @@ class ApiUtils
         return $this->json($response);
     }
 
-    public function search_chunks(string $question, string $collectionName, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 5): array
+    public function search_chunks(string $question, string $collectionName, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
     {
         $response = $this->post('/search_chunks', [
             'question' => $question,
@@ -133,7 +133,7 @@ class ApiUtils
         return $this->chat_manual($question, $collection, $historyKey, $prompt->template, $promptHistory->template, 10, 'fr');
     }
 
-    public function chat_manual(string $question, string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 5, string $lang = 'en'): array
+    public function chat_manual(string $question, string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 10, string $lang = 'en'): array
     {
         $response = $this->post('/chat_manual', [
             'question' => $question,
