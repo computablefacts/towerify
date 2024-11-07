@@ -37,6 +37,7 @@
         <th>{{ __('Imported At') }}</th>
         <th>{{ __('Imported By') }}</th>
         <th style="text-align:right">{{ __('Integration Status') }}</th>
+        <th></th>
       </tr>
       </thead>
       <tbody>
@@ -72,6 +73,19 @@
           @else
           <span class="lozenge information">{{ __($file['status']) }}</span>
           @endif
+        </td>
+        <td class="text-end">
+          <a href="#" onclick="deleteFile({{ $file['id'] }})" class="text-decoration-none" style="color:red">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M4 7l16 0"/>
+              <path d="M10 11l0 6"/>
+              <path d="M14 11l0 6"/>
+              <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/>
+              <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>
+            </svg>
+          </a>
         </td>
       </tr>
       @endforeach
@@ -185,4 +199,22 @@
       elCollections.items = response.data.map(collection => collection.name);
     }).catch(error => toaster.toastAxiosError(error));
   });
+
+  function deleteFile(fileId) {
+
+    const response = confirm("{{ __('Are you sure you want to delete this file?') }}");
+
+    if (response) {
+      axios.delete(`/cb/web/files/${fileId}`).then(function (response) {
+        if (response.data.success) {
+          toaster.toastSuccess(response.data.success);
+        } else if (response.data.error) {
+          toaster.toastError(response.data.error);
+        } else {
+          console.log(response.data);
+        }
+      }).catch(error => toaster.toastAxiosError(error));
+    }
+  }
+
 </script>

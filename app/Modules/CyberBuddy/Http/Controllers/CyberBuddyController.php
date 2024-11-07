@@ -243,6 +243,14 @@ class CyberBuddyController extends Controller
         ], 500);
     }
 
+    public function deleteFile(int $id)
+    {
+        \App\Modules\CyberBuddy\Models\File::where('id', $id)->update(['is_deleted' => true]);
+        return response()->json([
+            'success' => __('The file will be deleted soon!'),
+        ]);
+    }
+
     public function deleteCollection(int $id)
     {
         \App\Modules\CyberBuddy\Models\Collection::where('id', $id)->update(['is_deleted' => true]);
