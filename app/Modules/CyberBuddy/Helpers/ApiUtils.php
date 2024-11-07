@@ -154,10 +154,10 @@ class ApiUtils
         try {
             $client = new Client([
                 RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT,
-                /* 'auth' => [
+                'auth' => [
                     config('towerify.cyberbuddy.api_username'),
                     config('towerify.cyberbuddy.api_password')
-                ] */
+                ]
             ]);
             return $client->get($url, $this->httpHeaders($json));
         } catch (ClientException $exception) {
@@ -173,10 +173,10 @@ class ApiUtils
         try {
             $client = new Client([
                 RequestOptions::TIMEOUT => self::REQUEST_TIMEOUT,
-                /* 'auth' => [
+                'auth' => [
                     config('towerify.cyberbuddy.api_username'),
                     config('towerify.cyberbuddy.api_password')
-                ] */
+                ]
             ]);
             return $client->post($url, $this->httpHeaders($json));
         } catch (ClientException $exception) {
