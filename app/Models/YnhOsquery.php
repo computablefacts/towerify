@@ -339,6 +339,9 @@ fi
 # Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
 osqueryctl stop osqueryd
 
+# An attempt at dealing with https://github.com/osquery/osquery/issues/8064
+sleep 20
+
 tmux has-session -t "logalert" 2>/dev/null
 
 if [ $? != 0 ]; then
