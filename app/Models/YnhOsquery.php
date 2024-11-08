@@ -310,17 +310,10 @@ fi
 
 # Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
 osqueryctl stop osqueryd
+systemctl stop logalert
 
 # An attempt at dealing with https://github.com/osquery/osquery/issues/8064
 sleep 20
-
-tmux has-session -t "logalert" 2>/dev/null
-
-if [ $? != 0 ]; then
-  systemctl stop logalert
-else
-  sudo -H -u root bash -c 'tmux kill-ses -t logalert'
-fi
 
 # Cleanup
 if [ -f /opt/logparser/12408bd3.jsonl.gz ]; then
@@ -424,8 +417,6 @@ cat <(fgrep -i -v 'curl -s {$url}/update/{$server->secret} | bash' <(crontab -l)
 crontab -l | grep -v "app\.towerify\.io" | crontab -
 
 # Start LogAlert then Osquery because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
-# sudo -H -u root bash -c 'tmux new-session -A -d -s logalert'
-# tmux send-keys -t logalert "/opt/logalert/logalert.bin" C-m
 systemctl start logalert
 osqueryctl start osqueryd
 
