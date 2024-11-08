@@ -81,18 +81,31 @@ class RebuildPackagesList implements ShouldQueue
                     // Save snapshot!
                     $installed->each(function (YnhOsquery $event) use ($server, $osInfo) {
 
-                        $cves = YnhCve::appCves($osInfo->os, $osInfo->codename, $event->columns['name'], $event->columns['version'])
-                            ->pluck('id')
-                            ->toArray();
-
-                        YnhOsqueryPackage::create([
-                            'ynh_server_id' => $server->id,
-                            'os' => $osInfo->os,
-                            'os_version' => $osInfo->codename,
-                            'package' => $event->columns['name'],
-                            'package_version' => $event->columns['version'],
-                            'cves' => $cves,
-                        ]);
+                        $cves = YnhCve::appCves($osInfo->os, $osInfo->codename, $event->columns['name'], $event->columns['version']);
+                        
+                        if ($cves->isEmpty()) {
+                            YnhOsqueryPackage::create([
+                                'ynh_server_id' => $server->id,
+                                'ynh_cve_id' => null,
+                                'os' => $osInfo->os,
+                                'os_version' => $osInfo->codename,
+                                'package' => $event->columns['name'],
+                                'package_version' => $event->columns['version'],
+                                'cves' => [],
+                            ]);
+                        } else {
+                            $cves->each(function (YnhCve $cve) use ($server, $osInfo, $event, $cves) {
+                                YnhOsqueryPackage::create([
+                                    'ynh_server_id' => $server->id,
+                                    'ynh_cve_id' => $cve->id,
+                                    'os' => $osInfo->os,
+                                    'os_version' => $osInfo->codename,
+                                    'package' => $event->columns['name'],
+                                    'package_version' => $event->columns['version'],
+                                    'cves' => $cves->pluck('id')->toArray(),
+                                ]);
+                            });
+                        }
                     });
                 }
             } catch (\Exception $exception) {

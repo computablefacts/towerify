@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon created_at
  * @property Carbon updated_at
  * @property int ynh_server_id
+ * @property int ynh_cve_id
  * @property string os
  * @property string os_version
  * @property string package
@@ -25,6 +26,7 @@ class YnhOsqueryPackage extends Model
 
     protected $fillable = [
         'ynh_server_id',
+        'ynh_cve_id',
         'os',
         'os_version',
         'package',
@@ -41,5 +43,10 @@ class YnhOsqueryPackage extends Model
     public function server(): BelongsTo
     {
         return $this->belongsTo(YnhServer::class);
+    }
+
+    public function cve(): BelongsTo
+    {
+        return $this->belongsTo(YnhCve::class);
     }
 }
