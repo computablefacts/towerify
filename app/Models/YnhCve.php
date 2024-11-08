@@ -55,14 +55,31 @@ class YnhCve extends Model
     public static function appCves(string $os, string $codename, string $package, string $version, array $criticity = ['low', 'medium', 'high', 'unimportant', 'not yet assigned', 'end-of-life']): Collection
     {
         if ($os !== 'debian') {
-            return collect();
+            if ($os !== 'ubuntu') {
+                return collect();
+            }
+            return YnhCve::where('os', 'debian')
+                ->where('status', 'resolved')
+                ->where('package', $package)
+                ->whereIn('urgency', $criticity)
+                ->get()
+                ->filter(function ($cve) use ($version) {
+
+                    $versionInstalledEscaped = escapeshellarg($version);
+                    $versionFixedEscaped = escapeshellarg($cve->fixed_version);
+                    $command = "dpkg --compare-versions {$versionInstalledEscaped} lt {$versionFixedEscaped}";
+
+                    exec($command, $output, $returnVar);
+
+                    return $returnVar === 0;
+                });
         }
         if (!in_array($codename, ['stretch', 'buster', 'bullseye', 'sid', 'trixie'])) {
             return collect();
         }
         return YnhCve::where('os', 'debian')
-            ->where('version', $codename)
             ->where('status', 'resolved')
+            ->where('version', $codename)
             ->where('package', $package)
             ->whereIn('urgency', $criticity)
             ->get()
