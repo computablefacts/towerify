@@ -308,34 +308,6 @@ if [ ! -f /opt/logalert/config.json ]; then
   chmod 755 /opt/logalert/logalert.bin
 fi
 
-# See commit #12408bd3 for details
-if [ -d /opt/logparser ] && [ ! -f /opt/logparser/12408bd3.jsonl.gz ]; then
-
-  # Backup existing file
-  if [ -f /opt/logparser/osquery.jsonl.gz ]; then
-    mv /opt/logparser/osquery.jsonl.gz /opt/logparser/osquery-tmp.jsonl.gz
-  fi
-  
-  # Parse history to get back dropped events after commit #1bd199b3
-  cat /var/log/osquery/osqueryd.results.log \
-    | grep -Eai '"(groups|dns_resolvers|etc_services|python_packages|interface_addresses|startup_items|certificates|process_listening_port)"' \
-    | gzip -c >/opt/logparser/osquery.jsonl.gz
-  
-  # Send dropped events to the server
-  curl -X POST \
-    -H "Content-Type: multipart/form-data" \
-    -F "data=@/opt/logparser/osquery.jsonl.gz" \
-    {$url}/logparser/{$server->secret}
-  
-  # Set marker in order to prevent re-execution  
-  mv /opt/logparser/osquery.jsonl.gz /opt/logparser/12408bd3.jsonl.gz
-  
-  # Restore backup 
-  if [ -f /opt/logparser/osquery-tmp.jsonl.gz ]; then
-    mv /opt/logparser/osquery-tmp.jsonl.gz /opt/logparser/osquery.jsonl.gz
-  fi
-fi
-
 # Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
 osqueryctl stop osqueryd
 
@@ -348,6 +320,36 @@ if [ $? != 0 ]; then
   systemctl stop logalert
 else
   sudo -H -u root bash -c 'tmux kill-ses -t logalert'
+fi
+
+# Cleanup
+if [ -f /opt/logparser/12408bd3.jsonl.gz ]; then
+  rm /opt/logparser/12408bd3.jsonl.gz
+fi
+
+# Get back dropped metrics from local history
+if [ -d /opt/logparser ]; then
+
+  # Backup existing file
+  if [ -f /opt/logparser/osquery.jsonl.gz ]; then
+    mv /opt/logparser/osquery.jsonl.gz /opt/logparser/osquery-tmp.jsonl.gz
+  fi
+
+  # Parse local history to get back dropped metrics
+  cat /var/log/osquery/osqueryd.snapshots.log \
+    | grep -Eai '"(disk_available_snapshot|processor_available_snapshot|memory_available_snapshot)"' \
+    | gzip -c >/opt/logparser/osquery.jsonl.gz
+
+  # Send dropped metrics to the server
+  curl -X POST \
+    -H "Content-Type: multipart/form-data" \
+    -F "data=@/opt/logparser/osquery.jsonl.gz" \
+    {$url}/logparser/{$server->secret}
+
+  # Restore backup 
+  if [ -f /opt/logparser/osquery-tmp.jsonl.gz ]; then
+    mv -f /opt/logparser/osquery-tmp.jsonl.gz /opt/logparser/osquery.jsonl.gz
+  fi
 fi
 
 # Update LogAlert configuration

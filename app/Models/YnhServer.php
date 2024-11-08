@@ -730,19 +730,40 @@ EOT;
         $nbEvents = 0;
 
         foreach ($events as $event) {
-            YnhOsquery::create([
-                'ynh_server_id' => $this->id,
-                'row' => 0,
-                'name' => $event['name'],
-                'host_identifier' => $event['hostIdentifier'],
-                'calendar_time' => Carbon::createFromFormat('D M j H:i:s Y e', $event['calendarTime'])->setTimezone('UTC'),
-                'unix_time' => $event['unixTime'],
-                'epoch' => $event['epoch'],
-                'counter' => $event['counter'],
-                'numerics' => $event['numerics'],
-                'columns' => $event['columns'],
-                'action' => $event['action'],
-            ]);
+            if (in_array($event['name'], ['disk_available_snapshot', 'processor_available_snapshot', 'memory_available_snapshot'])) {
+                YnhOsquery::updateOrCreate([
+                    'ynh_server_id' => $this->id,
+                    'name' => $event['name'],
+                    'host_identifier' => $event['hostIdentifier'],
+                    'unix_time' => $event['unixTime'],
+                ], [
+                    'ynh_server_id' => $this->id,
+                    'row' => 0,
+                    'name' => $event['name'],
+                    'host_identifier' => $event['hostIdentifier'],
+                    'calendar_time' => Carbon::createFromFormat('D M j H:i:s Y e', $event['calendarTime'])->setTimezone('UTC'),
+                    'unix_time' => $event['unixTime'],
+                    'epoch' => $event['epoch'],
+                    'counter' => $event['counter'],
+                    'numerics' => $event['numerics'],
+                    'columns' => $event['columns'],
+                    'action' => $event['action'],
+                ]);
+            } else {
+                YnhOsquery::create([
+                    'ynh_server_id' => $this->id,
+                    'row' => 0,
+                    'name' => $event['name'],
+                    'host_identifier' => $event['hostIdentifier'],
+                    'calendar_time' => Carbon::createFromFormat('D M j H:i:s Y e', $event['calendarTime'])->setTimezone('UTC'),
+                    'unix_time' => $event['unixTime'],
+                    'epoch' => $event['epoch'],
+                    'counter' => $event['counter'],
+                    'numerics' => $event['numerics'],
+                    'columns' => $event['columns'],
+                    'action' => $event['action'],
+                ]);
+            }
             $nbEvents++;
         }
         return $nbEvents;
