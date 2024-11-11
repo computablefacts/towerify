@@ -309,11 +309,8 @@ if [ ! -f /opt/logalert/config.json ]; then
 fi
 
 # Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
-osqueryctl stop osqueryd
+systemctl stop osqueryd
 systemctl stop logalert
-
-# An attempt at dealing with https://github.com/osquery/osquery/issues/8064
-sleep 20
 
 # Cleanup
 if [ -f /opt/logparser/12408bd3.jsonl.gz ]; then
@@ -418,7 +415,7 @@ crontab -l | grep -v "app\.towerify\.io" | crontab -
 
 # Start LogAlert then Osquery because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
 systemctl start logalert
-osqueryctl start osqueryd
+systemctl start osqueryd
 
 # If fail2ban is up-and-running, whitelist AdversaryMeter IP addresses
 if systemctl is-active --quiet fail2ban; then
