@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 
 /**
  * @property int id
@@ -40,13 +41,29 @@ class YnhOsqueryPackage extends Model
         'cves' => 'array',
     ];
 
+    public static function vulnerablePackages(Collection $servers): Collection
+    {
+        return YnhOsqueryPackage::select(
+            'ynh_osquery_packages.*',
+            'ynh_cves.cve',
+            'ynh_cves.urgency',
+            'ynh_cves.fixed_version',
+            'ynh_cves.tracker',
+        )
+            ->join('ynh_cves', 'ynh_cves.id', '=', 'ynh_osquery_packages.ynh_cve_id')
+            ->whereIn('ynh_osquery_packages.ynh_server_id', $servers->pluck('id'))
+            ->whereIn('ynh_cves.urgency', ['high', 'medium', 'low'])
+            ->where('ynh_cves.status', 'resolved')
+            ->get();
+    }
+
     public function server(): BelongsTo
     {
-        return $this->belongsTo(YnhServer::class);
+        return $this->belongsTo(YnhServer::class, 'ynh_server_id', 'id');
     }
 
     public function cve(): BelongsTo
     {
-        return $this->belongsTo(YnhCve::class);
+        return $this->belongsTo(YnhCve::class, 'ynh_cve_id', 'id');
     }
 }

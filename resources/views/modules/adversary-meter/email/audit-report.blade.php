@@ -129,11 +129,18 @@
       <li><a href="#metrics">Métriques ({{ $metrics->count() }})</a></li>
     </ul>
   </li>
-  <li><a href="#vulns">Vulnérabilités</a>
+  <li><a href="#services">Services vulnérables</a>
     <ul>
-      <li><a href="#vulns-high">Hautes ({{ $alerts_high->count() }})</a></li>
-      <li><a href="#vulns-medium">Moyennes ({{ $alerts_medium->count() }})</a></li>
-      <li><a href="#vulns-low">Basses ({{ $alerts_low->count() }})</a></li>
+      <li><a href="#services-high">Hautes ({{ $alerts_high->count() }})</a></li>
+      <li><a href="#services-medium">Moyennes ({{ $alerts_medium->count() }})</a></li>
+      <li><a href="#services-low">Basses ({{ $alerts_low->count() }})</a></li>
+    </ul>
+  </li>
+  <li><a href="#packages">Packages vulnérables</a>
+    <ul>
+      <li><a href="#packages-high">Hautes ({{ $vulnerable_packages_high->count() }})</a></li>
+      <li><a href="#packages-medium">Moyennes ({{ $vulnerable_packages_medium->count() }})</a></li>
+      <li><a href="#packages-low">Basses ({{ $vulnerable_packages_low->count() }})</a></li>
     </ul>
   </li>
   <li><a href="#assets">Actifs</a>
@@ -233,10 +240,10 @@
 </div>
 @endif
 <div class='heading'>
-  <a name="vulns">2. Vulnérabilités</a>
+  <a name="services">2. Services vulnérables</a>
 </div>
 <div class="section">
-  <a name="vulns-high">2.1. Hautes ({{ $alerts_high->count() }})</a><br>
+  <a name="services-high">2.1. Hautes ({{ $alerts_high->count() }})</a><br>
 </div>
 @if($alerts_high->count())
 <table>
@@ -292,7 +299,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="vulns-medium">2.2. Moyennes ({{ $alerts_medium->count() }})</a>
+  <a name="services-medium">2.2. Moyennes ({{ $alerts_medium->count() }})</a>
 </div>
 @if($alerts_medium->count())
 <table>
@@ -348,7 +355,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="vulns-low">2.3. Basses ({{ $alerts_low->count() }})</a>
+  <a name="services-low">2.3. Basses ({{ $alerts_low->count() }})</a>
 </div>
 @if($alerts_low->count())
 <table>
@@ -404,10 +411,139 @@
 </div>
 @endif
 <div class='heading'>
-  <a name="assets">3. Actifs</a>
+  <a name="packages">3. Packages vulnérables</a>
 </div>
 <div class="section">
-  <a name="assets-discovered">3.1. Découverts ({{ $assets_discovered->count() }})</a>
+  <a name="packages-high">3.1. Hautes ({{ $vulnerable_packages_high->count() }})</a><br>
+</div>
+@if($vulnerable_packages_high->count())
+<table>
+  <colgroup>
+    <col span="1">
+    <col span="1">
+    <col span="1">
+    <col span="1">
+    <col span="1">
+  </colgroup>
+  <thead>
+  <tr>
+    <th>Serveur</th>
+    <th>Package</th>
+    <th>Version installée</th>
+    <th>Version fixée</th>
+    <th>CVE</th>
+  </tr>
+  </thead>
+  <tbody>
+  @foreach ($vulnerable_packages_high as $vuln)
+  <tr>
+    <td class="ellipsis" title="{{ $vuln->server->name }}">
+      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->server->name }}</span>
+    </td>
+    <td>{{ $vuln->package }}</td>
+    <td>{{ $vuln->package_version }}</td>
+    <td>{{ $vuln->fixed_version }}</td>
+    <td>
+      <a href="{{ $vuln->tracker }}" target="_blank">{{ $vuln->cve }}</a>
+    </td>
+  </tr>
+  @endforeach
+  </tbody>
+</table>
+@else
+<div class="grey">
+  <p>Aucune vulnérabilité n'a été détectée pour le moment.</p>
+</div>
+@endif
+<div class="section">
+  <a name="packages-medium">3.2. Moyennes ({{ $vulnerable_packages_medium->count() }})</a><br>
+</div>
+@if($vulnerable_packages_medium->count())
+<table>
+  <colgroup>
+    <col span="1">
+    <col span="1">
+    <col span="1">
+    <col span="1">
+    <col span="1">
+  </colgroup>
+  <thead>
+  <tr>
+    <th>Serveur</th>
+    <th>Package</th>
+    <th>Version installée</th>
+    <th>Version fixée</th>
+    <th>CVE</th>
+  </tr>
+  </thead>
+  <tbody>
+  @foreach ($vulnerable_packages_medium as $vuln)
+  <tr>
+    <td class="ellipsis" title="{{ $vuln->server->name }}">
+      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->server->name }}</span>
+    </td>
+    <td>{{ $vuln->package }}</td>
+    <td>{{ $vuln->package_version }}</td>
+    <td>{{ $vuln->fixed_version }}</td>
+    <td>
+      <a href="{{ $vuln->tracker }}" target="_blank">{{ $vuln->cve }}</a>
+    </td>
+  </tr>
+  @endforeach
+  </tbody>
+</table>
+@else
+<div class="grey">
+  <p>Aucune vulnérabilité n'a été détectée pour le moment.</p>
+</div>
+@endif
+<div class="section">
+  <a name="packages-low">3.3. Basses ({{ $vulnerable_packages_low->count() }})</a><br>
+</div>
+@if($vulnerable_packages_low->count())
+<table>
+  <colgroup>
+    <col span="1">
+    <col span="1">
+    <col span="1">
+    <col span="1">
+    <col span="1">
+  </colgroup>
+  <thead>
+  <tr>
+    <th>Serveur</th>
+    <th>Package</th>
+    <th>Version installée</th>
+    <th>Version fixée</th>
+    <th>CVE</th>
+  </tr>
+  </thead>
+  <tbody>
+  @foreach ($vulnerable_packages_low as $vuln)
+  <tr>
+    <td class="ellipsis" title="{{ $vuln->server->name }}">
+      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->server->name }}</span>
+    </td>
+    <td>{{ $vuln->package }}</td>
+    <td>{{ $vuln->package_version }}</td>
+    <td>{{ $vuln->fixed_version }}</td>
+    <td>
+      <a href="{{ $vuln->tracker }}" target="_blank">{{ $vuln->cve }}</a>
+    </td>
+  </tr>
+  @endforeach
+  </tbody>
+</table>
+@else
+<div class="grey">
+  <p>Aucune vulnérabilité n'a été détectée pour le moment.</p>
+</div>
+@endif
+<div class='heading'>
+  <a name="assets">4. Actifs</a>
+</div>
+<div class="section">
+  <a name="assets-discovered">4.1. Découverts ({{ $assets_discovered->count() }})</a>
 </div>
 @if($assets_discovered->count())
 <table>
@@ -444,7 +580,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="assets-monitored">3.2. Surveillés ({{ $assets_monitored->count() }})</a>
+  <a name="assets-monitored">4.2. Surveillés ({{ $assets_monitored->count() }})</a>
 </div>
 @if($assets_monitored->count())
 <table>
@@ -481,7 +617,7 @@
 </div>
 @endif
 <div class="section">
-  <a name="assets-not-monitored">3.3. À surveiller ({{ $assets_not_monitored->count() }})</a>
+  <a name="assets-not-monitored">4.3. À surveiller ({{ $assets_not_monitored->count() }})</a>
 </div>
 @if($assets_not_monitored->count())
 <table>

@@ -3,6 +3,7 @@
 namespace App\Modules\AdversaryMeter\Mail;
 
 use App\Models\YnhOsquery;
+use App\Models\YnhOsqueryPackage;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Models\Alert;
 use App\Modules\AdversaryMeter\Models\Asset;
@@ -26,13 +27,16 @@ class AuditReport extends Mailable
     private Collection $assetsDiscovered;
     private Collection $events;
     private Collection $metrics;
+    private Collection $vulnerablePackagesHigh;
+    private Collection $vulnerablePackagesMedium;
+    private Collection $vulnerablePackagesLow;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Collection $events, Collection $metrics, Collection $alertsHigh, Collection $alertsMedium, Collection $alertsLow, Collection $assetsMonitored, Collection $assetsNotMonitored, Collection $assetsDiscovered)
+    public function __construct(Collection $events, Collection $metrics, Collection $alertsHigh, Collection $alertsMedium, Collection $alertsLow, Collection $assetsMonitored, Collection $assetsNotMonitored, Collection $assetsDiscovered, Collection $vulnerablePackages)
     {
         $this->events = $events;
         $this->metrics = $metrics;
@@ -42,6 +46,15 @@ class AuditReport extends Mailable
         $this->assetsMonitored = $assetsMonitored;
         $this->assetsNotMonitored = $assetsNotMonitored;
         $this->assetsDiscovered = $assetsDiscovered;
+        $this->vulnerablePackagesHigh = $vulnerablePackages
+            ->filter(fn(YnhOsqueryPackage $package) => $package->urgency === 'high')
+            ->unique(fn($item) => $item->ynh_server_id . $item->package . $item->package_version . $item->fixed_version . $item->cve);
+        $this->vulnerablePackagesMedium = $vulnerablePackages
+            ->filter(fn(YnhOsqueryPackage $package) => $package->urgency === 'medium')
+            ->unique(fn($item) => $item->ynh_server_id . $item->package . $item->package_version . $item->fixed_version . $item->cve);
+        $this->vulnerablePackagesLow = $vulnerablePackages
+            ->filter(fn(YnhOsqueryPackage $package) => $package->urgency === 'low')
+            ->unique(fn($item) => $item->ynh_server_id . $item->package . $item->package_version . $item->fixed_version . $item->cve);
     }
 
     public static function create(): array
@@ -62,6 +75,7 @@ class AuditReport extends Mailable
         $assetsDiscovered = Asset::where('created_at', '>=', $cutOffTime)->orderBy('asset')->get();
         $events = YnhOsquery::suspiciousEvents($servers, $cutOffTime);
         $metrics = YnhOsquery::suspiciousMetrics($servers, $cutOffTime);
+        $vulnerablePackages = YnhOsqueryPackage::vulnerablePackages($servers);
 
         return [
             'is_empty' => $events->count() <= 0 &&
@@ -69,8 +83,9 @@ class AuditReport extends Mailable
                 $alerts->count() <= 0 &&
                 $assetsMonitored->count() <= 0 &&
                 $assetsNotMonitored->count() <= 0 &&
-                $assetsDiscovered->count() <= 0,
-            'report' => new AuditReport($events, $metrics, $alertsHigh, $alertsMedium, $alertsLow, $assetsMonitored, $assetsNotMonitored, $assetsDiscovered),
+                $assetsDiscovered->count() <= 0 &&
+                $vulnerablePackages->count() <= 0,
+            'report' => new AuditReport($events, $metrics, $alertsHigh, $alertsMedium, $alertsLow, $assetsMonitored, $assetsNotMonitored, $assetsDiscovered, $vulnerablePackages),
         ];
     }
 
@@ -104,9 +119,19 @@ class AuditReport extends Mailable
                 $events .= ", ";
             }
             if ($this->alertsHigh->count() === 1) {
-                $events .= "{$this->alertsHigh->count()} vulnérabilité critique";
+                $events .= "{$this->alertsHigh->count()} service avec une vulnérabilité critique";
             } else {
-                $events .= "{$this->alertsHigh->count()} vulnérabilités critiques";
+                $events .= "{$this->alertsHigh->count()}  services avec une vulnérabilité critique";
+            }
+        }
+        if ($this->vulnerablePackagesHigh->count() > 0) {
+            if (!empty($events)) {
+                $events .= ", ";
+            }
+            if ($this->vulnerablePackagesHigh->count() === 1) {
+                $events .= "{$this->vulnerablePackagesHigh->count()} package avec une vulnérabilité critique";
+            } else {
+                $events .= "{$this->vulnerablePackagesHigh->count()}  packages avec une vulnérabilité critique";
             }
         }
         if ($this->assetsDiscovered->count() > 0) {
@@ -132,6 +157,9 @@ class AuditReport extends Mailable
                 "assets_monitored" => $this->assetsMonitored,
                 "assets_not_monitored" => $this->assetsNotMonitored,
                 "assets_discovered" => $this->assetsDiscovered,
+                "vulnerable_packages_high" => $this->vulnerablePackagesHigh,
+                "vulnerable_packages_medium" => $this->vulnerablePackagesMedium,
+                "vulnerable_packages_low" => $this->vulnerablePackagesLow,
             ]);
     }
 }
