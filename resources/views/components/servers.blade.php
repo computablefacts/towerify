@@ -41,7 +41,6 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
       <tr>
         <th class="ps-4" width="25px"></th>
         <th>{{ __('Name') }}</th>
-        <th>{{ __('OS') }}</th>
         <th>{{ __('IP') }}</th>
         <th>{{ __('Domain') }}</th>
         <th>{{ __('Domains') }}</th>
@@ -74,10 +73,9 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
             {{ $server->name }}
             @endif
           </span>
-        </td>
-        <td>
-          {{ isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-'
-          }}
+          <div class="text-muted">
+            {{ isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-' }}
+          </div>
         </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
@@ -136,7 +134,7 @@ curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToke
       </tr>
       @if(Auth::user()->canManageServers() && $server->secret)
       <tr class="collapse" id="server{{ $server->id }}">
-        <td colspan="9" style="background-color:#fff3cd;">
+        <td colspan="8" style="background-color:#fff3cd;">
           <div class="row p-3">
             <div class="col">
               {{ __('To configure or restore metrics and security event collection on this server, execute the following command with root privileges:') }}
