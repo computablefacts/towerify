@@ -45,7 +45,7 @@ class CyberBuddyController extends Controller
         $refs = $matches[0];
         foreach ($refs as $ref) {
             $id = Str::replace(['[', ']'], '', $ref);
-            $tooltip = $sources->filter(fn($ctx) => $ctx['id'] === $id)->first();
+            $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
             if ($tooltip) {
                 $answer = Str::replace($ref, "
                   <div class=\"tooltip\">
