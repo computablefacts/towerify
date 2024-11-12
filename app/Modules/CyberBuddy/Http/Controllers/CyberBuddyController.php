@@ -371,20 +371,20 @@ class CyberBuddyController extends Controller
                     ->map(function (YnhServer $server) use ($botman, $user) {
                         $json = base64_encode(json_encode($server));
                         $name = $server->name;
-                        $os = isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-';
                         $ipv4 = $server->ip();
-                        $ipv6 = !$server->ipv6() ? '-' : $server->ipv6();
-                        $domains = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->domains->count();
-                        $applications = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->applications->count();
-                        $users = $server->isFrozen() || $server->addedWithCurl() ? '-' : $server->users->count();
-                        $linkServer = '<a href="' . route('ynh.servers.edit', $server->id) . '" target="_blank">' . $name . '</a>';
+                        $ipv6 = $server->ipv6() ?: '-';
+                        $domains = $server->isYunoHost() ? $server->domains->count() : '-';
+                        $applications = $server->isYunoHost() ? $server->applications->count() : '-';
+                        $users = $server->isYunoHost() ? $server->users->count() : '-';
+                        $linkServer = $server->isYunoHost() ?
+                            '<a href="' . route('ynh.servers.edit', $server->id) . '" target="_blank">' . $name . '</a>' :
+                            '<a href="' . route('home', ['tab' => 'servers', 'servers_type' => 'instrumented']) . '" target="_blank">' . $name . '</a>';
                         $linkDomains = $domains === '-' ? $domains : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=domains\" target=\"_blank\">$domains</a>";
                         $linkApplications = $applications === '-' ? $applications : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=applications\" target=\"_blank\">$applications</a>";
                         $linkUsers = $users === '-' ? $users : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=users\" target=\"_blank\">$users</a>";
                         return "
                           <tr data-json=\"{$json}\">
                             <td>{$linkServer}</td>
-                            <td>{$os}</td>
                             <td>{$ipv4}</td>
                             <td>{$ipv6}</td>
                             <td>{$linkDomains}</td>
@@ -399,7 +399,6 @@ class CyberBuddyController extends Controller
                       <thead>
                           <tr>
                             <th>Name</th>
-                            <th>OS</th>
                             <th>IP V4</th>
                             <th>IP V6</th>
                             <th>Domains</th>
