@@ -5,6 +5,27 @@
   }
 
 </style>
+@if($file)
+<div class="card mb-3" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
+        {{ __('Only the chunks from the ":document" document are displayed.', ['document' => $file]) }}
+      </div>
+    </div>
+  </div>
+</div>
+@elseif($collection)
+<div class="card mb-3" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
+        {{ __('Only the documents from the ":collection" collection are displayed.', ['collection' => $collection]) }}
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 <div class="card">
   @if($chunks->isEmpty())
   <div class="card-body">

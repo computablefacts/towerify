@@ -13,9 +13,9 @@
       <thead>
       <tr>
         <th>{{ __('Name') }}</th>
-        <th>{{ __('Number of Documents') }}</th>
-        <th>{{ __('Number of Chunks') }}</th>
-        <th>{{ __('Number of Vectors') }}</th>
+        <th style="text-align:right">{{ __('Number of Documents') }}</th>
+        <th style="text-align:right">{{ __('Number of Chunks') }}</th>
+        <th style="text-align:right">{{ __('Number of Vectors') }}</th>
         <th>{{ __('Created At') }}</th>
         <th>{{ __('Created By') }}</th>
         <th></th>
@@ -25,17 +25,19 @@
       @foreach($collections as $collection)
       <tr style="border-bottom-color:white">
         <td><span class="lozenge new">{{ $collection->name }}</span></td>
-        <td>
+        <td style="text-align:right">
           <a href="{{ route('home', ['tab' => 'knowledge_base', 'page' => 1, 'collection' => $collection->name]) }}">
-            {{ $collection->files->count() }}
+            {{ Illuminate\Support\Number::format($collection->files->count(), locale:'sv') }}
           </a>
         </td>
-        <td>
+        <td style="text-align:right">
           <a href="{{ route('home', ['tab' => 'chunks', 'page' => 1, 'collection' => $collection->name]) }}">
-            {{ $collection->chunks->count() }}
+            {{ Illuminate\Support\Number::format($collection->chunks->count(), locale:'sv') }}
           </a>
         </td>
-        <td>{{ $collection->chunks->where('is_embedded', true)->count() }}</td>
+        <td style="text-align:right">
+          {{ Illuminate\Support\Number::format($collection->chunks->where('is_embedded', true)->count(), locale:'sv') }}
+        </td>
         <td>{{ $collection->created_at->format('Y-m-d H:i') }}</td>
         <td>{{ $collection->createdBy()?->name }}</td>
         <td class="text-end">

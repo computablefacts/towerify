@@ -15,6 +15,17 @@
     </div>
   </div>
 </div>
+@if($collection)
+<div class="card mt-3" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
+        {{ __('Only the documents from the ":collection" collection are displayed.', ['collection' => $collection]) }}
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 <div class="card mt-3">
   @if($files->isEmpty())
   <div class="card-body">
@@ -43,14 +54,7 @@
       <tbody>
       @foreach($files as $file)
       <tr>
-        <td>
-          <span class="lozenge new">
-            <a
-              href="{{ route('home', ['tab' => 'chunks', 'page' => 1, 'collection' => $file['collection']]) }}">
-            {{ $file['collection'] }}
-            </a>
-          </span>
-        </td>
+        <td><span class="lozenge new">{{ $file['collection'] }}</span></td>
         <td>
           <a href="{{ $file['download_url'] }}">
             {{ $file['filename'] }}
@@ -60,7 +64,10 @@
           {{ Illuminate\Support\Number::format($file['size'], locale:'sv') }}
         </td>
         <td style="text-align:right">
-          {{ Illuminate\Support\Number::format($file['nb_chunks'], locale:'sv') }}
+          <a
+            href="{{ route('home', ['tab' => 'chunks', 'page' => 1, 'collection' => $file['collection'], 'file' => $file['name_normalized']]) }}">
+            {{ Illuminate\Support\Number::format($file['nb_chunks'], locale:'sv') }}
+          </a>
         </td>
         <td style="text-align:right">
           {{ Illuminate\Support\Number::format($file['nb_vectors'], locale:'sv') }}

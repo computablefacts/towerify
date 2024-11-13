@@ -134,6 +134,8 @@
     "Number of Vectors": "Nombre de vecteurs",
     "of": "de",
     "Offline": "Hors ligne",
+    "Only the documents from the \":collection\" collection are displayed.": "Seuls les documents de la collection \":collection\" sont affichés.",
+    "Only the chunks from the \":document\" document are displayed.": "Seuls les chunks du document \":document\" sont affichés.",
     "Order Complete": "Commande terminée",
     "Order Notes": "Ajouter une note",
     "Orders": "Commandes",

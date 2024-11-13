@@ -41,6 +41,7 @@
   @endif
   @if($tab === 'chunks')
   <x-chunks :collection="request()->input('collection') ? request()->input('collection') : ''"
+            :file="request()->input('file') ? request()->input('file') : ''"
             :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
   @if($tab === 'prompts')

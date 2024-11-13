@@ -37,6 +37,7 @@ class KnowledgeBase extends Component
                 $nbNotVectors = $file->chunks()->where('is_embedded', false)->count();
                 return [
                     'id' => $file->id,
+                    'name_normalized' => $file->name_normalized,
                     'collection' => $file->collection->name,
                     'filename' => "{$file->name_normalized}.{$file->extension}",
                     'created_at' => $file->created_at,
