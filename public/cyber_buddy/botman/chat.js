@@ -521,7 +521,7 @@
         const input = document.getElementById("messageArea");
         input.scrollTop = input.scrollHeight; // scroll to bottom
       }
-    }, 1500);
+    }, 500);
   };
   const removeThinkingDots = () => {
     hasReturned = true;
