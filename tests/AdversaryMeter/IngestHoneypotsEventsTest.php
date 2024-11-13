@@ -5,19 +5,18 @@ namespace AdversaryMeter;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
 use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
+use App\Modules\AdversaryMeter\Events\IngestHoneypotsEvents;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
-use App\Modules\AdversaryMeter\Jobs\ImportHoneypotsEvents;
 use App\Modules\AdversaryMeter\Models\Attacker;
 use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\Modules\AdversaryMeter\Models\HoneypotEvent;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
-class ImportHoneypotsEventsTest extends TestCase
+class IngestHoneypotsEventsTest extends TestCase
 {
-    public function testItImportsHoneypotsEvents()
+    public function testItIngestHoneypotsEvents()
     {
         ApiUtils::shouldReceive('ip_whois_public')
             ->once()
@@ -46,14 +45,6 @@ class ImportHoneypotsEventsTest extends TestCase
                 ],
             ]);
 
-        Storage::fake('honeypots-s3');
-
-        $filename = "honeypot1.example.com-access.log";
-        Storage::disk('honeypots-s3')->put("honeypot1.example.com/{$filename}", json_encode($this->firstHoneypotEvents()));
-
-        $filename = "honeypot2.example.com-access.log";
-        Storage::disk('honeypots-s3')->put("honeypot2.example.com/{$filename}", json_encode($this->secondHoneypotEvents()));
-
         Auth::login($this->user); // Ensure the honeypot's owner is properly set
 
         $honeypot1 = Honeypot::create([
@@ -69,7 +60,8 @@ class ImportHoneypotsEventsTest extends TestCase
             'cloud_sensor' => HoneypotCloudSensorsEnum::HTTPS,
         ]);
 
-        ImportHoneypotsEvents::dispatch();
+        event(new IngestHoneypotsEvents(Carbon::now(), 'honeypot1.example.com', $this->firstHoneypotEvents()));
+        event(new IngestHoneypotsEvents(Carbon::now(), 'honeypot2.example.com', $this->secondHoneypotEvents()));
 
         $this->assertCount(2, Honeypot::all());
         $this->assertCount(3, HoneypotEvent::all());

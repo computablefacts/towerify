@@ -1,5 +1,7 @@
 <?php
 
+use App\Modules\AdversaryMeter\Models\Honeypot;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 
 Route::group([
@@ -7,6 +9,42 @@ Route::group([
 ], function () {
     Route::post('alert/{alert}/mark-and-check-again', 'CyberTodoController@markAsResolved');
     Route::get('vulnerabilities/{hash}', 'CyberTodoController@vulns');
+    Route::post('honeypots/{dns}', function (string $dns, \Illuminate\Http\Request $request) {
+
+        if (!$request->hasFile('data')) {
+            return response('Missing attachment', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        $file = $request->file('data');
+
+        if (!$file->isValid()) {
+            return response('Invalid attachment', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        $honeypot = Honeypot::where('dns', $dns)->first();
+
+        if (!$honeypot) {
+            return response('Unknown honeypot', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        $filename = $file->getClientOriginalName();
+        $timestamp = Carbon::createFromFormat('Y.m.d_H.i.s', \Illuminate\Support\Str::substr($filename, \Illuminate\Support\Str::position($filename, '-access.') + 8, 19));
+        $events = collect(gzfile($file->getRealPath()))
+            ->flatMap(fn(string $line) => json_decode(trim($line), true));
+
+        if ($events->isEmpty()) {
+            return response('ok (empty file)', 200)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        event(new \App\Modules\AdversaryMeter\Events\IngestHoneypotsEvents($timestamp, $dns, $events->toArray()));
+
+        return response("ok ({$events->count()} events in file)", 200)
+            ->header('Content-Type', 'text/plain');
+    });
 })->middleware(['auth', 'throttle:60,1']);
 
 Route::group([

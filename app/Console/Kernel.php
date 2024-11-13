@@ -3,13 +3,9 @@
 namespace App\Console;
 
 use App\Jobs\AgeOffOsqueryEvents;
-use App\Jobs\CheckServersHealth;
-use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Jobs\PullServersInfos;
-use App\Jobs\RebuildPackagesList;
 use App\Jobs\Summarize;
 use App\Modules\AdversaryMeter\Jobs\FixDanglingScans;
-use App\Modules\AdversaryMeter\Jobs\ImportHoneypotsEvents;
 use App\Modules\AdversaryMeter\Jobs\SendAuditReport;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Jobs\TriggerScan;
@@ -40,14 +36,13 @@ class Kernel extends ConsoleKernel
         // $schedule->job(new CheckServersHealth())->everyFifteenMinutes();
         $schedule->job(new PullServersInfos())->hourly();
         $schedule->job(new AgeOffOsqueryEvents())->hourly();
-        $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
+        // $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
         $schedule->job(new Summarize())->daily();
-        $schedule->job(new RebuildPackagesList())->daily();
+        // $schedule->job(new RebuildPackagesList())->daily();
         $schedule->command('telescope:prune --hours=48')->daily();
 
         // AdversaryMeter
         $schedule->job(new TriggerScan())->everyMinute();
-        $schedule->job(new ImportHoneypotsEvents())->everyFiveMinutes();
         $schedule->job(new FixDanglingScans())->hourly();
         $schedule->job(new TriggerDiscoveryShallow())->daily();
         $schedule->job(new SendAuditReport())->dailyAt('6:45');
