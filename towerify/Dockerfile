@@ -46,7 +46,8 @@ RUN apt-get update && apt-get install -y \
     poppler-utils \
     dnsutils \
     wget \
-    jq
+    jq \
+    ffmpeg
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 

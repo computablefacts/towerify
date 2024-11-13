@@ -11,7 +11,9 @@ use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\Process\Process;
 
 class IngestFileListener extends AbstractListener
 {
@@ -40,48 +42,132 @@ class IngestFileListener extends AbstractListener
             $file = File::find($event->fileId);
 
             if (!$file) {
-                Log::error("Invalid file id : {$event->fileId}");
-            } else {
+                throw new \Exception("Invalid file id : {$event->fileId}");
+            }
 
-                $response = ApiUtils::file_input($event->user->client(), $file->downloadUrl());
+            // webm to mp3
+            if ($file->mime_type === 'audio/webm') {
+
+                $webmFileContent = file_get_contents($file->downloadUrl());
+
+                if ($webmFileContent === false) {
+                    throw new \Exception("Failed to download webm file : {$file->downloadUrl()}");
+                }
+
+                // Download webm file
+                $webmFilePath = "/tmp/{$file->name_normalized}.{$file->extension}";
+                file_put_contents($webmFilePath, $webmFileContent);
+
+                // webm to mp3
+                $mp3FilePath = "/tmp/{$file->name_normalized}.mp3";
+                $process = Process::fromShellCommandline("ffmpeg -i " . escapeshellarg($webmFilePath) . " " . escapeshellarg($mp3FilePath));
+                $process->run();
+
+                // Cleanup
+                unlink($webmFilePath);
+                
+                if (!$process->isSuccessful() || !file_exists($mp3FilePath)) {
+                    throw new \Exception("Failed to convert webm to mp3 : {$file->downloadUrl()}");
+                }
+
+                // Upload file to S3
+                $collection = $file->collection()->where('is_deleted', false)->first();
+
+                if (!$collection) {
+                    throw new \Exception("Unknown file collection : {$file->downloadUrl()}");
+                }
+                if (!Storage::disk('files-s3')->putFileAs($this->storageFilePath($collection), new \Illuminate\Http\File($mp3FilePath), $this->storageFileName($file, 'mp3'))) {
+                    throw new \Exception("Failed to upload mp3 file : {$mp3FilePath}");
+                }
+
+                // Replace the webm reference by the mp3 one
+                $file->extension = 'mp3';
+                $file->mime_type = 'audio/mpeg';
+                $file->save();
+
+                // Cleanup
+                unlink($mp3FilePath);
+            }
+
+            // Speech-to-text
+            if ($file->mime_type === 'audio/mpeg' || $file->mime_type === 'audio/wav') {
+
+                $response = ApiUtils::whisper($file->downloadUrl());
 
                 if ($response['error']) {
-                    Log::error($response['error_details']);
-                } else {
-
-                    $fragments = $response['response'];
-
-                    foreach ($fragments as $fragment) {
-
-                        $tags = explode('>', $fragment['metadata']['title']);
-                        $page = $fragment['metadata']['page_idx'] + 1;
-
-                        if ($fragment['metadata']['tag'] === 'list') {
-                            $text = trim($fragment['metadata']['prevPara']['text']) . "\n" . trim($fragment['text']);
-                        } else {
-                            $text = trim($fragment['text']);
-                        }
-
-                        /** @var Chunk $chunk */
-                        $chunk = $collection->chunks()->create([
-                            'file_id' => $file->id,
-                            'url' => $file->downloadUrl(),
-                            'page' => $page,
-                            'text' => $text,
-                        ]);
-
-                        foreach ($tags as $tag) {
-                            $chunk->tags()->create(['tag' => Str::lower($tag)]);
-                        }
-                    }
-                    if (!Chunk::where('file_id', $file->id)->exists()) { // no chunks -> no embeddings -> processing is complete
-                        $file->is_embedded = true;
-                        $file->save();
-                    }
+                    throw new \Exception($response['error_details']);
                 }
+
+                // Write text to disk
+                $txtFilePath = "/tmp/{$file->name_normalized}.txt";
+                file_put_contents($txtFilePath, $response['text']);
+
+                // Move file to storage
+                $collection = $file->collection()->where('is_deleted', false)->first();
+
+                if (!$collection) {
+                    throw new \Exception("Unknown file collection : {$file->downloadUrl()}");
+                }
+                if (!Storage::disk('files-s3')->putFileAs($this->storageFilePath($collection), new \Illuminate\Http\File($txtFilePath), $this->storageFileName($file, 'txt'))) {
+                    throw new \Exception("Failed to upload text file : {$txtFilePath}");
+                }
+
+                // Replace the mp3 reference by the txt one
+                $file->extension = 'txt';
+                $file->mime_type = 'text/plain';
+                $file->save();
+
+                // Cleanup
+                unlink($txtFilePath);
+            }
+
+            $response = ApiUtils::file_input($event->user->client(), $file->downloadUrl());
+
+            if ($response['error']) {
+                throw new \Exception($response['error_details']);
+            }
+
+            $fragments = $response['response'];
+
+            foreach ($fragments as $fragment) {
+
+                $tags = explode('>', $fragment['metadata']['title']);
+                $page = $fragment['metadata']['page_idx'] + 1;
+
+                if ($fragment['metadata']['tag'] === 'list') {
+                    $text = trim($fragment['metadata']['prevPara']['text']) . "\n" . trim($fragment['text']);
+                } else {
+                    $text = trim($fragment['text']);
+                }
+
+                /** @var Chunk $chunk */
+                $chunk = $collection->chunks()->create([
+                    'file_id' => $file->id,
+                    'url' => $file->downloadUrl(),
+                    'page' => $page,
+                    'text' => $text,
+                ]);
+
+                foreach ($tags as $tag) {
+                    $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                }
+            }
+            if (!Chunk::where('file_id', $file->id)->exists()) { // no chunks -> no embeddings -> processing is complete
+                $file->is_embedded = true;
+                $file->save();
             }
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
         }
+    }
+
+    private function storageFileName(File $file, string $extension): string
+    {
+        return "{$file->id}_{$file->name_normalized}.{$extension}";
+    }
+
+    private function storageFilePath(\App\Modules\CyberBuddy\Models\Collection $collection): string
+    {
+        return "/cyber-buddy/{$collection->id}";
     }
 }

@@ -1,6 +1,15 @@
 <div class="card">
   <div class="card-body p-3">
     <h6 class="card-title">{{ __('Import your documents !') }}</h6>
+    <div class="card mb-3" style="background-color:#fff3cd;">
+      <div class="card-body p-2">
+        <div class="row">
+          <div class="col">
+            {{ __('Authorized file formats: PDF, DOC, DOCX, TXT, MP3, WAV, and WEBM.') }}
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="row">
       <div class="col-3">
         <div id="collections"></div>

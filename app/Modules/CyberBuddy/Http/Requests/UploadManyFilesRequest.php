@@ -30,7 +30,7 @@ class UploadManyFilesRequest extends FormRequest implements UploadManyFiles
             'files.*' => [
                 'required',
                 'file',
-                'mimes:pdf,doc,docx,txt',
+                'mimes:pdf,doc,docx,txt,mp3,wav,webm',
                 'max:10240',
             ],
         ];

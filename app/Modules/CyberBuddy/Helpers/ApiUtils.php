@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Log;
 
 class ApiUtils
 {
+    public function whisper(string $url, string $lang = 'fr')
+    {
+        return $this->post('/api/whisper', [
+            'url' => $url,
+            'lang' => $lang,
+        ]);
+    }
+
     public function file_input(string $client, string $url): array
     {
         return $this->post('/api/file-input', [
