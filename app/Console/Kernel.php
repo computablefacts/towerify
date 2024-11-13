@@ -38,7 +38,6 @@ class Kernel extends ConsoleKernel
         $schedule->job(new AgeOffOsqueryEvents())->hourly();
         // $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
         $schedule->job(new Summarize())->daily();
-        // $schedule->job(new RebuildPackagesList())->daily();
         $schedule->command('telescope:prune --hours=48')->daily();
 
         // AdversaryMeter

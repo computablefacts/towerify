@@ -10,6 +10,7 @@ use App\Events\InstallApp;
 use App\Events\ProcessLogalertPayload;
 use App\Events\ProcessLogparserPayload;
 use App\Events\PullServerInfos;
+use App\Events\RebuildPackagesList;
 use App\Events\RemoveUserPermission;
 use App\Events\UninstallApp;
 use App\Listeners\AddTwrUserPermissionListener;
@@ -21,6 +22,7 @@ use App\Listeners\OrderCreatedListener;
 use App\Listeners\PasswordResetListener;
 use App\Listeners\ProcessLogalertPayloadListener;
 use App\Listeners\ProcessLogparserPayloadListener;
+use App\Listeners\RebuildPackagesListListener;
 use App\Listeners\RemoveUserPermissionListener;
 use App\Listeners\StripeEventListener;
 use App\Listeners\UninstallAppListener;
@@ -97,6 +99,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         ProcessLogparserPayload::class => [
             ProcessLogparserPayloadListener::class,
+        ],
+        RebuildPackagesList::class => [
+            RebuildPackagesListListener::class,
         ],
 
         // AdversaryMeter

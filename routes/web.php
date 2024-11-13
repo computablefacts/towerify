@@ -11,6 +11,7 @@
 |
 */
 
+use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
 use App\Http\Middleware\Subscribed;
 use App\Models\YnhServer;
@@ -326,7 +327,7 @@ Route::get('/dispatch/{job}', function (string $job) {
             if ($job === 'dl_debian_security_bug_tracker') {
                 \App\Jobs\DownloadDebianSecurityBugTracker::dispatch();
             } elseif ($job === 'rebuild_packages_list') {
-                \App\Jobs\RebuildPackagesList::dispatch();
+                event(new RebuildPackagesList());
             }
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());

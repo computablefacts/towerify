@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\RebuildPackagesList;
 use App\Models\YnhCve;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -66,5 +67,7 @@ class DownloadDebianSecurityBugTracker implements ShouldQueue
                 }
             }
         }
+        
+        event(new RebuildPackagesList());
     }
 }
