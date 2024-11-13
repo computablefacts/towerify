@@ -8,8 +8,7 @@
     </div>
     <div class="row mt-2">
       <div class="col">
-        Pour configurer Sentinel, connectez-vous en <i>root</i> au serveur que vous souhaitez surveiller et exécutez
-        cette ligne de commande :
+        Pour configurer l'agent, connectez-vous en <i>root</i> au serveur que vous souhaitez surveiller et exécutez cette ligne de commande :
         <br><br>
         <pre style="margin-bottom:0">
 curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')&server_name=$(hostname)" | bash
