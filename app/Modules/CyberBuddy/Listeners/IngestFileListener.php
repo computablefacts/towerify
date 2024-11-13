@@ -74,6 +74,10 @@ class IngestFileListener extends AbstractListener
                             $chunk->tags()->create(['tag' => Str::lower($tag)]);
                         }
                     }
+                    if (!Chunk::where('file_id', $file->id)->exists()) { // no chunks -> no embeddings -> processing is complete
+                        $file->is_embedded = true;
+                        $file->save();
+                    }
                 }
             }
         } catch (\Exception $exception) {

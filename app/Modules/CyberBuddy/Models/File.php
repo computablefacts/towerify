@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string mime_type
  * @property string secret
  * @property boolean is_deleted
+ * @property boolean is_embedded
  * @property int created_by
  */
 class File extends Model
@@ -44,12 +45,14 @@ class File extends Model
         'mime_type',
         'secret',
         'is_deleted',
+        'is_embedded',
         'created_by',
     ];
 
     protected $casts = [
         'size' => 'integer',
         'is_deleted' => 'boolean',
+        'is_embedded' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

@@ -67,9 +67,13 @@ class DeleteEmbeddedChunks implements ShouldQueue
                     ->where('is_deleted', true)
                     ->chunk(500, function ($chunks) use ($collection) {
 
+                        $files = [];
                         $uids = [];
 
                         foreach ($chunks as $chunk) {
+                            if (!in_array($chunk->file_id, $files)) {
+                                $files[] = $chunk->file_id;
+                            }
                             $uids[] = (string)$chunk->id;
                         }
                         try {
@@ -77,7 +81,14 @@ class DeleteEmbeddedChunks implements ShouldQueue
                             if ($response['error']) {
                                 Log::error($response['error_details']);
                             } else {
+
                                 Chunk::whereIn('id', $uids)->delete();
+
+                                foreach ($files as $fileId) {
+                                    if (!Chunk::where('file_id', $fileId)->exists()) {
+                                        File::where('id', $fileId)->update(['is_embedded' => false]);
+                                    }
+                                }
                             }
                         } catch (\Exception $exception) {
                             Log::error($exception->getMessage());

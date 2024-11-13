@@ -45,7 +45,7 @@ class KnowledgeBase extends Component
                     'nb_chunks' => $nbChunks,
                     'nb_vectors' => $nbVectors,
                     'nb_not_vectors' => $nbNotVectors,
-                    'status' => $nbVectors != 0 && $nbNotVectors === 0 ? 'processed' : 'processing',
+                    'status' => $file->is_embedded ? 'processed' : 'processing',
                     'download_url' => $file->downloadUrl(),
                 ];
             });
