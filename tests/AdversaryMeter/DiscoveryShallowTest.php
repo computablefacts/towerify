@@ -2,10 +2,12 @@
 
 namespace AdversaryMeter;
 
+use App\Models\Tenant;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Models\Asset;
+use App\User;
 use Tests\TestCase;
 
 class DiscoveryShallowTest extends TestCase
@@ -19,8 +21,20 @@ class DiscoveryShallowTest extends TestCase
                 'subdomains' => ['www1.example.com', 'www1.example.com' /* duplicate! */, 'www2.example.com'],
             ]);
 
-        event(new CreateAsset($this->user, 'example.com', false));
-        event(new CreateAsset($this->user, 'example.com', false));
+        /** @var User $user */
+        $user = User::updateOrCreate(['name' => 'qa'], [
+            'name' => 'qa',
+            'email' => 'qa+test@computablefacts.com',
+            'password' => 'qa4ever',
+        ]);
+
+        /** @var Tenant $tenant */
+        $tenant = Tenant::updateOrCreate(['name' => 'qa'], ['name' => 'qa']);
+        $user->tenant_id = $tenant->id;
+        $user->save();
+
+        event(new CreateAsset($user, 'example.com', false));
+        event(new CreateAsset($user, 'example.com', false));
 
         TriggerDiscoveryShallow::dispatch();
 

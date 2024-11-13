@@ -2,15 +2,18 @@
 
 namespace App\Modules\AdversaryMeter\Jobs;
 
+use App\Models\Tenant;
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\AdversaryMeter\Models\Asset;
+use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class TriggerDiscoveryShallow implements ShouldQueue
@@ -19,7 +22,7 @@ class TriggerDiscoveryShallow implements ShouldQueue
 
     public $tries = 1;
     public $maxExceptions = 1;
-    public $timeout = 3 * 180; // 9mn
+    public $timeout = 15 * 60; // 15mn
 
     public function __construct()
     {
@@ -28,29 +31,39 @@ class TriggerDiscoveryShallow implements ShouldQueue
 
     public function handle()
     {
-        Asset::whereNull('discovery_id')
-            ->where('type', AssetTypesEnum::DNS)
-            ->get()
-            ->map(fn(Asset $asset) => $asset->tld())
-            ->unique()
-            ->each(function (string $tld) {
+        Tenant::all()
+            ->map(fn(Tenant $tenant) => User::where('tenant_id', $tenant->id)->orderBy('created_at')->first())
+            ->filter(fn(User $user) => isset($user))
+            ->each(function (User $user) {
 
-                $discovered = $this->discover($tld);
+                Auth::login($user); // otherwise the tenant will not be properly set
 
-                if (isset($discovered['subdomains']) && count($discovered['subdomains'])) {
-                    collect($discovered['subdomains'])->each(function (string $domain) use ($tld) {
-                        Asset::where('tld', $tld)
-                            ->get()
-                            ->filter(function (Asset $asset) {
-                                // Deal with clients using one of our many domains...
-                                return $asset->createdBy()->email === config('towerify.admin.email')
-                                    || !Str::endsWith($asset->asset, ['computablefacts.com', 'computablefacts.io', 'towerify.io', 'cywise.io']);
-                            })
-                            ->each(function (Asset $asset) use ($domain) {
-                                event(new CreateAsset($asset->createdBy(), $domain, true));
+                Asset::whereNull('discovery_id')
+                    ->where('type', AssetTypesEnum::DNS)
+                    ->get()
+                    ->map(fn(Asset $asset) => $asset->tld())
+                    ->unique()
+                    ->each(function (string $tld) {
+
+                        $discovered = $this->discover($tld);
+
+                        if (isset($discovered['subdomains']) && count($discovered['subdomains'])) {
+                            collect($discovered['subdomains'])->each(function (string $domain) use ($tld) {
+                                Asset::where('tld', $tld)
+                                    ->get()
+                                    ->filter(function (Asset $asset) {
+                                        // Deal with clients using one of our many domains...
+                                        return $asset->createdBy()->email === config('towerify.admin.email')
+                                            || !Str::endsWith($asset->asset, ['computablefacts.com', 'computablefacts.io', 'towerify.io', 'cywise.io']);
+                                    })
+                                    ->each(function (Asset $asset) use ($domain) {
+                                        event(new CreateAsset($asset->createdBy(), $domain, true));
+                                    });
                             });
+                        }
                     });
-                }
+
+                Auth::logout();
             });
     }
 
