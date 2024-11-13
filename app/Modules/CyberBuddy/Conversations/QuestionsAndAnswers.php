@@ -72,7 +72,9 @@ class QuestionsAndAnswers extends Conversation
 
     private function waitTheNextQuestion(): void
     {
-        $this->ask('Que puis-je faire d\'autre pour vous maintenant?', fn(Answer $response) => $this->answerQuestion($response->getText()));
+        // We neither want to stop the conversation nor direct it too much :
+        // return an empty answer that won't be displayed by the chat widget
+        $this->ask('', fn(Answer $response) => $this->answerQuestion($response->getText()));
     }
 
     private function answerQuestion(string $question): void

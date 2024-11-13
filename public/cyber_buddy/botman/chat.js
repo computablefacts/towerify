@@ -561,6 +561,11 @@
         } catch (t) {
         }
       }
+      // ========== HACK : HIDE EMPTY QUESTIONS / BEGIN ==========
+      if (t && Array.isArray(t.messages)) {
+        t.messages = t.messages.filter(message => message.type === 'text' && message.text.trim().length > 0);
+      }
+      // ========== HACK : HIDE EMPTY QUESTIONS / END ==========
       return t
     }],
     timeout: 0,
