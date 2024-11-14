@@ -45,6 +45,12 @@ class UserInvitationUtilizedListener extends AbstractListener
                     $created->roles()->syncWithoutDetaching($basicEndUser);
                 }
 
+                $limitedAdministrator = Role::where('name', Role::LIMITED_ADMINISTRATOR)->first();
+
+                if ($limitedAdministrator) {
+                    $created->roles()->syncWithoutDetaching($limitedAdministrator);
+                }
+
                 $created->save();
             }
         }
