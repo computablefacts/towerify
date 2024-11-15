@@ -5,14 +5,17 @@ import {BlockNoteView} from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import {useCreateBlockNote} from "@blocknote/react";
 
+const ctx = {};
+
 function BlockNoteElement() {
-  const editor = useCreateBlockNote();
+  const editor = useCreateBlockNote(ctx.settings);
   return (<BlockNoteView editor={editor}/>);
 }
 
-function renderBlockNote(id) {
+function renderBlockNote(id, settings) {
   const el = document.getElementById(id);
   if (el) {
+    ctx.settings = settings;
     ReactDOM.render(<BlockNoteElement/>, el);
   }
 }
