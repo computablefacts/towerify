@@ -32,7 +32,7 @@ Route::group([
 
         $filename = $file->getClientOriginalName();
         $timestamp = Carbon::createFromFormat('Y.m.d_H.i.s', \Illuminate\Support\Str::substr($filename, \Illuminate\Support\Str::position($filename, '-access.') + 8, 19));
-        $events = collect(gzfile($file->getRealPath()))
+        $events = collect(implode(gzfile($file->getRealPath())))
             ->flatMap(fn(string $line) => json_decode(trim($line), true));
 
         if ($events->isEmpty()) {
