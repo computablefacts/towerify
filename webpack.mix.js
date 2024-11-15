@@ -15,5 +15,7 @@ mix.js('resources/js/app.js', 'public/js')
    	.sass('vendor/konekt/appshell/src/resources/assets/sass/appshell.sass', 'public/css')
 	.sass('resources/sass/app.scss', 'public/css');
 
+mix.js('resources/js/block-note.js', 'public/js/block-note.js').react();
+
 // Use this option if vendor/konekt/appshell is a symlink:
 // mix.webpackConfig({ resolve: { symlinks: false } });

@@ -36,6 +36,13 @@
   <main class="bd-main">
     <div class="bd-main-content">
       <div class="bd-content py-3">
+        <div class="container mb-2">
+          <div class="row">
+            <div class="col">
+              <x-block-note/>
+            </div>
+          </div>
+        </div>
         @if(Auth::user() && Auth::user()->isBarredFromAccessingTheApp())
         @include('layouts._trial-ended')
         @endif
