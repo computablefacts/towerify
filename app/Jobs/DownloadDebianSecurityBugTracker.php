@@ -67,7 +67,7 @@ class DownloadDebianSecurityBugTracker implements ShouldQueue
                 }
             }
         }
-        
-        event(new RebuildPackagesList());
+
+        RebuildPackagesList::sink();
     }
 }
