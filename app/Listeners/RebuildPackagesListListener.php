@@ -22,11 +22,11 @@ class RebuildPackagesListListener extends AbstractListener
 
         Tenant::all()
             ->map(fn(Tenant $tenant) => User::where('tenant_id', $tenant->id)->orderBy('created_at')->first())
-            ->filter(fn(User $user) => isset($user))
+            ->filter(fn(?User $user) => isset($user))
             ->each(function (User $user) {
 
                 Auth::login($user); // otherwise the tenant will not be properly set
-                
+
                 YnhServer::all()
                     ->each(function (YnhServer $server) {
                         try {
