@@ -327,7 +327,7 @@ Route::get('/dispatch/{job}', function (string $job) {
             if ($job === 'dl_debian_security_bug_tracker') {
                 \App\Jobs\DownloadDebianSecurityBugTracker::dispatch();
             } elseif ($job === 'rebuild_packages_list') {
-                event(new RebuildPackagesList());
+                RebuildPackagesList::sink();
             }
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
