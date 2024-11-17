@@ -2,6 +2,9 @@
 
 namespace App\Events;
 
+use App\Models\Tenant;
+use App\Models\YnhServer;
+use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -11,9 +14,21 @@ class RebuildPackagesList
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct()
+    public User $user;
+    public ?YnhServer $server;
+
+    public function __construct(User $user, ?YnhServer $server = null)
     {
-        //
+        $this->user = $user;
+        $this->server = $server;
+    }
+
+    public static function sink()
+    {
+        Tenant::all()
+            ->map(fn(Tenant $tenant) => User::where('tenant_id', $tenant->id)->orderBy('created_at')->first())
+            ->filter(fn(?User $user) => isset($user))
+            ->each(fn(User $user) => event(new RebuildPackagesList($user)));
     }
 
     public function broadcastOn()
