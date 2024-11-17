@@ -164,6 +164,11 @@ class User extends \Konekt\AppShell\Models\User
         return $this->hasPermissionTo(Permission::USE_CYBER_BUDDY);
     }
 
+    public function canUseFedera(): bool
+    {
+        return $this->hasPermissionTo(Permission::USE_FEDERA);
+    }
+
     public function ynhUsername(): string
     {
         return Str::lower(Str::before(Str::before($this->email, '@'), '+'));

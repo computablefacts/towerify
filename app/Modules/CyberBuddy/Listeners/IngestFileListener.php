@@ -30,11 +30,13 @@ class IngestFileListener extends AbstractListener
         Auth::login($event->user); // otherwise the tenant will not be properly set
 
         try {
+            /** @var ?Collection $collection */
             $collection = Collection::where('name', $event->collection)
                 ->where('is_deleted', false)
                 ->first();
 
             if (!$collection) {
+                /** @var Collection $collection */
                 $collection = Collection::create(['name' => $event->collection]);
             }
 
@@ -65,7 +67,7 @@ class IngestFileListener extends AbstractListener
 
                 // Cleanup
                 unlink($webmFilePath);
-                
+
                 if (!$process->isSuccessful() || !file_exists($mp3FilePath)) {
                     throw new \Exception("Failed to convert webm to mp3 : {$file->downloadUrl()}");
                 }

@@ -63,6 +63,10 @@ class RouteServiceProvider extends ServiceProvider
             ->prefix('tcb/web')
             ->namespace('App\Modules\TheCyberBrief\Http\Controllers')
             ->group(base_path('app/Modules/TheCyberBrief/web.php'));
+        Route::middleware('web')
+            ->prefix('f/web')
+            ->namespace('App\Modules\Federa\Http\Controllers')
+            ->group(base_path('app/Modules/Federa/web.php'));
     }
 
     /**
@@ -86,5 +90,9 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace('App\Modules\CyberBuddy\Http\Controllers')
             ->group(base_path('app/Modules/CyberBuddy/api.php'));
+        Route::prefix('f/api/v2')
+            ->middleware('api')
+            ->namespace('App\Modules\Federa\Http\Controllers')
+            ->group(base_path('app/Modules/Federa/api.php'));
     }
 }

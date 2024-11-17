@@ -17,4 +17,5 @@ class Permission extends PermissionBase
     const BUY_STUFF = 'buy stuff'; // display store & cart
     const USE_ADVERSARY_METER = 'use adversary meter';
     const USE_CYBER_BUDDY = 'use cyber buddy';
+    const USE_FEDERA = 'use federa';
 }

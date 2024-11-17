@@ -3,7 +3,6 @@
 namespace App\Modules\CyberBuddy\Http\Controllers;
 
 use App\Models\YnhServer;
-use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Conversations\QuestionsAndAnswers;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
@@ -188,6 +187,7 @@ class CyberBuddyController extends Controller
             if (!IsValidCollectionName::test($request->string('collection'))) {
                 return response()->json(['error' => 'Invalid collection name.'], 500);
             }
+            /** @var \App\Modules\CyberBuddy\Models\Collection $collection */
             $collection = \App\Modules\CyberBuddy\Models\Collection::create(['name' => $request->string('collection')]);
         }
         if (!$request->hasFile('file')) {
@@ -215,6 +215,7 @@ class CyberBuddyController extends Controller
             if (!IsValidCollectionName::test($request->string('collection'))) {
                 return response()->json(['error' => 'Invalid collection name.'], 500);
             }
+            /** @var \App\Modules\CyberBuddy\Models\Collection $collection */
             $collection = \App\Modules\CyberBuddy\Models\Collection::create(['name' => $request->string('collection')]);
         }
 

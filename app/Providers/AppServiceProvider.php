@@ -62,6 +62,10 @@ use App\Modules\CyberBuddy\Observers\ChunkTagObserver;
 use App\Modules\CyberBuddy\Observers\CollectionObserver;
 use App\Modules\CyberBuddy\Observers\FilesObserver;
 use App\Modules\CyberBuddy\Observers\PromptObserver;
+use App\Modules\Federa\Models\CsvRow;
+use App\Modules\Federa\Models\CsvFile;
+use App\Modules\Federa\Observers\CsvRowObserver;
+use App\Modules\Federa\Observers\CsvUploadObserver;
 use App\Observers\AddressObserver;
 use App\Observers\AdjustmentObserver;
 use App\Observers\BillpayerObserver;
@@ -128,7 +132,7 @@ class AppServiceProvider extends ServiceProvider
 
         Cashier::useCustomerModel(User::class);
         Cashier::calculateTaxes();
-        
+
         if (Str::startsWith(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
@@ -235,6 +239,10 @@ class AppServiceProvider extends ServiceProvider
         Collection::observe(CollectionObserver::class);
         File::observe(FilesObserver::class);
         Prompt::observe(PromptObserver::class);
+
+        // Federa
+        CsvFile::observe(CsvUploadObserver::class);
+        CsvRow::observe(CsvRowObserver::class);
     }
 
     /**
@@ -257,6 +265,11 @@ class AppServiceProvider extends ServiceProvider
         // Reports
         $this->app->bind('re_api_utils', function () {
             return new \App\Modules\Reports\Helpers\ApiUtils();
+        });
+
+        // Federa
+        $this->app->bind('f_api_utils', function () {
+            return new \App\Modules\Federa\Helpers\ApiUtils();
         });
     }
 }

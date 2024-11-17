@@ -11,6 +11,7 @@ use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Jobs\TriggerScan;
 use App\Modules\CyberBuddy\Jobs\DeleteEmbeddedChunks;
 use App\Modules\CyberBuddy\Jobs\EmbedChunks;
+use App\Modules\Federa\Jobs\DeleteCsvRows;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -50,6 +51,9 @@ class Kernel extends ConsoleKernel
         // CyberBuddy
         $schedule->job(new EmbedChunks())->everyMinute();
         $schedule->job(new DeleteEmbeddedChunks())->everyMinute();
+
+        // Federa
+        $schedule->job(new DeleteCsvRows())->everyMinute();
     }
 
     /**
