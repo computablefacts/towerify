@@ -80,6 +80,15 @@ class CyberBuddyController extends Controller
             });
     }
 
+    public function llm(Request $request)
+    {
+        $response = ApiUtils::ask_chunks_demo($request->string('collection'), $request->string('instruction'));
+        if ($response['error']) {
+            return 'Une erreur s\'est produite. Veuillez réessayer ultérieurement.';
+        }
+        return $response['response'];
+    }
+
     public function streamFile(string $secret, StreamOneFileRequest $request)
     {
         /** @var File $file */

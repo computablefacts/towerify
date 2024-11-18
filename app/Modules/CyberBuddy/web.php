@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::post('/llm', 'CyberBuddyController@llm')->middleware('auth');
+
 Route::get('/files', 'CyberBuddyController@files')->middleware('auth');
 
 Route::delete('/files/{id}', 'CyberBuddyController@deleteFile')->middleware('auth');
