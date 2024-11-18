@@ -25,7 +25,16 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-        VerifyCsrfToken::except(['cb/web/botman']);
+        VerifyCsrfToken::except([
+            'setup/*',
+            'update/*',
+            'logalert/*',
+            'logparser/*',
+            'osquery/*',
+            'cb/web/botman',
+            'cb/web/files/*',
+            'stripe/*',
+        ]);
     }
 
     /**
