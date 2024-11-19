@@ -49,11 +49,9 @@ class ApiUtils
     }
 
     /** @deprecated */
-    public function ask_chunks_demo(string $collection, string $question): array
+    public function ask_chunks_demo(string $collection, string $question, string $prompt = ""): array
     {
-        /** @var Prompt $prompt */
-        $prompt = Prompt::where('name', 'default_debugger')->firstOrfail();
-        return $this->ask_chunks($question, $collection, $prompt->template, true, true, 'fr');
+        return $this->ask_chunks($question, $collection, $prompt, true, true, 'fr');
     }
 
     public function ask_chunks(string $question, string $collectionName, string $prompt, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array

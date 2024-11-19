@@ -14,9 +14,11 @@ use App\Modules\CyberBuddy\Http\Requests\UploadOneFileRequest;
 use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
+use App\Modules\CyberBuddy\Models\Template;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -74,6 +76,54 @@ class CyberBuddyController extends Controller
         return view('modules.cyber-buddy.chat');
     }
 
+    public function templates()
+    {
+        return Template::where('readonly', true)
+            ->orderBy('name', 'asc')
+            ->get()
+            ->concat(
+                Template::where('readonly', false)
+                    ->where('created_by', Auth::user()->id)
+                    ->orderBy('name', 'asc')
+                    ->get()
+            )
+            ->map(function (Template $template) {
+                return [
+                    'id' => $template->id,
+                    'name' => $template->name,
+                    'template' => $template->template,
+                    'type' => $template->readonly ? 'template' : 'draft',
+                    'user' => User::find($template->created_by)->name,
+                ];
+            });
+    }
+
+    public function saveTemplate(Request $request)
+    {
+        // TODO : validate request
+        $id = $request->integer('id', 0);
+        $name = $request->string('name');
+        $template = $request->input('template', []);
+
+        if (isset($template) && count($template) > 0) {
+            if ($id === 0) {
+                return Template::create([
+                    'name' => (empty($name) ? "doc" : $name) . '-' . Carbon::now()->toIso8601ZuluString(),
+                    'template' => $template,
+                    'readonly' => false,
+                ]);
+            }
+            return Template::updateOrCreate([
+                'id' => $id,
+                'created_by' => Auth::user()->id,
+                'readonly' => false,
+            ], [
+                'template' => $template,
+            ]);
+        }
+        return [];
+    }
+
     public function collections()
     {
         return \App\Modules\CyberBuddy\Models\Collection::orderBy('name', 'asc')
@@ -86,9 +136,22 @@ class CyberBuddyController extends Controller
             });
     }
 
-    public function llm(Request $request)
+    public function llm1(Request $request)
     {
-        $response = ApiUtils::ask_chunks_demo($request->string('collection'), $request->string('instructions'));
+        // TODO : validate request
+        /** @var Prompt $prompt */
+        $prompt = Prompt::where('name', 'default_debugger')->firstOrfail();
+        $response = ApiUtils::ask_chunks_demo($request->string('collection'), $request->string('instructions'), $prompt->template);
+        if ($response['error']) {
+            return 'Une erreur s\'est produite. Veuillez réessayer ultérieurement.';
+        }
+        return self::removeSourcesFromAnswer($response['response']);
+    }
+
+    public function llm2(Request $request)
+    {
+        // TODO : validate request
+        $response = ApiUtils::ask_chunks_demo($request->string('collection'), $request->string('instructions'), $request->string('prompt'));
         if ($response['error']) {
             return 'Une erreur s\'est produite. Veuillez réessayer ultérieurement.';
         }
@@ -430,7 +493,9 @@ class CyberBuddyController extends Controller
         })->skipsConversation();
 
         $botman->hears('/question ([a-zA-Z0-9]+) (.*)', function (BotMan $botman, string $collection, string $question) {
-            $response = ApiUtils::ask_chunks_demo($collection, $question);
+            /** @var Prompt $prompt */
+            $prompt = Prompt::where('name', 'default_debugger')->firstOrfail();
+            $response = ApiUtils::ask_chunks_demo($collection, $question, $prompt->template);
             if ($response['error']) {
                 $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
             } else {

@@ -20,10 +20,15 @@ const QaBlock = createReactBlockSpec({
       default: [],
     }, answers: {
       default: [],
+    }, instructions: {
+      default: "",
+    }, collection: {
+      default: "",
     },
   }, content: "inline",
 }, {
   render: (props) => {
+    const [loading, setLoading] = useState(false);
     const handleChange = (event, question) => {
       const answers = [...props.block.props.answers];
       const answer = answers.find(answer => answer.question === question);
@@ -36,9 +41,19 @@ const QaBlock = createReactBlockSpec({
     };
     const handleClick = (event) => {
       const answers = props.block.props.answers;
-      console.log(answers);
-      const text = answers.map(answer => `${answer.question} ${answer.answer}`).join("\n");
-      props.editor.insertBlocks([{type: "paragraph", content: text}], props.block, 'after');
+      const text = answers.map(answer => `QUESTION: ${answer.question}\nANSWER: ${answer.answer}`).join("\n\n");
+      setLoading(true);
+      axios.post(`/cb/web/llm2`,
+        {collection: props.block.props.collection, prompt: props.block.props.instructions, instructions: text})
+      .then(function (response) {
+        if (response.data) {
+          props.editor.insertBlocks([{type: "paragraph", content: response.data}], props.block, 'after');
+        } else {
+          console.log(response.data);
+        }
+      })
+      .catch(error => console.log(error))
+      .finally(() => setLoading(false));
     };
     return (<div style={{width: "100%"}}>{props.block.props.questions.map(question => {
       return (<div key={question}>
@@ -51,15 +66,20 @@ const QaBlock = createReactBlockSpec({
                style={{width: "100%", border: "none", padding: "3px", outline: "unset"}}
                onChange={(event) => handleChange(event, question)}
                placeholder={"Saisissez votre réponse ici..."}
+               disabled={loading}
                required>
         </input>
       </div>);
     })}
-      <input type={"button"}
-             value={"Regénérer..."}
-             style={{backgroundColor: "#0d6efd", color: "white", border: "none", padding: "5px"}}
-             onClick={handleClick}>
-      </input>
+      <div className={"d-flex justify-content-center"}>
+        <input type={"button"}
+               value={"Générer!"}
+               style={{backgroundColor: "#0d6efd", color: "white", border: "none", padding: "10px"}}
+               disabled={loading}
+               onClick={handleClick}>
+        </input>
+        {loading && <span className="tw-loader-25 align-self-center ml-3"></span>}
+      </div>
     </div>);
   }
 });
@@ -88,8 +108,7 @@ const AiBlock = createReactBlockSpec({
         const propz = props.block.props;
         if (propz.instructions && propz.instructions.trim()) {
           setLoading(true);
-          axios
-          .post(`/cb/web/llm`, {collection: propz.collection, instructions: propz.instructions})
+          axios.post(`/cb/web/llm1`, {collection: propz.collection, instructions: propz.instructions})
           .then(function (response) {
             if (response.data) {
               insertOrUpdateBlock(props.editor, {type: "paragraph", content: response.data});
@@ -166,9 +185,14 @@ const getCustomSlashMenuItems = (editor, isSlash) => {
 
 function BlockNoteElement() {
   const editor = useCreateBlockNote(ctx.settings);
+  ctx.editor = editor;
+  ctx.blocks = editor.document;
   return (<BlockNoteView
     editor={editor}
     slashMenu={false}
+    onChange={() => {
+      ctx.blocks = editor.document;
+    }}
   >
     <SuggestionMenuController
       triggerCharacter={"/"}
@@ -195,7 +219,7 @@ function renderBlockNote(id, settings) {
 }
 
 const BlockNote = {
-  render: renderBlockNote,
+  render: renderBlockNote, observers: null, ctx: ctx,
 };
 
 export {
