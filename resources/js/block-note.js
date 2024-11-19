@@ -14,6 +14,56 @@ const ctx = {
   history: [],
 };
 
+const QaBlock = createReactBlockSpec({
+  type: "qa_block", propSchema: {
+    questions: {
+      default: [],
+    }, answers: {
+      default: [],
+    },
+  }, content: "inline",
+}, {
+  render: (props) => {
+    const handleChange = (event, question) => {
+      const answers = [...props.block.props.answers];
+      const answer = answers.find(answer => answer.question === question);
+      if (answer) {
+        answer.answer = event.target.value;
+      } else {
+        answers.push({question: question, answer: event.target.value});
+      }
+      props.editor.updateBlock(props.block, {type: "qa_block", props: {answers: answers}});
+    };
+    const handleClick = (event) => {
+      const answers = props.block.props.answers;
+      console.log(answers);
+      const text = answers.map(answer => `${answer.question} ${answer.answer}`).join("\n");
+      props.editor.insertBlocks([{type: "paragraph", content: text}], props.block, 'after');
+    };
+    return (<div style={{width: "100%"}}>{props.block.props.questions.map(question => {
+      return (<div key={question}>
+        <div style={{
+          backgroundColor: "var(--ds-background-discovery)", color: "var(--ds-text-discovery)", padding: "3px"
+        }}>
+          {question}
+        </div>
+        <input type={"text"}
+               style={{width: "100%", border: "none", padding: "3px", outline: "unset"}}
+               onChange={(event) => handleChange(event, question)}
+               placeholder={"Saisissez votre réponse ici..."}
+               required>
+        </input>
+      </div>);
+    })}
+      <input type={"button"}
+             value={"Regénérer..."}
+             style={{backgroundColor: "#0d6efd", color: "white", border: "none", padding: "5px"}}
+             onClick={handleClick}>
+      </input>
+    </div>);
+  }
+});
+
 const AiBlock = createReactBlockSpec({
   type: "ai_block", propSchema: {
     prompt: {
@@ -137,7 +187,7 @@ function renderBlockNote(id, settings) {
     ctx.settings = settings;
     ctx.settings.schema = BlockNoteSchema.create({
       blockSpecs: {
-        ...defaultBlockSpecs, ai_block: AiBlock,
+        ...defaultBlockSpecs, ai_block: AiBlock, qa_block: QaBlock,
       },
     });
     ReactDOM.render(<BlockNoteElement/>, el);
