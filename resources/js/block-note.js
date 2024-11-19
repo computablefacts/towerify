@@ -31,31 +31,15 @@ const AiBlock = createReactBlockSpec({
     const [loading, setLoading] = useState(false);
     const handleChange = (event) => {
       props.editor.updateBlock(props.block, {type: "ai_block", props: {instructions: event.target.value}});
-      props.editor.forEachBlock(block => {
-
-        const blockId = block.id;
-        let blockHistory = ctx.history.find(h => h.id === blockId);
-
-        if (block.content && block.content.length === 1 && (block.content[0].text.indexOf('<NOM_DE_L\'ENTITE>') >= 0
-          || (blockHistory && blockHistory.text.indexOf('<NOM_DE_L\'ENTITE>') >= 0))) {
-          // console.log(block, blockHistory);
-          if (!blockHistory) {
-            blockHistory = {id: block.id, text: block.content[0].text};
-            ctx.history.push(blockHistory);
-          }
-          block.content[0].text = event.target.value ? blockHistory.text.replace('<NOM_DE_L\'ENTITE>',
-            event.target.value) : blockHistory.text;
-          props.editor.updateBlock(block, {content: [block.content[0]]});
-        }
-      });
     };
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        if (props.block.props.instructions && props.block.props.instructions.trim()) {
+        const propz = props.block.props;
+        if (propz.instructions && propz.instructions.trim()) {
           setLoading(true);
           axios
-          .post(`/cb/web/llm`, {collection: props.block.props.collection, instructions: props.block.props.instructions})
+          .post(`/cb/web/llm`, {collection: propz.collection, instructions: propz.instructions})
           .then(function (response) {
             if (response.data) {
               insertOrUpdateBlock(props.editor, {type: "paragraph", content: response.data});
