@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 import "@blocknote/core/fonts/inter.css";
 import {BlockNoteView} from "@blocknote/mantine";
@@ -8,6 +8,7 @@ import {
   createReactBlockSpec, getDefaultReactSlashMenuItems, SuggestionMenuController, useCreateBlockNote
 } from "@blocknote/react";
 import {HiSparkles} from "react-icons/hi";
+import {Menu} from "@mantine/core";
 
 const ctx = {};
 
@@ -15,61 +16,95 @@ const AiBlock = createReactBlockSpec({
   type: "ai_block", propSchema: {
     prompt: {
       default: "AI Assistant",
-    },
+    }, collections: {
+      default: [],
+    }, collection: {
+      default: "",
+    }
   }, content: "inline",
 }, {
   render: (props) => {
-    const inputRef = useRef(null);
-    useEffect(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, []);
+    const [loading, setLoading] = useState(false);
+    let instructions = null;
+    const handleChange = (event) => instructions = event.target.value;
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        const block = props.block;
-        const text = inputRef.current.value;
-        console.log(block, text);
-        axios.post(`/cb/web/llm`, {collection: 'anssi', instruction: text})
-        .then(function (response) {
-          if (response.data) {
-            insertOrUpdateBlock(props.editor, {type: "paragraph", content: response.data});
-            props.editor.deleteBlock(block.id);
-          } else {
-            toaster.toastError(response.data);
-          }
-        }).catch(error => toaster.toastAxiosError(error));
+        if (instructions && instructions.trim()) {
+          setLoading(true);
+          axios
+          .post(`/cb/web/llm`, {collection: props.block.props.collection, instructions: instructions})
+          .then(function (response) {
+            if (response.data) {
+              insertOrUpdateBlock(props.editor, {type: "paragraph", content: response.data});
+            } else {
+              console.log(response.data);
+            }
+          })
+          .catch(error => console.log(error))
+          .finally(() => setLoading(false));
+        }
       }
     };
     return (
       <div style={{width: "100%", display: "flex", justifyContent: "center", alignItems: "center", flexGrow: "1"}}>
-        <div style={{backgroundColor: "#0194ff", color: "white", padding: "3px"}}>
-          @{props.block.props.prompt}
+        <div style={{
+          backgroundColor: "var(--ds-background-discovery)", color: "var(--ds-text-discovery)", padding: "3px"
+        }}>
+          @{props.block.props.prompt}&nbsp;
         </div>
+        {props.block.props.collections.length > 0 && <Menu withinPortal={false} zIndex={999999}>
+          <Menu.Target>
+            <div style={{
+              cursor: "pointer",
+              backgroundColor: "var(--ds-background-information)",
+              color: "var(--ds-text-information)",
+              padding: "3px"
+            }}>
+              &nbsp;{props.block.props.collection}&nbsp;
+            </div>
+          </Menu.Target>
+          <Menu.Dropdown>
+            {props.block.props.collections.map(col => {
+              return (<Menu.Item key={col} onClick={() => props.editor.updateBlock(props.block,
+                {type: "ai_block", props: {collection: col}})}>{col}</Menu.Item>);
+            })}
+          </Menu.Dropdown>
+        </Menu>}
         <input type={"text"}
-               style={{flexGrow: "1", border: "none", padding: "3px"}}
-               ref={inputRef}
-               onKeyDown={handleKeyDown}>
+               style={{flexGrow: "1", border: "none", padding: "3px", outline: "unset", minHeight: "30px"}}
+               ref={props.contentRef}
+               disabled={loading}
+               onKeyDown={handleKeyDown}
+               onChange={handleChange}
+               placeholder={"Saisissez vos instructions ici..."}
+               autoFocus
+               required>
         </input>
+        {loading && <span className="tw-loader-25"></span>}
       </div>)
   }
 });
 
-const getCustomSlashMenuItems = (editor) => {
+const getCustomSlashMenuItems = (editor, isSlash) => {
 
-  const items = getDefaultReactSlashMenuItems(editor).filter(
-    (item) => item.group !== 'Media' && item.group !== 'Others');
+  const items = isSlash ? getDefaultReactSlashMenuItems(editor).filter(
+    (item) => item.group !== 'Media' && item.group !== 'Others') : [];
 
-  items.push({
-    group: 'Cywise',
-    key: 'ai_command',
-    icon: <HiSparkles size={18}/>,
-    title: 'CyberBuddy',
-    subtext: 'Use AI to generate paragraph',
-    onItemClick: () => insertOrUpdateBlock(editor, {type: "ai_block", props: {prompt: 'CyberBuddy'}}),
-  });
-
+  if (!isSlash) {
+    items.push({
+      group: 'Cywise',
+      key: 'ai_command',
+      icon: <HiSparkles size={18}/>,
+      title: 'CyberBuddy',
+      subtext: 'Use AI to generate paragraph',
+      onItemClick: () => insertOrUpdateBlock(editor, {
+        type: "ai_block", props: {
+          prompt: 'CyberBuddy', collection: "anssi", collections: ["anssi", "pssi"],
+        }
+      }),
+    });
+  }
   return items;
 };
 
@@ -81,7 +116,11 @@ function BlockNoteElement() {
   >
     <SuggestionMenuController
       triggerCharacter={"/"}
-      getItems={async (query) => filterSuggestionItems(getCustomSlashMenuItems(editor), query)}
+      getItems={async (query) => filterSuggestionItems(getCustomSlashMenuItems(editor, true), query)}
+    />
+    <SuggestionMenuController
+      triggerCharacter={"@"}
+      getItems={async (query) => filterSuggestionItems(getCustomSlashMenuItems(editor, false), query)}
     />
   </BlockNoteView>);
 }

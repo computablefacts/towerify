@@ -7,6 +7,15 @@ use Tests\TestCase;
 
 class CyberBuddyControllerTest extends TestCase
 {
+    public function testItRemovesSourcesFromAnswer()
+    {
+        $html = CyberBuddyController::removeSourcesFromAnswer("La source est [[36]].");
+        $this->assertEquals("La source est .", $html);
+
+        $html = CyberBuddyController::removeSourcesFromAnswer("La source est [[36],[44]].");
+        $this->assertEquals("La source est .", $html);
+    }
+
     public function testItCreatesATooltipWhenASingleReferenceIsUsed()
     {
         $tooltip = "La source est \n                  <div class=\"tooltip\">\n                    <b style=\"color:#f8b500\">[36]</b>\n                    <span class=\"tooltiptext tooltip-top\">Source !</span>\n                  </div>\n                .";

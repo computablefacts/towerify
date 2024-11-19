@@ -58,6 +58,12 @@ class CyberBuddyController extends Controller
         return Str::replace(["\n\n", "\n-"], "<br>", $answer);
     }
 
+    public static function removeSourcesFromAnswer(string $answer): string
+    {
+        // Remove sources such as [[12]] or [[12],[13]] from the answer
+        return preg_replace("/\[((\[\d+],?)+)]/", "", $answer);
+    }
+
     public function showPage()
     {
         return view('modules.cyber-buddy.page');
@@ -82,11 +88,11 @@ class CyberBuddyController extends Controller
 
     public function llm(Request $request)
     {
-        $response = ApiUtils::ask_chunks_demo($request->string('collection'), $request->string('instruction'));
+        $response = ApiUtils::ask_chunks_demo($request->string('collection'), $request->string('instructions'));
         if ($response['error']) {
             return 'Une erreur s\'est produite. Veuillez réessayer ultérieurement.';
         }
-        return $response['response'];
+        return self::removeSourcesFromAnswer($response['response']);
     }
 
     public function streamFile(string $secret, StreamOneFileRequest $request)
