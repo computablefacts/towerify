@@ -55,11 +55,13 @@ use App\Modules\AdversaryMeter\Observers\HoneypotObserver;
 use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\ChunkTag;
 use App\Modules\CyberBuddy\Models\Collection;
+use App\Modules\CyberBuddy\Models\Conversation;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
 use App\Modules\CyberBuddy\Observers\ChunkObserver;
 use App\Modules\CyberBuddy\Observers\ChunkTagObserver;
 use App\Modules\CyberBuddy\Observers\CollectionObserver;
+use App\Modules\CyberBuddy\Observers\ConversationObserver;
 use App\Modules\CyberBuddy\Observers\FilesObserver;
 use App\Modules\CyberBuddy\Observers\PromptObserver;
 use App\Observers\AddressObserver;
@@ -128,7 +130,7 @@ class AppServiceProvider extends ServiceProvider
 
         Cashier::useCustomerModel(User::class);
         Cashier::calculateTaxes();
-        
+
         if (Str::startsWith(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
@@ -233,6 +235,7 @@ class AppServiceProvider extends ServiceProvider
         Chunk::observe(ChunkObserver::class);
         ChunkTag::observe(ChunkTagObserver::class);
         Collection::observe(CollectionObserver::class);
+        Conversation::observe(ConversationObserver::class);
         File::observe(FilesObserver::class);
         Prompt::observe(PromptObserver::class);
     }

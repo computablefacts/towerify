@@ -89,6 +89,24 @@ html, body {
   -ms-user-select: none;
 }
 
+.stars {
+  --rating: 0;
+  --percent: calc(var(--rating) / 1 * 100%);
+  display: inline-block;
+  font-size: 20px;
+  font-family: Times;
+  line-height: 1;
+  text-align: right;
+}
+
+.stars::before {
+  content: "★";
+  letter-spacing: 3px;
+  background: linear-gradient(90deg, #fc0 var(--percent), #fff var(--percent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* I N P U T */
 
 .textarea {
