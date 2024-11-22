@@ -12,6 +12,7 @@ use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadOneFileRequest;
 use App\Modules\CyberBuddy\Models\Chunk;
+use App\Modules\CyberBuddy\Models\Conversation;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
 use App\Modules\CyberBuddy\Models\Template;
@@ -503,6 +504,19 @@ class CyberBuddyController extends Controller
                 $botman->reply($answer);
             }
         })->skipsConversation();
+
+        $botman->hears('/rate ([a-z0-9]+) (.*)', function (BotMan $botman, string $threadId, string $dom) {
+            $user = $this->user($botman);
+            if ($user) {
+                $dom = Str::after($botman->getMessage()->getPayload()['message'], "/rate {$threadId} ");
+                $conversation = Conversation::updateOrCreate([
+                    'thread_id' => $threadId
+                ], [
+                    'thread_id' => $threadId,
+                    'dom' => $dom,
+                ]);
+            }
+        });
 
         $botman->hears('{message}', function (BotMan $botman, string $message) {
             if (Str::startsWith($message, "/")) {
