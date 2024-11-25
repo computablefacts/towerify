@@ -45,7 +45,7 @@ Route::group([
         return response("ok ({$events->count()} events in file)", 200)
             ->header('Content-Type', 'text/plain');
     });
-})->middleware(['auth', 'throttle:400,1']);
+})->middleware(['auth', 'throttle:60,1']);
 
 Route::group([
     'prefix' => 'inventory',
