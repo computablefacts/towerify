@@ -260,6 +260,18 @@ class CyberBuddyController extends Controller
         ]);
     }
 
+    public function saveCollection(int $id, Request $request)
+    {
+        $this->validate($request, [
+            'priority' => 'required|integer|min:0',
+        ]);
+        $priority = $request->string('priority');
+        \App\Modules\CyberBuddy\Models\Collection::where('id', $id)->update(['priority' => $priority]);
+        return response()->json([
+            'success' => __('The collection has been saved!'),
+        ]);
+    }
+
     public function deleteChunk(int $id)
     {
         Chunk::where('id', $id)->update(['is_deleted' => true]);
