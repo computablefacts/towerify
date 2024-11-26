@@ -59,7 +59,8 @@ class ApiUtils
 
     public function ask_chunks(string $question, string $collectionName, string $prompt, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
     {
-        $collections = array_unshift(Collection::where('name', '<>', $collectionName)->pluck('name')->toArray(), $collectionName);
+        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
+        array_unshift($collections, $collectionName);
         return $this->post('/ask_chunks', [
             'question' => $question,
             'collection_name' => $collectionName,
@@ -74,7 +75,8 @@ class ApiUtils
 
     public function search_chunks(string $question, string $collectionName, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
     {
-        $collections = array_unshift(Collection::where('name', '<>', $collectionName)->pluck('name')->toArray(), $collectionName);
+        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
+        array_unshift($collections, $collectionName);
         return $this->post('/search_chunks', [
             'question' => $question,
             'collection_name' => $collectionName,
@@ -132,7 +134,8 @@ class ApiUtils
 
     public function chat_manual(string $question, string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 10, string $lang = 'en'): array
     {
-        $collections = array_unshift(Collection::where('name', '<>', $collectionName)->pluck('name')->toArray(), $collectionName);
+        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
+        array_unshift($collections, $collectionName);
         return $this->post('/chat_manual', [
             'question' => $question,
             'collection_name' => $collectionName,
