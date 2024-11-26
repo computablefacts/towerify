@@ -28,6 +28,8 @@ Route::delete('/prompts/{id}', 'CyberBuddyController@deletePrompt')->middleware(
 
 Route::post('/prompts/{id}', 'CyberBuddyController@savePrompt')->middleware('auth');
 
+Route::delete('/conversations/{id}', 'CyberBuddyController@deleteConversation')->middleware('auth');
+
 Route::get('/cyber-buddy', 'CyberBuddyController@showPage')->middleware('auth');
 
 Route::get('/cyber-buddy/chat', 'CyberBuddyController@showChat');

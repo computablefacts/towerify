@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-  <title>Botman Widget</title>
+  <title>CyberBuddy</title>
   <meta charset="UTF-8">
-  <link rel="stylesheet" type="text/css" href="/cyber_buddy/botman/chat.css">
+  <link rel="stylesheet" type="text/css" href="/cyber_buddy/botman/chat_1.css">
+  <link rel="stylesheet" type="text/css" href="/cyber_buddy/botman/chat_2.css">
   <style>
 
     /* TABLE */

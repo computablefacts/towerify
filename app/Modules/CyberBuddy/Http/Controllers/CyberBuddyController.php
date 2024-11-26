@@ -329,6 +329,14 @@ class CyberBuddyController extends Controller
         ]);
     }
 
+    public function deleteConversation(int $id)
+    {
+        Conversation::where('id', $id)->delete();
+        return response()->json([
+            'success' => __('The conversation has been deleted!'),
+        ]);
+    }
+
     public function deletePrompt(int $id)
     {
         Prompt::where('id', $id)->update(['is_deleted' => true]);
