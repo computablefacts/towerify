@@ -118,3 +118,26 @@ div.loading-dots .dot-lg {
   color: white;
   text-align: center;
 }
+
+/* TABLE */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  background-color: #00264b;
+  color: white;
+}
+
+td {
+  background-color: white;
+  color: #00264b;
+}

@@ -49,9 +49,9 @@ class CyberBuddyController extends Controller
             $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
             if ($tooltip) {
                 $answer = Str::replace($ref, "
-                  <div class=\"tooltip\">
+                  <div class=\"cb-tooltip\">
                     <b style=\"color:#f8b500\">[{$id}]</b>
-                    <span class=\"tooltiptext tooltip-top\">{$tooltip['text']}</span>
+                    <span class=\"cb-tooltiptext cb-tooltip-top\">{$tooltip['text']}</span>
                   </div>
                 ", $answer);
             }
