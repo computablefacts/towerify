@@ -27,7 +27,7 @@ class BeginDiscoveryListener extends AbstractListener
             Log::error('Assets discovery cannot be started : ' . json_encode($task));
         } else {
             Asset::where('tld', $tld)->update(['discovery_id', $taskId]);
-            event(new EndDiscovery(Carbon::now(), $tld, $taskId));
+            EndDiscovery::dispatch(Carbon::now(), $tld, $taskId);
         }
     }
 

@@ -34,7 +34,7 @@ class EndVulnsScan
 
     public function sink(): void
     {
-        event(new EndVulnsScan($this->start, $this->scan()));
+        EndVulnsScan::dispatch($this->start, $this->scan());
     }
 
     public function drop(): bool

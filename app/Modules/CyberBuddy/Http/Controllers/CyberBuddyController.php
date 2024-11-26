@@ -536,7 +536,7 @@ class CyberBuddyController extends Controller
         }
 
         // Process file ex. create embeddings
-        event(new IngestFile(Auth::user(), $collection->name, $fileRef->id));
+        IngestFile::dispatch(Auth::user(), $collection->name, $fileRef->id);
 
         return $fileRef->downloadUrl();
     }

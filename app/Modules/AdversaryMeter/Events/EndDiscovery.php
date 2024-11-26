@@ -30,7 +30,7 @@ class EndDiscovery
 
     public function sink(): void
     {
-        event(new EndDiscovery($this->start, $this->tld, $this->taskId));
+        EndDiscovery::dispatch($this->start, $this->tld, $this->taskId);
     }
 
     public function drop(): bool

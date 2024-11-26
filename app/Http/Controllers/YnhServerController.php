@@ -120,7 +120,7 @@ class YnhServerController extends Controller
         $server->ssh_username = $request->username;
         $server->save();
 
-        event(new CreateAsset($server->user()->first(), $server->ip(), true, [$server->name]));
+        CreateAsset::dispatch($server->user()->first(), $server->ip(), true, [$server->name]);
 
         /** @var User $user */
         $user = Auth::user();
@@ -135,14 +135,14 @@ class YnhServerController extends Controller
                 'ynh_server_id' => $server->id,
                 'updated' => false,
             ]));
-            event(new CreateAsset($server->user()->first(), $request->domain, true, [$server->name]));
+            CreateAsset::dispatch($server->user()->first(), $request->domain, true, [$server->name]);
         }
 
         $uid = Str::random(10);
         $ssh = $server->sshConnection($uid, $user);
         $ssh->newTrace(SshTraceStateEnum::PENDING, "Your host is being configured!");
 
-        event(new ConfigureHost($uid, $user, $server));
+        ConfigureHost::dispatch($uid, $user, $server);
 
         return response()->json(['success' => "Your host is being configured!"]);
     }
@@ -189,10 +189,10 @@ class YnhServerController extends Controller
 
         if ($server->ip()) {
 
-            event(new DeleteAsset($server->user()->first(), $server->ip()));
+            DeleteAsset::dispatch($server->user()->first(), $server->ip());
 
             $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Stopping asset monitoring...');
-            event(new DeleteAsset(Auth::user(), $server->ip()));
+            DeleteAsset::dispatch(Auth::user(), $server->ip());
             $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring stopped.');
 
             $server->sshEnableAdminConsole($ssh);
@@ -217,7 +217,7 @@ class YnhServerController extends Controller
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "Your application is being removed!");
 
-        event(new UninstallApp($uid, Auth::user(), $application));
+        UninstallApp::dispatch($uid, Auth::user(), $application);
 
         return response()->json(['success' => "Your application is being removed!"]);
     }
@@ -244,7 +244,7 @@ class YnhServerController extends Controller
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "Your application is being installed!");
 
-        event(new InstallApp($uid, Auth::user(), $server, $order));
+        InstallApp::dispatch($uid, Auth::user(), $server, $order);
 
         return response()->json(['success' => "Your application is being installed!"]);
     }
@@ -261,7 +261,7 @@ class YnhServerController extends Controller
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The user's permission is being added!");
 
-        event(new AddTwrUserPermission($uid, Auth::user(), $server, $user, $perm));
+        AddTwrUserPermission::dispatch($uid, Auth::user(), $server, $user, $perm);
 
         return response()->json(['success' => "The user's permission is being added!"]);
     }
@@ -280,7 +280,7 @@ class YnhServerController extends Controller
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The user's permission is being added!");
 
-        event(new AddUserPermission($uid, Auth::user(), $server, $user, $perm));
+        AddUserPermission::dispatch($uid, Auth::user(), $server, $user, $perm);
 
         return response()->json(['success' => "The user's permission is being added!"]);
     }
@@ -299,7 +299,7 @@ class YnhServerController extends Controller
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The user's permission is being removed!");
 
-        event(new RemoveUserPermission($uid, Auth::user(), $server, $user, $perm));
+        RemoveUserPermission::dispatch($uid, Auth::user(), $server, $user, $perm);
 
         return response()->json(['success' => "The user's permission is being removed!"]);
     }
@@ -314,7 +314,7 @@ class YnhServerController extends Controller
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The server infos are being pulled!");
 
-        event(new PullServerInfos($uid, Auth::user(), $server));
+        PullServerInfos::dispatch($uid, Auth::user(), $server);
 
         return response()->json(['success' => "The server infos are being pulled!"]);
     }
@@ -329,7 +329,7 @@ class YnhServerController extends Controller
         $ssh = $server->sshConnection($uid, Auth::user());
         $ssh->newTrace(SshTraceStateEnum::PENDING, "The server backup is being created!");
 
-        event(new CreateBackup($uid, Auth::user(), $server));
+        CreateBackup::dispatch($uid, Auth::user(), $server);
 
         return response()->json(['success' => "The server backup is being created!"]);
     }
