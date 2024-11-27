@@ -4,7 +4,6 @@ namespace App\Modules\AdversaryMeter\Events;
 
 use Carbon\Carbon;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -21,11 +20,6 @@ class EndDiscovery
         $this->start = $start;
         $this->tld = $tld;
         $this->taskId = $taskId;
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 
     public function sink(): void

@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Models\YnhApplication;
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -22,10 +21,5 @@ class UninstallApp
         $this->uid = $uid;
         $this->user = $user;
         $this->application = $application;
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }

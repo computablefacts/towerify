@@ -10,6 +10,10 @@ abstract class AbstractListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
+    const string CRITICAL = 'critical';
+    const string MEDIUM = 'medium';
+    const string LOW = 'low';
+
     public $tries = 1;
     public $maxExceptions = 1;
     public $timeout = 10 * 60; // 10 mn

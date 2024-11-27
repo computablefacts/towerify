@@ -4,7 +4,6 @@ namespace App\Modules\AdversaryMeter\Events;
 
 use Carbon\Carbon;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -21,10 +20,5 @@ class IngestHoneypotsEvents
         $this->timestamp = $timestamp;
         $this->dns = $dns;
         $this->events = $events;
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }

@@ -12,6 +12,11 @@ use Illuminate\Support\Str;
 
 class EndDiscoveryListener extends AbstractListener
 {
+    public function viaQueue(): string
+    {
+        return self::LOW;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof EndDiscovery)) {

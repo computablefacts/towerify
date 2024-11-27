@@ -37,6 +37,11 @@ class DeleteAssetListener extends AbstractListener
         return true;
     }
 
+    public function viaQueue(): string
+    {
+        return self::CRITICAL;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof DeleteAsset)) {

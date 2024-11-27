@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Log;
 
 class EndPortsScanListener extends AbstractListener
 {
+    public function viaQueue(): string
+    {
+        return self::MEDIUM;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof EndPortsScan)) {

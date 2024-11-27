@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Log;
 
 class BeginPortsScanListener extends AbstractListener
 {
+    public function viaQueue(): string
+    {
+        return self::MEDIUM;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof BeginPortsScan)) {

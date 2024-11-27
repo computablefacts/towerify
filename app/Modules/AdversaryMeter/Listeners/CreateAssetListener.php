@@ -53,6 +53,11 @@ class CreateAssetListener extends AbstractListener
         return $azzet;
     }
 
+    public function viaQueue(): string
+    {
+        return self::CRITICAL;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof CreateAsset)) {

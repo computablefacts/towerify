@@ -4,7 +4,6 @@ namespace App\Events;
 
 use App\Models\YnhServer;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
@@ -20,10 +19,5 @@ class ProcessLogparserPayload
     {
         $this->server = $server;
         $this->logs = $logs;
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }
