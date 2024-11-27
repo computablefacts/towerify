@@ -41,7 +41,7 @@
         </td>
         <td>
           @if($domain->is_principal)
-          <span class="tw-pill rounded-pill bg-success float-end">
+          <span class="lozenge success float-end">
             principal
           </span>
           @endif
