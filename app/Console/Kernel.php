@@ -34,10 +34,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->job(new CheckServersHealth())->everyFifteenMinutes();
-        $schedule->job(new PullServersInfos())->hourly();
         $schedule->job(new AgeOffOsqueryEvents())->hourly();
+        $schedule->job(new PullServersInfos())->everyThreeHours();
+        $schedule->job(new Summarize())->everySixHours();
         // $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
-        $schedule->job(new Summarize())->daily();
         $schedule->command('telescope:prune --hours=48')->daily();
 
         // AdversaryMeter

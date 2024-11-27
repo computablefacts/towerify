@@ -26,6 +26,8 @@ Route::get('/collections', 'CyberBuddyController@collections')->middleware('auth
 
 Route::delete('/collections/{id}', 'CyberBuddyController@deleteCollection')->middleware('auth');
 
+Route::post('/collections/{id}', 'CyberBuddyController@saveCollection')->middleware('auth');
+
 Route::delete('/chunks/{id}', 'CyberBuddyController@deleteChunk')->middleware('auth');
 
 Route::post('/chunks/{id}', 'CyberBuddyController@saveChunk')->middleware('auth');
@@ -33,6 +35,8 @@ Route::post('/chunks/{id}', 'CyberBuddyController@saveChunk')->middleware('auth'
 Route::delete('/prompts/{id}', 'CyberBuddyController@deletePrompt')->middleware('auth');
 
 Route::post('/prompts/{id}', 'CyberBuddyController@savePrompt')->middleware('auth');
+
+Route::delete('/conversations/{id}', 'CyberBuddyController@deleteConversation')->middleware('auth');
 
 Route::get('/cyber-buddy', 'CyberBuddyController@showPage')->middleware('auth');
 

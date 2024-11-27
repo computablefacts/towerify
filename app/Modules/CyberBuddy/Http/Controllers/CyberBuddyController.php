@@ -51,9 +51,9 @@ class CyberBuddyController extends Controller
             $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
             if ($tooltip) {
                 $answer = Str::replace($ref, "
-                  <div class=\"tooltip\">
+                  <div class=\"cb-tooltip\">
                     <b style=\"color:#f8b500\">[{$id}]</b>
-                    <span class=\"tooltiptext tooltip-top\">{$tooltip['text']}</span>
+                    <span class=\"cb-tooltiptext cb-tooltip-top\">{$tooltip['text']}</span>
                   </div>
                 ", $answer);
             }
@@ -338,6 +338,18 @@ class CyberBuddyController extends Controller
         ]);
     }
 
+    public function saveCollection(int $id, Request $request)
+    {
+        $this->validate($request, [
+            'priority' => 'required|integer|min:0',
+        ]);
+        $priority = $request->string('priority');
+        \App\Modules\CyberBuddy\Models\Collection::where('id', $id)->update(['priority' => $priority]);
+        return response()->json([
+            'success' => __('The collection has been saved!'),
+        ]);
+    }
+
     public function deleteChunk(int $id)
     {
         Chunk::where('id', $id)->update(['is_deleted' => true]);
@@ -392,6 +404,14 @@ class CyberBuddyController extends Controller
 
         return response()->json([
             'success' => __('The chunk has been saved!'),
+        ]);
+    }
+
+    public function deleteConversation(int $id)
+    {
+        Conversation::where('id', $id)->delete();
+        return response()->json([
+            'success' => __('The conversation has been deleted!'),
         ]);
     }
 
@@ -596,7 +616,7 @@ class CyberBuddyController extends Controller
         }
 
         // Process file ex. create embeddings
-        event(new IngestFile(Auth::user(), $collection->name, $fileRef->id));
+        IngestFile::dispatch(Auth::user(), $collection->name, $fileRef->id);
 
         return $fileRef->downloadUrl();
     }

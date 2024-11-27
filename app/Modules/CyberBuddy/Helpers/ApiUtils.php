@@ -2,6 +2,7 @@
 
 namespace App\Modules\CyberBuddy\Helpers;
 
+use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\Prompt;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -56,9 +57,12 @@ class ApiUtils
 
     public function ask_chunks(string $question, string $collectionName, string $prompt, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
     {
+        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
+        array_unshift($collections, $collectionName);
         return $this->post('/ask_chunks', [
             'question' => $question,
             'collection_name' => $collectionName,
+            'collections' => $collections,
             'prompt' => $prompt,
             'reranking' => $rerankings,
             'show_context' => $showContext,
@@ -69,9 +73,12 @@ class ApiUtils
 
     public function search_chunks(string $question, string $collectionName, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
     {
+        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
+        array_unshift($collections, $collectionName);
         return $this->post('/search_chunks', [
             'question' => $question,
             'collection_name' => $collectionName,
+            'collections' => $collections,
             'reranking' => $rerankings,
             'show_context' => $showContext,
             'lang' => $lang,
@@ -125,9 +132,12 @@ class ApiUtils
 
     public function chat_manual(string $question, string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 10, string $lang = 'en'): array
     {
+        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
+        array_unshift($collections, $collectionName);
         return $this->post('/chat_manual', [
             'question' => $question,
             'collection_name' => $collectionName,
+            'collections' => $collections,
             'history_key' => $historyKey,
             'prompt' => $prompt,
             'history_prompt' => $historyPrompt,

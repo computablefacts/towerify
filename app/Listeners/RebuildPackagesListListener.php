@@ -25,7 +25,7 @@ class RebuildPackagesListListener extends AbstractListener
 
         if (!$server) {
             Log::info("Loading servers for user {$event->user->email}...");
-            YnhServer::all()->each(fn(YnhServer $server) => event(new RebuildPackagesList($event->user, $server)));
+            YnhServer::all()->each(fn(YnhServer $server) => RebuildPackagesList::dispatch($event->user, $server));
         } else {
             Log::info("Processing server {$server->name} for user {$event->user->email}...");
             try {

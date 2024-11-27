@@ -29,7 +29,7 @@ class AddTwrUserPermissionListener extends AbstractListener
             $isOk = $isOk && $server->sshAddUserPermission($ssh, $user2->ynhUsername(), $permission);
 
             if ($isOk) {
-                event(new PullServerInfos($uid, $user, $server));
+                PullServerInfos::dispatch($uid, $user, $server);
             }
         }
     }
