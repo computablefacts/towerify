@@ -1,0 +1,107 @@
+services:
+  lrvl9-app:
+    image: __DOCKER_IMAGE_NAME__:__DOCKER_IMAGE_TAG__
+    ports:
+      - target: 80
+        published: __PORT__
+    extra_hosts:
+      host.docker.internal: host-gateway
+    env_file:
+      - .env
+    environment:
+      - APP_URL=https://__DOMAIN____PATH__
+      - LOG_CHANNEL=stderr
+      - DB_CONNECTION=mysql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=__DB_NAME__
+      - DB_USERNAME=__DB_USER__
+      - DB_PASSWORD=__DB_PWD__
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+  lrvl9-scheduler:
+    image: __DOCKER_IMAGE_NAME__:__DOCKER_IMAGE_TAG__
+    extra_hosts:
+      host.docker.internal: host-gateway
+    env_file:
+      - .env
+    environment:
+      - CONTAINER_ROLE=scheduler
+      - APP_URL=https://__DOMAIN____PATH__
+      - LOG_CHANNEL=stderr
+      - DB_CONNECTION=mysql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=__DB_NAME__
+      - DB_USERNAME=__DB_USER__
+      - DB_PASSWORD=__DB_PWD__
+  lrvl9-queue:
+    image: __DOCKER_IMAGE_NAME__:__DOCKER_IMAGE_TAG__
+    extra_hosts:
+      host.docker.internal: host-gateway
+    env_file:
+      - .env
+    environment:
+      - CONTAINER_ROLE=queue
+      - APP_URL=https://__DOMAIN____PATH__
+      - LOG_CHANNEL=stderr
+      - DB_CONNECTION=mysql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=__DB_NAME__
+      - DB_USERNAME=__DB_USER__
+      - DB_PASSWORD=__DB_PWD__
+  lrvl9-queue-low:
+    image: __DOCKER_IMAGE_NAME__:__DOCKER_IMAGE_TAG__
+    extra_hosts:
+      host.docker.internal: host-gateway
+    env_file:
+      - .env
+    environment:
+      - CONTAINER_ROLE=queue
+      - QUEUE_NAME=low
+      - APP_URL=https://__DOMAIN____PATH__
+      - LOG_CHANNEL=stderr
+      - DB_CONNECTION=mysql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=__DB_NAME__
+      - DB_USERNAME=__DB_USER__
+      - DB_PASSWORD=__DB_PWD__
+  lrvl9-queue-medium:
+    image: __DOCKER_IMAGE_NAME__:__DOCKER_IMAGE_TAG__
+    extra_hosts:
+      host.docker.internal: host-gateway
+    env_file:
+      - .env
+    environment:
+      - CONTAINER_ROLE=queue
+      - QUEUE_NAME=medium
+      - APP_URL=https://__DOMAIN____PATH__
+      - LOG_CHANNEL=stderr
+      - DB_CONNECTION=mysql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=__DB_NAME__
+      - DB_USERNAME=__DB_USER__
+      - DB_PASSWORD=__DB_PWD__
+  lrvl9-queue-critical:
+    image: __DOCKER_IMAGE_NAME__:__DOCKER_IMAGE_TAG__
+    extra_hosts:
+      host.docker.internal: host-gateway
+    env_file:
+      - .env
+    environment:
+      - CONTAINER_ROLE=queue
+      - QUEUE_NAME=critical
+      - APP_URL=https://__DOMAIN____PATH__
+      - LOG_CHANNEL=stderr
+      - DB_CONNECTION=mysql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=__DB_NAME__
+      - DB_USERNAME=__DB_USER__
+      - DB_PASSWORD=__DB_PWD__
