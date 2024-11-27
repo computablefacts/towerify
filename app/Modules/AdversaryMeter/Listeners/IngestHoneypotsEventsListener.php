@@ -15,8 +15,13 @@ use Illuminate\Support\Str;
 class IngestHoneypotsEventsListener extends AbstractListener
 {
     use AttackerNameGenerator;
-    
+
     private array $cache = [];
+
+    public function viaQueue(): string
+    {
+        return self::LOW;
+    }
 
     protected function handle2($event)
     {

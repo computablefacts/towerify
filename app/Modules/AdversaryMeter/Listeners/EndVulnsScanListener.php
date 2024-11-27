@@ -16,6 +16,11 @@ use Illuminate\Support\Str;
 
 class EndVulnsScanListener extends AbstractListener
 {
+    public function viaQueue(): string
+    {
+        return self::MEDIUM;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof EndVulnsScan)) {

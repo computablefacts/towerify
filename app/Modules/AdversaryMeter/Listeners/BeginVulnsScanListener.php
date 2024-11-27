@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Log;
 
 class BeginVulnsScanListener extends AbstractListener
 {
+    public function viaQueue(): string
+    {
+        return self::MEDIUM;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof BeginVulnsScan)) {
