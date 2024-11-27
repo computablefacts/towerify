@@ -33,9 +33,8 @@ class DiscoveryShallowTest extends TestCase
         $user->tenant_id = $tenant->id;
         $user->save();
 
-        event(new CreateAsset($user, 'example.com', false));
-        event(new CreateAsset($user, 'example.com', false));
-
+        CreateAsset::dispatch($user, 'example.com', false);
+        CreateAsset::dispatch($user, 'example.com', false);
         TriggerDiscoveryShallow::dispatch();
 
         $assetsOriginal = Asset::where('asset', 'example.com')->get();
