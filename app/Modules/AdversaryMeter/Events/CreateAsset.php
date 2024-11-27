@@ -4,7 +4,6 @@ namespace App\Modules\AdversaryMeter\Events;
 
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -23,10 +22,5 @@ class CreateAsset
         $this->asset = $asset;
         $this->monitor = $monitor;
         $this->tags = $tags;
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }

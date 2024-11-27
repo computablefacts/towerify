@@ -6,7 +6,6 @@ use App\Models\Tenant;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -29,10 +28,5 @@ class RebuildPackagesList
             ->map(fn(Tenant $tenant) => User::where('tenant_id', $tenant->id)->orderBy('created_at')->first())
             ->filter(fn(?User $user) => isset($user))
             ->each(fn(User $user) => RebuildPackagesList::dispatch($user));
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }

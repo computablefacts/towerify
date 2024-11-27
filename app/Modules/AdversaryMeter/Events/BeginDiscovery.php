@@ -3,7 +3,6 @@
 namespace App\Modules\AdversaryMeter\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -16,10 +15,5 @@ class BeginDiscovery
     public function __construct(string $tld)
     {
         $this->tld = $tld;
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }
