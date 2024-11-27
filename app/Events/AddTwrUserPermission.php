@@ -5,7 +5,6 @@ namespace App\Events;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -26,10 +25,5 @@ class AddTwrUserPermission
         $this->server = $server;
         $this->ynhUser = $ynhUser;
         $this->permission = $permission;
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }

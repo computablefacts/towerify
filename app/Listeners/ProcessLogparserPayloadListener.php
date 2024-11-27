@@ -6,9 +6,15 @@ use App\Events\ProcessLogparserPayload;
 use App\Models\YnhNginxLogs;
 use App\Models\YnhServer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProcessLogparserPayloadListener extends AbstractListener
 {
+    public function viaQueue(): string
+    {
+        return self::LOW;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof ProcessLogparserPayload)) {
@@ -60,5 +66,6 @@ class ProcessLogparserPayloadListener extends AbstractListener
             YnhNginxLogs::where('to_ynh_server_id', $server->id)
                 ->update(['updated' => false]);
         });
+        Log::debug("LogParser - server_name={$server->name}, server_ip={$server->ip()}, nb_logs_ingested={$logs->count()}");
     }
 }

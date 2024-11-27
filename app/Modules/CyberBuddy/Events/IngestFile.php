@@ -4,7 +4,6 @@ namespace App\Modules\CyberBuddy\Events;
 
 use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -21,10 +20,5 @@ class IngestFile
         $this->user = $user;
         $this->collection = $collection;
         $this->fileId = $fileId;
-    }
-
-    public function broadcastOn()
-    {
-        return new PrivateChannel('channel-name');
     }
 }
