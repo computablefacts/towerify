@@ -12,6 +12,7 @@
     <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
+        <th class="text-end">{{ __('Priority') }}</th>
         <th>{{ __('Name') }}</th>
         <th style="text-align:right">{{ __('Number of Documents') }}</th>
         <th style="text-align:right">{{ __('Number of Chunks') }}</th>
@@ -24,6 +25,9 @@
       <tbody>
       @foreach($collections as $collection)
       <tr style="border-bottom-color:white">
+        <td class="text-end" onclick="editCollection(this, {{ $collection->id }})">{{
+          $collection->priority }}
+        </td>
         <td><span class="lozenge new">{{ $collection->name }}</span></td>
         <td style="text-align:right">
           <a href="{{ route('home', ['tab' => 'knowledge_base', 'page' => 1, 'collection' => $collection->name]) }}">
@@ -128,6 +132,44 @@
           console.log(response.data);
         }
       }).catch(error => toaster.toastAxiosError(error));
+    }
+  }
+
+  function editCollection(td, collectionId) {
+
+    if (td.getAttribute('contenteditable') === 'true') {
+      return; // Prevent multiple edits
+    }
+
+    const originalPriority = parseInt(td.innerText.trim(), 10);
+
+    td.setAttribute('contenteditable', 'true');
+    td.focus();
+    td.onblur = () => {
+      td.removeAttribute('contenteditable');
+      td.innerText = td.innerText.trim();
+      setPriority(td, collectionId, originalPriority, parseInt(td.innerText, 10));
+    }
+  }
+
+  function setPriority(td, collectionId, oldValue, newValue) {
+    if (oldValue !== newValue) {
+
+      const response = confirm("{{ __('Are you sure you want to edit this collection?') }}");
+
+      if (!response) {
+        td.innerText = oldValue;
+      } else {
+        axios.post(`/cb/web/collections/${collectionId}`, {priority: newValue}).then(function (response) {
+          if (response.data.success) {
+            toaster.toastSuccess(response.data.success);
+          } else if (response.data.error) {
+            toaster.toastError(response.data.error);
+          } else {
+            console.log(response.data);
+          }
+        }).catch(error => toaster.toastAxiosError(error));
+      }
     }
   }
 

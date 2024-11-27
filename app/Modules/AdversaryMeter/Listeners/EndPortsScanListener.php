@@ -75,7 +75,7 @@ class EndPortsScanListener extends AbstractListener
             $scan->ports_scan_ends_at = Carbon::now();
             $scan->save();
 
-            event(new BeginVulnsScan($scan, $port));
+            BeginVulnsScan::dispatch($scan, $port);
         } else {
             $ports->each(function (array $port, int $pos) use ($asset, $scan) {
 
@@ -123,7 +123,7 @@ class EndPortsScanListener extends AbstractListener
                     'hosting_service_date' => $date,
                 ]);
 
-                event(new BeginVulnsScan($newScan, $newPort));
+                BeginVulnsScan::dispatch($newScan, $newPort);
             });
         }
     }

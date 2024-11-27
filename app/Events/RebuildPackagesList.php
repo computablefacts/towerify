@@ -28,7 +28,7 @@ class RebuildPackagesList
         Tenant::all()
             ->map(fn(Tenant $tenant) => User::where('tenant_id', $tenant->id)->orderBy('created_at')->first())
             ->filter(fn(?User $user) => isset($user))
-            ->each(fn(User $user) => event(new RebuildPackagesList($user)));
+            ->each(fn(User $user) => RebuildPackagesList::dispatch($user));
     }
 
     public function broadcastOn()

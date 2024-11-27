@@ -28,7 +28,7 @@ class RemoveUserPermissionListener extends AbstractListener
             $isOk = $server->sshRemoveUserPermission($ssh, $user2->username, $permission);
 
             if ($isOk) {
-                event(new PullServerInfos($uid, $user, $server));
+                PullServerInfos::dispatch($uid, $user, $server);
             }
         }
     }

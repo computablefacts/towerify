@@ -39,7 +39,7 @@ class FixDanglingScans implements ShouldQueue
             ->get()
             ->each(function (Scan $scan) {
                 if (Carbon::now()->diffInHours($scan->ports_scan_begins_at, true) > 6) {
-                    event(new EndPortsScan($scan->ports_scan_begins_at, $scan->asset()->first(), $scan));
+                    EndPortsScan::dispatch($scan->ports_scan_begins_at, $scan->asset()->first(), $scan);
                 }
             });
         Scan::query()
@@ -53,7 +53,7 @@ class FixDanglingScans implements ShouldQueue
             ->get()
             ->each(function (Scan $scan) {
                 if (Carbon::now()->diffInHours($scan->vulns_scan_begins_at, true) > 6) {
-                    event(new EndVulnsScan($scan->vulns_scan_begins_at, $scan));
+                    EndVulnsScan::dispatch($scan->vulns_scan_begins_at, $scan);
                 }
             });
     }

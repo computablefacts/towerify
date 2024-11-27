@@ -44,6 +44,9 @@
             :file="request()->input('file') ? request()->input('file') : ''"
             :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
+  @if($tab === 'conversations')
+  <x-conversations :currentPage="request()->input('page') ? request()->input('page') : 1"/>
+  @endif
   @if($tab === 'prompts')
   <x-prompts :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif

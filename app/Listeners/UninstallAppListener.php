@@ -33,11 +33,11 @@ class UninstallAppListener extends AbstractListener
             $isOk = $isOk && $server->sshUpdateDnsRecords($ssh);
 
             if ($isOk) {
-                event(new PullServerInfos($uid, $user, $server));
+                PullServerInfos::dispatch($uid, $user, $server);
             }
 
             $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Stopping asset monitoring...');
-            event(new DeleteAsset($user, $domain));
+            DeleteAsset::dispatch($user, $domain);
             $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring stopped.');
         }
     }

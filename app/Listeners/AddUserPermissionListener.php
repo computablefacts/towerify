@@ -28,7 +28,7 @@ class AddUserPermissionListener extends AbstractListener
             $isOk = $server->sshAddUserPermission($ssh, $user2->username, $permission);
 
             if ($isOk) {
-                event(new PullServerInfos($uid, $user, $server));
+                PullServerInfos::dispatch($uid, $user, $server);
             }
         }
     }

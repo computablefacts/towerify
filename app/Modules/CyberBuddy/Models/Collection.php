@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon created_at
  * @property Carbon updated_at
  * @property string name
+ * @property integer priority
  * @property boolean is_deleted
  * @property int created_by
  */
@@ -24,11 +25,13 @@ class Collection extends Model
 
     protected $fillable = [
         'name',
+        'priority',
         'is_deleted',
         'created_by',
     ];
 
     protected $casts = [
+        'priority' => 'integer',
         'is_deleted' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

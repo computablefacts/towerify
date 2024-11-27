@@ -77,7 +77,7 @@ class EndDiscoveryListener extends AbstractListener
                             || !Str::endsWith($asset->asset, ['computablefacts.com', 'computablefacts.io', 'towerify.io', 'cywise.io']);
                     })
                     ->each(function (Asset $asset) use ($domain) {
-                        event(new CreateAsset($asset->createdBy(), $domain, true));
+                        CreateAsset::dispatch($asset->createdBy(), $domain, true);
                     });
             });
 

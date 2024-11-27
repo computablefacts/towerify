@@ -35,6 +35,6 @@ class TriggerScan implements ShouldQueue
                 $scans = $asset->scanCompleted();
                 return $scans->isEmpty() || $scans->sortBy('vulns_scan_ends_at')->last()?->vulns_scan_ends_at <= $minDate;
             })
-            ->each(fn(Asset $asset) => event(new BeginPortsScan($asset)));
+            ->each(fn(Asset $asset) => BeginPortsScan::dispatch($asset));
     }
 }

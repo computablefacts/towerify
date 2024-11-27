@@ -1,5 +1,83 @@
 /* https://cdn.jsdelivr.net/npm/botman-web-widget@0/build/js/chat.js */
 !function (t) {
+
+  // ========== HACK : DISPLAY STARS / BEGIN ==========
+  const threadId = Math.random().toString(36).substring(2, 12);
+  const botmanInterval = setInterval(checkBotman, 300);
+
+  function checkBotman() {
+
+    const elMessageArea = document.getElementById('messageArea');
+
+    if (elMessageArea) {
+
+      clearInterval(botmanInterval);
+
+      // Observe incoming messages and react accordingly
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          mutation.addedNodes.forEach(addedNode => {
+            if (addedNode.classList.contains('chatbot') && addedNode.getAttribute('data-message-id')
+              !== '00000000-0000-0000-0000-000000000000') {
+
+              const elDiv = document.createElement('div');
+              elDiv.style.textAlign = 'right';
+              elDiv.innerHTML = `
+                <span class="stars" data-star-id="1"></span>
+                <span class="stars" data-star-id="2"></span>
+                <span class="stars" data-star-id="3"></span>
+                <span class="stars" data-star-id="4"></span>
+                <span class="stars" data-star-id="5"></span>
+              `;
+
+              addedNode.querySelector('.msg').firstElementChild.appendChild(elDiv);
+
+              elDiv.onclick = (event) => {
+
+                const rating = event.target.getAttribute('data-star-id');
+                const elStars = elDiv.querySelectorAll('[data-star-id]');
+
+                elStars.forEach(elStar => {
+                  if (elStar.getAttribute('data-star-id') <= rating) {
+                    elStar.style.setProperty('--rating', '1');
+                  } else {
+                    elStar.style.setProperty('--rating', '0');
+                  }
+                });
+
+                // Serialize DOM -> STRING
+                // const serializedMessageArea = elMessageArea.outerHTML;
+
+                // Deserialize STRING -> DOM
+                // const parser = new DOMParser();
+                // const doc = parser.parseFromString(serializedMessageArea, 'text/html');
+                // const deserializedMessageArea = doc.body.firstChild;
+
+                fetch('/cb/web/botman', {
+                  method: 'POST', headers: {
+                    'Content-Type': 'application/json', 'Accept': 'application/json'
+                  }, body: JSON.stringify({
+                    driver: 'web',
+                    userId: 0,
+                    message: `/rate ${threadId} ${elMessageArea.outerHTML}`,
+                    attachment: null,
+                    interactive: 0,
+                  })
+                });
+              };
+            }
+          });
+        });
+      });
+
+      const elChatArea = elMessageArea.getElementsByClassName('chat')[0];
+
+      observer.observe(elChatArea, {subtree: false, childList: true});
+    }
+  }
+
+  // ========== HACK : DISPLAY STARS / END ==========
+
   function e(r) {
     if (n[r]) {
       return n[r].exports;
@@ -563,7 +641,9 @@
       }
       // ========== HACK : HIDE EMPTY QUESTIONS / BEGIN ==========
       if (t && Array.isArray(t.messages)) {
-        t.messages = t.messages.filter(message => !message.type || message.type !== 'text' || (message.type === 'text' && message.text.trim().length > 0));
+        t.messages = t.messages.filter(
+          message => !message.type || message.type !== 'text' || (message.type === 'text' && message.text.trim().length
+            > 0));
       }
       // ========== HACK : HIDE EMPTY QUESTIONS / END ==========
       return t

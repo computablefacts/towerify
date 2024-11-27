@@ -851,7 +851,7 @@ EOT;
                     'ynh_server_id' => $this->id,
                     'updated' => true,
                 ]);
-                event(new CreateAsset($this->user()->first(), $domain, true, [$this->name]));
+                CreateAsset::dispatch($this->user()->first(), $domain, true, [$this->name]);
             }
             DB::transaction(function () {
                 YnhDomain::where('ynh_server_id', $this->id)

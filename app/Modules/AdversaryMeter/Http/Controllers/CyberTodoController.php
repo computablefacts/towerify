@@ -50,7 +50,7 @@ class CyberTodoController extends Controller
             abort(500, 'Restart scan not allowed, asset is not monitored.');
         }
         if ($asset->scanInProgress()->isEmpty()) {
-            event(new BeginPortsScan($asset));
+            BeginPortsScan::dispatch($asset);
         }
         return [];
     }

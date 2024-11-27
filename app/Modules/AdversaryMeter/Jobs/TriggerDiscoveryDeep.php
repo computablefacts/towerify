@@ -41,7 +41,7 @@ class TriggerDiscoveryDeep implements ShouldQueue
                     ->get()
                     ->map(fn(Asset $asset) => $asset->tld())
                     ->unique()
-                    ->each(fn(string $tld) => event(new BeginDiscovery($tld)));
+                    ->each(fn(string $tld) => BeginDiscovery::dispatch($tld));
 
                 Auth::logout();
             });

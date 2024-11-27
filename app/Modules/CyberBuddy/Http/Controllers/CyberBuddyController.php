@@ -11,6 +11,7 @@ use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadOneFileRequest;
 use App\Modules\CyberBuddy\Models\Chunk;
+use App\Modules\CyberBuddy\Models\Conversation;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
@@ -47,9 +48,9 @@ class CyberBuddyController extends Controller
             $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
             if ($tooltip) {
                 $answer = Str::replace($ref, "
-                  <div class=\"tooltip\">
+                  <div class=\"cb-tooltip\">
                     <b style=\"color:#f8b500\">[{$id}]</b>
-                    <span class=\"tooltiptext tooltip-top\">{$tooltip['text']}</span>
+                    <span class=\"cb-tooltiptext cb-tooltip-top\">{$tooltip['text']}</span>
                   </div>
                 ", $answer);
             }
@@ -260,6 +261,18 @@ class CyberBuddyController extends Controller
         ]);
     }
 
+    public function saveCollection(int $id, Request $request)
+    {
+        $this->validate($request, [
+            'priority' => 'required|integer|min:0',
+        ]);
+        $priority = $request->string('priority');
+        \App\Modules\CyberBuddy\Models\Collection::where('id', $id)->update(['priority' => $priority]);
+        return response()->json([
+            'success' => __('The collection has been saved!'),
+        ]);
+    }
+
     public function deleteChunk(int $id)
     {
         Chunk::where('id', $id)->update(['is_deleted' => true]);
@@ -314,6 +327,14 @@ class CyberBuddyController extends Controller
 
         return response()->json([
             'success' => __('The chunk has been saved!'),
+        ]);
+    }
+
+    public function deleteConversation(int $id)
+    {
+        Conversation::where('id', $id)->delete();
+        return response()->json([
+            'success' => __('The conversation has been deleted!'),
         ]);
     }
 
@@ -425,6 +446,19 @@ class CyberBuddyController extends Controller
             }
         })->skipsConversation();
 
+        $botman->hears('/rate ([a-z0-9]+) (.*)', function (BotMan $botman, string $threadId, string $dom) {
+            $user = $this->user($botman);
+            if ($user) {
+                $dom = Str::after($botman->getMessage()->getPayload()['message'], "/rate {$threadId} ");
+                $conversation = Conversation::updateOrCreate([
+                    'thread_id' => $threadId
+                ], [
+                    'thread_id' => $threadId,
+                    'dom' => $dom,
+                ]);
+            }
+        });
+
         $botman->hears('{message}', function (BotMan $botman, string $message) {
             if (Str::startsWith($message, "/")) {
                 return;
@@ -503,7 +537,7 @@ class CyberBuddyController extends Controller
         }
 
         // Process file ex. create embeddings
-        event(new IngestFile(Auth::user(), $collection->name, $fileRef->id));
+        IngestFile::dispatch(Auth::user(), $collection->name, $fileRef->id);
 
         return $fileRef->downloadUrl();
     }

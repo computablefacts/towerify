@@ -41,7 +41,7 @@ class BeginPortsScanListener extends AbstractListener
             $asset->next_scan_id = $taskId;
             $asset->save();
 
-            event(new EndPortsScan(Carbon::now(), $asset, $scan));
+            EndPortsScan::dispatch(Carbon::now(), $asset, $scan);
         }
     }
 

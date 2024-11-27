@@ -77,7 +77,7 @@ class ConfigureHostListener extends AbstractListener
                 // $isOk = $isOk && $server->sshRestartDocker($ssh);
 
                 $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Starting asset monitoring...');
-                event(new CreateAsset($server->user()->first(), $server->ip(), true, [$server->name]));
+                CreateAsset::dispatch($server->user()->first(), $server->ip(), true, [$server->name]);
                 $ssh->newTrace(SshTraceStateEnum::DONE, 'Asset monitoring started.');
             }
             if ($isOk) {
@@ -95,7 +95,7 @@ class ConfigureHostListener extends AbstractListener
                     // TODO : if all order items have now been fulfilled, mark the order as 'Completed'
                 }
 
-                event(new PullServerInfos($uid, $user, $server));
+                PullServerInfos::dispatch($uid, $user, $server);
             }
         }
     }

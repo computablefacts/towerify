@@ -40,7 +40,7 @@ Route::group([
                 ->header('Content-Type', 'text/plain');
         }
 
-        event(new \App\Modules\AdversaryMeter\Events\IngestHoneypotsEvents($timestamp, $dns, $events->toArray()));
+        \App\Modules\AdversaryMeter\Events\IngestHoneypotsEvents::dispatch($timestamp, $dns, $events->toArray());
 
         return response("ok ({$events->count()} events in file)", 200)
             ->header('Content-Type', 'text/plain');
