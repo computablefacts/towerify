@@ -104,7 +104,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
                 'added_with_curl' => true,
             ]);
 
-            event(new \App\Modules\AdversaryMeter\Events\CreateAsset($user, $server->ip(), true, [$server->name]));
+            \App\Modules\AdversaryMeter\Events\CreateAsset::dispatch($user, $server->ip(), true, [$server->name]);
         }
     }
     if ($server->is_ready) {
@@ -195,7 +195,7 @@ Route::post('/logalert/{secret}', function (string $secret, \Illuminate\Http\Req
             ->filter(fn($event) => $event && count($event) > 0)
             ->all();
 
-        event(new \App\Events\ProcessLogalertPayload($server, $events));
+        \App\Events\ProcessLogalertPayload::dispatch($server, $events);
 
     } catch (\Exception $e) {
         \Illuminate\Support\Facades\Log::error($e);
@@ -292,7 +292,7 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
                 ->header('Content-Type', 'text/plain');
         }
 
-        event(new \App\Events\ProcessLogparserPayload($server, $logs));
+        \App\Events\ProcessLogparserPayload::dispatch($server, $logs);
 
     } else if ($filename === "osquery.jsonl.gz") {
 
@@ -304,7 +304,7 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
                 ->header('Content-Type', 'text/plain');
         }
 
-        event(new \App\Events\ProcessLogalertPayload($server, $logs->toArray()));
+        \App\Events\ProcessLogalertPayload::dispatch($server, $logs->toArray());
 
     } else {
         return response('Invalid attachment', 500)
