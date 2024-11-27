@@ -60,8 +60,8 @@ class IngestHoneypotsEventsTest extends TestCase
             'cloud_sensor' => HoneypotCloudSensorsEnum::HTTPS,
         ]);
 
-        event(new IngestHoneypotsEvents(Carbon::now(), 'honeypot1.example.com', $this->firstHoneypotEvents()));
-        event(new IngestHoneypotsEvents(Carbon::now(), 'honeypot2.example.com', $this->secondHoneypotEvents()));
+        IngestHoneypotsEvents::dispatch(Carbon::now(), 'honeypot1.example.com', $this->firstHoneypotEvents());
+        IngestHoneypotsEvents::dispatch(Carbon::now(), 'honeypot2.example.com', $this->secondHoneypotEvents());
 
         $this->assertCount(2, Honeypot::all());
         $this->assertCount(3, HoneypotEvent::all());
