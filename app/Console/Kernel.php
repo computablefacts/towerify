@@ -5,7 +5,6 @@ namespace App\Console;
 use App\Jobs\AgeOffOsqueryEvents;
 use App\Jobs\PullServersInfos;
 use App\Jobs\Summarize;
-use App\Modules\AdversaryMeter\Jobs\FixDanglingScans;
 use App\Modules\AdversaryMeter\Jobs\SendAuditReport;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Jobs\TriggerScan;
@@ -42,7 +41,6 @@ class Kernel extends ConsoleKernel
 
         // AdversaryMeter
         $schedule->job(new TriggerScan())->everyMinute();
-        $schedule->job(new FixDanglingScans())->hourly();
         $schedule->job(new TriggerDiscoveryShallow())->daily();
         $schedule->job(new SendAuditReport())->dailyAt('6:45');
         // $schedule->job(new TriggerDiscoveryDeep())->weekly();
