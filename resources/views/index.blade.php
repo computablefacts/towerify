@@ -71,5 +71,8 @@
   @if($tab === 'ama')
   @include('modules.cyber-buddy.widget')
   @endif
+  @if($tab === 'ia_writer')
+  @include('modules.cyber-buddy.ia-writer')
+  @endif
 </div>
 @endsection
