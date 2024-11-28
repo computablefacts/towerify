@@ -27,6 +27,7 @@ use Illuminate\Support\Str;
  * @property string action
  * @property bool packed
  * @property bool dismissed
+ * @property ?string columns_uid
  */
 class YnhOsquery extends Model
 {
@@ -45,6 +46,7 @@ class YnhOsquery extends Model
         'counter',
         'numerics',
         'columns',
+        'columns_uid',
         'action',
         'packed',
         'dismissed',
@@ -59,6 +61,16 @@ class YnhOsquery extends Model
         'updated_at' => 'datetime',
         'dismissed' => 'boolean',
     ];
+
+    public static function computeColumnsUid(array $json): string
+    {
+        ksort($json);
+        $uid = '';
+        foreach ($json as $key => $value) {
+            $uid .= ($key . ':' . $value . ';');
+        }
+        return md5($uid);
+    }
 
     public static function configLogParser(YnhServer $server): string
     {
@@ -159,43 +171,23 @@ if [ -f /etc/os-release ]; then
               {$url}/logparser/{$server->secret}
           fi
         fi
-        
-        # Get the list of installed packages
-        if [ -d /opt/logparser ]; then
-          
-          # Get it only once a day
-          if ! find "/opt/logparser/osquery.jsonl.gz" -mtime -1 | grep -q "/opt/logparser/osquery.jsonl.gz"; then
-          
-            apt_packages=$(apt list --installed 2>/dev/null | awk -F'[ /]' '{print $1 " " $3 " " $4 " apt"}' | tail -n +2)
-            snap_packages=$(snap list 2>/dev/null | awk 'NR>1 {print $1 " " $2 " " $3 " snap"}')
-            dpkg_packages=$(dpkg-query -W -f='\${binary:Package} \${Version} \${Architecture} dpkg\\n' 2>/dev/null)
-            all_packages=$(echo -e "\$apt_packages\\n\$snap_packages\\n\$dpkg_packages" | sort -u)
-        
-            echo "\$all_packages" | awk '{
-              key = $1 " " $2 " " $3
-              if (key in seen) {
-                seen[key] = seen[key] "," $4
-              } else {
-                seen[key] = $4
-              }
-            } END {
-              for (key in seen) {
-                print key " " seen[key]
-              }
-            }' \
-            | sort \
-            | awk -v hostname="$(hostname)" -v epoch="$(date +'%s')" -v date="$(LC_TIME=C date +'%a %b %e %T %Y %Z')" -v uid="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 15; echo)" '{print "{\"row\":0,\"name\":\"deb_packages_installed_snapshot\",\"hostIdentifier\":\""hostname"\",\"calendarTime\":\""date"\",\"unixTime\":\""epoch"\",\"epoch\":0,\"counter\":0,\"numerics\":0,\"action\":\"snapshot\",\"columns\":{\"uid\":\""uid"\",\"name\":\""$1"\",\"version\":\""$2"\",\"arch\":\""$3"\",\"manager\":\""$4"\",\"status\":\"installed\"}}"}' \
-            | gzip -c >/opt/logparser/osquery.jsonl.gz
-            
-            if [ -f /opt/logparser/osquery.jsonl.gz ]; then
-              curl -X POST \
-                -H "Content-Type: multipart/form-data" \
-                -F "data=@/opt/logparser/osquery.jsonl.gz" \
-                {$url}/logparser/{$server->secret}
-            fi
-          fi
-        fi
     fi
+fi
+
+# Parse local history to get back dropped metrics and events
+if [ -f /var/log/osquery/osqueryd.snapshots.log ] && [ -f /var/log/osquery/osqueryd.results.log ]; then
+
+  cat /var/log/osquery/osqueryd.snapshots.log /var/log/osquery/osqueryd.results.log \
+    | grep -Eai "$(date +"%a %b %d")" \
+    | gzip -c >/opt/logparser/osquery.jsonl.gz
+
+  if [ -f /opt/logparser/osquery.jsonl.gz ]; then
+    curl -X POST \
+      -H "Content-Type: multipart/form-data" \
+      -F "data=@/opt/logparser/osquery.jsonl.gz" \
+      {$url}/logparser/{$server->secret}
+    rm -f /opt/logparser/osquery.jsonl.gz
+  fi
 fi
 
 EOT;
@@ -312,36 +304,64 @@ fi
 systemctl stop osqueryd
 systemctl stop logalert
 
-# Cleanup
-if [ -f /opt/logparser/12408bd3.jsonl.gz ]; then
-  rm /opt/logparser/12408bd3.jsonl.gz
+# For debian-like oses, get the list of installed packages
+if [ -f /etc/os-release ]; then
+
+    id_like=$(grep '^ID_LIKE=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+    
+    if [ -z "\$id_like" ]; then
+      id_like=$(grep '^ID=' /etc/os-release | cut -d'=' -f2 | tr -d '"')
+    fi
+
+    # Ensure that the OS is debian-based
+    if [[ "\$id_like" == *"debian"* ]]; then
+
+      apt_packages=$(apt list --installed 2>/dev/null | awk -F'[ /]' '{print $1 " " $3 " " $4 " apt"}' | tail -n +2)
+      snap_packages=$(snap list 2>/dev/null | awk 'NR>1 {print $1 " " $2 " " $3 " snap"}')
+      dpkg_packages=$(dpkg-query -W -f='\${binary:Package} \${Version} \${Architecture} dpkg\\n' 2>/dev/null)
+      all_packages=$(echo -e "\$apt_packages\\n\$snap_packages\\n\$dpkg_packages" | sort -u)
+    
+      echo "\$all_packages" | awk '{
+        key = $1 " " $2 " " $3
+        if (key in seen) {
+          seen[key] = seen[key] "," $4
+        } else {
+          seen[key] = $4
+        }
+      } END {
+        for (key in seen) {
+          print key " " seen[key]
+        }
+      }' \
+      | sort \
+      | awk -v hostname="$(hostname)" -v epoch="$(date +'%s')" -v date="$(LC_TIME=C date +'%a %b %e %T %Y %Z')" -v uid="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 15; echo)" '{print "{\"row\":0,\"name\":\"deb_packages_installed_snapshot\",\"hostIdentifier\":\""hostname"\",\"calendarTime\":\""date"\",\"unixTime\":\""epoch"\",\"epoch\":0,\"counter\":0,\"numerics\":0,\"action\":\"snapshot\",\"columns\":{\"uid\":\""uid"\",\"name\":\""$1"\",\"version\":\""$2"\",\"arch\":\""$3"\",\"manager\":\""$4"\",\"status\":\"installed\"}}"}' \
+      | gzip -c >/opt/logparser/osquery.jsonl.gz
+        
+      if [ -f /opt/logparser/osquery.jsonl.gz ]; then
+        curl -X POST \
+          -H "Content-Type: multipart/form-data" \
+          -F "data=@/opt/logparser/osquery.jsonl.gz" \
+          {$url}/logparser/{$server->secret}
+        rm -f /opt/logparser/osquery.jsonl.gz
+      fi
+    fi
 fi
 
-# Get back dropped metrics from local history
-if [ -d /opt/logparser ]; then
+# Parse local history to get back dropped metrics and events
+if [ -f /var/log/osquery/osqueryd.snapshots.log ] && [ -f /var/log/osquery/osqueryd.results.log ]; then
 
-  # Backup existing file
-  if [ -f /opt/logparser/osquery.jsonl.gz ]; then
-    mv /opt/logparser/osquery.jsonl.gz /opt/logparser/osquery-tmp.jsonl.gz
-  fi
-
-  # Parse local history to get back dropped metrics
-  cat /var/log/osquery/osqueryd.snapshots.log \
-    | grep -Eai '"(disk_available_snapshot|processor_available_snapshot|memory_available_snapshot)"' \
+  cat /var/log/osquery/osqueryd.snapshots.log /var/log/osquery/osqueryd.results.log \
     | gzip -c >/opt/logparser/osquery.jsonl.gz
 
-  # Send dropped metrics to the server
-  curl -X POST \
-    -H "Content-Type: multipart/form-data" \
-    -F "data=@/opt/logparser/osquery.jsonl.gz" \
-    {$url}/logparser/{$server->secret}
-
-  # Restore backup 
-  if [ -f /opt/logparser/osquery-tmp.jsonl.gz ]; then
-    mv -f /opt/logparser/osquery-tmp.jsonl.gz /opt/logparser/osquery.jsonl.gz
+  if [ -f /opt/logparser/osquery.jsonl.gz ]; then
+    curl -X POST \
+      -H "Content-Type: multipart/form-data" \
+      -F "data=@/opt/logparser/osquery.jsonl.gz" \
+      {$url}/logparser/{$server->secret}
+    rm /opt/logparser/osquery.jsonl.gz
   fi
 fi
-
+        
 # Update LogAlert configuration
 wget -O /opt/logalert/config2.json {$url}/logalert/{$server->secret}
 
@@ -417,7 +437,7 @@ crontab -l | grep -v "app\.towerify\.io" | crontab -
 systemctl start logalert
 systemctl start osqueryd
 
-# If fail2ban is up-and-running, whitelist AdversaryMeter IP addresses
+# If fail2ban is up-and-running, whitelist Cywise's IP addresses
 if systemctl is-active --quiet fail2ban; then
   if [ -f /etc/fail2ban/jail.conf ]; then
     {$whitelist}

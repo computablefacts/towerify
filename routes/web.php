@@ -292,6 +292,7 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
                 ->header('Content-Type', 'text/plain');
         }
 
+        // Do not chunk because logs are managed as a whole!
         \App\Events\ProcessLogparserPayload::dispatch($server, $logs);
 
     } else if ($filename === "osquery.jsonl.gz") {
@@ -304,7 +305,9 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
                 ->header('Content-Type', 'text/plain');
         }
 
-        \App\Events\ProcessLogalertPayload::dispatch($server, $logs->toArray());
+        $logs->chunk(1000)->each(function ($chunk) use ($server) {
+            \App\Events\ProcessLogalertPayloadEx::dispatch($server, $chunk->toArray());
+        });
 
     } else {
         return response('Invalid attachment', 500)

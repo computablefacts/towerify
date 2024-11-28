@@ -8,6 +8,7 @@ use App\Events\ConfigureHost;
 use App\Events\CreateBackup;
 use App\Events\InstallApp;
 use App\Events\ProcessLogalertPayload;
+use App\Events\ProcessLogalertPayloadEx;
 use App\Events\ProcessLogparserPayload;
 use App\Events\PullServerInfos;
 use App\Events\RebuildPackagesList;
@@ -21,6 +22,7 @@ use App\Listeners\InstallAppListener;
 use App\Listeners\OrderCreatedListener;
 use App\Listeners\PasswordResetListener;
 use App\Listeners\ProcessLogalertPayloadListener;
+use App\Listeners\ProcessLogalertPayloadListenerEx;
 use App\Listeners\ProcessLogparserPayloadListener;
 use App\Listeners\RebuildPackagesListListener;
 use App\Listeners\RemoveUserPermissionListener;
@@ -96,6 +98,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         ProcessLogalertPayload::class => [
             ProcessLogalertPayloadListener::class,
+        ],
+        ProcessLogalertPayloadEx::class => [
+            ProcessLogalertPayloadListenerEx::class,
         ],
         ProcessLogparserPayload::class => [
             ProcessLogparserPayloadListener::class,
