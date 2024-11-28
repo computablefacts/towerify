@@ -28,6 +28,7 @@ class FixDanglingScans implements ShouldQueue
 
     public function handle()
     {
+        Scan::removeDanglingScans();
         Scan::query()
             ->whereNotNull('asset_id')
             ->whereNotNull('ports_scan_id')
