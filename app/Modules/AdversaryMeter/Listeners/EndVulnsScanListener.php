@@ -101,7 +101,7 @@ class EndVulnsScanListener extends AbstractListener
     private function setAlertsV1(Port $port, array $task): void
     {
         collect($task['data'] ?? [])
-            ->filter(fn(array $data) => $data['tool'] === 'alerter' && $data['rawOutput'])
+            ->filter(fn(array $data) => isset($data['tool']) && $data['tool'] === 'alerter' && isset($data['rawOutput']) && $data['rawOutput'])
             ->flatMap(fn(array $data) => collect(preg_split('/\r\n|\r|\n/', $data['rawOutput'])))
             ->filter(fn(string $alert) => $alert !== '')
             ->map(fn(string $alert) => json_decode($alert, true))
@@ -173,7 +173,7 @@ class EndVulnsScanListener extends AbstractListener
     private function setScreenshot(Port $port, array $task)
     {
         collect($task['data'] ?? [])
-            ->filter(fn(array $data) => $data['tool'] === 'splash' && $data['rawOutput'])
+            ->filter(fn(array $data) => isset($data['tool']) && $data['tool'] === 'splash' && isset($data['rawOutput']) && $data['rawOutput'])
             ->map(fn(array $data) => json_decode($data['rawOutput'], true))
             ->filter(fn(array $screenshot) => !empty($screenshot['png']))
             ->each(function (array $screenshot) use ($port) {

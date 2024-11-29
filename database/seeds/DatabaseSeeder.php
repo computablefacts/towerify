@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
         $this->setupProductProperties();
         $this->setupProducts();
         $this->setupOsqueryRules();
+        $this->fillMissingOsqueryUids();
     }
 
     private function setupTenants(): void
@@ -276,6 +277,17 @@ class DatabaseSeeder extends Seeder
         foreach ($rules as $rule) {
             $this->addOrUpdateOsqueryRule($rule['name'], isset($rule['attck']) ? 'mitre att&ck' : 'security', $rule);
         }
+    }
+
+    private function fillMissingOsqueryUids()
+    {
+        \App\Models\YnhOsquery::whereNull('columns_uid')
+            ->chunk(1000, function (\Illuminate\Support\Collection $osquery) {
+                $osquery->each(function (\App\Models\YnhOsquery $osquery) {
+                    $osquery->columns_uid = \App\Models\YnhOsquery::computeColumnsUid($osquery->columns);
+                    $osquery->save();
+                });
+            });
     }
 
     private function addOrUpdateOsqueryRule(string $name, string $category, array $rule): void

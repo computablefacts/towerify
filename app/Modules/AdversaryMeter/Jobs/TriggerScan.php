@@ -4,6 +4,7 @@ namespace App\Modules\AdversaryMeter\Jobs;
 
 use App\Modules\AdversaryMeter\Events\BeginPortsScan;
 use App\Modules\AdversaryMeter\Models\Asset;
+use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -28,6 +29,11 @@ class TriggerScan implements ShouldQueue
     {
         $frequency = config('towerify.adversarymeter.days_between_scans');
         $minDate = Carbon::now()->subDays((int)$frequency);
+
+        // Remove running scans that are not in the 'prev', 'cur' or 'next' status
+        Scan::removeDanglingScans();
+
+        // Begin a new scan
         Asset::whereNull('next_scan_id')
             ->where('is_monitored', true)
             ->get()
