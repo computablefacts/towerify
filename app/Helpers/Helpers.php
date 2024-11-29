@@ -194,7 +194,7 @@ if (!function_exists('app_sidebar')) {
                     'hidden' => !Auth::user()->canUseCyberBuddy(),
                     'section_items' => [
                         [
-                            'label' => __('IA Writer'),
+                            'label' => __('AI Writer'),
                             'route' => route('home', ['tab' => 'ia_writer']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ia_writer',
                         ], [
