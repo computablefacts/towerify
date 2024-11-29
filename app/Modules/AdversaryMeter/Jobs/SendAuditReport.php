@@ -25,6 +25,11 @@ class SendAuditReport implements ShouldQueue
         //
     }
 
+    public function viaQueue(): string
+    {
+        return 'critical';
+    }
+
     public function handle()
     {
         User::where('is_active', true)

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int id
@@ -44,6 +45,19 @@ class Scan extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /** @deprecated */
+    public static function removeDanglingScans(): void
+    {
+        DB::update("
+            DELETE
+            FROM am_scans
+            WHERE ports_scan_id NOT IN (SELECT next_scan_id FROM am_assets WHERE next_scan_id IS NOT NULL)
+            AND ports_scan_id NOT IN (SELECT cur_scan_id FROM am_assets WHERE cur_scan_id IS NOT NULL)
+            AND ports_scan_id NOT IN (SELECT prev_scan_id FROM am_assets WHERE prev_scan_id IS NOT NULL)
+            AND vulns_scan_ends_at IS NULL
+        ");
+    }
 
     public function asset(): BelongsTo
     {
