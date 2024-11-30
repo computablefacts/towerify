@@ -25,6 +25,7 @@ abstract class TestCase extends BaseTestCase
             exit(1);
         }
 
+        $this->runDatabaseMigrations();
         $this->seed();
 
         $this->user = User::where('email', 'qa@computablefacts.com')->firstOrfail();
