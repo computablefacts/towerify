@@ -144,7 +144,7 @@ CREATE TABLE `am_assets` (
   CONSTRAINT `am_assets_cur_scan_id_foreign` FOREIGN KEY (`cur_scan_id`) REFERENCES `am_scans` (`ports_scan_id`) ON DELETE SET NULL,
   CONSTRAINT `am_assets_next_scan_id_foreign` FOREIGN KEY (`next_scan_id`) REFERENCES `am_scans` (`ports_scan_id`) ON DELETE SET NULL,
   CONSTRAINT `am_assets_prev_scan_id_foreign` FOREIGN KEY (`prev_scan_id`) REFERENCES `am_scans` (`ports_scan_id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -252,7 +252,7 @@ CREATE TABLE `am_honeypots` (
   PRIMARY KEY (`id`),
   KEY `am_honeypots_created_by_foreign` (`created_by`),
   CONSTRAINT `am_honeypots_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -290,7 +290,7 @@ CREATE TABLE `am_honeypots_events` (
   KEY `am_honeypots_events_attacker_id_foreign` (`attacker_id`),
   CONSTRAINT `am_honeypots_events_attacker_id_foreign` FOREIGN KEY (`attacker_id`) REFERENCES `am_attackers` (`id`) ON DELETE SET NULL,
   CONSTRAINT `am_honeypots_events_honeypot_id_foreign` FOREIGN KEY (`honeypot_id`) REFERENCES `am_honeypots` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -368,7 +368,7 @@ CREATE TABLE `am_scans` (
   KEY `am_scans_asset_id_foreign` (`asset_id`),
   KEY `am_scans_ports_scan_id_index` (`ports_scan_id`),
   CONSTRAINT `am_scans_asset_id_foreign` FOREIGN KEY (`asset_id`) REFERENCES `am_assets` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -382,7 +382,7 @@ CREATE TABLE `am_screenshots` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `png` text NOT NULL,
+  `png` longtext NOT NULL,
   `port_id` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `am_screenshots_port_id_unique` (`port_id`),
@@ -578,11 +578,32 @@ CREATE TABLE `cb_collections` (
   `created_by` int(10) unsigned NOT NULL,
   `name` varchar(191) NOT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `priority` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `cb_chunks_collections_name_unique` (`name`),
   KEY `cb_chunks_collections_created_by_foreign` (`created_by`),
   CONSTRAINT `cb_chunks_collections_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cb_conversations`
+--
+
+DROP TABLE IF EXISTS `cb_conversations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cb_conversations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `created_by` int(10) unsigned NOT NULL,
+  `thread_id` varchar(191) NOT NULL,
+  `dom` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cb_conversations_created_by_foreign` (`created_by`),
+  KEY `cb_conversations_thread_id_index` (`thread_id`),
+  CONSTRAINT `cb_conversations_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -608,13 +629,14 @@ CREATE TABLE `cb_files` (
   `mime_type` varchar(191) NOT NULL,
   `secret` varchar(191) NOT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  `is_embedded` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cb_files_secret_unique` (`secret`),
   KEY `cb_files_created_by_foreign` (`created_by`),
   KEY `cb_files_collection_id_foreign` (`collection_id`),
   CONSTRAINT `cb_files_collection_id_foreign` FOREIGN KEY (`collection_id`) REFERENCES `cb_collections` (`id`) ON DELETE CASCADE,
   CONSTRAINT `cb_files_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -632,10 +654,31 @@ CREATE TABLE `cb_prompts` (
   `name` varchar(191) NOT NULL,
   `template` varchar(5000) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `cb_prompts_name_unique` (`name`),
-  KEY `cb_prompts_created_by_foreign` (`created_by`),
+  KEY `cb_prompts_created_by_index` (`created_by`),
   CONSTRAINT `cb_prompts_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cb_templates`
+--
+
+DROP TABLE IF EXISTS `cb_templates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cb_templates` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `created_by` int(10) unsigned NOT NULL,
+  `name` varchar(191) NOT NULL,
+  `template` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`template`)),
+  `readonly` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cb_templates_name_unique` (`name`),
+  KEY `cb_templates_created_by_foreign` (`created_by`),
+  CONSTRAINT `cb_templates_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -754,6 +797,89 @@ CREATE TABLE `customers` (
   CONSTRAINT `customers_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `customers_default_billing_address_id_foreign` FOREIGN KEY (`default_billing_address_id`) REFERENCES `addresses` (`id`) ON DELETE SET NULL,
   CONSTRAINT `customers_default_shipping_address_id_foreign` FOREIGN KEY (`default_shipping_address_id`) REFERENCES `addresses` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `f_collections`
+--
+
+DROP TABLE IF EXISTS `f_collections`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `f_collections` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `created_by` int(10) unsigned NOT NULL,
+  `name` varchar(191) NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `f_collections_name_unique` (`name`),
+  KEY `f_collections_created_by_foreign` (`created_by`),
+  CONSTRAINT `f_collections_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `f_csv_files`
+--
+
+DROP TABLE IF EXISTS `f_csv_files`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `f_csv_files` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `created_by` int(10) unsigned NOT NULL,
+  `collection_id` int(10) unsigned NOT NULL,
+  `name` varchar(191) NOT NULL,
+  `name_normalized` varchar(191) NOT NULL,
+  `extension` varchar(191) NOT NULL,
+  `path` varchar(191) NOT NULL,
+  `size` int(11) NOT NULL,
+  `md5` varchar(191) NOT NULL,
+  `sha1` varchar(191) NOT NULL,
+  `mime_type` varchar(191) NOT NULL,
+  `secret` varchar(191) NOT NULL,
+  `has_headers` tinyint(1) NOT NULL DEFAULT 0,
+  `column_mapping` text DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `f_csv_files_created_by_foreign` (`created_by`),
+  KEY `f_csv_files_collection_id_foreign` (`collection_id`),
+  CONSTRAINT `f_csv_files_collection_id_foreign` FOREIGN KEY (`collection_id`) REFERENCES `f_collections` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `f_csv_files_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `f_csv_rows`
+--
+
+DROP TABLE IF EXISTS `f_csv_rows`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `f_csv_rows` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `created_by` int(10) unsigned NOT NULL,
+  `collection_id` int(10) unsigned NOT NULL,
+  `csv_file_id` int(10) unsigned NOT NULL,
+  `contents` text NOT NULL,
+  `imported_at` datetime DEFAULT NULL,
+  `warned_at` datetime DEFAULT NULL,
+  `failed_at` datetime DEFAULT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `f_csv_rows_created_by_foreign` (`created_by`),
+  KEY `f_csv_rows_collection_id_foreign` (`collection_id`),
+  KEY `f_csv_rows_csv_file_id_index` (`csv_file_id`),
+  CONSTRAINT `f_csv_rows_collection_id_foreign` FOREIGN KEY (`collection_id`) REFERENCES `f_collections` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `f_csv_rows_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `f_csv_rows_csv_file_id_foreign` FOREIGN KEY (`csv_file_id`) REFERENCES `f_csv_files` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -803,7 +929,7 @@ CREATE TABLE `invitations` (
   KEY `invitations_created_by_foreign` (`created_by`),
   CONSTRAINT `invitations_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `invitations_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -823,7 +949,7 @@ CREATE TABLE `jobs` (
   `created_at` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `jobs_queue_index` (`queue`)
-) ENGINE=InnoDB AUTO_INCREMENT=239691 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=242867 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1016,7 +1142,7 @@ CREATE TABLE `media` (
   UNIQUE KEY `media_uuid_unique` (`uuid`),
   KEY `media_model_type_model_id_index` (`model_type`,`model_id`),
   KEY `media_order_column_index` (`order_column`)
-) ENGINE=InnoDB AUTO_INCREMENT=1807 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2293 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1031,7 +1157,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(191) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=242 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=282 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1874,7 +2000,7 @@ CREATE TABLE `tcb_stories` (
   `go_deeper_fr` text DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `ynh_the_cyber_brief_updated_at_index` (`updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1899,7 +2025,7 @@ CREATE TABLE `telescope_entries` (
   KEY `telescope_entries_family_hash_index` (`family_hash`),
   KEY `telescope_entries_created_at_index` (`created_at`),
   KEY `telescope_entries_type_should_display_on_index_index` (`type`,`should_display_on_index`)
-) ENGINE=InnoDB AUTO_INCREMENT=3991367 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4933696 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1985,7 +2111,7 @@ CREATE TABLE `users` (
   KEY `users_stripe_id_index` (`stripe_id`),
   KEY `users_stripe_tx_id_index` (`stripe_tx_id`),
   CONSTRAINT `users_tenant_id_foreign` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2041,6 +2167,32 @@ CREATE TABLE `ynh_backups` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `ynh_cves`
+--
+
+DROP TABLE IF EXISTS `ynh_cves`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ynh_cves` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `os` varchar(191) NOT NULL,
+  `version` varchar(191) NOT NULL,
+  `package` varchar(191) NOT NULL,
+  `cve` varchar(191) NOT NULL,
+  `status` varchar(191) NOT NULL,
+  `urgency` varchar(191) NOT NULL,
+  `fixed_version` varchar(191) NOT NULL,
+  `tracker` varchar(191) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ynh_cves_os_index` (`os`),
+  KEY `ynh_cves_version_index` (`version`),
+  KEY `ynh_cves_package_index` (`package`)
+) ENGINE=InnoDB AUTO_INCREMENT=137009 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `ynh_domains`
 --
 
@@ -2084,7 +2236,7 @@ CREATE TABLE `ynh_nginx_logs` (
   KEY `ynh_nginx_logs_to_ynh_server_id_foreign` (`to_ynh_server_id`),
   CONSTRAINT `ynh_nginx_logs_from_ynh_server_id_foreign` FOREIGN KEY (`from_ynh_server_id`) REFERENCES `ynh_servers` (`id`),
   CONSTRAINT `ynh_nginx_logs_to_ynh_server_id_foreign` FOREIGN KEY (`to_ynh_server_id`) REFERENCES `ynh_servers` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=208 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=209 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2132,13 +2284,16 @@ CREATE TABLE `ynh_osquery` (
   `columns` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`columns`)),
   `action` varchar(191) NOT NULL,
   `packed` tinyint(1) NOT NULL DEFAULT 1,
+  `dismissed` tinyint(1) NOT NULL DEFAULT 0,
+  `columns_uid` varchar(191) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `ynh_osquery_ynh_server_id_foreign` (`ynh_server_id`),
   KEY `ynh_osquery_name_index` (`name`),
   KEY `ynh_osquery_calendar_time_index` (`calendar_time`),
   KEY `ynh_osquery_updated_at_index` (`updated_at`),
+  KEY `ynh_osquery_columns_uid_index` (`columns_uid`),
   CONSTRAINT `ynh_osquery_ynh_server_id_foreign` FOREIGN KEY (`ynh_server_id`) REFERENCES `ynh_servers` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8300 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2192,6 +2347,35 @@ CREATE TABLE `ynh_osquery_memory_usage` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `ynh_osquery_packages`
+--
+
+DROP TABLE IF EXISTS `ynh_osquery_packages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ynh_osquery_packages` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `ynh_server_id` bigint(20) unsigned NOT NULL,
+  `os` varchar(191) NOT NULL,
+  `os_version` varchar(191) NOT NULL,
+  `package` varchar(191) NOT NULL,
+  `package_version` varchar(191) NOT NULL,
+  `cves` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`cves`)),
+  `ynh_cve_id` bigint(20) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ynh_osquery_packages_ynh_server_id_foreign` (`ynh_server_id`),
+  KEY `ynh_osquery_packages_os_index` (`os`),
+  KEY `ynh_osquery_packages_os_version_index` (`os_version`),
+  KEY `ynh_osquery_packages_package_index` (`package`),
+  KEY `ynh_osquery_packages_ynh_cve_id_foreign` (`ynh_cve_id`),
+  CONSTRAINT `ynh_osquery_packages_ynh_cve_id_foreign` FOREIGN KEY (`ynh_cve_id`) REFERENCES `ynh_cves` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `ynh_osquery_packages_ynh_server_id_foreign` FOREIGN KEY (`ynh_server_id`) REFERENCES `ynh_servers` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=12517 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `ynh_osquery_processor_usage`
 --
 
@@ -2238,7 +2422,7 @@ CREATE TABLE `ynh_osquery_rules` (
   `enabled` tinyint(1) NOT NULL DEFAULT 0,
   `attck` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=175 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=181 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2328,7 +2512,7 @@ CREATE TABLE `ynh_servers` (
   KEY `ynh_servers_ip_address_v6_index` (`ip_address_v6`),
   CONSTRAINT `ynh_servers_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `ynh_servers_ynh_order_id_foreign` FOREIGN KEY (`ynh_order_id`) REFERENCES `ynh_orders` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2398,7 +2582,7 @@ CREATE TABLE `zone_members` (
   KEY `zone_members_created_by_foreign` (`created_by`),
   CONSTRAINT `zone_members_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `zone_members_zone_id_foreign` FOREIGN KEY (`zone_id`) REFERENCES `zones` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1864 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2350 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2430,4 +2614,235 @@ CREATE TABLE `zones` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-24 10:28:44
+-- Dump completed on 2024-11-30 10:04:28
+
+INSERT INTO  migrations (id, migration, batch) VALUES (1, '2014_10_12_000000_create_users_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (2, '2014_10_12_100000_create_password_resets_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (3, '2014_10_13_100000_create_cache_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (4, '2016_11_24_104017_create_countries_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (5, '2016_11_24_104459_create_provinces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (6, '2016_12_03_110323_create_addresses_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (7, '2016_12_04_104214_create_persons_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (8, '2016_12_04_191141_create_organizations_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (9, '2016_12_18_113707_extend_users_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (10, '2016_12_18_121118_create_profiles_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (11, '2017_05_31_113121_create_acl_tables', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (12, '2017_06_11_190822_make_it_tenant_aware', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (13, '2017_06_12_073443_create_appshell_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (14, '2017_07_24_194147_create_customers_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (15, '2017_09_26_145245_create_customer_addresses_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (16, '2017_10_07_133259_create_products_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (17, '2017_10_19_192447_create_vanilo_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (18, '2017_10_28_111947_create_carts_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (19, '2017_10_29_224033_create_cart_items_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (20, '2017_11_27_131854_create_billpayers_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (21, '2017_11_27_131855_create_orders_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (22, '2017_11_27_145105_create_order_items_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (23, '2018_02_26_213828_create_gears_tables', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (24, '2018_05_12_100622_create_media_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (25, '2018_05_13_105644_create_media_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (26, '2018_05_27_210939_create_settings_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (27, '2018_08_08_100000_create_telescope_entries_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (28, '2018_08_24_160805_create_taxonomies_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (29, '2018_08_24_165408_create_taxons_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (30, '2018_09_22_092746_create_category_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (31, '2018_10_15_224808_add_cart_state', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (32, '2018_11_01_181324_add_last_purchase_date_to_customer_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (33, '2018_11_04_211505_create_model_taxons_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (34, '2018_11_10_204207_add_sales_attributes_to_products', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (35, '2018_12_08_111450_create_properties_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (36, '2018_12_08_112321_create_property_values_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (37, '2018_12_08_124157_create_model_property_values_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (38, '2018_12_09_193651_create_property_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (39, '2019_02_16_082635_create_shipments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (40, '2019_04_08_000000_add_stock_field_to_products_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (41, '2019_06_29_215847_convert_user_type_to_varchar', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (42, '2019_07_30_040905_create_channels_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (43, '2019_07_30_071633_create_channel_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (44, '2019_08_10_175251_streamline_provinces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (45, '2019_12_14_000001_create_personal_access_tokens_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (46, '2019_12_17_093757_create_payment_methods_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (47, '2019_12_17_094730_create_payments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (48, '2020_05_24_204911_fix_accidental_taxa_named_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (49, '2020_10_02_230537_upgrade_media_table_to_v8', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (50, '2020_10_25_101244_update_permissions_to_appshell_v2', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (51, '2020_12_08_150233_upgrade_media_table_to_v9', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (52, '2020_12_08_162243_add_payment_method_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (53, '2020_12_18_140413_create_invitations_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (54, '2020_12_19_013824_add_invitation_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (55, '2020_12_29_124643_add_unique_index_to_order_numbers', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (56, '2021_02_28_161404_add_status_message_to_payments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (57, '2021_03_21_102944_create_payment_history_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (58, '2021_05_20_174749_add_remote_id_to_payments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (59, '2021_05_27_113135_create_adjustments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (60, '2022_02_11_181838_create_link_types_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (61, '2022_02_16_092027_create_link_group_tables', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (62, '2022_02_28_160230_add_original_price_field_to_products_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (63, '2022_02_28_163548_add_dimensions_to_products_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (64, '2022_02_28_220149_create_carriers_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (65, '2022_02_28_221239_add_carrier_id_to_shipments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (66, '2022_03_12_165912_add_customer_id_to_users_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (67, '2022_03_15_170852_extend_customers_table_with_ltv_currency_and_timezone', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (68, '2022_03_26_144125_create_shipping_methods_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (69, '2022_06_13_090450_create_master_products_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (70, '2022_06_13_090835_create_master_product_variants_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (71, '2022_07_05_154855_add_channel_id_to_orders_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (72, '2022_11_09_141850_add_active_flag_to_shipping_methods_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (73, '2023_01_12_123641_add_cart_item_configuration', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (74, '2023_01_19_121154_add_order_item_configuration', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (75, '2023_01_25_114755_add_description_to_variants_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (76, '2023_01_25_133735_add_shipping_method_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (77, '2023_01_25_161641_add_carrier_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (78, '2023_02_20_094957_add_reference_number_to_shipments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (79, '2023_02_20_104644_create_shippables_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (80, '2023_02_20_145123_add_fulfillment_status_to_orders', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (81, '2023_02_20_153027_add_fulfillment_status_to_order_items', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (82, '2023_02_22_180720_add_language_and_ordered_at_fields_to_the_orders_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (83, '2023_02_22_191444_add_shipping_method_and_customer_to_the_orders_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (84, '2023_02_26_090848_create_zone_tables', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (85, '2023_02_27_183045_add_zone_to_shipping_methods_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (86, '2023_03_06_203615_add_payable_remote_id_to_the_orders_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (87, '2023_03_06_205137_add_subtype_to_payments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (88, '2023_03_10_110949_add_zone_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (89, '2023_03_12_093217_add_zones_foreign_key_to_shipping_methods_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (90, '2023_03_17_150427_create_tax_categories_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (91, '2023_03_25_201501_add_tax_category_id_to_products', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (92, '2023_03_26_085056_create_tax_rates_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (93, '2023_03_28_195634_add_extend_the_shipments_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (94, '2023_04_08_104809_create_languages_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (95, '2023_06_07_125654_extend_the_addresses_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (96, '2023_06_15_174343_add_model_to_the_addresses_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (97, '2023_06_15_215212_migrate_customer_addresses_for_v3', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (98, '2023_07_10_115351_add_currency_field_to_the_orders_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (99, '2023_07_10_145614_add_currency_to_the_channels_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (100, '2023_08_23_155708_add_hidden_field_to_properties', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (101, '2023_08_31_182424_add_channelables_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (102, '2023_10_04_230611_add_payment_method_to_orders_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (103, '2023_10_18_173544_add_default_address_fields_to_the_customer_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (104, '2023_11_23_091238_add_backorder_to_products_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (105, '2023_11_23_152437_add_backorder_to_master_product_variants_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (106, '2023_12_08_100000_create_tw_client_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (107, '2023_12_11_100000_create_tw_yunohost_instances_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (108, '2023_12_14_153118_add_permissions_to_tw_yunohost_applications_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (109, '2023_12_18_164652_add_tw_yunohost_servers_id_to_tw_yunohost_applications', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (110, '2023_12_19_140022_add_tw_yunohost_permissions_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (111, '2023_12_20_131928_create_jobs_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (112, '2023_12_20_180100_cleanup_yunohost_tables', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (113, '2023_12_21_155200_create_ssh_traces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (114, '2023_12_21_155200_update_ssh_traces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (115, '2023_12_22_221200_create_shadow_it_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (116, '2023_12_26_175900_update_users_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (117, '2023_12_27_161200_update_shadow_it_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (118, '2023_12_29_072239_create_failed_jobs_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (119, '2023_12_29_094039_rename_clients_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (120, '2023_12_29_153622_add_tw_tenants_media_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (121, '2024_01_15_142053_add_yunohost_servers_and_apps_id_to_tw_yunohost_ssh_traces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (122, '2024_01_18_144153_add_yunohost_shadow_it_to_tw_yunohost_ssh_traces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (123, '2024_01_22_213653_longer_trace_in_table_ssh_traces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (124, '2024_01_23_165122_create_ynh_servers_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (125, '2024_01_23_165132_create_ynh_users_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (126, '2024_01_23_165142_create_ynh_domains_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (127, '2024_01_23_165150_create_ynh_applications_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (128, '2024_01_23_170737_create_ynh_permissions_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (129, '2024_01_24_151222_create_is_ready_column_in_ynh_servers_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (130, '2024_01_24_164222_create_ynh_ssh_traces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (131, '2024_01_24_202432_create_ynh_orders', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (132, '2024_01_25_084322_create_ynh_order_id_column_in_ynh_servers_and_ynh_applications_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (133, '2024_01_25_200722_drop_columns_client_id_and_customer_id_from_ynh_servers_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (134, '2024_01_25_222522_update_column_ynh_server_id_on_ynh_ssh_traces_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (135, '2024_01_26_103355_extend_channels_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (136, '2024_01_27_190822_drop_tw_tables', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (137, '2024_01_27_190822_make_it_tenant_aware', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (138, '2024_02_01_115237_set_on_delete_on_tables_ynh', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (139, '2024_02_09_144402_add_type_to_tax_categories_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (140, '2024_02_21_162437_create_table_ynh_osquery', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (141, '2024_02_22_105724_add_tax_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (142, '2024_03_04_110737_update_table_ynh_server', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (143, '2024_03_05_161037_index_columns_in_ynh_tables', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (144, '2024_03_13_103700_index_columns_in_ynh_tables2', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (145, '2024_03_31_162637_create_table_ynh_backups', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (146, '2024_04_04_123653_convert_channel_billing_and_shipping_countries_to_zones', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (147, '2024_04_10_200341_add_zone_to_payment_methods_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (148, '2024_05_03_182837_create_table_ynh_nginx_logs', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (149, '2024_05_06_182837_add_column_ip_address_v6_to_table_ynh_servers', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (150, '2024_05_15_111702_create_media_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (151, '2024_05_25_1601702_add_column_is_frozen_to_ynh_servers', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (152, '2024_05_31_074502_add_root_item_to_link_group_items_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (153, '2024_06_07_083226_add_content_fields_to_taxons_table', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (154, '2024_07_10_101400_add_columns_is_visitors_and_is_all_users_to_ynh_permissions', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (155, '2024_08_06_172120_add_column_packed_to_table_ynh_osquery', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (156, '2024_08_06_172137_create_table_disk_usage', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (157, '2024_08_06_172137_create_table_memory_usage', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (158, '2024_08_11_110315_rename_tables_disk_and_memory_usage', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (159, '2024_08_12_165202_add_column_added_with_curl_to_ynh_servers', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (160, '2024_08_14_165202_create_table_ynh_cybernews', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (161, '2024_08_16_161600_index_columns_updated_at', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (162, '2024_08_19_103002_create_table_ynh_osquery_rules', 1);
+INSERT INTO  migrations (id, migration, batch) VALUES (163, '2024_08_26_091658_create_notifications_table', 2);
+INSERT INTO  migrations (id, migration, batch) VALUES (164, '2024_08_26_134402_add_column_category_to_table_ynh_osquery_rules', 3);
+INSERT INTO  migrations (id, migration, batch) VALUES (165, '2024_08_29_000000_create_assets_table', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (166, '2024_08_30_123600_fixup_tables', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (167, '2024_08_30_161200_fixup_tables2', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (168, '2024_08_30_180700_fixup_tables3', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (169, '2024_09_02_210000_fixup_tables4', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (170, '2024_09_03_121900_fixup_tables5', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (171, '2024_09_04_170900_create_honeypots_tables', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (172, '2024_09_05_145500_fixup_tables6', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (173, '2024_09_06_154400_create_assets_tags_hashes_tables', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (174, '2024_09_06_164300_fixup_tables7', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (175, '2024_09_08_102900_fixup_tables8', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (176, '2024_09_08_120600_create_screenshots_table', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (177, '2024_09_08_132400_fixup_tables9', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (178, '2024_09_08_150400_fixup_tables10', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (179, '2024_09_10_084900_fixup_tables11', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (180, '2024_09_10_090600_fixup_tables12', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (181, '2024_09_10_174900_fixup_tables13', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (182, '2024_09_11_183000_fixup_tables14', 4);
+INSERT INTO  migrations (id, migration, batch) VALUES (183, '2024_09_16_175400_fixup_tables15', 5);
+INSERT INTO  migrations (id, migration, batch) VALUES (184, '2018_01_01_000001_package_sinevia_cms_tables_create', 6);
+INSERT INTO  migrations (id, migration, batch) VALUES (185, '2018_01_13_000001_sinevia_cms_table_version_create', 6);
+INSERT INTO  migrations (id, migration, batch) VALUES (186, '2018_06_18_000001_sinevia_cms_tables_translation_create', 6);
+INSERT INTO  migrations (id, migration, batch) VALUES (187, '2021_09_04_000001_sinevia_cms_tables_menu_create', 6);
+INSERT INTO  migrations (id, migration, batch) VALUES (195, '2024_09_24_165200_create_chunks_table', 7);
+INSERT INTO  migrations (id, migration, batch) VALUES (196, '2024_09_24_212100_create_prompts_table', 8);
+INSERT INTO  migrations (id, migration, batch) VALUES (197, '2024_09_25_174100_increase_column_hyperlink_size_tcb_table', 9);
+INSERT INTO  migrations (id, migration, batch) VALUES (198, '2024_09_25_183800_add_fr_columns_in_tcb_table', 10);
+INSERT INTO  migrations (id, migration, batch) VALUES (199, '2024_09_25_183800_add_terms_accepted_column_in_users_table', 11);
+INSERT INTO  migrations (id, migration, batch) VALUES (200, '2024_09_27_094700_add_se_api_token_column_in_users_table', 12);
+INSERT INTO  migrations (id, migration, batch) VALUES (201, '2024_09_29_140500_create_ynh_summaries_table', 13);
+INSERT INTO  migrations (id, migration, batch) VALUES (202, '2024_09_29_151600_update_ynh_summaries_table', 14);
+INSERT INTO  migrations (id, migration, batch) VALUES (204, '2024_09_29_154100_rename_table_the_cyber_brief', 15);
+INSERT INTO  migrations (id, migration, batch) VALUES (205, '2024_09_29_175600_update_ynh_summaries_with_vulns_table', 16);
+INSERT INTO  migrations (id, migration, batch) VALUES (206, '2024_09_29_181000_update_ynh_summaries_with_servers_table', 17);
+INSERT INTO  migrations (id, migration, batch) VALUES (207, '2024_09_29_181900_rename_table_ynh_summaries', 18);
+INSERT INTO  migrations (id, migration, batch) VALUES (208, '2024_09_29_184300_rename_column_servers_monitored_in_table_ynh_overview', 19);
+INSERT INTO  migrations (id, migration, batch) VALUES (209, '2024_09_30_121900_index_column_level_in_table_am_alerts', 20);
+INSERT INTO  migrations (id, migration, batch) VALUES (215, '2024_10_03_142700_create_files_table', 21);
+INSERT INTO  migrations (id, migration, batch) VALUES (216, '2024_10_07_104300_rename_table_cb_chunks_collections_to_cb_collections', 22);
+INSERT INTO  migrations (id, migration, batch) VALUES (217, '2024_10_08_104500_index_column_timestamp_in_ynh_osquery', 23);
+INSERT INTO  migrations (id, migration, batch) VALUES (228, '2024_10_09_203200_index_column_ip_in_am_ports', 24);
+INSERT INTO  migrations (id, migration, batch) VALUES (229, '2024_10_19_164713_create_stripes_table', 24);
+INSERT INTO  migrations (id, migration, batch) VALUES (230, '2019_05_03_000001_create_customer_columns', 25);
+INSERT INTO  migrations (id, migration, batch) VALUES (231, '2019_05_03_000002_create_subscriptions_table', 25);
+INSERT INTO  migrations (id, migration, batch) VALUES (232, '2019_05_03_000003_create_subscription_items_table', 25);
+INSERT INTO  migrations (id, migration, batch) VALUES (233, '2024_10_21_095800_add_column_stripe_tx_id_to_users', 26);
+INSERT INTO  migrations (id, migration, batch) VALUES (234, '2024_10_21_203000_add_column_superset_id_to_users', 27);
+INSERT INTO  migrations (id, migration, batch) VALUES (236, '2024_10_22_110600_create_table_ynh_osquery_processor_usage', 28);
+INSERT INTO  migrations (id, migration, batch) VALUES (240, '2024_10_23_111700_drop_constraint_on_table_am_alerts', 29);
+INSERT INTO  migrations (id, migration, batch) VALUES (241, '2024_10_23_144200_add_column_enabled_to_table_ynh_osquery_rules', 29);
+INSERT INTO  migrations (id, migration, batch) VALUES (246, '2024_10_27_184400_create_table_ynh_cves', 30);
+INSERT INTO  migrations (id, migration, batch) VALUES (247, '2024_10_27_210500_create_table_ynh_osquery_packages', 30);
+INSERT INTO  migrations (id, migration, batch) VALUES (251, '2024_10_30_154200_add_column_dismissed_to_table_ynh_osquery', 31);
+INSERT INTO  migrations (id, migration, batch) VALUES (253, '2024_11_07_162100_set_constraint_on_prompts', 32);
+INSERT INTO  migrations (id, migration, batch) VALUES (254, '2024_11_08_143700_create_column_cve_id_on_table_ynh_packages', 33);
+INSERT INTO  migrations (id, migration, batch) VALUES (255, '2024_11_13_092900_add_column_is_embedded_to_table_files', 34);
+INSERT INTO  migrations (id, migration, batch) VALUES (263, '2024_11_17_125900_create_table_csv_collections', 35);
+INSERT INTO  migrations (id, migration, batch) VALUES (264, '2024_11_17_135900_create_table_csv_files', 35);
+INSERT INTO  migrations (id, migration, batch) VALUES (265, '2024_11_17_140200_create_table_csv_rows', 35);
+INSERT INTO  migrations (id, migration, batch) VALUES (267, '2024_11_20_051700_create_table_cb_templates', 36);
+INSERT INTO  migrations (id, migration, batch) VALUES (270, '2024_11_20_201100_create_table_cb_conversations', 37);
+INSERT INTO  migrations (id, migration, batch) VALUES (273, '2024_11_24_212400_set_constraint_on_collections', 38);
+INSERT INTO  migrations (id, migration, batch) VALUES (274, '2024_11_26_090800_add_column_priority_to_table_collections', 39);
+INSERT INTO  migrations (id, migration, batch) VALUES (279, '2024_11_28_190500_add_column_uid_to_table_osquery', 40);
+INSERT INTO  migrations (id, migration, batch) VALUES (280, '2024_11_29_034200_update_column_png_in_table_screenshots', 41);
+INSERT INTO  migrations (id, migration, batch) VALUES (281, '2024_11_29_112000_create_index_column_uid_to_table_osquery', 42);
