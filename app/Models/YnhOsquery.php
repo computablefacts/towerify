@@ -67,7 +67,11 @@ class YnhOsquery extends Model
         ksort($json);
         $uid = '';
         foreach ($json as $key => $value) {
-            $uid .= ($key . ':' . $value . ';');
+            if (is_array($value)) {
+                $uid .= ($key . ':' . self::computeColumnsUid($value) . ';');
+            } else {
+                $uid .= ($key . ':' . $value . ';');
+            }
         }
         return md5($uid);
     }
