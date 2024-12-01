@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property Carbon updated_at
  * @property string name
  * @property string description
- * @property ?string value
  * @property string query
  * @property ?string version
  * @property int interval
@@ -23,6 +22,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property ?string category
  * @property bool enabled
  * @property ?string attck
+ * @property bool is_ioc
+ * @property double score
  */
 class YnhOsqueryRule extends Model
 {
@@ -33,7 +34,6 @@ class YnhOsqueryRule extends Model
     protected $fillable = [
         'name',
         'description',
-        'value',
         'version',
         'query',
         'interval',
@@ -43,12 +43,16 @@ class YnhOsqueryRule extends Model
         'category',
         'enabled',
         'attck',
+        'is_ioc',
+        'score',
     ];
 
     protected $casts = [
         'enabled' => 'boolean',
         'removed' => 'boolean',
         'snapshot' => 'boolean',
+        'is_ioc' => 'boolean',
+        'score' => 'double',
         'platform' => OsqueryPlatformEnum::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

@@ -411,13 +411,15 @@ fi
 # Set Osquery flags
 echo '--disable_events=false' > /etc/osquery/osquery.flags # overwrite file!
 echo '--enable_file_events=true' >> /etc/osquery/osquery.flags
+echo '--enable_syslog=true' >> /etc/osquery/osquery.flags
 echo '--audit_allow_config=true' >> /etc/osquery/osquery.flags
-echo '--audit_allow_sockets' >> /etc/osquery/osquery.flags
+echo '--audit_allow_sockets=true' >> /etc/osquery/osquery.flags
 echo '--audit_persist=true' >> /etc/osquery/osquery.flags
 echo '--disable_audit=false' >> /etc/osquery/osquery.flags
 echo '--events_expiry=1' >> /etc/osquery/osquery.flags
 echo '--events_max=500000' >> /etc/osquery/osquery.flags
 echo '--logger_min_status=1' >> /etc/osquery/osquery.flags
+echo '--config_plugin=filesystem' >> /etc/osquery/osquery.flags
 echo '--logger_plugin=filesystem' >> /etc/osquery/osquery.flags
 echo '--watchdog_memory_limit=350' >> /etc/osquery/osquery.flags
 echo '--watchdog_utilization_limit=130' >> /etc/osquery/osquery.flags
