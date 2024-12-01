@@ -3,11 +3,12 @@
 namespace App\Console;
 
 use App\Jobs\AgeOffOsqueryEvents;
+use App\Jobs\ComputeIoc;
 use App\Jobs\PullServersInfos;
 use App\Jobs\Summarize;
-use App\Modules\AdversaryMeter\Jobs\TriggerSendAuditReport;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Jobs\TriggerScan;
+use App\Modules\AdversaryMeter\Jobs\TriggerSendAuditReport;
 use App\Modules\CyberBuddy\Jobs\DeleteEmbeddedChunks;
 use App\Modules\CyberBuddy\Jobs\EmbedChunks;
 use Illuminate\Console\Scheduling\Schedule;
@@ -32,6 +33,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->job(new ComputeIoc())->everyTenMinutes();
         // $schedule->job(new CheckServersHealth())->everyFifteenMinutes();
         $schedule->job(new AgeOffOsqueryEvents())->hourly();
         $schedule->job(new PullServersInfos())->everyThreeHours();

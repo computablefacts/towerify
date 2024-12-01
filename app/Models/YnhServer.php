@@ -937,6 +937,20 @@ EOT;
         $ssh->newTrace(SshTraceStateEnum::DONE, 'Infos pulled from server.');
     }
 
+    public function ioc(Carbon $dateMin, Carbon $dateMax): double
+    {
+        return YnhOsqueryRule::select('ynh_osquery_rules.name', DB::raw('SUM(ynh_osquery_rules.score) AS score'))
+            ->join('ynh_osquery', 'ynh_osquery.name', 'ynh_osquery_rules.name')
+            ->where('ynh_osquery.ynh_server_id', $this->id)
+            ->where('ynh_osquery.calendar_time', '>=', $dateMin)
+            ->where('ynh_osquery.calendar_time', '<=', $dateMax)
+            ->where('ynh_osquery_rules.is_ioc', true)
+            ->where('ynh_osquery_rules.enabled', true)
+            ->groupBy('ynh_osquery_rules.name')
+            ->get()
+            ->sum('score');
+    }
+
     protected function sshPrivateKey(): Attribute
     {
         return Attribute::make(
