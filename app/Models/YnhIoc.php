@@ -32,7 +32,7 @@ class YnhIoc extends Model
     protected $casts = [
         'date_min' => 'datetime',
         'date_max' => 'datetime',
-        'score' => 'double',
+        'score' => 'float',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

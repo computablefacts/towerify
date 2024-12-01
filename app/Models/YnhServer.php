@@ -937,7 +937,7 @@ EOT;
         $ssh->newTrace(SshTraceStateEnum::DONE, 'Infos pulled from server.');
     }
 
-    public function ioc(Carbon $dateMin, Carbon $dateMax): double
+    public function ioc(Carbon $dateMin, Carbon $dateMax): float
     {
         return YnhOsqueryRule::select('ynh_osquery_rules.name', DB::raw('SUM(ynh_osquery_rules.score) AS score'))
             ->join('ynh_osquery', 'ynh_osquery.name', 'ynh_osquery_rules.name')

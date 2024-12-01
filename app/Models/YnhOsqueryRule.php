@@ -53,7 +53,7 @@ class YnhOsqueryRule extends Model
         'removed' => 'boolean',
         'snapshot' => 'boolean',
         'is_ioc' => 'boolean',
-        'score' => 'double',
+        'score' => 'float',
         'platform' => OsqueryPlatformEnum::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
