@@ -6,6 +6,7 @@ use App\Enums\OsqueryPlatformEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 /**
  * @property int id
@@ -66,5 +67,19 @@ class YnhOsqueryRule extends Model
     public function customers()
     {
         return $this->belongsToMany(Customer::class, 'ynh_osquery_rules_scope_customer', 'rule_id', 'customer_id');
+    }
+
+    public function mitreAttckTactics(): array
+    {
+        return $this->mitreAttck()->flatMap(fn(YnhMitreAttck $attck) => $attck->tactics)->unique()->sort()->toArray();
+    }
+
+    public function mitreAttck(): Collection
+    {
+        if ($this->attck) {
+            $refs = explode(',', $this->attck);
+            return YnhMitreAttck::whereIn('uid', $refs)->get();
+        }
+        return collect();
     }
 }

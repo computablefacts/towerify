@@ -13,7 +13,6 @@ use App\Models\TaxRate;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Konekt\Address\Models\ZoneScope;
 
 class DatabaseSeeder extends Seeder
@@ -271,6 +270,18 @@ class DatabaseSeeder extends Seeder
         }
 
         $mitreAttckMatrix = $this->mitreAttckMatrix();
+
+        foreach ($mitreAttckMatrix as $rule) {
+            \App\Models\YnhMitreAttck::updateOrCreate([
+                'uid' => \Illuminate\Support\Str::replace('.', '/', $rule['id'])
+            ], [
+                'uid' => \Illuminate\Support\Str::replace('.', '/', $rule['id']),
+                'title' => $rule['title'],
+                'tactics' => $rule['tactics'],
+                'description' => $rule['description'],
+            ]);
+        }
+
         $indicatorsDetails = $this->indicatorsDetails();
         $osqueryConfiguration = $this->osqueryConfiguration();
         $rules = $this->securityEventsRules();
@@ -322,9 +333,6 @@ class DatabaseSeeder extends Seeder
         $category = isset($details['ioc_category']) ? $details['ioc_category'] : 'other';
         $rule['attck'] = isset($details['ioc_mitre']) ? collect($details['ioc_mitre'])->map(fn(array $ref) => \Illuminate\Support\Str::replace('.', '/', $ref['id']))->join(",") : null;
 
-        if (!isset($details['ioc_score'])) {
-            Log::debug($details);
-        }
         if (isset($details['ioc_score'])) {
             if (count($details) > 0) {
                 $rule['is_ioc'] = true;
