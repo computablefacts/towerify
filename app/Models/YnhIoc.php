@@ -14,7 +14,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int ynh_server_id
  * @property Carbon date_min
  * @property Carbon date_max
- * @property double score
+ * @property array iocs
+ * @property integer count
+ * @property double min
+ * @property double max
+ * @property double sum
+ * @property double mean
+ * @property double median
+ * @property double std_dev
+ * @property double variance
+ * @property boolean is_anomaly
  */
 class YnhIoc extends Model
 {
@@ -26,13 +35,31 @@ class YnhIoc extends Model
         'ynh_server_id',
         'date_min',
         'date_max',
-        'score',
+        'iocs',
+        'count',
+        'min',
+        'max',
+        'sum',
+        'mean',
+        'median',
+        'std_dev',
+        'variance',
+        'is_anomaly',
     ];
 
     protected $casts = [
         'date_min' => 'datetime',
         'date_max' => 'datetime',
-        'score' => 'float',
+        'iocs' => 'array',
+        'count' => 'integer',
+        'min' => 'float',
+        'max' => 'float',
+        'sum' => 'float',
+        'mean' => 'float',
+        'median' => 'float',
+        'std_dev' => 'float',
+        'variance' => 'float',
+        'is_anomaly' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

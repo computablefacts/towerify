@@ -937,18 +937,24 @@ EOT;
         $ssh->newTrace(SshTraceStateEnum::DONE, 'Infos pulled from server.');
     }
 
-    public function ioc(Carbon $dateMin, Carbon $dateMax): float
+    public function iocs(Carbon $dateMin, Carbon $dateMax): Collection
     {
-        return YnhOsqueryRule::select('ynh_osquery_rules.name', DB::raw('SUM(ynh_osquery_rules.score) AS score'))
-            ->join('ynh_osquery', 'ynh_osquery.name', 'ynh_osquery_rules.name')
-            ->where('ynh_osquery.ynh_server_id', $this->id)
-            ->where('ynh_osquery.calendar_time', '>=', $dateMin)
-            ->where('ynh_osquery.calendar_time', '<=', $dateMax)
-            ->where('ynh_osquery_rules.is_ioc', true)
-            ->where('ynh_osquery_rules.enabled', true)
-            ->groupBy('ynh_osquery_rules.name')
+        $rules = YnhOsqueryRule::where('is_ioc', true)->where('enabled', true)->get();
+        return YnhOsquery::where('ynh_server_id', $this->id)
+            ->whereIn('name', $rules->pluck('name'))
+            ->where('calendar_time', '>=', $dateMin)
+            ->where('calendar_time', '<=', $dateMax)
             ->get()
-            ->sum('score');
+            ->map(function (YnhOsquery $event) use ($rules) {
+                /** @var YnhOsqueryRule $rule */
+                $rule = $rules->filter(fn(YnhOsqueryRule $rule) => $rule->name === $event->name)->first();
+                return [
+                    'event_id' => $event->id,
+                    'rule_id' => $rule->id,
+                    'rule_name' => $rule->name,
+                    'rule_score' => $rule->score,
+                ];
+            });
     }
 
     protected function sshPrivateKey(): Attribute
