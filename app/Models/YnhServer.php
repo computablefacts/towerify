@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OsqueryPlatformEnum;
 use App\Enums\ServerStatusEnum;
 use App\Enums\SshTraceStateEnum;
 use App\Hashing\TwHasher;
@@ -62,6 +63,7 @@ class YnhServer extends Model
         'secret',
         'is_frozen',
         'added_with_curl',
+        'platform',
     ];
 
     protected $casts = [
@@ -69,6 +71,7 @@ class YnhServer extends Model
         'is_ready' => 'boolean',
         'is_frozen' => 'boolean',
         'added_with_curl' => 'boolean',
+        'platform' => OsqueryPlatformEnum::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -360,7 +363,7 @@ class YnhServer extends Model
 
     public function sshMonitorServer(SshConnection2 $ssh): bool
     {
-        $installScript = YnhOsquery::monitorServer($this);
+        $installScript = YnhOsquery::monitorLinuxServer($this);
         $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Installing tools for monitoring servers...');
         $filename = 'install-yunohost-' . Str::random(10);
         $isOk = $ssh->upload($filename, $installScript);

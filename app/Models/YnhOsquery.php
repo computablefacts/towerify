@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OsqueryPlatformEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -199,10 +200,11 @@ EOT;
     public static function configLogAlert(YnhServer $server): array
     {
         $url = app_url();
+        $path = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? "C:\\Program Files\\osquery\\log\\osqueryd.*.log" : "/var/log/osquery/osqueryd.*.log";
         return ["monitors" => [
             [
                 "name" => "Monitor Osquery Daemon Output",
-                "path" => "/var/log/osquery/osqueryd.*.log",
+                "path" => $path,
                 "match" => ".*",
                 "regexp" => true,
                 "url" => "{$url}/logalert/{$server->secret}"
@@ -237,7 +239,6 @@ EOT;
                 "logger_snapshot_event_type" => "true",
                 "schedule_splay_percent" => 10
             ],
-            "platform" => "linux",
             "schedule" => $schedule,
             "file_paths" => [
                 "configuration" => [
@@ -273,7 +274,7 @@ EOT;
         ];
     }
 
-    public static function monitorServer(YnhServer $server): string
+    public static function monitorLinuxServer(YnhServer $server): string
     {
         $url = app_url();
         $whitelist = collect(config('towerify.adversarymeter.ip_addresses'))
@@ -449,6 +450,179 @@ if systemctl is-active --quiet fail2ban; then
     systemctl restart fail2ban
   fi
 fi
+
+EOT;
+    }
+
+    public static function monitorWindowsServer(YnhServer $server): string
+    {
+        $url = app_url();
+        return <<<EOT
+# Install Osquery
+# NOTA: the MSI package creates the osqueryd Windows Service as well
+\$osqueryPath = "C:\Program Files\osquery"
+if (-not (Test-Path "\$osqueryPath\osquery.conf")) {
+    Invoke-WebRequest -Uri "https://pkg.osquery.io/windows/osquery-5.11.0.msi" -OutFile "C:\osquery.msi"
+    Start-Process msiexec.exe -ArgumentList "/i C:\osquery.msi /quiet" -Wait
+    Remove-Item "C:\osquery.msi"
+}
+
+# Install LogAlert
+\$logAlertPath = "C:\Program Files\LogAlert"
+if (-not (Test-Path "\$logAlertPath\config.json")) {
+    New-Item -Path \$logAlertPath -ItemType Directory -Force
+    Invoke-WebRequest -Uri "https://github.com/jhuckaby/logalert/releases/download/v1.0.4/logalert-win-x64.exe" -OutFile "\$logAlertPath\logalert.exe"
+}
+
+# Install a tool to create a service for LogAlert
+# See: https://github.com/winsw/winsw/tree/v2.12.0
+if (-not (Test-Path "\$logAlertPath\logalertd.exe")) {
+    Invoke-WebRequest -Uri "https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe" -OutFile "\$logAlertPath\logalertd.exe"
+}
+
+# Setup LogAlert service configuration
+\$logalertd_conf = @"
+id: logalert
+name: LogAlert
+description: Cywise LogAlert Service
+executable: \$logAlertPath\logalert.exe
+startmode: Automatic
+logmode: EventLog
+onFailure:
+  - action: restart
+"@
+\$logalertd_conf | Set-Content -Path "\$logAlertPath\logalertd.yml"
+
+# Setup LogAlert service
+if (-not (Get-Service -Name "logalert" -ErrorAction SilentlyContinue)) {
+    & \$logAlertPath\logalertd.exe install
+}
+
+# Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
+Stop-Service osqueryd
+Stop-Service logalert
+
+# Update LogAlert configuration
+Invoke-WebRequest -Uri "{$url}/logalert/{$server->secret}?os=windows" -OutFile "\$logAlertPath\config2.json"
+
+if (Test-Path "\$logAlertPath\config2.json") {
+  # Vérifier si le fichier est un JSON valide
+  try {
+      \$config2 = Get-Content "\$logAlertPath\config2.json" | ConvertFrom-Json
+      if (\$null -ne \$config2) {
+          # Remplacer config.json par config2.json
+          Copy-Item "\$logAlertPath\config2.json" "\$logAlertPath\config.json" -Force
+      }
+  } catch {
+      Write-Host "Erreur lors de la conversion du fichier config2.json en JSON."
+  }
+}
+
+# Update Osquery configuration
+Invoke-WebRequest -Uri "{$url}/osquery/{$server->secret}?os=windows" -OutFile "\$osqueryPath\osquery2.conf"
+
+if (Test-Path "\$osqueryPath\osquery2.conf") {
+  # Vérifier si le fichier est un JSON valide
+  try {
+      \$osquery2 = Get-Content "\$osqueryPath\osquery2.conf" | ConvertFrom-Json
+      if (\$null -ne \$osquery2) {
+          # Remplacer osquery.conf par osquery2.conf
+          Copy-Item "\$osqueryPath\osquery2.conf" "\$osqueryPath\osquery.conf" -Force
+      }
+  } catch {
+      Write-Host "Erreur lors de la conversion du fichier osquery2.json en JSON."
+  }
+}
+
+# Set Osquery flags
+\$osquery_flags = @"
+--disable_events=false
+--enable_file_events=true
+--audit_allow_config=true
+--audit_allow_sockets
+--audit_persist=true
+--disable_audit=false
+--events_expiry=1
+--events_max=500000
+--logger_min_status=1
+--logger_plugin=filesystem
+--watchdog_memory_limit=350
+--watchdog_utilization_limit=130
+"@
+\$osquery_flags | Set-Content -Path "\$osqueryPath\osquery.flags"
+
+# Start LogAlert then Osquery because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)
+Start-Service logalert
+Start-Service osqueryd
+
+function CreateOrUpdate-ScheduledTask {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=\$true)]
+        [string]\$TaskName,
+
+        [Parameter(Mandatory=\$true)]
+        [string]\$Executable,
+
+        [Parameter(Mandatory=\$false)]
+        [string]\$Arguments = "",
+
+        [Parameter(Mandatory=\$true)]
+        [ValidateSet("Daily", "Weekly")]
+        [string]\$ExecutionType,
+
+        [Parameter(Mandatory=\$true, ParameterSetName="Daily")]
+        [string]\$TimeOfDay,
+
+        [Parameter(Mandatory=\$true, ParameterSetName="Weekly")]
+        [int]\$DayOfWeek,
+
+        [Parameter(Mandatory=\$true, ParameterSetName="Weekly")]
+        [string]\$TimeOfWeek
+    )
+
+    # Create an object to define the scheduled task parameters
+    if ([string]::IsNullOrEmpty(\$Arguments)) {
+        \$Action = New-ScheduledTaskAction -Execute \$Executable
+    } else {
+        \$Action = New-ScheduledTaskAction -Execute \$Executable -Argument \$Arguments
+    }
+    \$Settings = New-ScheduledTaskSettingsSet
+    \$Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+
+    # Define the trigger based on the execution type
+    switch (\$ExecutionType) {
+        "Daily" {
+            \$TimeOfDay = [DateTime]::Parse(\$TimeOfDay)
+            \$Trigger = New-ScheduledTaskTrigger -Daily -At \$TimeOfDay
+        }
+        "Weekly" {
+            \$TimeOfWeek = [DateTime]::Parse(\$TimeOfWeek)
+            \$Trigger = New-ScheduledTaskTrigger -Weekly -At \$TimeOfWeek -DaysOfWeek \$DayOfWeek
+        }
+    }
+
+    # Check if the task already exists
+    if (\$null -ne (Get-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -ErrorAction SilentlyContinue)) {
+        # Update existing task
+        Set-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -Action \$Action -Principal \$Principal -Trigger \$Trigger -Settings \$Settings
+    } else {
+        # Create new task
+        Register-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -Action \$Action -Principal \$Principal -Trigger \$Trigger -Settings \$Settings
+    }
+}
+
+# Parse web logs every hour
+# TODO
+
+# Drop Osquery daemon's output every sunday at 01:11 am
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { if (Test-Path 'C:\Program Files\osquery\log\osqueryd.results.log') { Remove-Item -Path 'C:\Program Files\osquery\log\osqueryd.results.log' -Force }; if (Test-Path 'C:\Program Files\osquery\log\osqueryd.snapshots.log') { Remove-Item -Path 'C:\Program Files\osquery\log\osqueryd.snapshots.log' -Force } }""" -TaskName "DeleteOsqueryLogFiles" -ExecutionType "Weekly" -DayOfWeek 0 -TimeOfWeek "1:11"
+
+# Drop LogAlert's logs every day at 02:22 am
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Remove-Item -Path 'C:\Program Files\LogAlert\log.txt' -Force }""" -TaskName "DeleteLogAlertLogFile" -ExecutionType "Daily" -TimeOfDay "2:22"
+
+# Auto-update the server every day at 03:33 am
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Invoke-WebRequest -Uri '{$url}/update/{$server->secret}?os=windows' -UseBasicParsing | Invoke-Expression }""" -TaskName "AutoUpdate" -ExecutionType "Daily" -TimeOfDay "3:33"
 
 EOT;
     }

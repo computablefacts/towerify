@@ -11,6 +11,7 @@
 |
 */
 
+use App\Enums\OsqueryPlatformEnum;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
 use App\Http\Middleware\Subscribed;
@@ -82,6 +83,13 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
             ->header('Content-Type', 'text/plain');
     }
 
+    $platform = $request->input('platform', OsqueryPlatformEnum::LINUX);
+
+    if (!in_array($platform, OsqueryPlatformEnum::cases())) {
+        return response('Invalid platform name', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
     $server = \App\Models\YnhServer::where('ip_address', $ip)
         ->where('name', $name)
         ->first();
@@ -102,6 +110,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
                 'is_ready' => false,
                 'is_frozen' => true,
                 'added_with_curl' => true,
+                'platform' => $platform,
             ]);
 
             \App\Modules\AdversaryMeter\Events\CreateAsset::dispatch($user, $server->ip(), true, [$server->name]);
@@ -136,7 +145,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
 
     // 1. In the browser, go to "https://app.towerify.io" and login using your user account
     // 2. On the server, run as root: curl -s https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name> | bash
-    $installScript = \App\Models\YnhOsquery::monitorServer($server);
+    $installScript = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::monitorWindowsServer($server) : \App\Models\YnhOsquery::monitorLinuxServer($server);
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
@@ -151,7 +160,7 @@ Route::get('/update/{secret}', function (string $secret, \Illuminate\Http\Reques
             ->header('Content-Type', 'text/plain');
     }
 
-    $installScript = \App\Models\YnhOsquery::monitorServer($server);
+    $installScript = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::monitorWindowsServer($server) : \App\Models\YnhOsquery::monitorLinuxServer($server);
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
