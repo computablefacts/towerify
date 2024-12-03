@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 /**
  * @property int id
@@ -642,38 +641,6 @@ EOT;
                             'message' => "Le traffic réseau vers {$event->columns['hostnames']} n'est maintenant plus redirigé vers {$event->columns['address']}.",
                         ];
                     }
-                } elseif ($event->name === 'mounts') {
-
-                    $isDockerMountEvent = (Str::startsWith($event->columns['path'], '/var/lib/docker/') && $event->columns['type'] === 'overlay') ||
-                        (Str::startsWith($event->columns['path'], '/run/docker/') && $event->columns['type'] === 'nsfs');
-
-                    if (!$isDockerMountEvent) { // drop Docker-generated 'mounts' events
-                        /* if ($event->action === 'added') {
-                            return [
-                                'id' => $event->id,
-                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                                'server' => $event->server->name,
-                                'ip' => $event->server->ip(),
-                                'message' => "Le répertoire {$event->columns['path']} pointe maintenant vers un système de fichiers de type {$event->columns['type']}.",
-                            ];
-                        } elseif ($event->action === 'removed') {
-                            return [
-                                'id' => $event->id,
-                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                                'server' => $event->server->name,
-                                'ip' => $event->server->ip(),
-                                'message' => "Le répertoire {$event->columns['path']} ne pointe maintenant plus vers un système de fichiers de type {$event->columns['type']}.",
-                            ];
-                        } */
-                    }
-                } elseif ($event->name === 'shell_check' || $event->name === 'sudoers_shell' || $event->name === 'sudoers_sha1') {
-                    return [
-                        'id' => $event->id,
-                        'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                        'server' => $event->server->name,
-                        'ip' => $event->server->ip(),
-                        'message' => "Possible \"reverse shell\" (bash) transféré à un attaquant!",
-                    ];
                 } elseif ($event->name === 'deb_packages') {
                     if ($event->action === 'added') {
 
