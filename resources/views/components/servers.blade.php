@@ -3,10 +3,23 @@
   <div class="card-body">
     <div class="row">
       <div class="col">
-        {{ __('To monitor a new server, log in as root and execute this command line :') }}
+        {{ __('To monitor a new Linux server, log in as root and execute this command line :') }}
         <br><br>
         <pre class="no-bottom-margin">
 curl -s "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$(curl -s ipinfo.io | jq -r '.ip')&server_name=$(hostname)" | bash
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card mb-4" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
+        {{ __('To monitor a new Windows server, log in as administrator and execute this command line :') }}
+        <br><br>
+        <pre class="no-bottom-margin">
+Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->sentinelApiToken() }}&server_ip=$((Invoke-RestMethod -Uri 'https://ipinfo.io').ip)&server_name=$($env:COMPUTERNAME)&platform=windows" -UseBasicParsing | Invoke-Expression
         </pre>
       </div>
     </div>
