@@ -332,17 +332,17 @@ class DatabaseSeeder extends Seeder
         $details = $this->findDetails($rule['name'], $rule['query'], $mitreAttckMatrix, $indicatorsDetails, $osqueryConfiguration);
         $category = isset($details['ioc_category']) ? $details['ioc_category'] : 'other';
         $rule['attck'] = isset($details['ioc_mitre']) ? collect($details['ioc_mitre'])->map(fn(array $ref) => \Illuminate\Support\Str::replace('.', '/', $ref['id']))->join(",") : null;
+        $isIoc = count($details) > 0;
 
-        if (isset($details['ioc_score'])) {
-            if (count($details) > 0) {
-                $rule['is_ioc'] = true;
-                $rule['interval'] = $details['ioc_interval'] ?? 3600;
-                $rule['score'] = $details['ioc_score'] ?? 0.1;
-                $ioc = $details['ioc_name'];
-            }
-            $this->addOrUpdateOsqueryRule2($rule['name'], $category, $rule);
+        if ($isIoc) {
+            $rule['is_ioc'] = true;
+            $rule['interval'] = $details['ioc_interval'] ?? 3600;
+            $rule['score'] = $details['ioc_score'] ?? 0.1;
+            $ioc = $details['ioc_name'];
         }
-        return $ioc;
+
+        $this->addOrUpdateOsqueryRule2($rule['name'], $category, $rule);
+        return $isIoc ? $ioc : null;
     }
 
     private function addOrUpdateOsqueryRule2(string $name, string $category, array $rule): void
@@ -351,9 +351,6 @@ class DatabaseSeeder extends Seeder
             'name' => $name,
             'category' => $category,
         ];
-        if (isset($rule['description'])) {
-            $fields['description'] = $rule['description'];
-        }
         if (isset($rule['description'])) {
             $fields['description'] = $rule['description'];
         }
@@ -444,7 +441,7 @@ class DatabaseSeeder extends Seeder
             "interval" => 3600,
             "description" => "Retrieves the list of local system users.",
             'enabled' => true,
-            "platform"=>"all",
+            "platform" => "all",
         ], [
             "name" => "last",
             "query" => "SELECT * FROM last;",
