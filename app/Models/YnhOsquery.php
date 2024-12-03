@@ -503,7 +503,7 @@ Stop-Service osqueryd
 Stop-Service logalert
 
 # Update LogAlert configuration
-Invoke-WebRequest -Uri "{$url}/logalert/{$server->secret}?os=windows" -OutFile "\$logAlertPath\config2.json"
+Invoke-WebRequest -Uri "{$url}/logalert/{$server->secret}" -OutFile "\$logAlertPath\config2.json"
 
 if (Test-Path "\$logAlertPath\config2.json") {
   # Vérifier si le fichier est un JSON valide
@@ -519,7 +519,7 @@ if (Test-Path "\$logAlertPath\config2.json") {
 }
 
 # Update Osquery configuration
-Invoke-WebRequest -Uri "{$url}/osquery/{$server->secret}?os=windows" -OutFile "\$osqueryPath\osquery2.conf"
+Invoke-WebRequest -Uri "{$url}/osquery/{$server->secret}" -OutFile "\$osqueryPath\osquery2.conf"
 
 if (Test-Path "\$osqueryPath\osquery2.conf") {
   # Vérifier si le fichier est un JSON valide
@@ -622,7 +622,7 @@ CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command "
 CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Remove-Item -Path 'C:\Program Files\LogAlert\log.txt' -Force }""" -TaskName "DeleteLogAlertLogFile" -ExecutionType "Daily" -TimeOfDay "2:22"
 
 # Auto-update the server every day at 03:33 am
-CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Invoke-WebRequest -Uri '{$url}/update/{$server->secret}?os=windows' -UseBasicParsing | Invoke-Expression }""" -TaskName "AutoUpdate" -ExecutionType "Daily" -TimeOfDay "3:33"
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Invoke-WebRequest -Uri '{$url}/update/{$server->secret}' -UseBasicParsing | Invoke-Expression }""" -TaskName "AutoUpdate" -ExecutionType "Daily" -TimeOfDay "3:33"
 
 EOT;
     }
