@@ -83,9 +83,15 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
             ->header('Content-Type', 'text/plain');
     }
 
-    $platform = $request->input('platform', OsqueryPlatformEnum::LINUX);
+    $platform = $request->input('platform');
 
-    if (!in_array($platform, OsqueryPlatformEnum::cases())) {
+    if ($platform) {
+        $platform = OsqueryPlatformEnum::tryFrom($platform);
+    } else {
+        $platform = OsqueryPlatformEnum::LINUX;
+    }
+
+    if (!$platform) {
         return response('Invalid platform name', 500)
             ->header('Content-Type', 'text/plain');
     }
