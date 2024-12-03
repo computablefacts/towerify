@@ -12,7 +12,7 @@
     <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
-        <th>{{ __('IOC') }}</th>
+        <!-- <th>{{ __('IOC') }}</th> -->
         <!-- <th class="text-end">{{ __('Weight') }}</th> -->
         <th>{{ __('Name') }}</th>
         <th>{{ __('Version') }}</th>
@@ -23,13 +23,13 @@
       <tbody>
       @foreach($rules as $rule)
       <tr>
-        <td>
+        <!-- <td>
           @if($rule->is_ioc)
           <span class="lozenge error">yes</span>
           @else
           <span class="lozenge success">no</span>
           @endif
-        </td>
+        </td> -->
         <!-- <td class="text-end">
           <span class="lozenge information">{{ $rule->score }}</span>
         </td> -->
