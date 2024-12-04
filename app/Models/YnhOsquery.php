@@ -659,7 +659,7 @@ function CreateOrUpdate-ScheduledTask {
 }
 
 # Parse web logs every hour
-CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File \$cywisePath\logparser.ps1"  -TaskName "LogParser" -ExecutionType Custom -RepeatInterval 3600
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File ""\$cywisePath\logparser.ps1"""  -TaskName "LogParser" -ExecutionType Custom -RepeatInterval 3600
 
 # Drop Osquery daemon's output every sunday at 01:11 am
 CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { if (Test-Path '\$osqueryPath\log\osqueryd.results.log') { Remove-Item -Path '\$osqueryPath\log\osqueryd.results.log' -Force }; if (Test-Path '\$osqueryPath\log\osqueryd.snapshots.log') { Remove-Item -Path '\$osqueryPath\log\osqueryd.snapshots.log' -Force } }""" -TaskName "DeleteOsqueryLogFiles" -ExecutionType "Weekly" -DayOfWeek 0 -TimeOfWeek "1:11"
@@ -671,7 +671,7 @@ CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command "
 CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Invoke-WebRequest -Uri '{$url}/update/{$server->secret}' -UseBasicParsing | Invoke-Expression }""" -TaskName "AutoUpdate" -ExecutionType "Daily" -TimeOfDay "3:33"
 
 # Collect CPU, memory and disks metrics every 5 minutes
-CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File \$cywisePath\localMetrics.ps1"  -TaskName "LocalMetrics" -ExecutionType Custom -RepeatInterval 300
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File ""\$cywisePath\localMetrics.ps1"""  -TaskName "LocalMetrics" -ExecutionType Custom -RepeatInterval 300
 
 EOT;
     }
