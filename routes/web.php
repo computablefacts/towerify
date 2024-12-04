@@ -253,6 +253,21 @@ Route::get('/osquery/{secret}', function (string $secret, \Illuminate\Http\Reque
         ->header('Content-Type', 'text/plain');
 })->middleware('throttle:6,1');
 
+Route::get('/localmetrics/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+    if (!$server) {
+        return response('Unknown server', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $script = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::monitorLocalMetricsWindows($server) : '# TODO';
+
+    return response($script, 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware('throttle:6,1');
+
 Route::get('/logparser/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
 
     $server = \App\Models\YnhServer::where('secret', $secret)->first();
@@ -262,7 +277,7 @@ Route::get('/logparser/{secret}', function (string $secret, \Illuminate\Http\Req
             ->header('Content-Type', 'text/plain');
     }
 
-    $config = \App\Models\YnhOsquery::configLogParser($server);
+    $config = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::configLogParserWindows($server) : \App\Models\YnhOsquery::configLogParserLinux($server);
 
     return response($config, 200)
         ->header('Content-Type', 'text/plain');

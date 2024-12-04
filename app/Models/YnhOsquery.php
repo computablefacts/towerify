@@ -76,7 +76,7 @@ class YnhOsquery extends Model
         return md5($uid);
     }
 
-    public static function configLogParser(YnhServer $server): string
+    public static function configLogParserLinux(YnhServer $server): string
     {
         $url = app_url();
         return <<< EOT
@@ -193,6 +193,17 @@ if [ -f /var/log/osquery/osqueryd.snapshots.log ] && [ -f /var/log/osquery/osque
     rm -f /opt/logparser/osquery.jsonl.gz
   fi
 fi
+
+EOT;
+    }
+
+    public static function configLogParserWindows(YnhServer $server): string
+    {
+        $url = app_url();
+        return <<< EOT
+# TODO
+
+Write-Host "TODO!"
 
 EOT;
     }
@@ -504,7 +515,13 @@ if (-not (Get-Service -Name "logalert" -ErrorAction SilentlyContinue)) {
     & \$logAlertPath\logalertd.exe install
 }
 
-# Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
+# Create cywise directory
+\$cywisePath = "C:\Program Files\Cywise"
+if (-not (Test-Path "\$cywisePath")) {
+    New-Item -Path \$cywisePath -ItemType Directory -Force
+}
+
+# Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)
 Stop-Service osqueryd
 Stop-Service logalert
 
@@ -512,32 +529,48 @@ Stop-Service logalert
 Invoke-WebRequest -Uri "{$url}/logalert/{$server->secret}" -OutFile "\$logAlertPath\config2.json"
 
 if (Test-Path "\$logAlertPath\config2.json") {
-  # Vérifier si le fichier est un JSON valide
-  try {
-      \$config2 = Get-Content "\$logAlertPath\config2.json" | ConvertFrom-Json
-      if (\$null -ne \$config2) {
-          # Remplacer config.json par config2.json
-          Copy-Item "\$logAlertPath\config2.json" "\$logAlertPath\config.json" -Force
-      }
-  } catch {
-      Write-Host "Erreur lors de la conversion du fichier config2.json en JSON."
-  }
+    # Check if the file is a valid JSON
+    try {
+        \$config2 = Get-Content "\$logAlertPath\config2.json" | ConvertFrom-Json
+        if (\$null -ne \$config2) {
+            # Replace config.json with config2.json
+            Copy-Item "\$logAlertPath\config2.json" "\$logAlertPath\config.json" -Force
+        }
+    } catch {
+        Write-Output "Erreur lors de la conversion du fichier config2.json en JSON."
+    }
 }
 
 # Update Osquery configuration
 Invoke-WebRequest -Uri "{$url}/osquery/{$server->secret}" -OutFile "\$osqueryPath\osquery2.conf"
 
 if (Test-Path "\$osqueryPath\osquery2.conf") {
-  # Vérifier si le fichier est un JSON valide
-  try {
-      \$osquery2 = Get-Content "\$osqueryPath\osquery2.conf" | ConvertFrom-Json
-      if (\$null -ne \$osquery2) {
-          # Remplacer osquery.conf par osquery2.conf
-          Copy-Item "\$osqueryPath\osquery2.conf" "\$osqueryPath\osquery.conf" -Force
-      }
-  } catch {
-      Write-Host "Erreur lors de la conversion du fichier osquery2.json en JSON."
-  }
+    # Check if the file is a valid JSON
+    try {
+        \$osquery2 = Get-Content "\$osqueryPath\osquery2.conf" | ConvertFrom-Json
+        if (\$null -ne \$osquery2) {
+            # Replace osquery.conf with osquery2.conf
+            Copy-Item "\$osqueryPath\osquery2.conf" "\$osqueryPath\osquery.conf" -Force
+        }
+    } catch {
+        Write-Output "Erreur lors de la conversion du fichier osquery2.json en JSON."
+    }
+}
+
+# Update LogParser
+Invoke-WebRequest -Uri "{$url}/logparser/{$server->secret}" -OutFile "\$cywisePath\logparser2.ps1" -ErrorAction SilentlyContinue
+
+if (Test-Path "\$cywisePath\logparser2.ps1") {
+    # Remplacer logparser.ps1 par logparser2.ps1
+    Copy-Item "\$cywisePath\logparser2.ps1" "\$cywisePath\logparser.ps1" -Force
+}
+
+# Update localMetrics
+Invoke-WebRequest -Uri "{$url}/localmetrics/{$server->secret}" -OutFile "\$cywisePath\localMetrics2.ps1" -ErrorAction SilentlyContinue
+
+if (Test-Path "\$cywisePath\localMetrics2.ps1") {
+    # Remplacer logparser.ps1 par localMetrics2.ps1
+    Copy-Item "\$cywisePath\localMetrics2.ps1" "\$cywisePath\localMetrics.ps1" -Force
 }
 
 # Set Osquery flags
@@ -564,26 +597,29 @@ Start-Service osqueryd
 function CreateOrUpdate-ScheduledTask {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=\$true)]
+        [Parameter(Mandatory = \$true)]
         [string]\$TaskName,
 
-        [Parameter(Mandatory=\$true)]
+        [Parameter(Mandatory = \$true)]
         [string]\$Executable,
 
-        [Parameter(Mandatory=\$false)]
+        [Parameter(Mandatory = \$false)]
         [string]\$Arguments = "",
 
-        [Parameter(Mandatory=\$true)]
-        [ValidateSet("Daily", "Weekly")]
+        [Parameter(Mandatory = \$true)]
+        [ValidateSet("Custom", "Daily", "Weekly")]
         [string]\$ExecutionType,
 
-        [Parameter(Mandatory=\$true, ParameterSetName="Daily")]
+        [Parameter(Mandatory = \$false, ParameterSetName = "Custom")]
+        [int]\$RepeatInterval = 3600,
+
+        [Parameter(Mandatory = \$true, ParameterSetName = "Daily")]
         [string]\$TimeOfDay,
 
-        [Parameter(Mandatory=\$true, ParameterSetName="Weekly")]
+        [Parameter(Mandatory = \$true, ParameterSetName = "Weekly")]
         [int]\$DayOfWeek,
 
-        [Parameter(Mandatory=\$true, ParameterSetName="Weekly")]
+        [Parameter(Mandatory = \$true, ParameterSetName = "Weekly")]
         [string]\$TimeOfWeek
     )
 
@@ -598,6 +634,10 @@ function CreateOrUpdate-ScheduledTask {
 
     # Define the trigger based on the execution type
     switch (\$ExecutionType) {
+        "Custom" {
+            \$TimeOfDay = [DateTime]::Parse("00:00")
+            \$Trigger = New-ScheduledTaskTrigger -Once -At \$TimeOfDay -RepetitionInterval (New-TimeSpan -Seconds \$RepeatInterval) -RepetitionDuration (New-TimeSpan -Days 3650)
+        }
         "Daily" {
             \$TimeOfDay = [DateTime]::Parse(\$TimeOfDay)
             \$Trigger = New-ScheduledTaskTrigger -Daily -At \$TimeOfDay
@@ -619,16 +659,129 @@ function CreateOrUpdate-ScheduledTask {
 }
 
 # Parse web logs every hour
-# TODO
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File \$cywisePath\logparser.ps1"  -TaskName "LogParser" -ExecutionType Custom -RepeatInterval 3600
 
 # Drop Osquery daemon's output every sunday at 01:11 am
-CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { if (Test-Path 'C:\Program Files\osquery\log\osqueryd.results.log') { Remove-Item -Path 'C:\Program Files\osquery\log\osqueryd.results.log' -Force }; if (Test-Path 'C:\Program Files\osquery\log\osqueryd.snapshots.log') { Remove-Item -Path 'C:\Program Files\osquery\log\osqueryd.snapshots.log' -Force } }""" -TaskName "DeleteOsqueryLogFiles" -ExecutionType "Weekly" -DayOfWeek 0 -TimeOfWeek "1:11"
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { if (Test-Path '\$osqueryPath\log\osqueryd.results.log') { Remove-Item -Path '\$osqueryPath\log\osqueryd.results.log' -Force }; if (Test-Path '\$osqueryPath\log\osqueryd.snapshots.log') { Remove-Item -Path '\$osqueryPath\log\osqueryd.snapshots.log' -Force } }""" -TaskName "DeleteOsqueryLogFiles" -ExecutionType "Weekly" -DayOfWeek 0 -TimeOfWeek "1:11"
 
 # Drop LogAlert's logs every day at 02:22 am
-CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Remove-Item -Path 'C:\Program Files\LogAlert\log.txt' -Force }""" -TaskName "DeleteLogAlertLogFile" -ExecutionType "Daily" -TimeOfDay "2:22"
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Remove-Item -Path '\$logAlertPath\LogAlert\log.txt' -Force }""" -TaskName "DeleteLogAlertLogFile" -ExecutionType "Daily" -TimeOfDay "2:22"
 
 # Auto-update the server every day at 03:33 am
 CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Invoke-WebRequest -Uri '{$url}/update/{$server->secret}' -UseBasicParsing | Invoke-Expression }""" -TaskName "AutoUpdate" -ExecutionType "Daily" -TimeOfDay "3:33"
+
+# Collect CPU, memory and disks metrics every 5 minutes
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File \$cywisePath\localMetrics.ps1"  -TaskName "LocalMetrics" -ExecutionType Custom -RepeatInterval 300
+
+EOT;
+    }
+
+    public static function monitorLocalMetricsWindows(YnhServer $server): string
+    {
+        $url = app_url();
+        return <<<EOT
+function Get-CpuMetrics() {
+    # Retrieve data (first point)
+    \$objService = Get-WmiObject -Class Win32_PerfRawData_PerfOS_Processor -Filter "Name='_Total'"
+    \$userTime1 = \$objService.PercentUserTime
+    \$systemTime1 = \$objService.PercentPrivilegedTime
+    \$time1 = \$objService.TimeStamp_Sys100NS
+
+    # Wait
+    Start-Sleep -Seconds 1
+
+    # Retrieve data (second point)
+    \$objService = Get-WmiObject -Class Win32_PerfRawData_PerfOS_Processor -Filter "Name='_Total'"
+    \$userTime2 = \$objService.PercentUserTime
+    \$systemTime2 = \$objService.PercentPrivilegedTime
+    \$time2 = \$objService.TimeStamp_Sys100NS
+
+    # Calculate CPU usage
+    \$PercentUserTime = [math]::Round(((\$userTime2 - \$userTime1) / (\$time2 - \$time1)) * 100, 2)
+    \$PercentSystemTime = [math]::Round(((\$systemTime2 - \$systemTime1) / (\$time2 - \$time1)) * 100, 2)
+    \$PercentIdleTime = 100 - \$PercentUserTime - \$PercentSystemTime
+
+    return @{
+        time_spent_idle_pct                = \$PercentIdleTime.ToString()
+        time_spent_on_system_workloads_pct = \$PercentSystemTime.ToString()
+        time_spent_on_user_workloads_pct   = \$PercentUserTime.ToString()
+    }
+}
+
+function Get-DiskMetrics() {
+    # Retrieve disk information
+    \$disks = Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3"
+
+    # Initialize variables
+    \$total_space_gb = 0
+    \$space_left_gb = 0
+
+    # Loop through disks
+    foreach (\$disk in \$disks) {
+        # Calculate total size in GB
+        \$total_space_gb += [math]::Round(\$disk.Size / 1GB, 2)
+
+        # Calculate free space in GB
+        \$space_left_gb += [math]::Round(\$disk.FreeSpace / 1GB, 2)
+    }
+
+    # Calculate others metrics
+    \$used_space_gb = [math]::Round(\$total_space_gb - \$space_left_gb, 2)
+    \$percent_available = [math]::Round((\$space_left_gb / \$total_space_gb) * 100, 1)
+    \$percent_used = [math]::Round(100 - \$percent_available, 1)
+
+    return @{
+        '%_available'  = \$percent_available.ToString()
+        '%_used'       = \$percent_used.ToString()
+        space_left_gb  = \$space_left_gb.ToString()
+        total_space_gb = \$total_space_gb.ToString()
+        used_space_gb  = \$used_space_gb.ToString()
+    }
+}
+
+function Get-MemoryMetrics() {
+    \$total_space_gb = [math]::round(\$(Get-WmiObject -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)
+    \$space_left_gb = [math]::round((\$(Get-WmiObject -Class Win32_PerfFormattedData_PerfOS_Memory).AvailableBytes) / 1GB, 2)
+    \$used_space_gb = [math]::round(\$total_space_gb - \$space_left_gb, 2)
+    \$pct_available = [math]::round((\$space_left_gb / \$total_space_gb) * 100, 1)
+    \$pct_used = [math]::round((\$used_space_gb / \$total_space_gb) * 100, 1)
+
+    return @{
+        '%_available'  = \$pct_available.ToString()
+        '%_used'       = \$pct_used.ToString()
+        space_left_gb  = \$space_left_gb.ToString()
+        total_space_gb = \$total_space_gb.ToString()
+        used_space_gb  = \$used_space_gb.ToString()
+    }
+}
+
+function Generate-OsqueryJson {
+    param (
+        [string]\$Name,
+        [hashtable]\$Columns
+    )
+
+    \$currentDate = Get-Date -Format "ddd MMM  d HH:mm:ss yyyy UTC"
+    \$unixTime = [int][double]::Parse((Get-Date -UFormat %s).ToString())
+
+    \$data = @{
+        name           = \$Name
+        hostIdentifier = \$env:COMPUTERNAME
+        calendarTime   = \$currentDate
+        unixTime       = \$unixTime
+        epoch          = 0
+        counter        = 0
+        numerics       = \$false
+        columns        = \$Columns
+        action         = "snapshot"
+    }
+
+    return \$data | ConvertTo-Json -Compress
+}
+
+Generate-OsqueryJson -Name "processor_available_snapshot" -Columns \$(Get-CpuMetrics) | Out-File -Append -Encoding utf8 "C:\Program Files\osquery\log\osqueryd.snapshots.log"
+Generate-OsqueryJson -Name "disk_available_snapshot" -Columns \$(Get-DiskMetrics) | Out-File -Append -Encoding utf8 "C:\Program Files\osquery\log\osqueryd.snapshots.log"
+Generate-OsqueryJson -Name "memory_available_snapshot" -Columns \$(Get-MemoryMetrics) | Out-File -Append -Encoding utf8 "C:\Program Files\osquery\log\osqueryd.snapshots.log"
 
 EOT;
     }
