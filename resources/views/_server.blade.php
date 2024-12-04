@@ -14,6 +14,12 @@
         {{ __('Settings') }}
       </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link {{ !$tab || $tab === 'events' ? 'active' : '' }}"
+         href="{{ route('ynh.servers.edit', $server) }}?tab=events">
+        {{ __('Events') }}
+      </a>
+    </li>
     @if(!$server->addedWithCurl())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'backups' ? 'active' : '' }}"
@@ -65,6 +71,9 @@
   </ul>
   @if(!$tab || $tab === 'settings')
   <x-server :server="$server"/>
+  @endif
+  @if($tab === 'events')
+  <x-timeline :server="$server"/>
   @endif
   @if($tab === 'backups')
   <x-backups :server="$server"/>
