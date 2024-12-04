@@ -6,6 +6,7 @@
         "rationale": "Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vi /etc/modprobe.d/squashfs.conf and add the following line: install squashfs /bin/true. Run the following command to unload the squashfs module: # rmmod squashfs",
         "test_query": "from kernel_modules where name = 'squashfs';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'squashfs'",
         "query_type": "negative_success",
         "category": "Disable unused filesystems",
         "compliance": [
@@ -35,6 +36,7 @@
         "rationale": "Removing support for unneeded filesystem types reduces the local attack surface of the server. If this filesystem type is not needed, disable it.",
         "remediation": "1) Edit or create a file in the /etc/modprobe.d/ directory ending in .conf and add the following line: install cramfs /bin/true. 2) Run the following command to unload the cramfs module: # rmmod cramfs",
         "test_query": "from kernel_modules where name = 'cramfs';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'cramfs'",
         "query_type": "negative_success",
         "category": "Disable unused filesystems",
         "compliance": [
@@ -64,6 +66,7 @@
         "rationale": "Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vi /etc/modprobe.d/freevxfs.conf and add the following line: install freevxfs /bin/true Run the following command to unload the freevxfs module: # rmmod freevxfs",
         "test_query": "from kernel_modules where name = 'freevxfs';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'freevxfs'",
         "query_type": "negative_success",
         "category": "Disable unused filesystems",
         "compliance": [
@@ -93,6 +96,7 @@
         "rationale": "Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vi /etc/modprobe.d/jffs2.conf and add the following line: install jffs2 /bin/true Run the following command to unload the jffs2 module: # rmmod jffs2",
         "test_query": "from kernel_modules where name = 'jffs2';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'jffs2'",
         "query_type": "negative_success",
         "category": "Disable unused filesystems",
         "compliance": [
@@ -122,6 +126,7 @@
         "rationale": "Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vi /etc/modprobe.d/hfs.conf and add the following line: install hfs /bin/true Run the following command to unload the hfs module: # rmmod hfs",
         "test_query": "from kernel_modules where name = 'hfs';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'hfs'",
         "query_type": "negative_success",
         "category": "Disable unused filesystems",
         "compliance": [
@@ -151,6 +156,7 @@
         "rationale": "Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .confExample: vi /etc/modprobe.d/hfsplus.conf and add the following line: install hfsplus /bin/true Run the following command to unload the hfsplus module: # rmmod hfsplus",
         "test_query": "from kernel_modules where name = 'hfsplus';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'hfsplus'",
         "query_type": "negative_success",
         "category": "Disable unused filesystems",
         "compliance": [
@@ -180,6 +186,7 @@
         "rationale": "Removing support for unneeded filesystem types reduces the local attack surface of the system. If this filesystem type is not needed, disable it.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vi /etc/modprobe.d/udf.conf and add the following line: install udf /bin/true Run the following command to unload the udf module: # rmmod udf",
         "test_query": "from kernel_modules where name = 'udf';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'udf'",
         "query_type": "negative_success",
         "category": "Disable unused filesystems",
         "compliance": [
@@ -209,6 +216,7 @@
         "rationale": "Making /tmp its own file system allows an administrator to set the noexec option on the mount, making /tmp useless for an attacker to install executable code. It would also prevent an attacker from establishing a hardlink to a system setuid program and wait for it to be updated. Once the program was updated, the hardlink would be broken and the attacker would have his own copy of the program. If the program happened to have a security vulnerability, the attacker could continue to exploit the known flaw. This can be accomplished by either mounting tmpfs to /tmp, or creating a separate partition for /tmp.",
         "remediation": "Configure /etc/fstab as appropriate. Example: tmpfs /tmp tmpfs defaults,rw,nosuid,nodev,noexec,relatime 0 0 or Run the following commands to enable systemd /tmp mounting: systemctl unmask tmp.mount systemctl enable tmp.mount Edit /etc/systemd/system/local-fs.target.wants/tmp.mount to configure the /tmp mount: [Mount] What=tmpfs Where=/tmp Type=tmpfs Options=mode=1777,strictatime,noexec,nodev,nosuid",
         "test_query": "from mounts where path = '/tmp';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/tmp'",
         "query_type": "positive_success",
         "category": "Filesystem Configuration",
         "compliance": [
@@ -226,6 +234,7 @@
         "rationale": "Since the /tmp filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices in /tmp.",
         "remediation": "Edit the /etc/fstab file and add nodev to the fourth field (mounting options) for the /tmp partition. See the fstab(5) manual page for more information. Run the following command to remount /tmp: # mount -o remount,nodev /tmp     OR      Edit /etc/systemd/system/local-fs.target.wants/tmp.mount to add nodevto the /tmp mount options:  [Mount]   Options=mode=1777,strictatime,noexec,nodev,nosuid Run the following command to remount /tmp:  # mount -o remount,nodev /tmp",
         "test_query": "from mounts where path = '/tmp' and flags LIKE '%nodev%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/tmp' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%nodev%'",
         "query_type": "positive_success",
         "category": "Filesystem Configuration",
         "compliance": [
@@ -243,6 +252,7 @@
         "rationale": "Since the /tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot create set userid files in /tmp.",
         "remediation": "Edit the /etc/fstab file and add nosuid to the fourth field (mounting options) for the /tmp partition. See the fstab(5) manual page for more information. Run the following command to remount /tmp: # mount -o remount,nosuid /tmp       OR          Edit /etc/systemd/system/local-fs.target.wants/tmp.mount to add nosuidto the /tmp mount options:[Mount]  Options=mode=1777,strictatime,noexec,nodev,nosuid  Run the following command to remount /tmp:# mount -o remount,nosuid /tmp",
         "test_query": "from mounts where path = '/tmp' and flags LIKE '%nosuid%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/tmp' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%nosuid%'",
         "query_type": "positive_success",
         "category": "Filesystem Configuration",
         "compliance": [
@@ -260,6 +270,7 @@
         "rationale": "Since the /tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot create set userid files in /tmp.",
         "remediation": "Edit the /etc/fstab file and add noexecto the fourth field (mounting options) for the /tmp partition. See the fstab(5) manual page for more information. Run the following command to remount /tmp: # mount -o remount,noexec /tmp       OR      Edit /etc/systemd/system/local-fs.target.wants/tmp.mount to add noexecto the /tmp mount options:  [Mount]  Options=mode=1777,strictatime,noexec,nodev,nosuid Run the following command to remount /tmp: # mount -o remount,noexec /tmp",
         "test_query": "from mounts where path = '/tmp' and flags LIKE '%noexec%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/tmp' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%noexec%'",
         "query_type": "positive_success",
         "category": "Filesystem Configuration",
         "compliance": [
@@ -277,6 +288,7 @@
         "rationale": "Any user can upload and execute files inside the /dev/shm similar to the /tmp partition. Configuring /dev/shm allows an administrator to set the noexecoption on the mount, making /dev/shm useless for an attacker to install executable code. It would also prevent an attacker from establishing a hardlink to a system setuid program and wait for it to be updated. Once the program was updated, the hardlink would be broken and the attacker would have his own copy of the program. If the program happened to have a security vulnerability, the attacker could continue to exploit the known flaw.",
         "remediation": "Any user can upload and execute files inside the /dev/shm similar to the /tmp partition. Configuring /dev/shm allows an administrator to set the noexecoption on the mount, making /dev/shm useless for an attacker to install executable code. It would also prevent an attacker from establishing a hardlink to a system setuid program and wait for it to be updated. Once the program was updated, the hardlink would be broken and the attacker would have his own copy of the program. If the program happened to have a security vulnerability, the attacker could continue to exploit the known flaw.",
         "test_query": "from mounts where path = '/dev/shm';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/dev/shm'",
         "query_type": "positive_success",
         "category": "Filesystem Configuration",
         "compliance": [
@@ -294,6 +306,7 @@
         "rationale": "Since the /dev/shm filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create special devices in /dev/shm partitions.",
         "remediation": "Edit the /etc/fstab file and add nodev to the fourth field (mounting options) for the /dev/shm partition. See the fstab(5) manual page for more information. Run the following command to remount /dev/shm: # mount -o remount,nodev /dev/shm",
         "test_query": "from mounts where path = '/dev/shm' and flags LIKE '%nodev%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/dev/shm' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%nodev%'",
         "query_type": "positive_success",
         "category": "Filesystem Configuration",
         "compliance": [
@@ -311,6 +324,7 @@
         "rationale": "Setting this option on a file system prevents users from introducing privileged programs onto the system and allowing non-root users to execute them.",
         "remediation": "Edit the /etc/fstab file and add nosuid to the fourth field (mounting options) for the /dev/shm partition. See the fstab(5) manual page for more information. Run the following command to remount /dev/shm: # mount -o remount,nosuid /dev/shm",
         "test_query": "from mounts where path = '/dev/shm' and flags LIKE '%nosuid%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/dev/shm' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%nosuid%'",
         "query_type": "positive_success",
         "category": "Filesystem Configuration",
         "compliance": [
@@ -328,6 +342,7 @@
         "rationale": "Setting this option on a file system prevents users from executing programs from shared memory. This deters users from introducing potentially malicious software on the system.",
         "remediation": "Edit the /etc/fstab file and add noexec to the fourth field (mounting options) for the /dev/shm partition. See the fstab(5) manual page for more information. Run the following command to remount /dev/shm: # mount -o remount,noexec /dev/shm",
         "test_query": "from mounts where path = '/dev/shm' and flags LIKE '%noexec%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/dev/shm' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%noexec%'",
         "query_type": "positive_success",
         "compliance": [
             {
@@ -344,6 +359,7 @@
         "rationale": "Since the /var directory may contain world-writable files and directories, there is a risk of resource exhaustion if it is not bound to a separate partition.",
         "remediation": "For new installations, during installationcreate a custom partition setup and specify a separate partition for /var. For systems that were previously installed, create a new partition and configure /etc/fstab as appropriate.",
         "test_query": "from mounts where path = '/var';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var'",
         "query_type": "positive_success",
         "compliance": [
             {
@@ -361,6 +377,7 @@
         "rationale": "Since the /var/tmp filesystem is not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices in /var/tmp.",
         "remediation": "Edit the /etc/fstab file and add nodev to the fourth field (mounting options) for the /var/tmp partition. See the fstab(5) manual page for more information. Run the following command to remount /var/tmp : # mount -o remount,nodev /var/tmp",
         "test_query": "from mounts where path = '/var/tmp';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/tmp'",
         "query_type": "positive_success",
         "compliance": [
             {
@@ -378,6 +395,7 @@
         "rationale": "Since the /var/tmp directory is intended to be world-writable, there is a risk of resource exhaustion if it is not bound to a separate partition. In addition, making /var/tmp its own file system allows an administrator to set the noexec option on the mount, making /var/tmp useless for an attacker to install executable code. It would also prevent an attacker from establishing a hardlink to a system setuid program and wait for it to be updated. Once the program was updated, the hardlink would be broken and the attacker would have his own copy of the program. If the program happened to have a security vulnerability, the attacker could continue to exploit the known flaw.",
         "remediation": "Edit the /etc/fstab file and add nodev to the fourth field (mounting options) for the /var/tmp partition. See the fstab(5) manual page for more information. Run the following command to remount /var/tmp : # mount -o remount,nodev /var/tmp",
         "test_query": "from mounts where path = '/var/tmp' and flags LIKE '%nodev%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/tmp' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%nodev%'",
         "compliance": [
             {
                 "name": "cis",
@@ -395,6 +413,7 @@
         "rationale": "Since the /var/tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot create setuid files in /var/tmp .",
         "remediation": "Edit the /etc/fstab file and add nosuid to the fourth field (mounting options) for the /var/tmp partition. See the fstab(5) manual page for more information. Run the following command to remount /var/tmp: mount -o remount,nosuid /var/tmp",
         "test_query": "from mounts where path = '/var/tmp' and flags LIKE '%nosuid%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/tmp' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%nosuid%'",
         "compliance": [
             {
                 "name": "cis",
@@ -412,6 +431,7 @@
         "rationale": "Since the /var/tmp filesystem is only intended for temporary file storage, set this option to ensure that users cannot run executable binaries from /var/tmp.",
         "remediation": "Edit the /etc/fstab file and add noexec to the fourth field (mounting options) for the /var/tmp partition. See the fstab(5) manual page for more information. Run the following command to remount /var/tmp: # mount -o remount,noexec /var/tmp",
         "test_query": "from mounts where path = '/var/tmp' and flags LIKE '%noexec%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/tmp' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%noexec%'",
         "compliance": [
             {
                 "name": "cis",
@@ -429,6 +449,7 @@
         "rationale": "There are two important reasons to ensure that system logs are stored on a separate partition: protection against resource exhaustion (since logs can grow quite large) and protection of audit data.",
         "remediation": "For new installations, during installation create a custom partition setup and specify a separate partition for /var/log. For systems that were previously installed, create a new partition and configure /etc/fstab as appropriate.",
         "test_query": "from mounts where path = '/var/log'",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log'",
         "compliance": [
             {
                 "name": "cis",
@@ -446,6 +467,7 @@
         "rationale": "There are two important reasons to ensure that data gathered by auditd is stored on a separate partition: protection against resource exhaustion (since the audit.log file can grow quite large) and protection of audit data. The audit daemon calculates how much free space is left and performs actions based on the results. If other processes (such as syslog ) consume space in the same partition as auditd , it may not perform as desired.",
         "remediation": "For new installations, during installation create a custom partition setup and specify a separate partition for /var/log/audit . For systems that were previously installed, create a new partition and configure /etc/fstab as appropriate.",
         "test_query": "from mounts where path = '/var/log/audit'",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log/audit'",
         "compliance": [
             {
                 "name": "cis",
@@ -463,6 +485,7 @@
         "rationale": "If the system is intended to support local users, create a separate partition for the /home directory to protect against resource exhaustion and restrict the type of files that can be stored under /home .",
         "remediation": "For new installations, during installation create a custom partition setup and specify a separate partition for /home. For systems that were previously installed, create a new partition and configure /etc/fstab as appropriate.",
         "test_query": "from mounts where path = '/home'",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/home'",
         "compliance": [
             {
                 "name": "cis",
@@ -480,6 +503,7 @@
         "rationale": "Since the user partitions are not intended to support devices, set this option to ensure that users cannot attempt to create block or character special devices.",
         "remediation": "Edit the /etc/fstab file and add nodev to the fourth field (mounting options) for the /home partition. See the fstab(5) manual page for more information. mount -o remount,nodev /home",
         "test_query": "from mounts where path = '/home' and flags LIKE '%nodev%';",
+        "test_query_cywise": "where ynh_osquery.name = 'mounts' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/home' and json_unquote(json_extract(ynh_osquery.columns, '$.flags')) like '%nodev%'",
         "compliance": [
             {
                 "name": "cis",
@@ -497,6 +521,7 @@
         "rationale": "With automounting enabled anyone with physical access could attach a USB drive or disc and have its contents available in system even if they lacked permissions to mount it themselves.",
         "remediation": "Run the following command to disable autofs: systemctl disable autofs",
         "test_query": "from deb_packages where name = 'autofs';",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'autofs'",
         "category": "Filesystem Configuration",
         "compliance": [
             {
@@ -514,6 +539,7 @@
         "rationale": "sudo supports a plugin architecture for security policies and input/output logging. Third parties can develop and distribute their own policy and I/O logging plugins to work seamlessly with the sudo front end. The default security policy is sudoers, which is configured via the file /etc/sudoers. The security policy determines what privileges, if any, a user has to run sudo. The policy may require that users authenticate themselves with a password or another authentication mechanism. If authentication is required, sudo will exit if the user's password is not entered within a configurable time limit. This limit is policy-specific.",
         "remediation": "Install sudo using the following command. # apt install sudo OR # apt install sudo-ldap",
         "test_query": "from deb_packages where name = 'sudo'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'sudo'",
         "category": "Filesystem Configuration",
         "compliance": [
             {
@@ -531,6 +557,7 @@
         "rationale": "Attackers can run a malicious program using sudo, which would again fork a background process that remains even when the main program has finished executing.",
         "remediation": "Edit the file /etc/sudoers or a file in /etc/sudoers.d/ with visudo -f and add the following line: Defaults use_pty",
         "test_query": "from sudoers where header LIKE '%Defaults%' and rule_details = 'use_pty'",
+        "test_query_cywise": "where ynh_osquery.name = 'sudoers' and json_unquote(json_extract(ynh_osquery.columns, '$.header')) LIKE '%Defaults%' and json_unquote(json_extract(ynh_osquery.columns, '$.rule_details')) = 'use_pty'",
         "category": "Filesystem Configuration",
         "compliance": [
             {
@@ -548,6 +575,7 @@
         "rationale": "A sudo log file simplifies auditing of sudo commands.",
         "remediation": "Edit the file /etc/sudoers or a file in /etc/sudoers.d/ with visudo -f and add the following line:   Defaults logfile=\"<PATH TO CUSTOM LOG FILE>\"   Example    Defaults logfile=\"/var/log/sudo.log\"",
         "test_query": "from sudoers where header LIKE '%Defaults%' and rule_details LIKE '%logfile%'",
+        "test_query_cywise": "where ynh_osquery.name = 'sudoers' and json_unquote(json_extract(ynh_osquery.columns, '$.header')) LIKE '%Defaults%' and json_unquote(json_extract(ynh_osquery.columns, '$.rule_details')) like '%logfile%'",
         "category": "Filesystem Configuration",
         "compliance": [
             {
@@ -565,6 +593,7 @@
         "rationale": "By monitoring the filesystem state compromised files can be detected to prevent or limit the exposure of accidental or malicious misconfigurations or modified binaries.",
         "remediation": "Run the following command to install AIDE: apt-get install aide aide-common; Configure AIDE as appropriate for your environment. Consult the AIDE documentation for options.",
         "test_query": "from deb_packages where name = 'aide'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'aide'",
         "category": "Filesystem Integrity Checking",
         "compliance": [
             {
@@ -583,6 +612,7 @@
         "rationale": "Periodic file checking allows the system administrator to determine on a regular basis if critical files have been changed in an unauthorized fashion.",
         "remediation": "Run the following command: crontab -u root -e; Add the following line to the crontab: 0 5 * * * /usr/bin/aide.wrapper --config /etc/aide/aide.conf --check",
         "test_query": "from crontab where command LIKE '%aide%'",
+        "test_query_cywise": "where ynh_osquery.name = 'crontab' and json_unquote(json_extract(ynh_osquery.columns, '$.command')) like '%aide%'",
         "category": "Filesystem Integrity Checking",
         "compliance": [
             {
@@ -601,6 +631,7 @@
         "rationale": "Setting the permissions to read and write for root only prevents non-root users from seeing the boot parameters or changing them. Non-root users who read the boot parameters may be able to identify weaknesses in security upon boot and be able to exploit them.",
         "remediation": "Run the following commands to set permissions on your grub configuration: chown root:root /boot/grub/grub.cfg; chmod og-rwx /boot/grub/grub.cfg",
         "test_query": "from file where path = '/boot/grub/grub.cfg' and mode = '0400';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/boot/grub/grub.cfg' and json_unquote(json_extract(ynh_osquery.columns, '$.mode')) = '0400'",
         "category": "Secure Boot Settings",
         "compliance": [
             {
@@ -619,6 +650,7 @@
         "rationale": "Only root should be able to modify bootloader config.",
         "remediation": "chmod root:root /boot/grub/grub.cfg",
         "test_query": "from file where path = '/boot/grub/grub.cfg' and uid = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/boot/grub/grub.cfg' and json_unquote(json_extract(ynh_osquery.columns, '$.uid')) = '0'",
         "category": "Secure Boot Settings",
         "compliance": [
             {
@@ -655,6 +687,7 @@
         "rationale": "Randomly placing virtual memory regions will make it difficult to write memory page exploits as the memory placement will be consistently shifting.",
         "remediation": "Set the following parameter in /etc/sysctl.conf or a /etc/sysctl.d/* file: kernel.randomize_va_space = 2; Run the following command to set the active kernel parameter: # sysctl -w kernel.randomize_va_space=2",
         "test_query": "from system_controls where name = 'kernel.randomize_va_space' and current_value = '2';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'kernel.randomize_va_space' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '2'",
         "category": "Additional Process Hardening",
         "compliance": [
             {
@@ -673,6 +706,7 @@
         "rationale": "The prelinking feature can interfere with the operation of AIDE, because it changes binaries. Prelinking can also increase the vulnerability of the system if a malicious user is able to compromise a common library such as libc.",
         "remediation": "Run the following command to restore binaries to normal: prelink -ua; Run the following command to uninstall prelink: apt-get remove prelink;",
         "test_query": "from deb_packages where name = 'prelink';",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'prelink'",
         "category": "Additional Process Hardening",
         "compliance": [
             {
@@ -691,6 +725,7 @@
         "rationale": "Setting a hard limit on core dumps prevents users from overriding the soft variable. If core dumps are required, consider setting limits for user groups (see limits.conf(5) ). In addition, setting the fs.suid_dumpable variable to 0 will prevent setuid programs from dumping core.",
         "remediation": "Add the following line to /etc/security/limits.conf or a /etc/security/limits.d/* file: * hard core 0; Set the following parameter in /etc/sysctl.conf or a /etc/sysctl.d/* file: fs.suid_dumpable = 0; Run the following command to set the active kernel parameter: # sysctl -w fs.suid_dumpable=0; ",
         "test_query": " from system_controls where name = 'fs.suid_dumpable' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'fs.suid_dumpable' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Additional Process Hardening",
         "compliance": [
             {
@@ -709,6 +744,7 @@
         "rationale": "Without a Mandatory Access Control system installed only the default Discretionary Access Control system will be available.",
         "remediation": "Run one of the following commands to install apparmor: dpkg -s apparmor",
         "test_query": " from deb_packages where name = 'apparmor';",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'apparmor'",
         "category": "Configure AppArmor",
         "compliance": [
             {
@@ -727,6 +763,7 @@
         "rationale": "Security configuration requirements vary from site to site. Some sites may mandate a policy that is stricter than the default policy, which is perfectly acceptable. This item is intended to ensure that any policies that exist on the system are activated.",
         "remediation": "Run the following command to set all profiles to enforce mode: aa-enforce /etc/apparmor.d/*; Any unconfined processes may need to have a profile created or activated for them and then be restarted.",
         "test_query": "from apparmor_profiles where mode != 'enforce' AND mode != 'complain';",
+        "test_query_cywise": "where ynh_osquery.name = 'apparmor_profiles' and json_unquote(json_extract(ynh_osquery.columns, '$.mode')) <> 'enforce' and json_unquote(json_extract(ynh_osquery.columns, '$.mode')) <> 'complain'",
         "category": "Configure AppArmor",
         "compliance": [
             {
@@ -745,6 +782,7 @@
         "rationale": "Warning messages inform users who are attempting to login to the system of their legal status regarding the system and must include the name of the organization that owns the system and any monitoring policies that are in place. Displaying OS and patch level information in login banners also has the side effect of providing detailed system information to attackers attempting to target specific exploits of a system. Authorized users can easily get this information by running the ' uname -a ' command once they have logged in.",
         "remediation": "Edit the /etc/motd file with the appropriate contents according to your site policy, remove any instances of \\m , \r , \\s , or \u000b. , or references to the OS platform",
         "test_query": " from file where path = '/etc/motd' and size > 0;",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/motd'",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -763,6 +801,7 @@
         "rationale": "Warning messages inform users who are attempting to login to the system of their legal status regarding the system and must include the name of the organization that owns the system and any monitoring policies that are in place. Displaying OS and patch level information in login banners also has the side effect of providing detailed system information to attackers attempting to target specific exploits of a system. Authorized users can easily get this information by running the ' uname -a ' command once they have logged in.",
         "remediation": "Edit the /etc/issue file with the appropriate contents according to your site policy, remove any instances of \\m , \r , \\s , or \u000b , or references to the OS platform. # echo 'Authorized uses only. All activity may be monitored and reported.' > /etc/issue",
         "test_query": "from file where path = '/etc/issue' and size > 0;",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/issue' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.path')) AS INTEGER) > 0",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -781,6 +820,7 @@
         "rationale": "Warning messages inform users who are attempting to login to the system of their legal status regarding the system and must include the name of the organization that owns the system and any monitoring policies that are in place. Displaying OS and patch level information in login banners also has the side effect of providing detailed system information to attackers attempting to target specific exploits of a system. Authorized users can easily get this information by running the ' uname -a ' command once they have logged in",
         "remediation": "Edit the /etc/issue.net file with the appropriate contents according to your site policy, remove any instances of \\m , \r , \\s , or \u000b : # echo 'Authorized uses only. All activity may be monitored and reported.' > /etc/issue.net",
         "test_query": "from file where path = '/etc/issue.net' and size > 0;",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/issue.net'",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -798,6 +838,7 @@
         "rationale": "If the /etc/motd file does not have the correct ownership it could be modified by unauthorized users with incorrect or misleading information.",
         "remediation": "chown root:root /etc/motd # chmod u-x,go-wx /etc/motd",
         "test_query": "from file where path = '/etc/motd' and mode = '0644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/motd' and json_unquote(json_extract(ynh_osquery.columns, '$.mode')) = '0644'",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -815,6 +856,7 @@
         "rationale": "Only root user should be able to edit /etc/motd.",
         "remediation": "Run the following command chown root:root",
         "test_query": "from file where path = '/etc/motd' and uid = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/motd' and json_unquote(json_extract(ynh_osquery.columns, '$.uid')) = '0'",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -832,6 +874,7 @@
         "rationale": "If the /etc/issue file does not have the correct ownership it could be modified by unauthorized users with incorrect or misleading information.",
         "remediation": "Run the following commands to set permissions on /etc/issue: # chown root:root /etc/issue # chmod u-x,go-wx /etc/issue",
         "test_query": "from file where path = '/etc/issue' and mode = '0644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/issue' and json_unquote(json_extract(ynh_osquery.columns, '$.mode')) = '0644'",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -849,6 +892,7 @@
         "rationale": "If the /etc/issue file does is not owned by root, it could be modified by unauthorized users.",
         "remediation": "Run the following command chown root:root",
         "test_query": "from file where path = '/etc/issue' and uid = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/issue' and json_unquote(json_extract(ynh_osquery.columns, '$.uid')) = '0'",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -866,6 +910,7 @@
         "rationale": "If the /etc/issue.net file does not have the correct ownership it could be modified by unauthorized users with incorrect or misleading information.",
         "remediation": "Run the following commands to set permissions on /etc/issue.net: chown root:root /etc/issue.net; chmod 644 /etc/issue.net",
         "test_query": "from file where path = '/etc/issue.net' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/issue.net' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -883,6 +928,7 @@
         "rationale": "If the /etc/issue.net file does not have the correct ownership it could be modified by unauthorized users with incorrect or misleading information.",
         "remediation": "Run the following commands to set permissions on /etc/issue.net: chown root:root /etc/issue.net; chmod 644 /etc/issue.net",
         "test_query": "from file where path = '/etc/issue.net' and uid = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/issue.net' and json_unquote(json_extract(ynh_osquery.columns, '$.uid')) = '0'",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -900,6 +946,7 @@
         "rationale": "Warning messages inform users who are attempting to login to the system of their legal status regarding the system and must include the name of the organization that owns the system and any monitoring policies that are in place.",
         "remediation": "Edit or create the file /etc/gdm3/greeter.dconf-defaults and add: [org/gnome/login-screen], banner-message-enable=true, banner-message-text='Authorized uses only. All activity may be monitored and reported.'",
         "test_query": "from file where path = '/etc/gdm3/greeter.dconf-defaults' and size > 0;",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/gdm3/greeter.dconf-defaults' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.size')) AS INTEGER) > 0",
         "category": "Command Line Warning Banners",
         "compliance": [
             {
@@ -917,6 +964,7 @@
         "rationale": "Time synchronization is important to support time sensitive security mechanisms like Kerberos and also ensures log files have consistent time records across the enterprise, which aids in forensic investigations.",
         "remediation": "On systems where host based time synchronization is not available, configure systemd-timesyncd. If \"full featured\" and/or encrypted time synchronization is required, install chrony or NTP. To install chrony: # apt install chrony To install ntp: # apt install ntp On virtual systems where host based time synchronization is available consult your virtualization software documentation and setup host based synchronization.",
         "test_query": "from deb_packages where name = 'chrony';",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'chrony'",
         "category": "Time Synchronization",
         "compliance": [
             {
@@ -934,6 +982,7 @@
         "rationale": "If ntp is in use on the system proper configuration is vital to ensuring time synchronization is working properly.",
         "remediation": "Add or edit restrict lines in /etc/ntp.conf to match the following: restrict -4 default kod nomodify notrap nopeer noquery restrict -6 default kod nomodify notrap nopeer noquery Add or edit server or pool lines to /etc/ntp.conf as appropriate: server <remote-server> Configure ntp to run as the ntp user by adding or editing the /etc/init.d/ntp file: RUNASUSER=ntp",
         "test_query": "from deb_packages where name = 'ntp';",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'ntp'",
         "category": "Time Synchronization",
         "compliance": [
             {
@@ -951,6 +1000,7 @@
         "rationale": "Proper configuration is vital to ensuring time synchronization is working properly. This recommendation only applies if timesyncd is in use on the system.",
         "remediation": "Run the following command to enable systemd-timesyncd   # systemctl enable systemd-timesyncd.service  ||  Edit the file /etc/systemd/timesyncd.conf and add/modify the following lines:   NTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org   FallbackNTP=2.debian.pool.ntp.org 3.debian.pool.ntp.org    RootDistanceMax=1  || Run the following commands to start systemd-timesyncd.service   # systemctl start systemd-timesyncd.service   # timedatectl set-ntp true  || Notes: Servers listed and RootDistanceMax should be In Accordance With Local Policy some versions of systemd have been compiled without systemd-timesycnd. On these distributions, chrony or NTP should be used instead of systemd-timesycnd. Not all options are available on all versions of systemd-timesyncd",
         "test_query": "from systemd_units where id = 'systemd-timesyncd.service' and active_state = 'active';",
+        "test_query_cywise": "where ynh_osquery.name = 'systemd_units' and json_unquote(json_extract(ynh_osquery.columns, '$.id')) = 'systemd-timesyncd.service' and json_unquote(json_extract(ynh_osquery.columns, '$.active_state')) = 'active'",
         "category": "Time Synchronization",
         "compliance": [
             {
@@ -968,6 +1018,7 @@
         "rationale": "Unless your organization specifically requires graphical login access via X Windows, remove it to reduce the potential attack surface.",
         "remediation": "Remove the X Windows System packages: apt purge xserver-xorg*",
         "test_query": "from deb_packages where name = 'xserver-xorg-core'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'xserver-xorg-core'",
         "category": "Ensure the X Window system is not installed",
         "compliance": [
             {
@@ -985,6 +1036,7 @@
         "rationale": "Automatic discovery of network services is not normally required for system functionality. It is recommended to disable the service to reduce the potential attach surface.",
         "remediation": "Run the following command to remove avahi-daemon: # systemctl --now disable avahi-daemon # systemctl stop avahi-daemon.socket  # apt purge avahi-daemon",
         "test_query": "from deb_packages where name = 'avahi-daemon'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'avahi-daemon'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -997,6 +1049,7 @@
         "rationale": "If the system does not need to print jobs or accept print jobs from other systems, it is recommended that CUPS be disabled to reduce the potential attack surface.",
         "remediation": "Run the following command to remove cups: # apt purge cups",
         "test_query": "from deb_packages where name = 'cups'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'cups'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1009,6 +1062,7 @@
         "rationale": "Unless a system is specifically set up to act as a DHCP server, it is recommended that this service be disabled to reduce the potential attack surface.",
         "remediation": "Run the following commands to remove dhcpd: # apt purge isc-dhcp-server",
         "test_query": "from deb_packages where name = 'isc-dhcp-server'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'isc-dhcp-server'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1021,6 +1075,7 @@
         "rationale": "If the system will not need to act as an LDAP server, it is recommended that the software be disabled to reduce the potential attack surface.",
         "remediation": "Run the following command to remove slapd: # apt purge slapd",
         "test_query": "from deb_packages where name = 'slapd'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'slapd'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1033,6 +1088,7 @@
         "rationale": "If the system does not export NFS shares or act as an NFS client, it is recommended that these services be disabled to reduce remote attack surface.",
         "remediation": "Run the following commands to remove nfs: # apt purge nfs-kernel-server",
         "test_query": "from deb_packages where name = 'nfs-kernel-server'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'nfs-kernel-server'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1045,6 +1101,7 @@
         "rationale": "Unless a system is specifically designated to act as a DNS server, it is recommended that the package be deleted to reduce the potential attack surface.",
         "remediation": "Run the following command to disable dns server: # apt purge bind9 ",
         "test_query": "from deb_packages where name = 'bind9'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'bind9'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1057,6 +1114,7 @@
         "rationale": "FTP does not protect the confidentiality of data or authentication credentials. It is recommended sftp be used if file transfer is required. Unless there is a need to run the system as a FTP server (for example, to allow anonymous downloads), it is recommended that the package be deleted to reduce the potential attack surface.",
         "remediation": "Run the following command to remove vsftpd: # apt purge vsftpd",
         "test_query": "from deb_packages where name = 'vsftpd'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'vsftpd'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1069,6 +1127,7 @@
         "rationale": "Unless there is a need to run the system as a web server, it is recommended that the package be deleted to reduce the potential attack surface.",
         "remediation": "Run the following command to remove apache2: # apt purge apache2",
         "test_query": "from deb_packages where name = 'apache2'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'apache2'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1081,6 +1140,7 @@
         "rationale": "Unless IMAP servers is to be provided by this system, it is recommended that the package be removed to reduce the potential attack surface.",
         "remediation": "apt purge dovecot-imapd",
         "test_query": "from deb_packages where name = 'dovecot-imapd'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'dovecot-imapd'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1093,6 +1153,7 @@
         "rationale": "Unless POP3 servers is to be provided by this system, it is recommended that the package be removed to reduce the potential attack surface.",
         "remediation": "apt purge dovecot-pop3d",
         "test_query": "from deb_packages where name = 'dovecot-pop3d'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'dovecot-pop3d'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1105,6 +1166,7 @@
         "rationale": "If there is no need to mount directories and file systems to Windows systems, then this service can be deleted to reduce the potential attack surface.",
         "remediation": "Run the following command to remove smbd: # apt purge samba",
         "test_query": "from deb_packages where name = 'samba'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'samba'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1117,6 +1179,7 @@
         "rationale": "If there is no need for a proxy server, it is recommended that the squid proxy be deleted to reduce the potential attack surface.",
         "remediation": "Run the following command to remove squid: # apt purge squid",
         "test_query": "from deb_packages where name = 'squid'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'squid'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1129,6 +1192,7 @@
         "rationale": "The SNMP server can communicate using SNMP v1, which transmits data in the clear and does not require authentication to execute commands. Unless absolutely necessary, it is recommended that the SNMP service not be used. If SNMP is required the server should be configured to disallow SNMP v1.",
         "remediation": "Run the following command to remove snmpd: # apt purge snmpd",
         "test_query": "from deb_packages where name = 'snmpd';",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'snmpd'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1141,6 +1205,7 @@
         "rationale": "The software for all Mail Transfer Agents is complex and most have a long history of security issues. While it is important to ensure that the system can process local mail messages, it is not necessary to have the MTA's daemon listening on a port unless the server is intended to be a mail server that receives and processes mail from other systems.",
         "remediation": "Stop the mail service or make it bind to localhost only.",
         "test_query": "from listening_ports where port = '25' and address = '0.0.0.0';",
+        "test_query_cywise": "where ynh_osquery.name = 'listening_ports' and json_unquote(json_extract(ynh_osquery.columns, '$.port')) = '25' and json_unquote(json_extract(ynh_osquery.columns, '$.address')) = '0.0.0.0'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1153,6 +1218,7 @@
         "rationale": "The rsyncd service presents a security risk as it uses unencrypted protocols for communication.",
         "remediation": "Run the following command to remove rsync: # apt purge rsync",
         "test_query": "from deb_packages where name = 'rsync';",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'rsync'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1165,6 +1231,7 @@
         "rationale": "The NIS service is inherently an insecure system that has been vulnerable to DOS attacks, buffer overflows and has poor authentication for querying NIS maps. NIS generally been replaced by such protocols as Lightweight Directory Access Protocol (LDAP). It is recommended that the service be disabled and other, more secure services be used",
         "remediation": "Run the following command to remove nis: # apt purge nis",
         "test_query": "from deb_packages where name = 'nis'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'nis'",
         "category": "Remove Special Purpose Services",
         "compliance": [],
         "query_type": "negative_success",
@@ -1177,6 +1244,7 @@
         "rationale": "These legacy clients contain numerous security exposures and have been replaced with the more secure SSH package. Even if the server is removed, it is best to ensure the clients are also removed to prevent users from inadvertently attempting to use these commands and therefore exposing their credentials. Note that removing the rsh package removes the clients for rsh , rcp and rlogin .",
         "remediation": "Uninstall rsh : apt remove rsh-client",
         "test_query": "from deb_packages where name = 'rsh-client'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'rsh-client'",
         "category": "Remove Service Clients",
         "compliance": [],
         "query_type": "negative_success",
@@ -1189,6 +1257,7 @@
         "rationale": "The software presents a security risk as it uses unencrypted protocols for communication.",
         "remediation": "Uninstall talk : apt purge talk",
         "test_query": "from deb_packages where name = 'talk'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'talk'",
         "category": "Remove Service Clients",
         "compliance": [],
         "query_type": "negative_success",
@@ -1201,6 +1270,7 @@
         "rationale": "The telnet protocol is insecure and unencrypted. The use of an unencrypted transmission medium could allow an unauthorized user to steal credentials. The ssh package provides an encrypted session and stronger security and is included in most Linux distributions.",
         "remediation": "Uninstall telnet : # apt purge telnet",
         "test_query": "from deb_packages where name = 'telnet'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'telnet'",
         "category": "Remove Service Clients",
         "compliance": [],
         "query_type": "negative_success",
@@ -1213,6 +1283,7 @@
         "rationale": "If the system will not need to act as an LDAP client, it is recommended that the software be removed to reduce the potential attack surface.",
         "remediation": "Uninstall ldap-utils : # apt purge ldap-utils",
         "test_query": "from deb_packages where name = 'ldap-utils'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'ldap-utils'",
         "category": "Remove Service Clients",
         "compliance": [],
         "query_type": "negative_success",
@@ -1225,6 +1296,7 @@
         "rationale": "If RPC is not required, it is recommended that this services be removed to reduce the remote attack surface.",
         "remediation": "Run the following command to remove rpcbind: # apt purge rpcbind",
         "test_query": "from deb_packages where name = 'rpcbind'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'rpcbind'",
         "category": "Remove Service Clients",
         "compliance": [],
         "query_type": "negative_success",
@@ -1237,6 +1309,7 @@
         "rationale": "An attacker could use a compromised host to send invalid ICMP redirects to other router devices in an attempt to corrupt routing and have users access a system set up by the attacker as opposed to a valid system.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.send_redirects = 0 net.ipv4.conf.default.send_redirects = 0 Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.send_redirects=0 # sysctl -w net.ipv4.conf.default.send_redirects=0 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.all.send_redirects' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.all.send_redirects' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1249,6 +1322,7 @@
         "rationale": "Setting the flags to 0 ensures that a system with multiple interfaces (for example, a hard proxy), will never be able to forward packets, and therefore, never serve as a router.",
         "remediation": "Run the following command to restore the default parameter and set the active kernel parameter: # grep -Els \"^\\s*net\\.ipv4\\.ip_forward\\s*=\\s*1\" /etc/sysctl.conf /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf | while read filename; do sed -ri \"s/^\\s*(net\\.ipv4\\.ip_forward\\s*)(=)(\\s*\\S+\\b).*$/# *REMOVED* \\1/\" $filename; done; sysctl -w net.ipv4.ip_forward=0; sysctl -w net.ipv4.route.flush=1 IF IPv6 is enabled: Run the following command to restore the default parameter and set the active kernel parameter: # grep -Els \"^\\s*net\\.ipv6\\.conf\\.all\\.forwarding\\s*=\\s*1\" /etc/sysctl.conf /etc/sysctl.d/*.conf /usr/lib/sysctl.d/*.conf /run/sysctl.d/*.conf | while read filename; do sed -ri \"s/^\\s*(net\\.ipv6\\.conf\\.all\\.forwarding\\s*)(=)(\\s*\\S+\\b).*$/# *REMOVED* \\1/\" $filename; done; sysctl -w net.ipv6.conf.all.forwarding=0; sysctl -w net.ipv6.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.ip_forward' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.ip_forward' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1261,6 +1335,7 @@
         "rationale": "Setting net.ipv4.conf.all.accept_source_route, net.ipv4.conf.default.accept_source_route, net.ipv6.conf.all.accept_source_route and net.ipv6.conf.default.accept_source_route to 0 disables the system from accepting source routed packets. Assume this system was capable of routing packets to Internet routable addresses on one interface and private addresses on another interface. Assume that the private addresses were not routable to the Internet routable addresses and vice versa. Under normal routing circumstances, an attacker from the Internet routable addresses could not use the system as a way to reach the private address systems. If, however, source routed packets were allowed, they could be used to gain access to the private address systems as the route could be specified, rather than rely on routing protocols that did not allow this routing.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.accept_source_route = 0 net.ipv4.conf.default.accept_source_route = 0     net.ipv6.conf.all.accept_source_route = 0    net.ipv6.conf.default.accept_source_route = 0   || Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.accept_source_route=0 # sysctl -w net.ipv4.conf.default.accept_source_route=0 # sysctl -w net.ipv4.route.flush=1  # sysctl -w net.ipv6.conf.all.accept_source_route=0 # sysctl -w net.ipv6.conf.default.accept_source_route=0 # sysctl -w net.ipv6.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.all.accept_source_route' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.all.accept_source_route' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1273,6 +1348,7 @@
         "rationale": "Setting net.ipv4.conf.all.accept_source_route, net.ipv4.conf.default.accept_source_route, net.ipv6.conf.all.accept_source_route and net.ipv6.conf.default.accept_source_route to 0 disables the system from accepting source routed packets. Assume this system was capable of routing packets to Internet routable addresses on one interface and private addresses on another interface. Assume that the private addresses were not routable to the Internet routable addresses and vice versa. Under normal routing circumstances, an attacker from the Internet routable addresses could not use the system as a way to reach the private address systems. If, however, source routed packets were allowed, they could be used to gain access to the private address systems as the route could be specified, rather than rely on routing protocols that did not allow this routing.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.accept_source_route = 0 net.ipv4.conf.default.accept_source_route = 0 Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.accept_source_route=0 # sysctl -w net.ipv4.conf.default.accept_source_route=0 # sysctl -w net.ipv4.route.flush=1 IF IPv6 is enabled: Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv6.conf.all.accept_source_route = 0 net.ipv6.conf.default.accept_source_route = 0 Run the following commands to set the active kernel parameters: # sysctl -w net.ipv6.conf.all.accept_source_route=0 # sysctl -w net.ipv6.conf.default.accept_source_route=0 # sysctl -w net.ipv6.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.default.accept_source_route' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.default.accept_source_route' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1285,6 +1361,7 @@
         "rationale": "Attackers could use bogus ICMP redirect messages to maliciously alter the system routing tables and get them to send packets to incorrect networks and allow your system packets to be captured.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.accept_redirects = 0 net.ipv4.conf.default.accept_redirects = 0 Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.accept_redirects=0 # sysctl -w net.ipv4.conf.default.accept_redirects=0 # sysctl -w net.ipv4.route.flush=1  # sysctl -w net.ipv6.conf.all.accept_redirects=0 # sysctl -w net.ipv6.conf.default.accept_redirects=0 # sysctl -w net.ipv6.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.all.accept_redirects' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.all.accept_redirects' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1297,6 +1374,7 @@
         "rationale": "Attackers could use bogus ICMP redirect messages to maliciously alter the system routing tables and get them to send packets to incorrect networks and allow your system packets to be captured.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.accept_redirects = 0 net.ipv4.conf.default.accept_redirects = 0 Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.accept_redirects=0 # sysctl -w net.ipv4.conf.default.accept_redirects=0 # sysctl -w net.ipv4.route.flush=1  # sysctl -w net.ipv6.conf.all.accept_redirects=0 # sysctl -w net.ipv6.conf.default.accept_redirects=0 # sysctl -w net.ipv6.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.default.accept_redirects' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.default.accept_redirects' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1309,6 +1387,7 @@
         "rationale": "It is still possible for even known gateways to be compromised. Setting net.ipv4.conf.all.secure_redirects to 0 protects the system from routing table updates by possibly compromised known gateways.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.secure_redirects = 0 net.ipv4.conf.default.secure_redirects = 0. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.secure_redirects=0 # sysctl -w net.ipv4.conf.default.secure_redirects=0 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.all.secure_redirects' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.all.secure_redirects' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1321,6 +1400,7 @@
         "rationale": "It is still possible for even known gateways to be compromised. Setting net.ipv4.conf.all.secure_redirects to 0 protects the system from routing table updates by possibly compromised known gateways.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.secure_redirects = 0 net.ipv4.conf.default.secure_redirects = 0. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.secure_redirects=0 # sysctl -w net.ipv4.conf.default.secure_redirects=0 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.default.secure_redirects' and current_value = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.default.secure_redirects' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1333,6 +1413,7 @@
         "rationale": "Enabling this feature and logging these packets allows an administrator to investigate the possibility that an attacker is sending spoofed packets to their server.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.log_martians = 1 net.ipv4.conf.default.log_martians = 1. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.log_martians=1 # sysctl -w net.ipv4.conf.default.log_martians=1 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.all.log_martians' and current_value = '1';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.all.log_martians' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '1'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1345,6 +1426,7 @@
         "rationale": "Enabling this feature and logging these packets allows an administrator to investigate the possibility that an attacker is sending spoofed packets to their server.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.log_martians = 1 net.ipv4.conf.default.log_martians = 1. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.log_martians=1 # sysctl -w net.ipv4.conf.default.log_martians=1 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.default.log_martians' and current_value = '1';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.default.log_martians' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '1'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1357,6 +1439,7 @@
         "rationale": "Accepting ICMP echo and timestamp requests with broadcast or multicast destinations for your network could be used to trick your host into starting (or participating) in a Smurf attack. A Smurf attack relies on an attacker sending large amounts of ICMP broadcast messages with a spoofed source address. All hosts receiving this message and responding would send echo-reply messages back to the spoofed address, which is probably not routable. If many hosts respond to the packets, the amount of traffic on the network could be significantly multiplied.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.icmp_echo_ignore_broadcasts = 1. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.icmp_echo_ignore_broadcasts' and current_value = '1';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.icmp_echo_ignore_broadcasts' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '1'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1369,6 +1452,7 @@
         "rationale": "Some routers (and some attackers) will send responses that violate RFC-1122 and attempt to fill up a log file system with many useless error messages.",
         "remediation": "Set the following parameter in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.icmp_ignore_bogus_error_responses = 1. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.icmp_ignore_bogus_error_responses' and current_value = '1';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.icmp_ignore_bogus_error_responses' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '1'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1381,6 +1465,7 @@
         "rationale": "Setting these flags is a good way to deter attackers from sending your system bogus packets that cannot be responded to. One instance where this feature breaks down is if asymmetrical routing is employed. This would occur when using dynamic routing protocols (bgp, ospf, etc) on your system. If you are using asymmetrical routing on your system, you will not be able to enable this feature without breaking the routing.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.rp_filter = 1 net.ipv4.conf.default.rp_filter = 1. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.rp_filter=1 # sysctl -w net.ipv4.conf.default.rp_filter=1 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.all.rp_filter' and current_value = '1';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.all.rp_filter' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '1'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1393,6 +1478,7 @@
         "rationale": "Setting these flags is a good way to deter attackers from sending your system bogus packets that cannot be responded to. One instance where this feature breaks down is if asymmetrical routing is employed. This would occur when using dynamic routing protocols (bgp, ospf, etc) on your system. If you are using asymmetrical routing on your system, you will not be able to enable this feature without breaking the routing.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.conf.all.rp_filter = 1 net.ipv4.conf.default.rp_filter = 1. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.conf.all.rp_filter=1 # sysctl -w net.ipv4.conf.default.rp_filter=1 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.conf.default.rp_filter' and current_value = '1';",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.conf.default.rp_filter' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '1'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1405,6 +1491,7 @@
         "rationale": "Attackers use SYN flood attacks to perform a denial of service attacked on a system by sending many SYN packets without completing the three way handshake. This will quickly use up slots in the kernel's half-open connection queue and prevent legitimate connections from succeeding. SYN cookies allow the system to keep accepting valid connections, even if under a denial of service attack.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.tcp_syncookies = 1. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.tcp_syncookies=1 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.tcp_syncookies' and current_value = '1'",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.tcp_syncookies' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '1'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1417,6 +1504,7 @@
         "rationale": "Attackers use SYN flood attacks to perform a denial of service attacked on a system by sending many SYN packets without completing the three way handshake. This will quickly use up slots in the kernel's half-open connection queue and prevent legitimate connections from succeeding. SYN cookies allow the system to keep accepting valid connections, even if under a denial of service attack.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv4.tcp_syncookies = 1. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv4.tcp_syncookies=1 # sysctl -w net.ipv4.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv4.route.flush' and config_value = '1'",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv4.route.flush' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '1'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1429,6 +1517,7 @@
         "rationale": "It is recommended that systems not accept router advertisements as they could be tricked into routing traffic to compromised machines. Setting hard routes within the system (usually a single default route to a trusted router) protects the system from bad routes.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv6.conf.all.accept_ra = 0 net.ipv6.conf.default.accept_ra = 0. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv6.conf.all.accept_ra=0 # sysctl -w net.ipv6.conf.default.accept_ra=0 # sysctl -w net.ipv6.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv6.conf.all.accept_ra' and current_value = '0'",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv6.conf.all.accept_ra' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1441,6 +1530,7 @@
         "rationale": "It is recommended that systems not accept router advertisements as they could be tricked into routing traffic to compromised machines. Setting hard routes within the system (usually a single default route to a trusted router) protects the system from bad routes.",
         "remediation": "Set the following parameters in /etc/sysctl.conf or a /etc/sysctl.d/* file: net.ipv6.conf.all.accept_ra = 0 net.ipv6.conf.default.accept_ra = 0. Run the following commands to set the active kernel parameters: # sysctl -w net.ipv6.conf.all.accept_ra=0 # sysctl -w net.ipv6.conf.default.accept_ra=0 # sysctl -w net.ipv6.route.flush=1",
         "test_query": "from system_controls where name = 'net.ipv6.conf.all.accept_ra' and current_value = '0'",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv6.conf.all.accept_ra' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1453,6 +1543,7 @@
         "rationale": "",
         "remediation": "Set #sysctl -w net.ipv6.conf.default.accept_ra=0",
         "test_query": "from system_controls where name = 'net.ipv6.conf.default.accept_ra' and current_value = '0'",
+        "test_query_cywise": "where ynh_osquery.name = 'system_controls' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'net.ipv6.conf.default.accept_ra' and json_unquote(json_extract(ynh_osquery.columns, '$.current_value')) = '0'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1465,6 +1556,7 @@
         "rationale": "If the protocol is not required, it is recommended that the drivers not be installed to reduce the potential attack surface.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vim /etc/modprobe.d/dccp.conf and add the following line: install dccp /bin/true",
         "test_query": "from kernel_modules where name = 'dccp';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'dccp'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "negative_success",
@@ -1477,6 +1569,7 @@
         "rationale": "If the protocol is not being used, it is recommended that kernel module not be loaded, disabling the service to reduce the potential attack surface.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vim /etc/modprobe.d/sctp.conf and add the following line: install sctp /bin/true",
         "test_query": "from kernel_modules where name = 'sctp';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'sctp'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "negative_success",
@@ -1489,6 +1582,7 @@
         "rationale": "If the protocol is not being used, it is recommended that kernel module not be loaded, disabling the service to reduce the potential attack surface.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vim /etc/modprobe.d/rds.conf and add the following line: install rds /bin/true",
         "test_query": "from kernel_modules where name = 'rds';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'rds'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "negative_success",
@@ -1501,6 +1595,7 @@
         "rationale": "If the protocol is not being used, it is recommended that kernel module not be loaded, disabling the service to reduce the potential attack surface.",
         "remediation": "Edit or create a file in the /etc/modprobe.d/ directory ending in .conf Example: vim /etc/modprobe.d/tipc.conf and add the following line: install tipc /bin/true",
         "test_query": "from kernel_modules where name = 'tipc';",
+        "test_query_cywise": "where ynh_osquery.name = 'kernel_modules' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'tipc'",
         "category": "Network Configuration",
         "compliance": [],
         "query_type": "negative_success",
@@ -1513,6 +1608,7 @@
         "rationale": "A firewall utility is required to configure the Linux kernel's netfilter framework via the iptables or nftables back-end.The Linux kernel's netfilter framework host-based firewall can protect against threats originating from within a corporate network to include malicious mobile code and poorly configured software on a host.",
         "remediation": "Run the following command to install Uncomplicated Firewall (UFW): # apt install ufw OR #  apt install nftables OR # apt install iptables",
         "test_query": "from deb_packages where name = 'ufw'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'ufw'",
         "category": "Firewall configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1525,6 +1621,7 @@
         "rationale": "Running both ufwand the services included in theiptables-persistent package may lead to conflict",
         "remediation": "Run the following command to install Uncomplicated Firewall (UFW): # apt install ufw OR #  apt install nftables OR # apt install iptables",
         "test_query": "from deb_packages where name = 'iptables-persistent'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'iptables-persistent'",
         "category": "Firewall configuration",
         "compliance": [],
         "query_type": "negative_success",
@@ -1537,6 +1634,7 @@
         "rationale": "The ufw service must be enabled and running in order for ufw to protect the system",
         "remediation": "Run the following command to enable ufw: # ufw enable",
         "test_query": "from systemd_units where id = 'ufw.service' and active_state='active';",
+        "test_query_cywise": "where ynh_osquery.name = 'systemd_units' and json_unquote(json_extract(ynh_osquery.columns, '$.id')) = 'ufw.service' and json_unquote(json_extract(ynh_osquery.columns, '$.active_state')) = 'active'",
         "category": "Firewall configuration",
         "compliance": [],
         "query_type": "positive_success",
@@ -1549,6 +1647,7 @@
         "rationale": "Running both iptablesand nftablesmay lead to conflict",
         "remediation": "RRun the following command to remove nftables:: # apt purge nftables",
         "test_query": "from deb_packages where name = 'nftables'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'nftables'",
         "category": "Firewall configuration",
         "compliance": [],
         "query_type": "negative_success",
@@ -1561,6 +1660,7 @@
         "rationale": "With a default accept policy the firewall will accept any packet that is not configured to be denied. It is easier to white list acceptable usage than to black list unacceptable usage.",
         "remediation": "Run the following commands to implement a default DROP policy: # iptables -P INPUT DROP # Notes: Changing firewall settings while connected over network can result in being locked out of the system. Remediation will only affect the active system firewall, be sure to configure the default policy in your firewall management to apply on boot as well.",
         "test_query": "SELECT CASE WHEN COUNT(*) >= 1 THEN 'Passing' ELSE 'Failing' END AS state from iptables where chain like '%INPUT%' and policy like '%DROP%';",
+        "test_query_cywise": "select case when count(*) >= 1 then 'passing' else 'failing' end as state from ynh_osquery where ynh_osquery.name = 'iptables' and json_unquote(json_extract(ynh_osquery.columns, '$.chain')) like '%INPUT%' and json_unquote(json_extract(ynh_osquery.columns, '$.policy')) like '%DROP%'",
         "category": "Firewall configuration",
         "compliance": [],
         "enabled": true
@@ -1572,6 +1672,7 @@
         "rationale": "The capturing of system events provides system administrators with information to allow them to determine if unauthorized access to their system is occurring.",
         "remediation": "Run the following command to enable auditd: # apt install auditd audispd-plugins",
         "test_query": "from deb_packages where name = 'auditd'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'auditd'",
         "category": "Logging and Auditing",
         "compliance": [],
         "query_type": "positive_success",
@@ -1584,6 +1685,7 @@
         "rationale": "The capturing of system events provides system administrators with information to allow them to determine if unauthorized access to their system is occurring.",
         "remediation": "Run the following command to enable auditd: # systemctl --now enable auditd",
         "test_query": "from systemd_units where id = 'auditd.service' and active_state = 'active';",
+        "test_query_cywise": "where ynh_osquery.name = 'systemd_units' and json_unquote(json_extract(ynh_osquery.columns, '$.id')) = 'auditd.service' and json_unquote(json_extract(ynh_osquery.columns, '$.active_state')) = 'active'",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1601,6 +1703,7 @@
         "rationale": "The security enhancements of rsyslogsuch as connection-oriented (i.e. TCP) transmission of logs, the option to log to database formats, and the encryption of log data en route to a central logging server) justify installing and configuring the package.",
         "remediation": "Install rsyslog: # apt install rsyslog",
         "test_query": "from deb_packages where name = 'rsyslog'",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) = 'rsyslog'",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1618,6 +1721,7 @@
         "rationale": "If the rsyslog service is not activated the system will not have a syslog service running.",
         "remediation": "Run the following command to enable rsyslog: # systemctl --now enable rsyslog",
         "test_query": "from systemd_units where id = 'rsyslog.service' and active_state = 'active';",
+        "test_query_cywise": "where ynh_osquery.name = 'systemd_units' and json_unquote(json_extract(ynh_osquery.columns, '$.id')) = 'rsyslog.service' and json_unquote(json_extract(ynh_osquery.columns, '$.active_state')) = 'active'",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1635,6 +1739,7 @@
         "rationale": "It is important to ensure that log files have the correct permissions to ensure that sensitive data is archived and protected.",
         "remediation": "Edit the /etc/rsyslog.conf and /etc/rsyslog.d/*.conf files and set $FileCreateMode to 0640 or more restrictive:   $FileCreateMode 0640",
         "test_query": "from file where path = '/etc/rsyslog.conf' and mode <= '0644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/rsyslog.conf' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1652,6 +1757,7 @@
         "rationale": "It is important to ensure that log files have the correct permissions to ensure that sensitive data is archived and protected.",
         "remediation": "chmod 644 /var/log/syslog",
         "test_query": "from file where path = '/var/log/syslog' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log/syslog' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1669,6 +1775,7 @@
         "rationale": "It is important to ensure that log files have the correct permissions to ensure that sensitive data is archived and protected.",
         "remediation": "chmod 644 /var/log/auth.log",
         "test_query": "from file where path = '/var/log/auth.log' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log/auth.log' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1686,6 +1793,7 @@
         "rationale": "It is important to ensure that log files have the correct permissions to ensure that sensitive data is archived and protected.",
         "remediation": "chmod 644 /var/log/lastlog",
         "test_query": "from file where path = '/var/log/lastlog' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log/lastlog' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1703,6 +1811,7 @@
         "rationale": "It is important to ensure that log files have the correct permissions to ensure that sensitive data is archived and protected.",
         "remediation": "chmod 644 /var/log/kern.log",
         "test_query": "from file where path = '/var/log/kern.log' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log/kern.log' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1720,6 +1829,7 @@
         "rationale": "It is important to ensure that log files have the correct permissions to ensure that sensitive data is archived and protected.",
         "remediation": "chmod 644 /var/log/faillog",
         "test_query": "from file where path = '/var/log/faillog' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log/faillog' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1737,6 +1847,7 @@
         "rationale": "It is important to ensure that log files have the correct permissions to ensure that sensitive data is archived and protected.",
         "remediation": "chmod 644 /var/log/dpkg.log",
         "test_query": "from file where path = '/var/log/dpkg.log' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log/dpkg.log' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1754,6 +1865,7 @@
         "rationale": "It is important to ensure that log files have the correct permissions to ensure that sensitive data is archived and protected.",
         "remediation": "chmod 644 /var/log/mail.log",
         "test_query": "from file where path = '/var/log/mail.log' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/var/log/mail.log' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Logging and Auditing",
         "compliance": [
             {
@@ -1771,6 +1883,7 @@
         "rationale": "While there may not be user jobs that need to be run on the system, the system does have maintenance jobs that may include security monitoring that have to run, and cron is used to execute them.",
         "remediation": "Run the following command to enable cron: systemctl --now enable cron",
         "test_query": "from systemd_units where id = 'cron.service' and active_state = 'active';",
+        "test_query_cywise": "where ynh_osquery.name = 'systemd_units' and json_unquote(json_extract(ynh_osquery.columns, '$.id')) = 'cron.service' and json_unquote(json_extract(ynh_osquery.columns, '$.active_state')) = 'active'",
         "category": "Access, Authentication and Authorization",
         "compliance": [
             {
@@ -1788,6 +1901,7 @@
         "rationale": "This file contains information on what system jobs are run by cron. Write access to these files could provide unprivileged users with the ability to elevate their privileges. Read access to these files could provide users with the ability to gain insight on system jobs that run on the system and could provide them a way to gain unauthorized privileged access.",
         "remediation": "Run the following commands to set ownership and permissions on /etc/crontab : chown root:root /etc/crontab and chmod og-rwx /etc/crontab",
         "test_query": "from file where path = '/etc/crontab' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/crontab' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Access, Authentication and Authorization",
         "compliance": [
             {
@@ -1805,6 +1919,7 @@
         "rationale": "Granting write access to this directory for non-privileged users could provide them the means for gaining unauthorized elevated privileges. Granting read access to this directory could give an unprivileged user insight in how to gain elevated privileges or circumvent auditing controls.",
         "remediation": "Run the following commands to set ownership and permissions on /etc/cron.hourly : chown root:root /etc/cron.hourly and chmod og-rwx /etc/cron.hourly",
         "test_query": "from file where path = '/etc/cron.hourly' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/cron.hourly' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Access, Authentication and Authorization",
         "compliance": [
             {
@@ -1822,6 +1937,7 @@
         "rationale": "Granting write access to this directory for non-privileged users could provide them the means for gaining unauthorized elevated privileges. Granting read access to this directory could give an unprivileged user insight in how to gain elevated privileges or circumvent auditing controls.",
         "remediation": "Run the following commands to set ownership and permissions on /etc/cron.daily : chown root:root /etc/cron.hourly and chmod og-rwx /etc/cron.daily",
         "test_query": "from file where path = '/etc/cron.daily' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/cron.daily' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Access, Authentication and Authorization",
         "compliance": [
             {
@@ -1839,6 +1955,7 @@
         "rationale": "Granting write access to this directory for non-privileged users could provide them the means for gaining unauthorized elevated privileges. Granting read access to this directory could give an unprivileged user insight in how to gain elevated privileges or circumvent auditing controls.",
         "remediation": "Run the following commands to set ownership and permissions on /etc/cron.weekly : chown root:root /etc/cron.hourly and chmod og-rwx /etc/cron.weekly",
         "test_query": "from file where path = '/etc/cron.weekly' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/cron.weekly' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Access, Authentication and Authorization",
         "compliance": [
             {
@@ -1856,6 +1973,7 @@
         "rationale": "Granting write access to this directory for non-privileged users could provide them the means for gaining unauthorized elevated privileges. Granting read access to this directory could give an unprivileged user insight in how to gain elevated privileges or circumvent auditing controls.",
         "remediation": "Run the following commands to set ownership and permissions on /etc/cron.monthly : chown root:root /etc/cron.monthly and chmod og-rwx /etc/cron.monthly",
         "test_query": "from file where path = '/etc/cron.monthly' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/cron.monthly' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "Access, Authentication and Authorization",
         "compliance": [
             {
@@ -1873,6 +1991,7 @@
         "rationale": "On many systems, only the system administrator is authorized to schedule cron jobs. Using the cron.allow file to control who can run cron jobs enforces this policy. It is easier to manage an allow list than a deny list. In a deny list, you could potentially add a user ID to the system and forget to add it to the deny files.",
         "remediation": "Run the following commands to remove /etc/cron.deny and /etc/at.deny and create and set permissions and ownership for /etc/cron.allow and /etc/at.allow: rm /etc/cron.deny;rm /etc/at.deny;touch /etc/cron.allow; touch /etc/at.allow; chmod og-rwx /etc/cron.allow; chmod og-rwx /etc/at.allow; chown root:root /etc/cron.allow and chown root:root /etc/at.allow",
         "test_query": "from file where path = '/etc/cron.allow'",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/cron.allow'",
         "category": "Access, Authentication and Authorization",
         "compliance": [
             {
@@ -1890,6 +2009,7 @@
         "rationale": "On many systems, only the system administrator is authorized to schedule at jobs. Using the at.allow file to control who can run at jobs enforces this policy. It is easier to manage an allow list than a deny list. In a deny list, you could potentially add a user ID to the system and forget to add it to the deny files.",
         "remediation": "Run the following commands to remove /etc/at.deny and create and set permissions and ownership for/etc/at.allow: # rm /etc/at.deny # touch /etc/at.allow # chmod og-rwx /etc/at.allow # chown root:root /etc/at.allow",
         "test_query": "from file where path = '/etc/at.allow'",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/at.allow'",
         "category": "Access, Authentication and Authorization",
         "compliance": [
             {
@@ -1907,6 +2027,7 @@
         "rationale": "The /etc/ssh/sshd_config file needs to be protected from unauthorized changes by non- privileged users.",
         "remediation": "Run the following commands to set ownership and permissions on /etc/ssh/sshd_config: # chown root:root /etc/ssh/sshd_config # chmod og-rwx /etc/ssh/sshd_config",
         "test_query": "from file where path = '/etc/ssh/sshd_config' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "SSH Server Configuration",
         "compliance": [
             {
@@ -1924,6 +2045,7 @@
         "rationale": "Files in /etc/ssh need to be protected from unauthorized changes by non-privileged users",
         "remediation": "# chown root:root /etc/ssh/* # chmod og-rwx /etc/ssh/*",
         "test_query": "from file WHERE path LIKE '/etc/ssh/%%' and mode > '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) like '/etc/ssh/%%' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) > 644",
         "category": "SSH Server Configuration",
         "compliance": [
             {
@@ -1941,6 +2063,7 @@
         "rationale": "SSH provides several logging levels with varying amounts of verbosity. DEBUG is specifically not recommended other than strictly for debugging SSH communications since it provides so much data that it is difficult to identify important security information.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: LogLevel VERBOSE or LogLevel INFO",
         "test_query": "from augeas WHERE path = '/etc/ssh/sshd_config' and label like '%LogLevel%' and value LIKE '%VERBOSE%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%LogLevel%' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%VERBOSE%'",
         "compliance": [
             {
                 "name": "",
@@ -1957,6 +2080,7 @@
         "rationale": "Disable X11 forwarding unless there is an operational requirement to use X11 applications directly. There is a small risk that the remote X11 servers of users who are logged in via SSH with X11 forwarding could be compromised by other users on the X11 server. Note that even if X11 forwarding is disabled, users can always install their own forwarders.",
         "remediation": "Edit the /etc/ssh/sshd_configfile to set the parameter as follows: X11Forwarding no",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and value LIKE '%X11Forwarding no%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%X11Forwarding no%'",
         "compliance": [
             {
                 "name": "",
@@ -1973,6 +2097,7 @@
         "rationale": "Setting the MaxAuthTries parameter to a low number will minimize the risk of successful brute force attacks to the SSH server. While the recommended setting is 4, set the number based on site policy.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: MaxAuthTries 3",
         "test_query": "from augeas WHERE path = '/etc/ssh/sshd_config' and label like '%MaxAuthTries%' and value < 4 ;",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%MaxAuthTries%' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.value')) AS INTEGER) < 4",
         "compliance": [
             {
                 "name": "",
@@ -1989,6 +2114,7 @@
         "rationale": "Setting this parameter forces users to enter a password when authenticating with ssh.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: IgnoreRhosts yes",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and value LIKE '%IgnoreRhosts yes%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%IgnoreRhosts yes%'",
         "compliance": [
             {
                 "name": "",
@@ -2005,6 +2131,7 @@
         "rationale": "Even though the .rhosts files are ineffective if support is disabled in /etc/pam.conf, disabling the ability to use .rhosts files in SSH provides an additional layer of protection.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: HostbasedAuthentication no.",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and value LIKE '%HostbasedAuthentication no%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%HostbasedAuthentication no%'",
         "compliance": [
             {
                 "name": "",
@@ -2021,6 +2148,7 @@
         "rationale": "Even though the .rhosts files are ineffective if support is disabled in /etc/pam.conf, disabling the ability to use .rhosts files in SSH provides an additional layer of protection.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: HostbasedAuthentication no",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and label LIKE '%PermitRootLogin%' and value LIKE '%no%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%PermitRootLogin%' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%no%'",
         "compliance": [
             {
                 "name": "",
@@ -2037,6 +2165,7 @@
         "rationale": "Disallowing remote shell access to accounts that have an empty password reduces the probability of unauthorized access to the system",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: PermitEmptyPasswords no",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and value LIKE '%PermitEmptyPasswords no%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%PermitEmptyPasswords no%'",
         "compliance": [
             {
                 "name": "",
@@ -2053,6 +2182,7 @@
         "rationale": "Permitting users the ability to set environment variables through the SSH daemon could potentially allow users to bypass security controls (e.g. setting an execution path that has ssh executing trojan'd programs)",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: PermitUserEnvironment no",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and value LIKE '%PermitUserEnvironment no%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%PermitUserEnvironment no%'",
         "compliance": [
             {
                 "name": "",
@@ -2069,6 +2199,7 @@
         "rationale": "Having no timeout value associated with a connection could allow an unauthorized user access to another user's ssh session (e.g. user walks away from their computer and doesn't lock the screen). Setting a timeout value at least reduces the risk of this happening. While the recommended setting is 300 seconds (5 minutes), set this timeout value based on site policy. The recommended setting for ClientAliveCountMax is 0. In this case, the client session will be terminated after 5 minutes of idle time and no keepalive messages will be sent.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameters according to site policy: ClientAliveInterval 300",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and label='ClientAliveInterval' and value='300';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) = 'ClientAliveInterval' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) = '300'",
         "compliance": [
             {
                 "name": "",
@@ -2085,6 +2216,7 @@
         "rationale": "Having no timeout value associated with a connection could allow an unauthorized user access to another user's ssh session (e.g. user walks away from their computer and doesn't lock the screen). Setting a timeout value at least reduces the risk of this happening. While the recommended setting is 300 seconds (5 minutes), set this timeout value based on site policy. The recommended setting for ClientAliveCountMax is 0. In this case, the client session will be terminated after 5 minutes of idle time and no keepalive messages will be sent.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameters according to site policy: ClientAliveInterval 300",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and label='ClientAliveCountMax' and value='300';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) = 'ClientAliveCountMax' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) = '300'",
         "compliance": [
             {
                 "name": "",
@@ -2101,6 +2233,7 @@
         "rationale": "Setting the LoginGraceTime parameter to a low number will minimize the risk of successful brute force attacks to the SSH server. It will also limit the number of concurrent unauthenticated connections While the recommended setting is 60 seconds (1 Minute), set the number based on site policy.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: LoginGraceTime 60",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and label like '%LoginGraceTime%' and value LIKE '%60%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%LoginGraceTime%' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%60%'",
         "compliance": [
             {
                 "name": "",
@@ -2117,6 +2250,7 @@
         "rationale": "Restricting which users can remotely access the system via SSH will help ensure that only authorized users access the system.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set one or more of the parameter as follows: AllowUsers <userlist>    AllowGroups <grouplist>    DenyUsers <userlist>    DenyGroups <grouplist>",
         "test_query": "SELECT CASE WHEN COUNT(*) > 1 THEN 'Passing' ELSE 'Failing' END AS state from augeas WHERE path = '/etc/ssh/sshd_config' and node like '%/AllowUsers%';",
+        "test_query_cywise": "select case when count(*) > 1 then 'passing' else 'failing' end as state from ynh_osquery where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.node')) like '%/AllowUsers%'",
         "compliance": [
             {
                 "name": "",
@@ -2132,6 +2266,7 @@
         "rationale": "Banners are used to warn connecting users of the particular site's policy regarding connection. Presenting a warning message prior to the normal user login may assist the prosecution of trespassers on the computer system.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: Banner /etc/issue.net",
         "test_query": "from augeas WHERE path = '/etc/ssh/sshd_config' and label like '%Banner%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%Banner%'",
         "compliance": [
             {
                 "name": "",
@@ -2148,6 +2283,7 @@
         "rationale": "When usePAM is set to yes, PAM runs through account and session types properly. This is important if you want to restrict access to services based off of IP, time or other factors of the account. Additionally, you can make sure users inherit certain environment variables on login or disallow access to the server.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: UsePAM yes",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and label LIKE '%UsePAM%' and value LIKE '%yes%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%UsePAM%' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%yes%'",
         "compliance": [
             {
                 "name": "",
@@ -2164,6 +2300,7 @@
         "rationale": "Leaving port forwarding enabled can expose the organization to security risks and back-doors. SSH connections are protected with strong encryption. This makes their contents invisible to most deployed network monitoring and traffic filtering solutions. This invisibility carries considerable risk potential if it is used for malicious purposes such as data exfiltration. Cybercriminals or malware could exploit SSH to hide their unauthorized communications, or to exfiltrate stolen data from the target network.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: AllowTcpForwarding no",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and value LIKE '%AllowTcpForwarding no%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%AllowTcpForwarding no%'",
         "compliance": [
             {
                 "name": "",
@@ -2180,6 +2317,7 @@
         "rationale": "To protect a system from denial of service due to a large number of pending authentication connection attempts, use the rate limiting function of MaxStartups to protect availability of sshd logins and prevent overwhelming the daemon.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: maxstartups 10:30:60",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and label LIKE '%MaxStartups%' and value LIKE '%10:30:60%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%MaxStartups%' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%10:30:60%'",
         "compliance": [
             {
                 "name": "",
@@ -2196,6 +2334,7 @@
         "rationale": "To protect a system from denial of service due to a large number of concurrent sessions, use the rate limiting function of MaxSessions to protect availability of sshd logins and prevent overwhelming the daemon.",
         "remediation": "Edit the /etc/ssh/sshd_config file to set the parameter as follows: MaxSessions 10",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and value LIKE '%MaxSessions 10%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%MaxSessions 10%'",
         "compliance": [
             {
                 "name": "",
@@ -2212,6 +2351,7 @@
         "rationale": "Strong passwords protect systems from being hacked through brute force methods.",
         "remediation": "1) Run the following command to install the pam_pwquality module: apt install libpam-pwquality 2) Edit the /etc/pam.d/common-password file to include the appropriate options for pam_pwquality.so and to conform to site policy: password requisite pam_pwquality.so retry=3 3) Edit /etc/security/pwquality.conf to add or update the following settings to conform to site policy: minlen = 14 dcredit = -1 ucredit = -1 ocredit = -1 lcredit = -1. Notes: Additional module options may be set, recommendation requirements only cover including try_first_pass and minlen set to 14 or more. Settings in /etc/security/pwquality.conf must use spaces around the = symbol.",
         "test_query": "from deb_packages where name LIKE '%libpam-pwquality%' and status LIKE '%installed%';",
+        "test_query_cywise": "where ynh_osquery.name = 'deb_packages' and json_unquote(json_extract(ynh_osquery.columns, '$.name')) like '%libpam-pwquality%' and json_unquote(json_extract(ynh_osquery.columns, '$.status')) like '%installed%'",
         "category": "Configure PAM",
         "compliance": [
             {
@@ -2229,6 +2369,7 @@
         "rationale": "Using GID 0 for the root account helps prevent root-owned files from accidentally becoming accessible to non-privileged users.",
         "remediation": "Run the following command to set the root user default group to GID 0: # usermod -g 0 root",
         "test_query": "FROM users where username = 'root' and gid = '0';",
+        "test_query_cywise": "where ynh_osquery.name = 'users' and json_unquote(json_extract(ynh_osquery.columns, '$.username')) = 'root' and json_unquote(json_extract(ynh_osquery.columns, '$.gid')) = '0'",
         "category": "User Accounts and Environment",
         "compliance": [
             {
@@ -2246,6 +2387,7 @@
         "rationale": "It is critical to ensure that the /etc/passwd file is protected from unauthorized write access. Although it is protected by default, the file permissions could be changed either inadvertently or through malicious actions.",
         "remediation": "Run the following command to set permissions on /etc/passwd: # chown root:root /etc/passwd # chmod 600 /etc/passwd",
         "test_query": "from file where path = '/etc/passwd' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/passwd' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2263,6 +2405,7 @@
         "rationale": "It is critical to ensure that the /etc/gshadow- file is protected from unauthorized access. Although it is protected by default, the file permissions could be changed either inadvertently or through malicious actions.",
         "remediation": "Run the one of the following chown commands as appropriate and the chmod to set permissions on /etc/gshadow- : # chown root:root /etc/gshadow- # chown root:shadow /etc/gshadow- # chmod o-rwx,g-wx /etc/gshadow-",
         "test_query": "from file where path = '/etc/gshadow-' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/gshadow-' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2280,6 +2423,7 @@
         "rationale": "If attackers can gain read access to the /etc/shadow file, they can easily run a password cracking program against the hashed password to break it. Other security information that is stored in the /etc/shadow file (such as expiration) could also be useful to subvert the user accounts.",
         "remediation": "Run the one following commands to set permissions on /etc/shadow : # chown root:shadow /etc/shadow # chmod o-rwx,g-wx /etc/shadow",
         "test_query": "from file where path = '/etc/shadow' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/shadow' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2297,6 +2441,7 @@
         "rationale": "The /etc/group file needs to be protected from unauthorized changes by non-privileged users, but needs to be readable as this information is used with many non-privileged programs.",
         "remediation": "Run the following command to set permissions on /etc/group: # chown root:root /etc/group # chmod 644 /etc/group",
         "test_query": "from file where path = '/etc/group' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/group' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2314,6 +2459,7 @@
         "rationale": "It is critical to ensure that the /etc/passwd- file is protected from unauthorized access. Although it is protected by default, the file permissions could be changed either inadvertently or through malicious actions.",
         "remediation": "Run the following command to set permissions on /etc/passwd-: # chown root:root /etc/passwd- # chmod u-x,go-rwx /etc/passwd-",
         "test_query": "from file where path = '/etc/passwd-' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/passwd-' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2331,6 +2477,7 @@
         "rationale": "It is critical to ensure that the /etc/shadow- file is protected from unauthorized access. Although it is protected by default, the file permissions could be changed either inadvertently or through malicious actions.",
         "remediation": "Run the following commands to set permissions on /etc/shadow- : # chown root:shadow /etc/shadow- # chmod u-x,go-rwx /etc/shadow-",
         "test_query": "from file where path = '/etc/shadow-' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/shadow-' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2348,6 +2495,7 @@
         "rationale": "It is critical to ensure that the /etc/group- file is protected from unauthorized access. Although it is protected by default, the file permissions could be changed either inadvertently or through malicious actions.",
         "remediation": "Run the following command to set permissions on /etc/group-: # chown root:root /etc/group- # chmod u-x,go-rwx /etc/group-",
         "test_query": "from file where path = '/etc/group-' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/group-' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2365,6 +2513,7 @@
         "rationale": "If attackers can gain read access to the /etc/gshadow file, they can easily run a password cracking program against the hashed password to break it. Other security information that is stored in the /etc/gshadow file (such as group administrators) could also be useful to subvert the group",
         "remediation": "Run the following commands to set permissions on /etc/gshadow : # chown root:shadow /etc/gshadow # chmod o-rwx,g-rw /etc/gshadow",
         "test_query": "from file where path = '/etc/gshadow' and mode <= '644';",
+        "test_query_cywise": "where ynh_osquery.name = 'file' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/gshadow' and CAST(json_unquote(json_extract(ynh_osquery.columns, '$.mode')) AS INTEGER) <= 644",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2382,6 +2531,7 @@
         "rationale": "This access must be limited to only the default root account and only from the system console. Administrative access must be through an unprivileged account using an approved mechanism as noted in Item 5.6 Ensure access to the su command is restricted.",
         "remediation": "Remove any users other than root with UID 0 or assign them a new UID if appropriate.",
         "test_query": "from users where uid = 0 and username != 'root';",
+        "test_query_cywise": "where ynh_osquery.name = 'users' and json_unquote(json_extract(ynh_osquery.columns, '$.username')) <> 'root' and json_unquote(json_extract(ynh_osquery.columns, '$.uid')) = 0",
         "category": "System File Permissions",
         "compliance": [
             {
@@ -2416,6 +2566,7 @@
         "rationale": "Changing the default port you may reduce the number of successful attacks from zombie bots, an attacker or bot doing port-scanning can quickly identify your SSH port.",
         "remediation": "Change the Port option value in the sshd_config file.",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and value LIKE '%Port 22%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%Port 22%'",
         "category": "SSH Server Configuration",
         "compliance": [
             {
@@ -2433,6 +2584,7 @@
         "rationale": "The Protocol parameter dictates which version of the SSH communication and encryption protocols are in use. Version 1 of the SSH protocol has weaknesses.",
         "remediation": "Change the Protocol option value in the sshd_config file. If this line does not exist add it to the bottom of the file: 'Protocol 2'",
         "test_query": "from augeas WHERE path = '/etc/ssh/sshd_config' and label LIKE '%Protocol%' and value LIKE '%2%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%Protocol%' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%2%'",
         "category": "SSH Server Configuration",
         "compliance": [
             {
@@ -2450,6 +2602,7 @@
         "rationale": "Access only by public key. Generally people will use weak passwords and have poor password practices. Keys are considered stronger than password.",
         "remediation": "Change the PubkeyAuthentication option value in the sshd_config file.",
         "test_query": ", value from augeas WHERE path = '/etc/ssh/sshd_config' and label LIKE '%PubkeyAuthentication%' and value LIKE '%yes%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%PubkeyAuthentication%' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%yes%'",
         "compliance": [
             {
                 "name": "",
@@ -2466,6 +2619,7 @@
         "rationale": "The option PasswordAuthentication specifies whether we should use password-based authentication. Use public key authentication instead of passwords.",
         "remediation": "Change the PasswordAuthentication option value in the sshd_config file.",
         "test_query": "from augeas WHERE path = '/etc/ssh/sshd_config' and label like '%PasswordAuthentication%' and value like '%no%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/ssh/sshd_config' and json_unquote(json_extract(ynh_osquery.columns, '$.label')) like '%PasswordAuthentication%' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%no%'",
         "compliance": [
             {
                 "name": "",
@@ -2482,6 +2636,7 @@
         "rationale": "Strong passwords protect systems from being hacked through brute force methods.",
         "remediation": "Edit the /etc/pam.d/common-password and set retry=2.",
         "test_query": ", value from augeas WHERE path = '/etc/pam.d/common-password' and value LIKE '%retry=2%';",
+        "test_query_cywise": "where ynh_osquery.name = 'augeas' and json_unquote(json_extract(ynh_osquery.columns, '$.path')) = '/etc/pam.d/common-password' and json_unquote(json_extract(ynh_osquery.columns, '$.value')) like '%retry=2%'",
         "compliance": [
             {
                 "name": "",

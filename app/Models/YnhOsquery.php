@@ -688,10 +688,6 @@ EOT;
                 'kernel_modules',
                 'crontab',
                 'etc_hosts',
-                'mounts',
-                'shell_check',
-                'sudoers_shell',
-                'sudoers_sha1',
                 'deb_packages',
             ])
             ->where('dismissed', false)
