@@ -146,7 +146,7 @@ Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->
         </td>
       </tr>
       @if(Auth::user()->canManageServers() && $server->secret)
-      <tr class="collapse" id="server{{ $server->id }}">
+      <tr class="collapse overflow-hidden" id="server{{ $server->id }}">
         <td colspan="8" style="background-color:#fff3cd;">
           <div class="row p-3">
             <div class="col">
