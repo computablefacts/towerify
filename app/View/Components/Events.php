@@ -16,7 +16,7 @@ class Events extends Component
 
     public function __construct(YnhServer $server)
     {
-        $this->entries = YnhOsquery::suspiciousEvents(collect([$server]), Carbon::now()->subDays(20))
+        $this->entries = YnhOsquery::suspiciousEvents(collect([$server]), Carbon::now()->subDays(100))
             ->map(fn(array $entry) => (object)$entry);
     }
 

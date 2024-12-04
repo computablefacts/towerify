@@ -9,18 +9,18 @@
 <div class="container">
   <ul class="nav justify-content-end mb-4">
     <li class="nav-item">
-      <a class="nav-link {{ !$tab || $tab === 'settings' ? 'active' : '' }}"
-         href="{{ route('ynh.servers.edit', $server) }}?tab=settings">
-        {{ __('Settings') }}
-      </a>
-    </li>
-    <li class="nav-item">
       <a class="nav-link {{ !$tab || $tab === 'events' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=events">
         {{ __('Events') }}
       </a>
     </li>
-    @if(!$server->addedWithCurl())
+    <li class="nav-item">
+      <a class="nav-link {{ !$tab || $tab === 'settings' ? 'active' : '' }}"
+         href="{{ route('ynh.servers.edit', $server) }}?tab=settings">
+        {{ __('Settings') }}
+      </a>
+    </li>
+    @if($server->isYunoHost())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'backups' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=backups">
@@ -51,8 +51,6 @@
         {{ __('Interdependencies') }}
       </a>
     </li>
-    @endif
-    @if(!$server->addedWithCurl())
     <li class="nav-item">
       <a class="nav-link {{ $tab === 'users' ? 'active' : '' }}"
          href="{{ route('ynh.servers.edit', $server) }}?tab=users">
@@ -72,7 +70,7 @@
   @if(!$tab || $tab === 'settings')
   <x-server :server="$server"/>
   @endif
-  @if($tab === 'events')
+  @if(!$tab || $tab === 'events')
   <x-events :server="$server"/>
   @endif
   @if($tab === 'backups')

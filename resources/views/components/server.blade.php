@@ -19,7 +19,7 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
   </div>
 </div>
 @endif
-@if(Auth::user()->canListServers())
+@if(Auth::user()->canListServers() && $server->isYunoHost())
 {!! Form::model($server, [
 'route' => ['ynh.servers.edit', $server],
 'method' => 'POST',
