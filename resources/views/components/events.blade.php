@@ -24,7 +24,7 @@
         <td>{{ $entry->message }}</td>
         <td class="text-end">
           <span class="lozenge new">
-            {{ Illuminate\Support\Number::format($entry->idc, locale:'sv') }}
+            {{ Illuminate\Support\Number::format($entry->id, locale:'sv') }}
           </span>
         </td>
       </tr>
