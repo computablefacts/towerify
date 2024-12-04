@@ -42,6 +42,7 @@ use Illuminate\Support\Str;
  * @property string ip_address_v6
  * @property bool is_frozen
  * @property bool added_with_curl
+ * @property OsqueryPlatformEnum platform
  */
 class YnhServer extends Model
 {
