@@ -10,7 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 
-class Timeline extends Component
+class Events extends Component
 {
     public Collection $entries;
 
@@ -22,6 +22,6 @@ class Timeline extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.timeline');
+        return view('components.events');
     }
 }

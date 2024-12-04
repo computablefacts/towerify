@@ -73,7 +73,7 @@
   <x-server :server="$server"/>
   @endif
   @if($tab === 'events')
-  <x-timeline :server="$server"/>
+  <x-events :server="$server"/>
   @endif
   @if($tab === 'backups')
   <x-backups :server="$server"/>
