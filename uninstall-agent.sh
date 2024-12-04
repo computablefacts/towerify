@@ -13,3 +13,7 @@ apt-get purge --auto-remove osquery
 rm -rf /opt/osquery
 rm -rf /opt/logparser
 rm -rf /opt/logalert
+rm -rf /var/log/osquery
+rm /etc/systemd/system/logalert.service
+
+systemctl daemon-reload
