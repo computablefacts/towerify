@@ -163,7 +163,7 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
               {{ __('The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.') }}
             </div>
           </div>
-          <x-timeline :server="$server"/>
+          <x-events :server="$server"/>
         </td>
       </tr>
       @endif
