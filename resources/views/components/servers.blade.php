@@ -125,7 +125,7 @@ Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->
           @endif
         </td>
         <td class="text-end">
-          @if($server->isReady() && !$server->addedWithCurl() && Auth::user()->canManageServers())
+          @if(Auth::user()->canManageServers() && $server->isYunoHost() && $server->isReady() && !$server->addedWithCurl())
           <a id="refresh-{{ $server->id }}"
              onclick="refresh('{{ $server->id }}')"
              class="cursor-pointer"
@@ -134,7 +134,7 @@ Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->
           </a>
           &nbsp;&nbsp;&nbsp;&nbsp;
           @endif
-          @if(Auth::user()->canManageServers() && $server->secret)
+          @if(Auth::user()->canManageServers() && !$server->isYunoHost() && $server->secret)
           <a data-bs-toggle="collapse" href="#server{{ $server->id }}" class="text-decoration-none">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                  stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
