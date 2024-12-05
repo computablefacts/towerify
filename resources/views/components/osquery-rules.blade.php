@@ -12,18 +12,27 @@
     <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
-        <th>
-          {{ __('Name') }}
-        </th>
+        <!-- <th>{{ __('IOC') }}</th> -->
+        <!-- <th class="text-end">{{ __('Weight') }}</th> -->
+        <th>{{ __('Name') }}</th>
         <th>{{ __('Version') }}</th>
         <th>{{ __('Interval') }}</th>
         <th>{{ __('Platform') }}</th>
-        <!-- <th>{{ __('Snapshot') }}</th> -->
       </tr>
       </thead>
       <tbody>
       @foreach($rules as $rule)
       <tr>
+        <!-- <td>
+          @if($rule->is_ioc)
+          <span class="lozenge error">yes</span>
+          @else
+          <span class="lozenge success">no</span>
+          @endif
+        </td> -->
+        <!-- <td class="text-end">
+          <span class="lozenge information">{{ $rule->score }}</span>
+        </td> -->
         <td>
           <span class="font-lg mb-3 fw-bold">
             {{ $rule->name }}&nbsp;{!! $rule->category ? '<span style="color:#ff9704">/</span>&nbsp;' . $rule->category : '' !!}
@@ -31,20 +40,17 @@
           <div class="text-muted">
             {{ $rule->description }}
           </div>
-          @if($rule->value)
-          <div class="text-muted">
-            {{ $rule->value }}
-          </div>
-          @endif
           @if($rule->attck)
           <div class="text-muted">
-              <?php $first = true ?>
+            @foreach($rule->mitreAttckTactics() as $tactic)
+            <span class="lozenge new">{{ $tactic }}</span>&nbsp;
+            @endforeach
+          </div>
+          <div class="text-muted">
             @foreach(explode(',', $rule->attck) as $attck)
-            @if(!$first),@endif
-              <?php $first = false ?>
             <a href="https://attack.mitre.org/techniques/{{ $attck }}/">
               {{ $attck }}
-            </a>
+            </a>&nbsp;
             @endforeach
           </div>
           @endif
@@ -60,9 +66,6 @@
             {{ $rule->platform->value }}
           </span>
         </td>
-        <!-- <td>
-          {{ $rule->snapshot ? 'YES' : 'NO' }}
-        </td> -->
       </tr>
       @endforeach
       </tbody>

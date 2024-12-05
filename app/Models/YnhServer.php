@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OsqueryPlatformEnum;
 use App\Enums\ServerStatusEnum;
 use App\Enums\SshTraceStateEnum;
 use App\Hashing\TwHasher;
@@ -41,6 +42,7 @@ use Illuminate\Support\Str;
  * @property string ip_address_v6
  * @property bool is_frozen
  * @property bool added_with_curl
+ * @property OsqueryPlatformEnum platform
  */
 class YnhServer extends Model
 {
@@ -62,6 +64,7 @@ class YnhServer extends Model
         'secret',
         'is_frozen',
         'added_with_curl',
+        'platform',
     ];
 
     protected $casts = [
@@ -69,6 +72,7 @@ class YnhServer extends Model
         'is_ready' => 'boolean',
         'is_frozen' => 'boolean',
         'added_with_curl' => 'boolean',
+        'platform' => OsqueryPlatformEnum::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -360,7 +364,7 @@ class YnhServer extends Model
 
     public function sshMonitorServer(SshConnection2 $ssh): bool
     {
-        $installScript = YnhOsquery::monitorServer($this);
+        $installScript = YnhOsquery::monitorLinuxServer($this);
         $ssh->newTrace(SshTraceStateEnum::IN_PROGRESS, 'Installing tools for monitoring servers...');
         $filename = 'install-yunohost-' . Str::random(10);
         $isOk = $ssh->upload($filename, $installScript);
@@ -935,6 +939,26 @@ EOT;
             });
         }
         $ssh->newTrace(SshTraceStateEnum::DONE, 'Infos pulled from server.');
+    }
+
+    public function iocs(Carbon $dateMin, Carbon $dateMax): Collection
+    {
+        $rules = YnhOsqueryRule::where('is_ioc', true)->where('enabled', true)->get();
+        return YnhOsquery::where('ynh_server_id', $this->id)
+            ->whereIn('name', $rules->pluck('name'))
+            ->where('calendar_time', '>=', $dateMin)
+            ->where('calendar_time', '<=', $dateMax)
+            ->get()
+            ->map(function (YnhOsquery $event) use ($rules) {
+                /** @var YnhOsqueryRule $rule */
+                $rule = $rules->filter(fn(YnhOsqueryRule $rule) => $rule->name === $event->name)->first();
+                return [
+                    'event_id' => $event->id,
+                    'rule_id' => $rule->id,
+                    'rule_name' => $rule->name,
+                    'rule_score' => $rule->score,
+                ];
+            });
     }
 
     protected function sshPrivateKey(): Attribute

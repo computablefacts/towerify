@@ -11,6 +11,7 @@
 |
 */
 
+use App\Enums\OsqueryPlatformEnum;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
 use App\Http\Middleware\Subscribed;
@@ -82,6 +83,19 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
             ->header('Content-Type', 'text/plain');
     }
 
+    $platform = $request->input('platform');
+
+    if ($platform) {
+        $platform = OsqueryPlatformEnum::tryFrom($platform);
+    } else {
+        $platform = OsqueryPlatformEnum::LINUX;
+    }
+
+    if (!$platform) {
+        return response('Invalid platform name', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
     $server = \App\Models\YnhServer::where('ip_address', $ip)
         ->where('name', $name)
         ->first();
@@ -102,6 +116,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
                 'is_ready' => false,
                 'is_frozen' => true,
                 'added_with_curl' => true,
+                'platform' => $platform,
             ]);
 
             \App\Modules\AdversaryMeter\Events\CreateAsset::dispatch($user, $server->ip(), true, [$server->name]);
@@ -136,7 +151,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
 
     // 1. In the browser, go to "https://app.towerify.io" and login using your user account
     // 2. On the server, run as root: curl -s https://app.towerify.io/setup/script?api_token=<token>&server_ip=<ip>&server_name=<name> | bash
-    $installScript = \App\Models\YnhOsquery::monitorServer($server);
+    $installScript = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::monitorWindowsServer($server) : \App\Models\YnhOsquery::monitorLinuxServer($server);
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
@@ -151,7 +166,7 @@ Route::get('/update/{secret}', function (string $secret, \Illuminate\Http\Reques
             ->header('Content-Type', 'text/plain');
     }
 
-    $installScript = \App\Models\YnhOsquery::monitorServer($server);
+    $installScript = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::monitorWindowsServer($server) : \App\Models\YnhOsquery::monitorLinuxServer($server);
 
     return response($installScript, 200)
         ->header('Content-Type', 'text/plain');
@@ -238,6 +253,21 @@ Route::get('/osquery/{secret}', function (string $secret, \Illuminate\Http\Reque
         ->header('Content-Type', 'text/plain');
 })->middleware('throttle:6,1');
 
+Route::get('/localmetrics/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+    if (!$server) {
+        return response('Unknown server', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $script = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::monitorLocalMetricsWindows($server) : '# TODO';
+
+    return response($script, 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware('throttle:6,1');
+
 Route::get('/logparser/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
 
     $server = \App\Models\YnhServer::where('secret', $secret)->first();
@@ -247,7 +277,7 @@ Route::get('/logparser/{secret}', function (string $secret, \Illuminate\Http\Req
             ->header('Content-Type', 'text/plain');
     }
 
-    $config = \App\Models\YnhOsquery::configLogParser($server);
+    $config = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::configLogParserWindows($server) : \App\Models\YnhOsquery::configLogParserLinux($server);
 
     return response($config, 200)
         ->header('Content-Type', 'text/plain');

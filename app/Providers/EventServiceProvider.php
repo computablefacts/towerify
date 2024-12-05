@@ -37,6 +37,7 @@ use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\Modules\AdversaryMeter\Events\EndPortsScan;
 use App\Modules\AdversaryMeter\Events\EndVulnsScan;
 use App\Modules\AdversaryMeter\Events\IngestHoneypotsEvents;
+use App\Modules\AdversaryMeter\Events\SendAuditReport;
 use App\Modules\AdversaryMeter\Listeners\BeginPortsScanListener;
 use App\Modules\AdversaryMeter\Listeners\BeginVulnsScanListener;
 use App\Modules\AdversaryMeter\Listeners\CreateAssetListener;
@@ -44,6 +45,7 @@ use App\Modules\AdversaryMeter\Listeners\DeleteAssetListener;
 use App\Modules\AdversaryMeter\Listeners\EndPortsScanListener;
 use App\Modules\AdversaryMeter\Listeners\EndVulnsScanListener;
 use App\Modules\AdversaryMeter\Listeners\IngestHoneypotsEventsListener;
+use App\Modules\AdversaryMeter\Listeners\SendAuditReportListener;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Listeners\IngestFileListener;
 use Illuminate\Auth\Events\PasswordReset;
@@ -130,6 +132,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         IngestHoneypotsEvents::class => [
             IngestHoneypotsEventsListener::class,
+        ],
+        SendAuditReport::class => [
+            SendAuditReportListener::class,
         ],
 
         // CyberBuddy

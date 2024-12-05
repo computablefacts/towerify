@@ -263,19 +263,55 @@ class DatabaseSeeder extends Seeder
 
     private function setupOsqueryRules(): void
     {
-        $rules = $this->mitreAttckRules();
-        foreach ($rules as $rule) {
-            $this->addOrUpdateOsqueryRule($rule['name'], 'mitre att&ck', $rule);
-        }
-
         $rules = $this->metricsRules();
+
         foreach ($rules as $rule) {
-            $this->addOrUpdateOsqueryRule($rule['name'], 'metrics', $rule);
+            $this->addOrUpdateOsqueryRule2($rule['name'], 'metrics', $rule);
         }
 
-        $rules = $this->securityRules();
+        $mitreAttckMatrix = $this->mitreAttckMatrix();
+
+        foreach ($mitreAttckMatrix as $rule) {
+            \App\Models\YnhMitreAttck::updateOrCreate([
+                'uid' => \Illuminate\Support\Str::replace('.', '/', $rule['id'])
+            ], [
+                'uid' => \Illuminate\Support\Str::replace('.', '/', $rule['id']),
+                'title' => $rule['title'],
+                'tactics' => $rule['tactics'],
+                'description' => $rule['description'],
+            ]);
+        }
+
+        $indicatorsDetails = $this->indicatorsDetails();
+        $osqueryConfiguration = $this->osqueryConfiguration();
+        $rules = $this->securityEventsRules();
+        $iocs = [];
+
         foreach ($rules as $rule) {
-            $this->addOrUpdateOsqueryRule($rule['name'], isset($rule['attck']) ? 'mitre att&ck' : 'security', $rule);
+            $ioc = $this->addOrUpdateOsqueryRule1($rule, $mitreAttckMatrix, $indicatorsDetails, $osqueryConfiguration);
+            if ($ioc) {
+                $iocs[] = $ioc;
+            }
+        }
+
+        $schedule = $osqueryConfiguration['schedule'];
+
+        foreach ($schedule as $key => $value) {
+            if (!in_array($key, $iocs)) {
+                $rule = [
+                    "name" => $key,
+                    "query" => $value['query'],
+                    "interval" => $value['interval'],
+                    "platform" => $value['platform'] ?? "all",
+                    "version" => null,
+                    "description" => $value['description'] ?? "",
+                    "enabled" => true,
+                ];
+                $ioc = $this->addOrUpdateOsqueryRule1($rule, $mitreAttckMatrix, $indicatorsDetails, $osqueryConfiguration);
+                if ($ioc) {
+                    $iocs[] = $ioc;
+                }
+            }
         }
     }
 
@@ -290,7 +326,26 @@ class DatabaseSeeder extends Seeder
             });
     }
 
-    private function addOrUpdateOsqueryRule(string $name, string $category, array $rule): void
+    private function addOrUpdateOsqueryRule1(array $rule, array $mitreAttckMatrix, array $indicatorsDetails, array $osqueryConfiguration): ?string
+    {
+        $ioc = null;
+        $details = $this->findDetails($rule['name'], $rule['query'], $mitreAttckMatrix, $indicatorsDetails, $osqueryConfiguration);
+        $category = isset($details['ioc_category']) ? $details['ioc_category'] : 'other';
+        $rule['attck'] = isset($details['ioc_mitre']) ? collect($details['ioc_mitre'])->map(fn(array $ref) => \Illuminate\Support\Str::replace('.', '/', $ref['id']))->join(",") : null;
+        $isIoc = count($details) > 0;
+
+        if ($isIoc) {
+            $rule['is_ioc'] = true;
+            $rule['interval'] = $details['ioc_interval'] ?? 3600;
+            $rule['score'] = $details['ioc_score'] ?? 0.1;
+            $ioc = $details['ioc_name'];
+        }
+
+        $this->addOrUpdateOsqueryRule2($rule['name'], $category, $rule);
+        return $isIoc ? $ioc : null;
+    }
+
+    private function addOrUpdateOsqueryRule2(string $name, string $category, array $rule): void
     {
         $fields = [
             'name' => $name,
@@ -298,12 +353,6 @@ class DatabaseSeeder extends Seeder
         ];
         if (isset($rule['description'])) {
             $fields['description'] = $rule['description'];
-        }
-        if (isset($rule['description'])) {
-            $fields['description'] = $rule['description'];
-        }
-        if (isset($rule['value'])) {
-            $fields['value'] = $rule['value'];
         }
         if (isset($rule['version'])) {
             $fields['version'] = $rule['version'];
@@ -329,6 +378,12 @@ class DatabaseSeeder extends Seeder
         if (isset($rule['attck'])) {
             $fields['attck'] = $rule['attck'];
         }
+        if (isset($rule['is_ioc'])) {
+            $fields['is_ioc'] = $rule['is_ioc'];
+        }
+        if (isset($rule['score'])) {
+            $fields['score'] = $rule['score'];
+        }
         \App\Models\YnhOsqueryRule::updateOrCreate(['name' => $name], $fields);
     }
 
@@ -340,6 +395,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Track processor usage.',
             'attck' => 'T1496',
             'interval' => 300,
+            "platform" => "posix",
             'snapshot' => true,
             'enabled' => true,
         ], [
@@ -348,6 +404,7 @@ class DatabaseSeeder extends Seeder
             'description' => "Track memory usage.",
             'attck' => 'T1496',
             'interval' => 300,
+            "platform" => "linux",
             'snapshot' => true,
             'enabled' => true,
         ], [
@@ -356,12 +413,13 @@ class DatabaseSeeder extends Seeder
             'description' => "Track disk usage.",
             'attck' => 'T1496',
             'interval' => 300,
+            "platform" => "posix",
             'snapshot' => true,
             'enabled' => true,
         ]];
     }
 
-    private function securityRules(): array
+    private function securityEventsRules(): array
     {
         // Sources :
         // - https://github.com/osquery/osquery/blob/master/packs/hardware-monitoring.conf
@@ -376,13 +434,14 @@ class DatabaseSeeder extends Seeder
             'description' => "Retrieves the list of authorized_keys for each user.",
             'interval' => 3600,
             'enabled' => true,
+            "platform" => "posix",
         ], [
             'name' => 'users',
             "query" => "SELECT * FROM users;",
             "interval" => 3600,
             "description" => "Retrieves the list of local system users.",
-            "attck" => "T1136,T1078",
             'enabled' => true,
+            "platform" => "all",
         ], [
             "name" => "last",
             "query" => "SELECT * FROM last;",
@@ -390,8 +449,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves the list of the latest logins with PID, username and timestamp.",
-            "value" => "Useful for intrusion detection and incident response. Verify assumptions of what accounts should be accessing what systems and identify machines accessed during a compromise.",
-            "attck" => "T1136,T1078",
             "enabled" => true,
         ], [
             "name" => 'suid_bin',
@@ -400,7 +457,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves all the files in the target system that are setuid enabled.",
-            "value" => "Detect backdoor binaries (attacker may drop a copy of /bin/sh). Find potential elevation points / vulnerabilities in the standard build.",
             "enabled" => true,
         ], [
             'name' => 'ld_preload',
@@ -417,8 +473,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "linux",
             "version" => "1.4.5",
             "description" => "Retrieves all the information for the current kernel modules in the target Linux system.",
-            "value" => "Identify malware that has a kernel module component.",
-            "attck" => "T1547",
             "enabled" => true,
         ], [
             'name' => 'crontab',
@@ -427,16 +481,14 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves all the jobs scheduled in crontab in the target system.",
-            "value" => "Identify malware that uses this persistence mechanism to launch at a given interval",
             "enabled" => true
         ], [
             "name" => "etc_hosts",
             "query" => "SELECT * FROM etc_hosts;",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "version" => "1.4.5",
             "description" => "Retrieves all the entries in the target system /etc/hosts file.",
-            "value" => "Identify network communications that are being redirected. Example: identify if security logging has been disabled",
             "enabled" => true,
         ], [
             'name' => "shell_history",
@@ -445,18 +497,14 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves the command history, per user, by parsing the shell history files.",
-            "value" => "Identify actions taken. Useful for compromised hosts.",
-            "attck" => "T1059",
             "enabled" => true,
         ], [
             'name' => "logged_in_users",
             "query" => "SELECT liu.*, p.name, p.cmdline, p.cwd, p.root FROM logged_in_users liu, processes p WHERE liu.pid = p.pid;",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "version" => "1.4.5",
             "description" => "Retrieves the list of all the currently logged in users in the target system.",
-            "value" => "Useful for intrusion detection and incident response. Verify assumptions of what accounts should be accessing what systems and identify machines accessed during a compromise.",
-            "attck" => "T1136,T1078,T1169,T1184,T1021",
             "enabled" => true,
         ], [
             'name' => "ip_forwarding",
@@ -465,16 +513,14 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves the current status of IP/IPv6 forwarding.",
-            "value" => "Identify if a machine is being used as relay.",
             "enabled" => true,
         ], [
             'name' => "listening_ports",
             "query" => "SELECT * FROM listening_ports;",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "version" => "1.4.5",
             "description" => "Retrieves all the listening ports in the target system.",
-            "value" => "Detect if a listening port is not mapped to a known process. Find backdoors.",
             "enabled" => true,
         ], [
             'name' => "wireless_networks",
@@ -483,16 +529,14 @@ class DatabaseSeeder extends Seeder
             "platform" => "darwin",
             "version" => "1.6.0",
             "description" => "Retrieves all the remembered wireless network that the target machine has connected to.",
-            "value" => "Identifies connections to rogue access points.",
             "enabled" => true,
         ], [
             'name' => "open_sockets",
             "query" => "SELECT DISTINCT pid, family, protocol, local_address, local_port, remote_address, remote_port, path FROM process_open_sockets WHERE path <> '' OR remote_address <> '';",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "version" => "1.4.5",
             "description" => "Retrieves all the open sockets per process in the target system.",
-            "value" => "Identify malware via connections to known bad IP addresses as well as odd local or remote port bindings",
             "enabled" => true,
         ], [
             'name' => "open_files",
@@ -501,7 +545,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves all the open files per process in the target system.",
-            "value" => "Identify processes accessing sensitive files they shouldn't",
             "enabled" => true,
         ], [
             'name' => "process_env",
@@ -510,7 +553,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves all the environment variables per process in the target system.",
-            "value" => "Insight into the process data: Where was it started from, was it preloaded...",
             "enabled" => true,
         ], [
             'name' => "ramdisk",
@@ -519,7 +561,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves all the ramdisk currently mounted in the target system.",
-            "value" => "Identify if an attacker is using temporary, memory storage to avoid touching disk for anti-forensics purposes",
             "enabled" => true,
         ], [
             'name' => "iptables",
@@ -528,7 +569,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "linux",
             "version" => "1.4.5",
             "description" => "Retrieves the current filters and chains per filter in the target system.",
-            "value" => "Verify firewall settings are as restrictive as you need. Identify unwanted firewall holes made by malware or humans",
             "enabled" => true,
         ], [
             'name' => "disk_encryption",
@@ -537,23 +577,22 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves the current disk encryption status for the target system.",
-            "value" => "Identifies a system potentially vulnerable to disk cloning.",
             "enabled" => true,
         ], [
             'name' => "kernel_info",
             "query" => "SELECT * FROM kernel_info;",
             "interval" => 86400,
+            "platform" => "all",
             "version" => "1.4.5",
             "description" => "Retrieves information from the current kernel in the target system.",
-            "value" => "Identify out of date kernels or version drift across your infrastructure",
             "enabled" => true,
         ], [
             'name' => "os_version",
             "query" => "SELECT * FROM os_version;",
             "interval" => 86400,
+            "platform" => "all",
             "version" => "1.4.5",
             "description" => "Retrieves information from the Operative System where osquery is currently running.",
-            "value" => "Identify out of date operating systems or version drift across your infrastructure",
             "enabled" => true,
         ], [
             'name' => "deb_packages",
@@ -562,8 +601,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "linux",
             "version" => "1.4.5",
             "description" => "Retrieves all the installed DEB packages in the target Linux system.",
-            "value" => "General security posture.",
-            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "apt_sources",
@@ -572,8 +609,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "linux",
             "version" => "1.4.5",
             "description" => "Retrieves all the APT sources to install packages from in the target Linux system.",
-            "value" => "General security posture.",
-            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "portage_packages",
@@ -582,8 +617,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "linux",
             "version" => "2.0.0",
             "description" => "Retrieves all the packages installed with portage from the target Linux system.",
-            "value" => "General security posture.",
-            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "rpm_packages",
@@ -592,8 +625,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "linux",
             "version" => "1.4.5",
             "description" => "Retrieves all the installed RPM packages in the target Linux system.",
-            "value" => "General security posture.",
-            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "homebrew_packages",
@@ -602,8 +633,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "darwin",
             "version" => "1.4.5",
             "description" => "Retrieves the list of brew packages installed in the target OSX system.",
-            "value" => "This, with the help of a vulnerability feed, can help tell if a vulnerable application is installed.",
-            "attck" => "T1072",
             "enabled" => true,
         ], [
             'name' => "mounts",
@@ -612,8 +641,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves the current list of mounted drives in the target system.",
-            "value" => "Scope for lateral movement. Potential exfiltration locations. Potential dormant backdoors.",
-            "attck" => "T1025,T1052",
             "enabled" => true,
         ], [
             'name' => "usb_devices",
@@ -622,8 +649,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves the current list of USB devices in the target system.",
-            "value" => "Scope for lateral movement. Potential exfiltration locations. Potential dormant backdoors.",
-            "attck" => "T1052",
             "enabled" => true,
         ], [
             'name' => 'crontab',
@@ -632,8 +657,6 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves all the jobs scheduled in crontab in the target system.",
-            "value" => "Identify malware that uses this persistence mechanism to launch at a given interval.",
-            "attck" => "T1168",
             "enabled" => true
         ], [
             'name' => "shell_history",
@@ -642,23 +665,20 @@ class DatabaseSeeder extends Seeder
             "platform" => "posix",
             "version" => "1.4.5",
             "description" => "Retrieves the command history, per user, by parsing the shell history files.",
-            "value" => "Identify actions taken. Useful for compromised hosts.",
-            "attck" => "T1064,T1059,T1153,T1166,T1100,T1055,T1222,T1107,T1146,T1081,T1003,T1033,T1016,T1082,T1069,T1201,T1083,T1217,T1087",
             "enabled" => true,
         ], [
             'name' => 'users',
             "query" => "SELECT * FROM users;",
             "interval" => 3600,
+            "platform" => "all",
             "description" => "Retrieves the list of local system users.",
-            "attck" => "T1136,T1078,T1184,T1021",
             'enabled' => true,
         ], [
             'name' => 'groups',
             "query" => "SELECT * FROM groups;",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "description" => "Retrieves the list of groups.",
-            "attck" => "T1136,T1078",
             "enabled" => true
         ], [
             'name' => 'dns_resolvers',
@@ -671,127 +691,193 @@ class DatabaseSeeder extends Seeder
             'name' => 'etc_services',
             "query" => "SELECT * FROM etc_services;",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "description" => "Retrieves the list of runninf Etc services.",
             "enabled" => true
         ], [
             'name' => 'python_packages',
             "query" => "SELECT * FROM python_packages;",
             "interval" => 86400,
-            "platform" => "posix",
+            "platform" => "all",
             "description" => "Retrieves the list of Python packages.",
-            "attck" => "T1059",
             "enabled" => true
         ], [
             'name' => 'interface_addresses',
             "query" => "SELECT * FROM interface_addresses;",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "description" => "Retrieves the list of network interfaces.",
-            "attck" => "T1040",
             "enabled" => true
         ], [
             'name' => 'startup_items',
             "query" => "SELECT * FROM startup_items;",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "description" => "Retrieves the list of systemd services.",
-            "attck" => "T1543",
             "enabled" => true
         ], [
             'name' => 'certificates',
             "query" => "SELECT * FROM certificates;",
             "interval" => 3600,
-            "platform" => "posix",
+            "platform" => "all",
             "description" => "Retrieves the list of certificates.",
             "enabled" => true
-        ]];
-    }
-
-    private function mitreAttckRules(): array
-    {
-        return [[
+        ], [
             'name' => "process_listening_port",
             "query" => "SELECT p.name, p.path, lp.port, lp.address, lp.protocol  FROM listening_ports lp LEFT JOIN processes p ON lp.pid = p.pid WHERE lp.port != 0 AND p.name != '';",
             "interval" => 3600,
-            "platform" => "linux",
+            "platform" => "all",
             "description" => "Returns the listening ports list.",
-            "attck" => "T1108,T1100,T1029,T1011,T1041,T1048,T1020,T1071,T1219",
             "removed" => false,
             "enabled" => true,
         ], [
             'name' => "process_open_sockets",
             "query" => "SELECT DISTINCT p.name, p.path, pos.remote_address, pos.remote_port FROM process_open_sockets pos LEFT JOIN processes p ON pos.pid = p.pid WHERE pos.remote_port != 0 AND p.name != '';",
             "interval" => 3600,
-            "platform" => "linux",
+            "platform" => "all",
             "description" => "Returns the network connections from system processes.",
-            "attck" => "T1108,T1100,T1102,T1105,T1039,T1029,T1011,T1041,T1043,T1090,T1094,T1048,T1132,T1020,T1065,T1001,T1071,T1219,T1104,T1008",
             "removed" => false,
             "enabled" => true,
         ], [
             'name' => "shell_check",
             "query" => "SELECT DISTINCT(processes.pid),processes.parent,processes.name,processes.path,processes.cmdline,processes.cwd,processes.root,processes.uid,processes.gid,processes.start_time,process_open_sockets.remote_address,process_open_sockets.remote_port,(SELECT cmdline FROM processes AS parent_cmdline WHERE pid = processes.parent) AS parent_cmdline FROM processes JOIN process_open_sockets USING(pid) LEFT OUTER JOIN process_open_files ON processes.pid = process_open_files.pid WHERE (name = 'sh' OR name = 'bash') AND process_open_files.pid IS NULL;",
             "interval" => 3600,
-            "platform" => "linux",
+            "platform" => "posix",
             "description" => "Returns possible reverse shells on system processes.",
-            "attck" => "T1108,T1100",
             "removed" => false,
             "enabled" => true,
         ], [
             'name' => "sudoers",
             "query" => "SELECT * FROM sudoers;",
             "interval" => 3600,
-            "platform" => "linux",
+            "platform" => "posix",
             "description" => "Linux sudoers information.",
-            "attck" => "T1169,T1206,T1548",
             "enabled" => true,
         ], [
             'name' => "sudoers_shell",
             "query" => "SELECT * FROM processes WHERE cmdline LIKE '/bin/bash -i >& /dev/tcp/%';",
             "interval" => 3600,
-            "platform" => "linux",
+            "platform" => "posix",
             "description" => "Check any bash reverse shell forwarded to the attacker.",
-            "attck" => "T1169,T1206",
-            "enabled" => true,
+            "enabled" => false,
         ], [
             'name' => "sudoers_sha1",
             "query" => "SELECT hash.sha1, fi.path, fi.filename, datetime(fi.btime, 'unixepoch', 'UTC') AS btime, datetime(fi.atime, 'unixepoch', 'UTC') AS atime, datetime(fi.ctime, 'unixepoch', 'UTC') AS ctime, datetime(fi.mtime, 'unixepoch', 'UTC') AS mtime FROM hash JOIN file fi USING (path) WHERE (fi.path LIKE '/etc/sudoers') AND type='regular';",
             "interval" => 3600,
-            "platform" => "linux",
+            "platform" => "posix",
             "description" => "Check any bash reverse shell forwarded to the attacker.",
-            "attck" => "T1169,T1206",
-            "enabled" => true,
+            "enabled" => false,
         ], [
             'name' => "system_running_processes",
             "query" => "SELECT pr.pid, pr.name, usr.username, pr.path, pr.cmdline FROM processes pr LEFT JOIN users usr ON pr.uid = usr.uid WHERE pr.cmdline != '';",
             "interval" => 3600,
-            "platform" => "linux",
-            "description" => "List Linux System running processes with CMDLINE not null.",
-            "attck" => "T1059,T1108,T1166,T1100,T1064,T1107,T1003,T1033,T1016,T1082,T1057,T1201,T1083,T1217,T1087,T1072,T1002",
+            "platform" => "all",
+            "description" => "List running processes with CMDLINE not null.",
             "enabled" => true,
         ], [
             'name' => "hidden_files",
             "query" => "SELECT hash.sha1, fi.path, fi.filename, datetime(fi.btime, 'unixepoch', 'UTC') AS btime, datetime(fi.atime, 'unixepoch', 'UTC') AS atime, datetime(fi.ctime, 'unixepoch', 'UTC') AS ctime, datetime(fi.mtime, 'unixepoch', 'UTC') AS mtime FROM hash JOIN file fi USING (path) WHERE ((fi.path LIKE '/home/%%/.%') OR (fi.path LIKE '/root/.%')) AND type='regular';",
             "interval" => 3600,
-            "platform" => "linux",
+            "platform" => "posix",
             "description" => "Lists hidden files in relevant path.",
-            "attck" => "T1158",
             "enabled" => true,
         ], [
             'name' => "hidden_directories",
             "query" => "SELECT fi.path, fi.filename, datetime(fi.btime, 'unixepoch', 'UTC') AS btime, datetime(fi.atime, 'unixepoch', 'UTC') AS atime, datetime(fi.ctime, 'unixepoch', 'UTC') AS ctime, datetime(fi.mtime, 'unixepoch', 'UTC') AS mtime FROM file fi WHERE ((fi.path LIKE '/home/%%/.%') OR (fi.path LIKE '/root/.%')) AND type='directory';",
             "interval" => 3600,
-            "platform" => "linux",
+            "platform" => "posix",
             "description" => "Lists hidden directories in relevant path.",
-            "attck" => "T1158",
             "enabled" => true,
         ], [
             'name' => "kernel_modules_and_extensions",
             "query" => "SELECT usr.username, sht.command, sht.history_file FROM shell_history sht JOIN users usr ON sht.uid = usr.uid WHERE sht.uid IN (SELECT uid FROM users) AND (sht.command LIKE '%modprobe%' OR sht.command LIKE '%insmod%' OR sht.command  LIKE '%lsmod%' OR sht.command  LIKE '%rmmod%' OR sht.command LIKE '%modinfo%' OR sht.command LIKE '%linux-headers-$%'OR sht.command LIKE '%kernel-devel-$%');",
             "interval" => 3600,
-            "description" => "Detect loading, unloading, and manipulating modules on Linux systems",
-            "attck" => "T1215",
+            "platform" => "posix",
+            "description" => "Detect loading, unloading, and manipulating modules on Linux systems.",
             "enabled" => true,
         ]];
+    }
+
+    private function findDetails(string $name, string $query, array $mitreAttckMatrix, array $indicatorsDetails, array $osqueryConfiguration): array
+    {
+        $details = [];
+        $schedule = $osqueryConfiguration['schedule'];
+        $confName = null;
+
+        foreach ($schedule as $key => $value) {
+            if ($value['query'] === $query) {
+                $confName = $key;
+                $details['ioc_name'] = $key;
+                $details['ioc_interval'] = $value['interval'];
+                break;
+            }
+        }
+        if (!$confName) {
+            foreach ($schedule as $key => $value) {
+                if ($key === $name) {
+                    $confName = $key;
+                    $details['ioc_name'] = $key;
+                    $details['ioc_interval'] = $value['interval'];
+                    break;
+                }
+            }
+        }
+        if ($confName) {
+            foreach ($indicatorsDetails as $value) {
+                if ($confName === $value['indicator_name']) {
+                    $details['ioc_category'] = $value['category'] ?? '';
+                    $details['ioc_score'] = $value['score'] ?? 0;
+                    $details['ioc_mitre_refs'] = $value['mitre_ref'] ?? [];
+                    break;
+                }
+            }
+            foreach ($mitreAttckMatrix as $value) {
+                if (isset($details['ioc_mitre_refs']) && in_array($value['id'], $details['ioc_mitre_refs'])) {
+                    if (!isset($details['ioc_mitre'])) {
+                        $details['ioc_mitre'] = [];
+                    }
+                    $details['ioc_mitre'][] = [
+                        'id' => $value['id'],
+                        'title' => $value['title'],
+                        'tactics' => $value['tactics'],
+                        'description' => $value['description'],
+                    ];
+                }
+            }
+            unset($details['ioc_mitre_refs']);
+        }
+        return $details;
+    }
+
+    private function mitreAttckMatrix(): array
+    {
+        // https://github.com/bgenev/impulse-xdr/blob/main/managerd/main/helpers/data/mitre_matrix.json
+        $path = database_path('seeds/mitre_matrix.json');
+        $json = Illuminate\Support\Facades\File::get($path);
+        return json_decode($json, true);
+    }
+
+    private function indicatorsDetails(): array
+    {
+        // https://github.com/bgenev/impulse-xdr/blob/main/managerd/main/helpers/data/indicators_details.json
+        $path = database_path('seeds/indicators_details.json');
+        $json = Illuminate\Support\Facades\File::get($path);
+        return json_decode($json, true);
+    }
+
+    private function securityConfigurationAssessment(): array
+    {
+        // https://github.com/bgenev/impulse-xdr/blob/main/managerd/main/helpers/data/sca_checks.json
+        $path = database_path('seeds/sca_checks.json');
+        $json = Illuminate\Support\Facades\File::get($path);
+        return json_decode($json, true);
+    }
+
+    private function osqueryConfiguration(): array
+    {
+        // https://github.com/bgenev/impulse-xdr/blob/main/build/shared/osquery/osquery.conf
+        $path = database_path('seeds/osquery.conf');
+        $json = Illuminate\Support\Facades\File::get($path);
+        return json_decode($json, true);
     }
 }

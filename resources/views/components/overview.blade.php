@@ -102,18 +102,4 @@
     <x-suspicious-activity/>
   </div>
   @endif
-  <!--
-  <div class="row mt-2">
-    @if(Auth::user()->canUseAdversaryMeter())
-    <div class="col col-6 pr-0">
-      <x-faq-adversary-meter/>
-    </div>
-    @endif
-    @if(Auth::user()->canManageServers())
-    <div class="col col-6 pl-2">
-      <x-faq-sentinel/>
-    </div>
-    @endif
-  </div>
-  -->
 </div>

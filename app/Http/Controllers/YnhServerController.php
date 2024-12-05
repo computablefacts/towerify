@@ -49,7 +49,7 @@ class YnhServerController extends Controller
 
     public function index(YnhServer $server, Request $request)
     {
-        $tab = $request->input('tab', 'settings');
+        $tab = $request->input('tab', 'events');
         $limit = $request->input('limit', 40);
 
         return view('_server', compact(

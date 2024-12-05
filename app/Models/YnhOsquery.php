@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\OsqueryPlatformEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 /**
  * @property int id
@@ -76,7 +76,7 @@ class YnhOsquery extends Model
         return md5($uid);
     }
 
-    public static function configLogParser(YnhServer $server): string
+    public static function configLogParserLinux(YnhServer $server): string
     {
         $url = app_url();
         return <<< EOT
@@ -197,13 +197,25 @@ fi
 EOT;
     }
 
+    public static function configLogParserWindows(YnhServer $server): string
+    {
+        $url = app_url();
+        return <<< EOT
+# TODO
+
+Write-Host "TODO!"
+
+EOT;
+    }
+
     public static function configLogAlert(YnhServer $server): array
     {
         $url = app_url();
+        $path = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? "C:\\Program Files\\osquery\\log\\osqueryd.*.log" : "/var/log/osquery/osqueryd.*.log";
         return ["monitors" => [
             [
                 "name" => "Monitor Osquery Daemon Output",
-                "path" => "/var/log/osquery/osqueryd.*.log",
+                "path" => $path,
                 "match" => ".*",
                 "regexp" => true,
                 "url" => "{$url}/logalert/{$server->secret}"
@@ -238,7 +250,6 @@ EOT;
                 "logger_snapshot_event_type" => "true",
                 "schedule_splay_percent" => 10
             ],
-            "platform" => "linux",
             "schedule" => $schedule,
             "file_paths" => [
                 "configuration" => [
@@ -274,7 +285,7 @@ EOT;
         ];
     }
 
-    public static function monitorServer(YnhServer $server): string
+    public static function monitorLinuxServer(YnhServer $server): string
     {
         $url = app_url();
         $whitelist = collect(config('towerify.adversarymeter.ip_addresses'))
@@ -409,18 +420,26 @@ else
 fi
 
 # Set Osquery flags
-echo '--disable_events=false' > /etc/osquery/osquery.flags # overwrite file!
+echo '--config_plugin=filesystem' > /etc/osquery/osquery.flags # overwrite file!
+echo '--disable_events=false' >> /etc/osquery/osquery.flags
+echo '--disable_logging=false' >> /etc/osquery/osquery.flags
 echo '--enable_file_events=true' >> /etc/osquery/osquery.flags
+echo '--enable_ntfs_publisher=true' >> /etc/osquery/osquery.flags
+echo '--enable_syslog=true' >> /etc/osquery/osquery.flags
+echo '--force=true' >> /etc/osquery/osquery.flags
 echo '--audit_allow_config=true' >> /etc/osquery/osquery.flags
-echo '--audit_allow_sockets' >> /etc/osquery/osquery.flags
+echo '--audit_allow_sockets=true' >> /etc/osquery/osquery.flags
 echo '--audit_persist=true' >> /etc/osquery/osquery.flags
 echo '--disable_audit=false' >> /etc/osquery/osquery.flags
 echo '--events_expiry=1' >> /etc/osquery/osquery.flags
 echo '--events_max=500000' >> /etc/osquery/osquery.flags
 echo '--logger_min_status=1' >> /etc/osquery/osquery.flags
 echo '--logger_plugin=filesystem' >> /etc/osquery/osquery.flags
+echo '--schedule_default_interval=3600' >> /etc/osquery/osquery.flags
+echo '--verbose=false' >> /etc/osquery/osquery.flags
 echo '--watchdog_memory_limit=350' >> /etc/osquery/osquery.flags
 echo '--watchdog_utilization_limit=130' >> /etc/osquery/osquery.flags
+echo '--worker_threads=2' >> /etc/osquery/osquery.flags
 
 # Parse web logs every hour
 cat <(fgrep -i -v '/opt/logparser/parser' <(crontab -l)) <(echo '0 * * * * /opt/logparser/parser') | crontab -
@@ -448,6 +467,321 @@ if systemctl is-active --quiet fail2ban; then
     systemctl restart fail2ban
   fi
 fi
+
+EOT;
+    }
+
+    public static function monitorWindowsServer(YnhServer $server): string
+    {
+        $url = app_url();
+        return <<<EOT
+# Install Osquery
+# NOTA: the MSI package creates the osqueryd Windows Service as well
+\$osqueryPath = "C:\Program Files\osquery"
+if (-not (Test-Path "\$osqueryPath\osquery.conf")) {
+    Invoke-WebRequest -Uri "https://pkg.osquery.io/windows/osquery-5.11.0.msi" -OutFile "C:\osquery.msi"
+    Start-Process msiexec.exe -ArgumentList "/i C:\osquery.msi /quiet" -Wait
+    Remove-Item "C:\osquery.msi"
+}
+
+# Install LogAlert
+\$logAlertPath = "C:\Program Files\LogAlert"
+if (-not (Test-Path "\$logAlertPath\config.json")) {
+    New-Item -Path \$logAlertPath -ItemType Directory -Force
+    Invoke-WebRequest -Uri "https://github.com/jhuckaby/logalert/releases/download/v1.0.4/logalert-win-x64.exe" -OutFile "\$logAlertPath\logalert.exe"
+}
+
+# Install a tool to create a service for LogAlert
+# See: https://github.com/winsw/winsw/tree/v2.12.0
+if (-not (Test-Path "\$logAlertPath\logalertd.exe")) {
+    Invoke-WebRequest -Uri "https://github.com/winsw/winsw/releases/download/v2.12.0/WinSW-x64.exe" -OutFile "\$logAlertPath\logalertd.exe"
+}
+
+# Setup LogAlert service configuration
+\$logalertd_conf = @"
+id: logalert
+name: LogAlert
+description: Cywise LogAlert Service
+executable: \$logAlertPath\logalert.exe
+startmode: Automatic
+logmode: EventLog
+onFailure:
+  - action: restart
+"@
+\$logalertd_conf | Set-Content -Path "\$logAlertPath\logalertd.yml"
+
+# Setup LogAlert service
+if (-not (Get-Service -Name "logalert" -ErrorAction SilentlyContinue)) {
+    & \$logAlertPath\logalertd.exe install
+}
+
+# Create cywise directory
+\$cywisePath = "C:\Program Files\Cywise"
+if (-not (Test-Path "\$cywisePath")) {
+    New-Item -Path \$cywisePath -ItemType Directory -Force
+}
+
+# Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)
+Stop-Service osqueryd
+Stop-Service logalert
+
+# Update LogAlert configuration
+Invoke-WebRequest -Uri "{$url}/logalert/{$server->secret}" -OutFile "\$logAlertPath\config2.json"
+
+if (Test-Path "\$logAlertPath\config2.json") {
+    # Check if the file is a valid JSON
+    try {
+        \$config2 = Get-Content "\$logAlertPath\config2.json" | ConvertFrom-Json
+        if (\$null -ne \$config2) {
+            # Replace config.json with config2.json
+            Copy-Item "\$logAlertPath\config2.json" "\$logAlertPath\config.json" -Force
+        }
+    } catch {
+        Write-Output "Erreur lors de la conversion du fichier config2.json en JSON."
+    }
+}
+
+# Update Osquery configuration
+Invoke-WebRequest -Uri "{$url}/osquery/{$server->secret}" -OutFile "\$osqueryPath\osquery2.conf"
+
+if (Test-Path "\$osqueryPath\osquery2.conf") {
+    # Check if the file is a valid JSON
+    try {
+        \$osquery2 = Get-Content "\$osqueryPath\osquery2.conf" | ConvertFrom-Json
+        if (\$null -ne \$osquery2) {
+            # Replace osquery.conf with osquery2.conf
+            Copy-Item "\$osqueryPath\osquery2.conf" "\$osqueryPath\osquery.conf" -Force
+        }
+    } catch {
+        Write-Output "Erreur lors de la conversion du fichier osquery2.json en JSON."
+    }
+}
+
+# Update LogParser
+Invoke-WebRequest -Uri "{$url}/logparser/{$server->secret}" -OutFile "\$cywisePath\logparser2.ps1" -ErrorAction SilentlyContinue
+
+if (Test-Path "\$cywisePath\logparser2.ps1") {
+    # Remplacer logparser.ps1 par logparser2.ps1
+    Copy-Item "\$cywisePath\logparser2.ps1" "\$cywisePath\logparser.ps1" -Force
+}
+
+# Update localMetrics
+Invoke-WebRequest -Uri "{$url}/localmetrics/{$server->secret}" -OutFile "\$cywisePath\localMetrics2.ps1" -ErrorAction SilentlyContinue
+
+if (Test-Path "\$cywisePath\localMetrics2.ps1") {
+    # Remplacer logparser.ps1 par localMetrics2.ps1
+    Copy-Item "\$cywisePath\localMetrics2.ps1" "\$cywisePath\localMetrics.ps1" -Force
+}
+
+# Set Osquery flags
+\$osquery_flags = @"
+--disable_events=false
+--enable_file_events=true
+--audit_allow_config=true
+--audit_allow_sockets
+--audit_persist=true
+--disable_audit=false
+--events_expiry=1
+--events_max=500000
+--logger_min_status=1
+--logger_plugin=filesystem
+--watchdog_memory_limit=350
+--watchdog_utilization_limit=130
+"@
+\$osquery_flags | Set-Content -Path "\$osqueryPath\osquery.flags"
+
+# Start LogAlert then Osquery because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)
+Start-Service logalert
+Start-Service osqueryd
+
+function CreateOrUpdate-ScheduledTask {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = \$true)]
+        [string]\$TaskName,
+
+        [Parameter(Mandatory = \$true)]
+        [string]\$Executable,
+
+        [Parameter(Mandatory = \$false)]
+        [string]\$Arguments = "",
+
+        [Parameter(Mandatory = \$true)]
+        [ValidateSet("Custom", "Daily", "Weekly")]
+        [string]\$ExecutionType,
+
+        [Parameter(Mandatory = \$false, ParameterSetName = "Custom")]
+        [int]\$RepeatInterval = 3600,
+
+        [Parameter(Mandatory = \$true, ParameterSetName = "Daily")]
+        [string]\$TimeOfDay,
+
+        [Parameter(Mandatory = \$true, ParameterSetName = "Weekly")]
+        [int]\$DayOfWeek,
+
+        [Parameter(Mandatory = \$true, ParameterSetName = "Weekly")]
+        [string]\$TimeOfWeek
+    )
+
+    # Create an object to define the scheduled task parameters
+    if ([string]::IsNullOrEmpty(\$Arguments)) {
+        \$Action = New-ScheduledTaskAction -Execute \$Executable
+    } else {
+        \$Action = New-ScheduledTaskAction -Execute \$Executable -Argument \$Arguments
+    }
+    \$Settings = New-ScheduledTaskSettingsSet
+    \$Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+
+    # Define the trigger based on the execution type
+    switch (\$ExecutionType) {
+        "Custom" {
+            \$TimeOfDay = [DateTime]::Parse("00:00")
+            \$Trigger = New-ScheduledTaskTrigger -Once -At \$TimeOfDay -RepetitionInterval (New-TimeSpan -Seconds \$RepeatInterval) -RepetitionDuration (New-TimeSpan -Days 3650)
+        }
+        "Daily" {
+            \$TimeOfDay = [DateTime]::Parse(\$TimeOfDay)
+            \$Trigger = New-ScheduledTaskTrigger -Daily -At \$TimeOfDay
+        }
+        "Weekly" {
+            \$TimeOfWeek = [DateTime]::Parse(\$TimeOfWeek)
+            \$Trigger = New-ScheduledTaskTrigger -Weekly -At \$TimeOfWeek -DaysOfWeek \$DayOfWeek
+        }
+    }
+
+    # Check if the task already exists
+    if (\$null -ne (Get-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -ErrorAction SilentlyContinue)) {
+        # Update existing task
+        Set-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -Action \$Action -Principal \$Principal -Trigger \$Trigger -Settings \$Settings
+    } else {
+        # Create new task
+        Register-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -Action \$Action -Principal \$Principal -Trigger \$Trigger -Settings \$Settings
+    }
+}
+
+# Parse web logs every hour
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File ""\$cywisePath\logparser.ps1"""  -TaskName "LogParser" -ExecutionType Custom -RepeatInterval 3600
+
+# Drop Osquery daemon's output every sunday at 01:11 am
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { if (Test-Path '\$osqueryPath\log\osqueryd.results.log') { Remove-Item -Path '\$osqueryPath\log\osqueryd.results.log' -Force }; if (Test-Path '\$osqueryPath\log\osqueryd.snapshots.log') { Remove-Item -Path '\$osqueryPath\log\osqueryd.snapshots.log' -Force } }""" -TaskName "DeleteOsqueryLogFiles" -ExecutionType "Weekly" -DayOfWeek 0 -TimeOfWeek "1:11"
+
+# Drop LogAlert's logs every day at 02:22 am
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Remove-Item -Path '\$logAlertPath\LogAlert\log.txt' -Force }""" -TaskName "DeleteLogAlertLogFile" -ExecutionType "Daily" -TimeOfDay "2:22"
+
+# Auto-update the server every day at 03:33 am
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command ""& { Invoke-WebRequest -Uri '{$url}/update/{$server->secret}' -UseBasicParsing | Invoke-Expression }""" -TaskName "AutoUpdate" -ExecutionType "Daily" -TimeOfDay "3:33"
+
+# Collect CPU, memory and disks metrics every 5 minutes
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File ""\$cywisePath\localMetrics.ps1"""  -TaskName "LocalMetrics" -ExecutionType Custom -RepeatInterval 300
+
+EOT;
+    }
+
+    public static function monitorLocalMetricsWindows(YnhServer $server): string
+    {
+        $url = app_url();
+        return <<<EOT
+function Get-CpuMetrics() {
+    # Retrieve data (first point)
+    \$objService = Get-WmiObject -Class Win32_PerfRawData_PerfOS_Processor -Filter "Name='_Total'"
+    \$userTime1 = \$objService.PercentUserTime
+    \$systemTime1 = \$objService.PercentPrivilegedTime
+    \$time1 = \$objService.TimeStamp_Sys100NS
+
+    # Wait
+    Start-Sleep -Seconds 1
+
+    # Retrieve data (second point)
+    \$objService = Get-WmiObject -Class Win32_PerfRawData_PerfOS_Processor -Filter "Name='_Total'"
+    \$userTime2 = \$objService.PercentUserTime
+    \$systemTime2 = \$objService.PercentPrivilegedTime
+    \$time2 = \$objService.TimeStamp_Sys100NS
+
+    # Calculate CPU usage
+    \$PercentUserTime = [math]::Round(((\$userTime2 - \$userTime1) / (\$time2 - \$time1)) * 100, 2)
+    \$PercentSystemTime = [math]::Round(((\$systemTime2 - \$systemTime1) / (\$time2 - \$time1)) * 100, 2)
+    \$PercentIdleTime = 100 - \$PercentUserTime - \$PercentSystemTime
+
+    return @{
+        time_spent_idle_pct                = \$PercentIdleTime.ToString()
+        time_spent_on_system_workloads_pct = \$PercentSystemTime.ToString()
+        time_spent_on_user_workloads_pct   = \$PercentUserTime.ToString()
+    }
+}
+
+function Get-DiskMetrics() {
+    # Retrieve disk information
+    \$disks = Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3"
+
+    # Initialize variables
+    \$total_space_gb = 0
+    \$space_left_gb = 0
+
+    # Loop through disks
+    foreach (\$disk in \$disks) {
+        # Calculate total size in GB
+        \$total_space_gb += [math]::Round(\$disk.Size / 1GB, 2)
+
+        # Calculate free space in GB
+        \$space_left_gb += [math]::Round(\$disk.FreeSpace / 1GB, 2)
+    }
+
+    # Calculate others metrics
+    \$used_space_gb = [math]::Round(\$total_space_gb - \$space_left_gb, 2)
+    \$percent_available = [math]::Round((\$space_left_gb / \$total_space_gb) * 100, 1)
+    \$percent_used = [math]::Round(100 - \$percent_available, 1)
+
+    return @{
+        '%_available'  = \$percent_available.ToString()
+        '%_used'       = \$percent_used.ToString()
+        space_left_gb  = \$space_left_gb.ToString()
+        total_space_gb = \$total_space_gb.ToString()
+        used_space_gb  = \$used_space_gb.ToString()
+    }
+}
+
+function Get-MemoryMetrics() {
+    \$total_space_gb = [math]::round(\$(Get-WmiObject -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)
+    \$space_left_gb = [math]::round((\$(Get-WmiObject -Class Win32_PerfFormattedData_PerfOS_Memory).AvailableBytes) / 1GB, 2)
+    \$used_space_gb = [math]::round(\$total_space_gb - \$space_left_gb, 2)
+    \$pct_available = [math]::round((\$space_left_gb / \$total_space_gb) * 100, 1)
+    \$pct_used = [math]::round((\$used_space_gb / \$total_space_gb) * 100, 1)
+
+    return @{
+        '%_available'  = \$pct_available.ToString()
+        '%_used'       = \$pct_used.ToString()
+        space_left_gb  = \$space_left_gb.ToString()
+        total_space_gb = \$total_space_gb.ToString()
+        used_space_gb  = \$used_space_gb.ToString()
+    }
+}
+
+function Generate-OsqueryJson {
+    param (
+        [string]\$Name,
+        [hashtable]\$Columns
+    )
+
+    \$currentDate = Get-Date -Format "ddd MMM  d HH:mm:ss yyyy UTC"
+    \$unixTime = [int][double]::Parse((Get-Date -UFormat %s).ToString())
+
+    \$data = @{
+        name           = \$Name
+        hostIdentifier = \$env:COMPUTERNAME
+        calendarTime   = \$currentDate
+        unixTime       = \$unixTime
+        epoch          = 0
+        counter        = 0
+        numerics       = \$false
+        columns        = \$Columns
+        action         = "snapshot"
+    }
+
+    return \$data | ConvertTo-Json -Compress
+}
+
+Generate-OsqueryJson -Name "processor_available_snapshot" -Columns \$(Get-CpuMetrics) | Out-File -Append -Encoding utf8 "C:\Program Files\osquery\log\osqueryd.snapshots.log"
+Generate-OsqueryJson -Name "disk_available_snapshot" -Columns \$(Get-DiskMetrics) | Out-File -Append -Encoding utf8 "C:\Program Files\osquery\log\osqueryd.snapshots.log"
+Generate-OsqueryJson -Name "memory_available_snapshot" -Columns \$(Get-MemoryMetrics) | Out-File -Append -Encoding utf8 "C:\Program Files\osquery\log\osqueryd.snapshots.log"
 
 EOT;
     }
@@ -507,10 +841,6 @@ EOT;
                 'kernel_modules',
                 'crontab',
                 'etc_hosts',
-                'mounts',
-                'shell_check',
-                'sudoers_shell',
-                'sudoers_sha1',
                 'deb_packages',
             ])
             ->where('dismissed', false)
@@ -640,38 +970,6 @@ EOT;
                             'message' => "Le traffic réseau vers {$event->columns['hostnames']} n'est maintenant plus redirigé vers {$event->columns['address']}.",
                         ];
                     }
-                } elseif ($event->name === 'mounts') {
-
-                    $isDockerMountEvent = (Str::startsWith($event->columns['path'], '/var/lib/docker/') && $event->columns['type'] === 'overlay') ||
-                        (Str::startsWith($event->columns['path'], '/run/docker/') && $event->columns['type'] === 'nsfs');
-
-                    if (!$isDockerMountEvent) { // drop Docker-generated 'mounts' events
-                        /* if ($event->action === 'added') {
-                            return [
-                                'id' => $event->id,
-                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                                'server' => $event->server->name,
-                                'ip' => $event->server->ip(),
-                                'message' => "Le répertoire {$event->columns['path']} pointe maintenant vers un système de fichiers de type {$event->columns['type']}.",
-                            ];
-                        } elseif ($event->action === 'removed') {
-                            return [
-                                'id' => $event->id,
-                                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                                'server' => $event->server->name,
-                                'ip' => $event->server->ip(),
-                                'message' => "Le répertoire {$event->columns['path']} ne pointe maintenant plus vers un système de fichiers de type {$event->columns['type']}.",
-                            ];
-                        } */
-                    }
-                } elseif ($event->name === 'shell_check' || $event->name === 'sudoers_shell' || $event->name === 'sudoers_sha1') {
-                    return [
-                        'id' => $event->id,
-                        'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                        'server' => $event->server->name,
-                        'ip' => $event->server->ip(),
-                        'message' => "Possible \"reverse shell\" (bash) transféré à un attaquant!",
-                    ];
                 } elseif ($event->name === 'deb_packages') {
                     if ($event->action === 'added') {
 
