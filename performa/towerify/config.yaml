@@ -1,0 +1,5 @@
+name: performa
+type: static
+config:
+  dockerfile: ./towerify/Dockerfile
+  stackfile: ./towerify/stack.yaml
