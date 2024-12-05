@@ -44,6 +44,12 @@ else
     jq '.secret_key' conf/config.json
 fi
 
+# Test if the PERFORMA_EXTERNAL_USER_API environment variable exists
+if [ -n "$PERFORMA_EXTERNAL_USER_API" ]; then
+    # Change the value of secret_key in the config.json file
+    jq '.User.external_user_api = "'"$PERFORMA_EXTERNAL_USER_API"'"' conf/config.json > /tmp/config.json && mv /tmp/config.json conf/config.json
+fi
+
 echo "Display conf after"
 jq . conf/config.json
 

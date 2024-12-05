@@ -347,6 +347,38 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
         ->header('Content-Type', 'text/plain');
 });
 
+Route::get('/performa/user/login', function (\Illuminate\Http\Request $request) {
+
+    $shouldLogout = $request->input('logout', 0);
+    if (1 == $shouldLogout) {
+        Auth::logout();
+        return redirect()->route('home');
+    }
+
+    /** @var User $user */
+    $user = Auth::user();
+
+    if ($user) {
+        return response()->json([
+            'code' => 0,
+            'username' => $user->ynhUsername(),
+            'user' => [
+                'full_name' => $user->name,
+                'email' => $user->email,
+                'privileges' => [
+                    'admin' => $user->canManageServers() ? 1 : 0,
+                ],
+            ],
+        ]);
+    }
+
+    return response()->json([
+        'code' => 0,
+        'location' => route('login') . '?redirect_to=',
+    ]);
+
+})->middleware('throttle:6,1');
+
 /** @deprecated */
 Route::get('/dispatch/{job}', function (string $job) {
 
