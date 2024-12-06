@@ -227,6 +227,20 @@ EOT;
         ];
     }
 
+    public static function configPerforma(YnhServer $server): array
+    {
+        return [
+            'enabled' => true,
+            'host' => $server->user()->first()->performa_domain,
+            'secret_key' => $server->user()->first()->performa_secret,
+            'group' => '',
+            'proto' => 'https:',
+            'socket_opts' => [
+                'rejectUnauthorized' => false
+            ]
+        ];
+    }
+
     public static function configOsquery(): array
     {
         $schedule = [];
@@ -291,6 +305,36 @@ EOT;
         $whitelist = collect(config('towerify.adversarymeter.ip_addresses'))
             ->map(fn(string $ip) => "sed -i '/^ignoreip/ { /{$ip}/! s/$/ {$ip}/ }' /etc/fail2ban/jail.conf")
             ->join("\n");
+        $installPerforma = '';
+        $updatePerformaConfig = '';
+        if (!is_null($server->user()->first()->performa_domain)) {
+            $installPerforma = <<<EOT
+
+# Install performa-satellite
+if [ ! -f /opt/performa/config.json ]; then 
+    mkdir -p /opt/performa
+    curl -L https://github.com/jhuckaby/performa-satellite/releases/latest/download/performa-satellite-linux-x64 > /opt/performa/satellite.bin
+    chmod 755 /opt/performa/satellite.bin
+    /opt/performa/satellite.bin --install
+fi
+
+EOT;
+            $updatePerformaConfig = <<<EOT
+
+# Update performa-satellite configuration
+wget -O /opt/performa/config2.json {$url}/performa/{$server->secret}
+
+if [ -s /opt/performa/config2.json ]; then
+  if jq empty /opt/performa/config2.json; then
+    mv -f /opt/performa/config2.json /opt/performa/config.json
+  fi
+else
+  rm /opt/performa/config2.json
+fi
+
+EOT;
+
+        }
         return <<<EOT
 #!/bin/bash
 
@@ -314,7 +358,7 @@ if [ ! -f /opt/logalert/config.json ]; then
   curl -L https://github.com/jhuckaby/logalert/releases/latest/download/logalert-linux-x64 >/opt/logalert/logalert.bin
   chmod 755 /opt/logalert/logalert.bin
 fi
-
+{$installPerforma}
 # Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)  
 systemctl stop osqueryd
 systemctl stop logalert
@@ -399,7 +443,7 @@ if [ -s /opt/logparser/parser2 ]; then
 else
     rm /opt/logparser/parser2
 fi
-
+{$updatePerformaConfig}
 # Set LogAlert as a daemon
 echo '[Unit]' > /etc/systemd/system/logalert.service
 echo 'Description=LogAlert (cywise)' >> /etc/systemd/system/logalert.service

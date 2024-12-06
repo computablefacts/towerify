@@ -347,6 +347,21 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
         ->header('Content-Type', 'text/plain');
 });
 
+Route::get('/performa/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+    if (!$server) {
+        return response('Unknown server', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $config = \App\Models\YnhOsquery::configPerforma($server);
+
+    return response($config, 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware('throttle:6,1');
+
 Route::get('/performa/user/login', function (\Illuminate\Http\Request $request) {
 
     $shouldLogout = $request->input('logout', 0);
