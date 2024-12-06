@@ -19,8 +19,8 @@
 		
 		[ "listCreate", "global/groups", { "page_size": 100 } ],
 		[ "listPush", "global/groups", {
-			"id": "main",
-			"title": "Main Group",
+			"id": "self",
+			"title": "Performa server",
 			"hostname_match": "_HOSTNAME_",
 			"alerts_enabled": true,
 			"sort_order": 0,
@@ -28,7 +28,17 @@
 			"modified": 1434125333,
 			"created": 1434125333
 		} ],
-		
+		[ "listPush", "global/groups", {
+			"id": "all",
+			"title": "All servers",
+			"hostname_match": ".+",
+			"alerts_enabled": true,
+			"sort_order": 1,
+			"username": "admin",
+			"modified": 1434125333,
+			"created": 1434125333
+		} ],
+
 		[ "listCreate", "global/monitors", { "page_size": 100 } ],
 		[ "listPush", "global/monitors", {
 			"id": "load_avg",
