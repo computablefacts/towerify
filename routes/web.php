@@ -362,7 +362,7 @@ Route::get('/performa/{secret}', function (string $secret, \Illuminate\Http\Requ
         ->header('Content-Type', 'text/plain');
 })->middleware('throttle:6,1');
 
-Route::get('/performa/user/login', function (\Illuminate\Http\Request $request) {
+Route::get('/performa/user/login/{performa_domain}', function (string $performa_domain, \Illuminate\Http\Request $request) {
 
     $shouldLogout = $request->input('logout', 0);
     if (1 == $shouldLogout) {
@@ -373,7 +373,7 @@ Route::get('/performa/user/login', function (\Illuminate\Http\Request $request) 
     /** @var User $user */
     $user = Auth::user();
 
-    if ($user) {
+    if ($user && $user->performa_domain === $performa_domain) {
         return response()->json([
             'code' => 0,
             'username' => $user->ynhUsername(),
