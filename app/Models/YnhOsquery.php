@@ -451,7 +451,7 @@ cat <(fgrep -i -v 'rm /var/log/osquery/osqueryd.results.log /var/log/osquery/osq
 cat <(fgrep -i -v 'rm /opt/logalert/log.txt' <(crontab -l)) <(echo '22 2 * * * rm /opt/logalert/log.txt') | crontab -
 
 # Auto-update the server every day at 03:33 am
-cat <(fgrep -i -v 'curl -s {$url}/update/{$server->secret} | bash' <(crontab -l)) <(echo '33 3 * * * curl -s {$url}/update/{$server->secret} | bash') | crontab -
+cat <(crontab -l | sed '/curl -s https:\/\/.*\/update\/.*| bash/d') <(echo '33 3 * * * curl -s {$url}/update/{$server->secret} | bash') | crontab -
 
 # Delete entry that call old domain app.towerify.io
 crontab -l | grep -v "app\.towerify\.io" | crontab -
