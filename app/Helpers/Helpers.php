@@ -137,12 +137,12 @@ if (!function_exists('app_sidebar')) {
                             'route' => route('home', ['tab' => 'overview']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'overview',
                         ], [
-                            'label' => __('Reports & Alerts'),
-                            'route' => config('towerify.reports.url'),
+                            'label' => __('Metrics'),
+                            'route' => 'https://' . Auth::user()->performa_domain,
                             'target' => '_blank',
                         ], [
-                            'label' => __('Monitoring'),
-                            'route' => 'https://' . Auth::user()->performa_domain,
+                            'label' => __('Events'),
+                            'route' => config('towerify.reports.url'),
                             'target' => '_blank',
                         ]
                     ]
