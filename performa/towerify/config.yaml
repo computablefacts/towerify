@@ -3,3 +3,8 @@ type: static
 config:
   dockerfile: ./towerify/Dockerfile
   stackfile: ./towerify/stack.yaml
+  envs:
+    zdhi-8skn-fu6v:
+      domain: zdhi-8skn-fu6v.cywise.io
+    v29m-tcdr-kqx2:
+      domain: v29m-tcdr-kqx2.cywise.io
