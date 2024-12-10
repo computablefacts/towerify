@@ -140,11 +140,11 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Metrics'),
                             'route' => 'https://' . Auth::user()->performa_domain,
                             'target' => '_blank',
+                            'hidden' => is_null(Auth::user()->performa_domain),
                         ], [
                             'label' => __('Events'),
                             'route' => config('towerify.reports.url'),
                             'target' => '_blank',
-                            'hidden' => is_null(Auth::user()->performa_domain),
                         ]
                     ]
                 ], [
