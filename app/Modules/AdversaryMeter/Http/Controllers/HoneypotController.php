@@ -360,7 +360,7 @@ class HoneypotController extends Controller
                         'id' => $honeypot->id,
                         'sensor' => $honeypot->cloud_sensor,
                         'provider' => $honeypot->cloud_provider,
-                        'query' => "UPDATE honeypots SET status = 'setup_complete' WHERE id = {$honeypot->id};",
+                        'query' => "UPDATE am_honeypots SET status = 'setup_complete' WHERE id = {$honeypot->id};",
                     ];
                     Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested($user, $subject, $body));
                 }
