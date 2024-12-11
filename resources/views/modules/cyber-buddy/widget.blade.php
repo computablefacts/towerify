@@ -28,7 +28,6 @@
     const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
     if (iframeDocument) {
       const input = iframeDocument.getElementById('userText');
-      console.log(input);
       input.placeholder = "Saisissez ici votre question...";
     }
   };
