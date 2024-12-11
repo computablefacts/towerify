@@ -109,6 +109,28 @@
           const editor = window.BlockNote.ctx.editor;
           const blocksFromMarkdown = editor.tryParseMarkdownToBlocks(markdownContent);
           blocksFromMarkdown.then(blocks => {
+            for (let i = 0; i < blocks.length; i++) {
+              const block = blocks[i];
+              if (block.type === 'paragraph') {
+                if (block.content.length === 1) {
+                  for (let j = 0; j < block.content.length; j++) {
+                    if (block.content[j].type === 'text') {
+                      const text = block.content[j].text.trim();
+                      if (text.startsWith('Q:')) {
+                        blocks[i] = {
+                          id: block.id, type: "ai_block", props: {
+                            prompt: "CyberBuddy",
+                            collection: "pssi",
+                            collections: ["pssi"],
+                            instructions: text.substring(2)
+                          }, content: []
+                        };
+                      }
+                    }
+                  }
+                }
+              }
+            }
             const template = {
               name: file.name.slice(0, -3), template: blocks, type: 'draft', user: '{{ Auth::user()->name }}',
             };

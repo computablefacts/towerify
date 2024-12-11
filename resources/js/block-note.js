@@ -153,6 +153,7 @@ const AiBlock = createReactBlockSpec({
                onKeyDown={handleKeyDown}
                onChange={handleChange}
                placeholder={"Saisissez vos instructions ici..."}
+               value={props.block.props.instructions}
                autoFocus
                required>
         </input>
