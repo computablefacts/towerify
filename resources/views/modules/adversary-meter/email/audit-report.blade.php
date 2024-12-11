@@ -266,8 +266,8 @@
   <tbody>
   @foreach ($alerts_high as $vuln)
   <tr>
-    <td class="ellipsis" title="{{ $vuln->asset()->first()?->asset }}">
-      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->asset()->first()?->asset }}</span>
+    <td class="ellipsis" title="{{ $vuln->asset()?->asset }}">
+      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->asset()?->asset }}</span>
     </td>
     <td>{{ $vuln->port()?->ip }}</td>
     <td>{{ $vuln->port()?->port }}</td>
@@ -322,8 +322,8 @@
   <tbody>
   @foreach ($alerts_medium as $vuln)
   <tr>
-    <td class="ellipsis" title="{{ $vuln->asset()->first()?->asset }}">
-      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->asset()->first()?->asset }}</span>
+    <td class="ellipsis" title="{{ $vuln->asset()?->asset }}">
+      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->asset()?->asset }}</span>
     </td>
     <td>{{ $vuln->port()?->ip }}</td>
     <td>{{ $vuln->port()?->port }}</td>
@@ -378,8 +378,8 @@
   <tbody>
   @foreach ($alerts_low as $vuln)
   <tr>
-    <td class="ellipsis" title="{{ $vuln->asset()->first()?->asset }}">
-      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->asset()->first()?->asset }}</span>
+    <td class="ellipsis" title="{{ $vuln->asset()?->asset }}">
+      <span style="color:#f8b502;font-weight:bolder">{{ $vuln->asset()?->asset }}</span>
     </td>
     <td>{{ $vuln->port()?->ip }}</td>
     <td>{{ $vuln->port()?->port }}</td>

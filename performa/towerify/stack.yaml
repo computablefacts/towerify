@@ -1,0 +1,23 @@
+services:
+  app:
+    image: __DOCKER_IMAGE_NAME__:__DOCKER_IMAGE_TAG__
+    ports:
+      - target: 5511
+        published: __PORT__
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 20M
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first

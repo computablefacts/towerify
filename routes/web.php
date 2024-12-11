@@ -347,6 +347,53 @@ Route::post('/logparser/{secret}', function (string $secret, \Illuminate\Http\Re
         ->header('Content-Type', 'text/plain');
 });
 
+Route::get('/performa/{secret}', function (string $secret, \Illuminate\Http\Request $request) {
+
+    $server = \App\Models\YnhServer::where('secret', $secret)->first();
+
+    if (!$server) {
+        return response('Unknown server', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $config = \App\Models\YnhOsquery::configPerforma($server);
+
+    return response($config, 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware('throttle:6,1');
+
+Route::get('/performa/user/login/{performa_domain}', function (string $performa_domain, \Illuminate\Http\Request $request) {
+
+    $shouldLogout = $request->input('logout', 0);
+    if (1 == $shouldLogout) {
+        Auth::logout();
+        return redirect()->route('home');
+    }
+
+    /** @var User $user */
+    $user = Auth::user();
+
+    if ($user && $user->performa_domain === $performa_domain) {
+        return response()->json([
+            'code' => 0,
+            'username' => $user->ynhUsername(),
+            'user' => [
+                'full_name' => $user->name,
+                'email' => $user->email,
+                'privileges' => [
+                    'admin' => $user->canManageServers() ? 1 : 0,
+                ],
+            ],
+        ]);
+    }
+
+    return response()->json([
+        'code' => 0,
+        'location' => route('login') . '?redirect_to=',
+    ]);
+
+})->middleware('throttle:6,1');
+
 /** @deprecated */
 Route::get('/dispatch/{job}', function (string $job) {
 
