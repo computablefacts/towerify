@@ -1,8 +1,10 @@
 @if(Auth::check() && Auth::user()->canUseCyberBuddy())
+<iframe id="chatBotManFrame" src="" style="width:100%"></iframe>
 <script>
+
   window.botmanWidget = {
     title: 'CyberBuddy',
-    aboutText: "⚡ Powered by {{ config('app.name') }}",
+    aboutText: null, // "⚡ Powered by {{ config('app.name') }}",
     aboutLink: '{{ app_url() }}',
     userId: '{{ Auth::user() ? Auth::user()->id : \Illuminate\Support\Str::random(10) }}',
     chatServer: '/cb/web/botman',
@@ -15,23 +17,24 @@
     bubbleBackground: '#00264b',
     headerTextColor: 'white',
   };
-</script>
-<script src='/cyber_buddy/botman/widget.js'></script>
-<script>
 
-  const startConversation = () => {
+  const iframe = document.getElementById('chatBotManFrame');
+  const container = iframe.parentElement;
+  const paddingTop = parseInt(getComputedStyle(container).paddingTop);
+  const paddingBottom = parseInt(getComputedStyle(container).paddingBottom);
+  const url = `/cb/web/cyber-buddy/chat?conf=${encodeURIComponent(JSON.stringify(window.botmanWidget))}`;
 
-    const botmanInterval = setInterval(checkBotman, 300);
-
-    function checkBotman() {
-      if (window.botmanChatWidget) {
-        clearInterval(botmanInterval);
-        window.botmanChatWidget.open();
-      }
+  iframe.onload = () => {
+    const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+    if (iframeDocument) {
+      const input = iframeDocument.getElementById('userText');
+      console.log(input);
+      input.placeholder = "Saisissez ici votre question...";
     }
   };
-
-  startConversation();
+  iframe.placeholder = "test";
+  iframe.style.height = `${container.offsetHeight - paddingTop - paddingBottom}px`;
+  iframe.src = url;
 
 </script>
 @endif
