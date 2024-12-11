@@ -10,6 +10,8 @@ Route::get('/templates', 'CyberBuddyController@templates')->middleware('auth');
 
 Route::post('/templates', 'CyberBuddyController@saveTemplate')->middleware('auth');
 
+Route::delete('/templates/{id}', 'CyberBuddyController@deleteTemplate')->middleware('auth');
+
 Route::get('/files', 'CyberBuddyController@files')->middleware('auth');
 
 Route::delete('/files/{id}', 'CyberBuddyController@deleteFile')->middleware('auth');

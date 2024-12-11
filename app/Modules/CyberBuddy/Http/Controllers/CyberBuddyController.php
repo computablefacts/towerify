@@ -108,21 +108,37 @@ class CyberBuddyController extends Controller
 
         if (isset($template) && count($template) > 0) {
             if ($id === 0) {
-                return Template::create([
+                $template = Template::create([
                     'name' => (empty($name) ? "doc" : $name) . '-' . Carbon::now()->toIso8601ZuluString(),
                     'template' => $template,
                     'readonly' => false,
                 ]);
+            } else {
+                $template = Template::updateOrCreate([
+                    'id' => $id,
+                    'created_by' => Auth::user()->id,
+                    'readonly' => false,
+                ], [
+                    'template' => $template,
+                ]);
             }
-            return Template::updateOrCreate([
-                'id' => $id,
-                'created_by' => Auth::user()->id,
-                'readonly' => false,
-            ], [
-                'template' => $template,
-            ]);
+            return [
+                'id' => $template->id,
+                'name' => $template->name,
+                'template' => $template->template,
+                'type' => $template->readonly ? 'template' : 'draft',
+                'user' => User::find($template->created_by)->name,
+            ];
         }
         return [];
+    }
+
+    public function deleteTemplate(int $id)
+    {
+        Template::where('id', $id)->where('readonly', false)->delete();
+        return response()->json([
+            'success' => __('The template has been deleted!'),
+        ]);
     }
 
     public function collections()
