@@ -156,10 +156,10 @@ class CyberBuddyController extends Controller
     public function llm1(Request $request)
     {
         // TODO : validate request
-        /** @var Prompt $prompt */
-        $prompt = Prompt::where('name', 'default_debugger')->firstOrfail();
-        $response = ApiUtils::ask_chunks_demo($request->string('collection'), $request->string('instructions'), $prompt->template);
-        if ($response['error']) {
+        $collection = $request->string('collection');
+        $prompt = $request->string('prompt');
+        $response = ApiUtils::ask_chunks($prompt, $collection, null, true, true, 'fr', 10, true);
+        if (!isset($response['error']) || $response['error']) {
             return 'Une erreur s\'est produite. Veuillez réessayer ultérieurement.';
         }
         return self::removeSourcesFromAnswer($response['response']);
@@ -168,8 +168,11 @@ class CyberBuddyController extends Controller
     public function llm2(Request $request)
     {
         // TODO : validate request
-        $response = ApiUtils::ask_chunks_demo($request->string('collection'), $request->string('instructions'), $request->string('prompt'));
-        if ($response['error']) {
+        $template = $request->string('template');
+        $prompt = $request->string('prompt');
+        $questionsAndAnswers = $request->input('q_and_a', []);
+        $response = ApiUtils::generate_from_template($template, $prompt, $questionsAndAnswers);
+        if (!isset($response['error']) || $response['error']) {
             return 'Une erreur s\'est produite. Veuillez réessayer ultérieurement.';
         }
         return self::removeSourcesFromAnswer($response['response']);

@@ -55,12 +55,13 @@ class ApiUtils
         return $this->ask_chunks($question, $collection, $prompt, true, true, 'fr');
     }
 
-    public function ask_chunks(string $question, string $collectionName, string $prompt, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
+    public function ask_chunks(string $question, string $collectionName, ?string $prompt = null, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10, bool $generateQuestion = false): array
     {
         $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
         array_unshift($collections, $collectionName);
         return $this->post('/ask_chunks', [
             'question' => $question,
+            'generate_question' => $generateQuestion,
             'collection_name' => $collectionName,
             'collections' => $collections,
             'prompt' => $prompt,
@@ -144,6 +145,15 @@ class ApiUtils
             'max_docs_used' => $maxDocsUsed,
             'lang' => $lang,
             'show_context' => true
+        ]);
+    }
+
+    public function generate_from_template(string $template, string $prompt, array $questionsAndAnswers): array
+    {
+        return $this->post('/generate_from_template', [
+            'template' => $template,
+            'qa_list' => $questionsAndAnswers,
+            'prompt' => $prompt,
         ]);
     }
 

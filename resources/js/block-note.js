@@ -14,21 +14,27 @@ const ctx = {
   history: [],
 };
 
+// This component render a list of questions. The user answers the questions. Then, a paragraph is generated using the
+// provided paragraph template and answers.
 const QaBlock = createReactBlockSpec({
   type: "qa_block", propSchema: {
     questions: {
       default: [],
     }, answers: {
       default: [],
-    }, instructions: {
+    }, template: {
       default: "",
-    }, collection: {
+    }, prompt: {
       default: "",
     },
   }, content: "inline",
 }, {
   render: (props) => {
+
+    // Show/hide loader
     const [loading, setLoading] = useState(false);
+
+    // When an answer is updated, update the underlying data structure
     const handleChange = (event, question) => {
       const answers = [...props.block.props.answers];
       const answer = answers.find(answer => answer.question === question);
@@ -39,12 +45,17 @@ const QaBlock = createReactBlockSpec({
       }
       props.editor.updateBlock(props.block, {type: "qa_block", props: {answers: answers}});
     };
+
+    // Submit the questions and answers to the LLM
     const handleClick = (event) => {
-      const answers = props.block.props.answers;
-      const text = answers.map(answer => `QUESTION: ${answer.question}\nANSWER: ${answer.answer}`).join("\n\n");
       setLoading(true);
-      axios.post(`/cb/web/llm2`,
-        {collection: props.block.props.collection, prompt: props.block.props.instructions, instructions: text})
+      axios.post(`/cb/web/llm2`, {
+        template: props.block.props.template,
+        prompt: props.block.props.prompt,
+        q_and_a: props.block.props.answers.map(answer => {
+          return {question: answer.question, answer: answer.answer};
+        })
+      })
       .then(function (response) {
         if (response.data) {
           props.editor.insertBlocks([{type: "paragraph", content: response.data}], props.block, 'after');
@@ -84,34 +95,42 @@ const QaBlock = createReactBlockSpec({
   }
 });
 
+// This component render a single question. An answer to this question will be provided using the selected collection.
 const AiBlock = createReactBlockSpec({
   type: "ai_block", propSchema: {
-    prompt: {
-      default: "AI Assistant",
+    assistant_name: {
+      default: "CyberBuddy",
     }, collections: {
       default: [],
     }, collection: {
       default: "",
-    }, instructions: {
+    }, prompt: {
       default: null,
     },
   }, content: "inline",
 }, {
   render: (props) => {
+
+    // Show/hide loader
     const [loading, setLoading] = useState(false);
+
+    // When the prompt is updated, update the underlying data structure
     const handleChange = (event) => {
-      props.editor.updateBlock(props.block, {type: "ai_block", props: {instructions: event.target.value}});
+      props.editor.updateBlock(props.block, {type: "ai_block", props: {prompt: event.target.value}});
     };
+
+    // Submit the prompt to the LLM
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
         const propz = props.block.props;
-        if (propz.instructions && propz.instructions.trim()) {
+        if (propz.prompt && propz.prompt.trim()) {
           setLoading(true);
-          axios.post(`/cb/web/llm1`, {collection: propz.collection, instructions: propz.instructions})
+          axios.post(`/cb/web/llm1`, {collection: propz.collection, prompt: propz.prompt})
           .then(function (response) {
             if (response.data) {
-              insertOrUpdateBlock(props.editor, {type: "paragraph", content: response.data});
+              props.editor.insertBlocks([{type: "paragraph", content: response.data}], props.block, 'after');
+              // insertOrUpdateBlock(props.editor, {type: "paragraph", content: response.data});
             } else {
               console.log(response.data);
             }
@@ -126,7 +145,7 @@ const AiBlock = createReactBlockSpec({
         <div style={{
           backgroundColor: "var(--ds-background-discovery)", color: "var(--ds-text-discovery)", padding: "3px"
         }}>
-          @{props.block.props.prompt}&nbsp;
+          @{props.block.props.assistant_name}&nbsp;
         </div>
         {props.block.props.collections.length > 0 && <Menu withinPortal={false} zIndex={999999}>
           <Menu.Target>
@@ -153,7 +172,7 @@ const AiBlock = createReactBlockSpec({
                onKeyDown={handleKeyDown}
                onChange={handleChange}
                placeholder={"Saisissez vos instructions ici..."}
-               value={props.block.props.instructions}
+               value={props.block.props.prompt}
                autoFocus
                required>
         </input>
@@ -168,17 +187,25 @@ const getCustomSlashMenuItems = (editor, isSlash) => {
     (item) => item.group !== 'Media' && item.group !== 'Others') : [];
 
   if (!isSlash) {
+
     items.push({
       group: 'Cywise',
       key: 'ai_command',
       icon: <HiSparkles size={18}/>,
       title: 'CyberBuddy',
       subtext: 'Use AI to generate paragraph',
-      onItemClick: () => insertOrUpdateBlock(editor, {
-        type: "ai_block", props: {
-          prompt: 'CyberBuddy', collection: "anssi", collections: ["anssi", "pssi"],
-        }
-      }),
+      onItemClick: () => {
+        axios.get('/cb/web/collections')
+        .then(response => {
+          const collections = response.data.map(collection => collection.name);
+          insertOrUpdateBlock(editor, {
+            type: "ai_block", props: {
+              assistant_name: 'CyberBuddy', collection: collections[0], collections: collections,
+            }
+          });
+        })
+        .catch(error => toaster.toastAxiosError(error));
+      },
     });
   }
   return items;
