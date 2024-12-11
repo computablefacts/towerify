@@ -35,7 +35,7 @@
   @endauth
   <main class="bd-main">
     <div class="bd-main-content">
-      @if($tab === 'ama')
+      @if(isset($tab) && $tab === 'ama')
       @include('modules.cyber-buddy.widget')
       @else
       <div class="bd-content py-3">
