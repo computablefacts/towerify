@@ -203,7 +203,7 @@ if (!function_exists('app_sidebar')) {
                             'route' => route('home', ['tab' => 'ia_writer']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ia_writer',
                         ], [
-                            'label' => __('AMA'),
+                            'label' => __('CyberBuddy'),
                             'route' => route('home', ['tab' => 'ama']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ama',
                         ], [
