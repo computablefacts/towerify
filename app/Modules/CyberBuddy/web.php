@@ -2,6 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::post('/llm1', 'CyberBuddyController@llm1')->middleware('auth');
+
+Route::post('/llm2', 'CyberBuddyController@llm2')->middleware('auth');
+
+Route::get('/templates', 'CyberBuddyController@templates')->middleware('auth');
+
+Route::post('/templates', 'CyberBuddyController@saveTemplate')->middleware('auth');
+
+Route::delete('/templates/{id}', 'CyberBuddyController@deleteTemplate')->middleware('auth');
+
 Route::get('/files', 'CyberBuddyController@files')->middleware('auth');
 
 Route::delete('/files/{id}', 'CyberBuddyController@deleteFile')->middleware('auth');

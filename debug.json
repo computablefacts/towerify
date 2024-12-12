@@ -1,0 +1,75 @@
+[
+  {
+    "id": "9f5f3c05-d610-4d8e-a729-08170b4e9214",
+    "type": "heading",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left",
+      "level": 1
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Chart informatique",
+        "styles": []
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "47fa6076-a3b2-4223-b276-1a24efb62faf",
+    "type": "heading",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left",
+      "level": 2
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Dispositions applicables aux utilisateur du syst\u00e8me d'information",
+        "styles": []
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "7bca2688-aa41-499c-ad3c-ab628049b4d6",
+    "type": "qa_block",
+    "props": {
+      "questions": [
+        "Quel est le nom de l'entit\u00e9?",
+        "Quel est le type d'entit\u00e9 (soci\u00e9t\u00e9, collectivit\u00e9, etc.)?"
+      ],
+      "answers": [],
+      "collection": "anssi",
+      "instructions": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>You are a helpful virtual assistant.<|eot_id|><|start_header_id|>user<|end_header_id|>Remplacer <NOM_DE_L'ENTITE> par le nom de la société et son type dans le paragraphe suivant : \"Les différents outils technologiques utilisés offrent aux utilisateurs de <NOM_DE_L'ENTITE> une grande ouverture vers l’extérieur. Cette ouverture peut apporter des améliorations de performances importantes si l’utilisation de ces outils technologiques est faite à bon escient et selon certaines règles. L’usage des moyens numériques mis à disposition doit permettre de préserver le système d’information, le bon fonctionnement des services et les droits et libertés de chacun.\"\n\nQUESTION: Quel est le nom de l'entité?\nANSWER: Cywise\n\nQUESTION: Quel est le type d'entité (société, collectivité, etc.)?\nANSWER: SAS\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>Les différents outils technologiques utilisés offrent aux utilisateurs de Cywise SAS une grande ouverture vers l’extérieur. Cette ouverture peut apporter des améliorations de performances importantes si l’utilisation de ces outils technologiques est faite à bon escient et selon certaines règles. L’usage des moyens numériques mis à disposition doit permettre de préserver le système d’information, le bon fonctionnement des services et les droits et libertés de chacun.<|eot_id|><|start_header_id|>user<|end_header_id|>Exécuter la même action en utilisant les réponses suivantes: <QUESTION><|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "543c2887-111d-422e-b35a-75c82083e58b",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "4d57665a-115b-4a96-980f-c3fab4fdc9f3",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  }
+]

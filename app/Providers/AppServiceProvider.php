@@ -58,12 +58,14 @@ use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\Conversation;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
+use App\Modules\CyberBuddy\Models\Template;
 use App\Modules\CyberBuddy\Observers\ChunkObserver;
 use App\Modules\CyberBuddy\Observers\ChunkTagObserver;
 use App\Modules\CyberBuddy\Observers\CollectionObserver;
 use App\Modules\CyberBuddy\Observers\ConversationObserver;
 use App\Modules\CyberBuddy\Observers\FilesObserver;
 use App\Modules\CyberBuddy\Observers\PromptObserver;
+use App\Modules\CyberBuddy\Observers\TemplateObserver;
 use App\Observers\AddressObserver;
 use App\Observers\AdjustmentObserver;
 use App\Observers\BillpayerObserver;
@@ -238,6 +240,7 @@ class AppServiceProvider extends ServiceProvider
         Conversation::observe(ConversationObserver::class);
         File::observe(FilesObserver::class);
         Prompt::observe(PromptObserver::class);
+        Template::observe(TemplateObserver::class);
     }
 
     /**

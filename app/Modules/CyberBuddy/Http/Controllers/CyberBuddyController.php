@@ -15,9 +15,11 @@ use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\Conversation;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
+use App\Modules\CyberBuddy\Models\Template;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -59,6 +61,12 @@ class CyberBuddyController extends Controller
         return Str::replace(["\n\n", "\n-"], "<br>", $answer);
     }
 
+    public static function removeSourcesFromAnswer(string $answer): string
+    {
+        // Remove sources such as [[12]] or [[12],[13]] from the answer
+        return preg_replace("/\[((\[\d+],?)+)]/", "", $answer);
+    }
+
     public function showPage()
     {
         return view('modules.cyber-buddy.page');
@@ -67,6 +75,70 @@ class CyberBuddyController extends Controller
     public function showChat()
     {
         return view('modules.cyber-buddy.chat');
+    }
+
+    public function templates()
+    {
+        return Template::where('readonly', true)
+            ->orderBy('name', 'asc')
+            ->get()
+            ->concat(
+                Template::where('readonly', false)
+                    ->where('created_by', Auth::user()->id)
+                    ->orderBy('name', 'asc')
+                    ->get()
+            )
+            ->map(function (Template $template) {
+                return [
+                    'id' => $template->id,
+                    'name' => $template->name,
+                    'template' => $template->template,
+                    'type' => $template->readonly ? 'template' : 'draft',
+                    'user' => User::find($template->created_by)->name,
+                ];
+            });
+    }
+
+    public function saveTemplate(Request $request)
+    {
+        // TODO : validate request
+        $id = $request->integer('id', 0);
+        $name = $request->string('name');
+        $template = $request->input('template', []);
+
+        if (isset($template) && count($template) > 0) {
+            if ($id === 0) {
+                $template = Template::create([
+                    'name' => (empty($name) ? "doc" : $name) . '-' . Carbon::now()->toIso8601ZuluString(),
+                    'template' => $template,
+                    'readonly' => false,
+                ]);
+            } else {
+                $template = Template::updateOrCreate([
+                    'id' => $id,
+                    'created_by' => Auth::user()->id,
+                    'readonly' => false,
+                ], [
+                    'template' => $template,
+                ]);
+            }
+            return [
+                'id' => $template->id,
+                'name' => $template->name,
+                'template' => $template->template,
+                'type' => $template->readonly ? 'template' : 'draft',
+                'user' => User::find($template->created_by)->name,
+            ];
+        }
+        return [];
+    }
+
+    public function deleteTemplate(int $id)
+    {
+        Template::where('id', $id)->where('readonly', false)->delete();
+        return response()->json([
+            'success' => __('The template has been deleted!'),
+        ]);
     }
 
     public function collections()
@@ -79,6 +151,31 @@ class CyberBuddyController extends Controller
                     'name' => $collection->name,
                 ];
             });
+    }
+
+    public function llm1(Request $request)
+    {
+        // TODO : validate request
+        $collection = $request->string('collection');
+        $prompt = $request->string('prompt');
+        $response = ApiUtils::ask_chunks($prompt, $collection, null, true, true, 'fr', 10, true);
+        if (!isset($response['error']) || $response['error']) {
+            return 'Une erreur s\'est produite. Veuillez réessayer ultérieurement.';
+        }
+        return self::removeSourcesFromAnswer($response['response']);
+    }
+
+    public function llm2(Request $request)
+    {
+        // TODO : validate request
+        $template = $request->string('template');
+        $prompt = $request->string('prompt');
+        $questionsAndAnswers = $request->input('q_and_a', []);
+        $response = ApiUtils::generate_from_template($template, $prompt, $questionsAndAnswers);
+        if (!isset($response['error']) || $response['error']) {
+            return 'Une erreur s\'est produite. Veuillez réessayer ultérieurement.';
+        }
+        return self::removeSourcesFromAnswer($response['response']);
     }
 
     public function streamFile(string $secret, StreamOneFileRequest $request)
@@ -436,7 +533,9 @@ class CyberBuddyController extends Controller
         })->skipsConversation();
 
         $botman->hears('/question ([a-zA-Z0-9]+) (.*)', function (BotMan $botman, string $collection, string $question) {
-            $response = ApiUtils::ask_chunks_demo($collection, $question);
+            /** @var Prompt $prompt */
+            $prompt = Prompt::where('name', 'default_debugger')->firstOrfail();
+            $response = ApiUtils::ask_chunks_demo($collection, $question, $prompt->template);
             if ($response['error']) {
                 $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
             } else {

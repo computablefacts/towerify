@@ -12,3 +12,7 @@ import Alpine from 'alpinejs'
 
 window.Alpine = Alpine
 Alpine.start();
+
+import BlockNote from './block-note';
+
+window.BlockNote = BlockNote;

@@ -35,12 +35,16 @@
   @endauth
   <main class="bd-main">
     <div class="bd-main-content">
+      @if(isset($tab) && $tab === 'ama')
+      @include('modules.cyber-buddy.widget')
+      @else
       <div class="bd-content py-3">
         @if(Auth::user() && Auth::user()->isBarredFromAccessingTheApp())
         @include('layouts._trial-ended')
         @endif
         @yield('content')
       </div>
+      @endif
     </div>
   </main>
 </div>
