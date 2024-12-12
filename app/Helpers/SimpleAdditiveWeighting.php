@@ -14,8 +14,6 @@ class SimpleAdditiveWeighting
     //      ],
     //      ...
     // ]
-    //
-    // The sum of weights must be equal to 100
     private array $criteria;
 
     const string BENEFIT = "benefit";
@@ -29,6 +27,14 @@ class SimpleAdditiveWeighting
     public function __construct(array $criteria)
     {
         $this->criteria = $criteria;
+        $total = collect($criteria)->values()->map(fn(array $item) => $item['weight'])->sum();
+        if ($total != 100) {
+            throw new \Exception("The sum of all weights must be equal to 100, got {$total}");
+        }
+        $positive = collect($criteria)->values()->map(fn(array $item) => $item['weight'])->doesntContain(fn(int $value) => $value < 0);
+        if (!$positive) {
+            throw new \Exception("All weights must be positive");
+        }
     }
 
     public function scoreAll(Collection $items): Collection
