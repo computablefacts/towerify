@@ -277,4 +277,98 @@ class SimpleAdditiveWeightingTest extends TestCase
             'score' => 55.0,
         ], $scores[4]);
     }
+
+    public function testWeightCyberRules()
+    {
+        $saw = new SimpleAdditiveWeighting([
+            "whoami" => [
+                "type" => SimpleAdditiveWeighting::BENEFIT,
+                "weight" => 10,
+                "transform" => function (string $criterion, $item): string {
+                    return $item[$criterion] >= 1 ? SimpleAdditiveWeighting::VERY_HIGH : SimpleAdditiveWeighting::VERY_LOW;
+                }
+            ],
+            "netuser" => [
+                "type" => SimpleAdditiveWeighting::BENEFIT,
+                "weight" => 10,
+                "transform" => function (string $criterion, $item): string {
+                    return $item[$criterion] >= 1 ? SimpleAdditiveWeighting::VERY_HIGH : SimpleAdditiveWeighting::VERY_LOW;
+                }
+            ],
+            "ipconfig_all" => [
+                "type" => SimpleAdditiveWeighting::BENEFIT,
+                "weight" => 20,
+                "transform" => function (string $criterion, $item): string {
+                    return $item[$criterion] >= 1 ? SimpleAdditiveWeighting::VERY_HIGH : SimpleAdditiveWeighting::VERY_LOW;
+                }
+            ],
+            "memdump" => [
+                "type" => SimpleAdditiveWeighting::BENEFIT,
+                "weight" => 30,
+                "transform" => function (string $criterion, $item): string {
+                    return $item[$criterion] >= 1 ? SimpleAdditiveWeighting::VERY_HIGH : SimpleAdditiveWeighting::VERY_LOW;
+                }
+            ],
+            "lateral_movement" => [
+                "type" => SimpleAdditiveWeighting::BENEFIT,
+                "weight" => 20,
+                "transform" => function (string $criterion, $item): string {
+                    return $item[$criterion] >= 1 ? SimpleAdditiveWeighting::VERY_HIGH : SimpleAdditiveWeighting::VERY_LOW;
+                }
+            ],
+            "first_time_process_executed" => [
+                "type" => SimpleAdditiveWeighting::BENEFIT,
+                "weight" => 10,
+                "transform" => function (string $criterion, $item): string {
+                    return $item[$criterion] >= 1 ? SimpleAdditiveWeighting::VERY_HIGH : SimpleAdditiveWeighting::VERY_LOW;
+                }
+            ],
+        ]);
+
+        // values represent the number of times a rule has been matched in a given timeframe
+        $scores = $saw->scoreAll(collect([
+            ['machine' => 'A', 'whoami' => 3, 'netuser' => 1, 'ipconfig_all' => 1, 'memdump' => 1, 'lateral_movement' => 1, 'first_time_process_executed' => 1],
+            ['machine' => 'B', 'whoami' => 0, 'netuser' => 1, 'ipconfig_all' => 1, 'memdump' => 0, 'lateral_movement' => 0, 'first_time_process_executed' => 0],
+            ['machine' => 'C', 'whoami' => 1, 'netuser' => 0, 'ipconfig_all' => 0, 'memdump' => 0, 'lateral_movement' => 0, 'first_time_process_executed' => 1],
+        ]));
+
+        $this->assertEquals([
+            'item' => [
+                'machine' => 'A',
+                'whoami' => 3,
+                'netuser' => 1,
+                'ipconfig_all' => 1,
+                'memdump' => 1,
+                'lateral_movement' => 1,
+                'first_time_process_executed' => 1,
+            ],
+            'score' => 100.0,
+        ], $scores[0]);
+
+        $this->assertEquals([
+            'item' => [
+                'machine' => 'B',
+                'whoami' => 0,
+                'netuser' => 1,
+                'ipconfig_all' => 1,
+                'memdump' => 0,
+                'lateral_movement' => 0,
+                'first_time_process_executed' => 0,
+            ],
+            'score' => 34.375,
+        ], $scores[1]);
+
+        $this->assertEquals([
+            'item' => [
+                'machine' => 'C',
+                'whoami' => 1,
+                'netuser' => 0,
+                'ipconfig_all' => 0,
+                'memdump' => 0,
+                'lateral_movement' => 0,
+                'first_time_process_executed' => 1,
+            ],
+            'score' => 25.0,
+        ], $scores[2]);
+    }
 }

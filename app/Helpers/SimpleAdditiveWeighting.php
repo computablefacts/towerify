@@ -28,7 +28,7 @@ class SimpleAdditiveWeighting
     {
         $this->criteria = $criteria;
         $total = collect($criteria)->values()->map(fn(array $item) => $item['weight'])->sum();
-        if ($total != 100) {
+        if (abs($total - 100.0) > 0.00001) {
             throw new \Exception("The sum of all weights must be equal to 100, got {$total}");
         }
         $positive = collect($criteria)->values()->map(fn(array $item) => $item['weight'])->doesntContain(fn(int $value) => $value < 0);
