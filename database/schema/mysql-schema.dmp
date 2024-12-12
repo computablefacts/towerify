@@ -2235,7 +2235,7 @@ CREATE TABLE `ynh_iocs` (
   `median` double DEFAULT NULL,
   `std_dev` double DEFAULT NULL,
   `variance` double DEFAULT NULL,
-  `iocs` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`iocs`)),
+  `iocs` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`iocs`)),
   `is_anomaly` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `ynh_iocs_ynh_server_id_foreign` (`ynh_server_id`),
