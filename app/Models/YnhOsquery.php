@@ -519,17 +519,22 @@ EOT;
     {
         $url = app_url();
         return <<<EOT
+# Create cywise directory
+\$cywisePath = "C:\Cywise"
+if (-not (Test-Path "\$cywisePath")) {
+    New-Item -Path \$cywisePath -ItemType Directory -Force
+}
+
 # Install Osquery
 # NOTA: the MSI package creates the osqueryd Windows Service as well
 \$osqueryPath = "C:\Program Files\osquery"
 if (-not (Test-Path "\$osqueryPath\osquery.conf")) {
-    Invoke-WebRequest -Uri "https://pkg.osquery.io/windows/osquery-5.11.0.msi" -OutFile "C:\osquery.msi"
-    Start-Process msiexec.exe -ArgumentList "/i C:\osquery.msi /quiet" -Wait
-    Remove-Item "C:\osquery.msi"
+    Invoke-WebRequest -Uri "https://pkg.osquery.io/windows/osquery-5.11.0.msi" -OutFile "\$cywisePath\osquery.msi"
+    Start-Process msiexec.exe -ArgumentList "/i \$cywisePath\osquery.msi /quiet" -Wait
 }
 
 # Install LogAlert
-\$logAlertPath = "C:\Program Files\LogAlert"
+\$logAlertPath = "\$cywisePath\LogAlert"
 if (-not (Test-Path "\$logAlertPath\config.json")) {
     New-Item -Path \$logAlertPath -ItemType Directory -Force
     Invoke-WebRequest -Uri "https://github.com/jhuckaby/logalert/releases/download/v1.0.4/logalert-win-x64.exe" -OutFile "\$logAlertPath\logalert.exe"
@@ -557,12 +562,6 @@ onFailure:
 # Setup LogAlert service
 if (-not (Get-Service -Name "logalert" -ErrorAction SilentlyContinue)) {
     & \$logAlertPath\logalertd.exe install
-}
-
-# Create cywise directory
-\$cywisePath = "C:\Program Files\Cywise"
-if (-not (Test-Path "\$cywisePath")) {
-    New-Item -Path \$cywisePath -ItemType Directory -Force
 }
 
 # Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)
