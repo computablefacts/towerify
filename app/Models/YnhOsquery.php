@@ -518,18 +518,63 @@ EOT;
     public static function monitorWindowsServer(YnhServer $server): string
     {
         $url = app_url();
+        $installPerforma = '';
+        $updatePerformaConfig = '';
+        $updatePerformaScheduledTask = '';
+        if (!is_null($server->user()->first()->performa_domain)) {
+            $installPerforma = <<<EOT
+# Install or update performa-satellite
+\$performaPath = "\$cywisePath\performa"
+if (-not (Test-Path "\$performaPath\performa-satellite-win-x64.exe")) {
+    New-Item -Path \$performaPath -ItemType Directory -Force
+    Invoke-WebRequest -Uri "{$url}/bin/performa-satellite-win-x64.exe" -OutFile "\$performaPath\performa-satellite-win-x64.exe"
+}
+EOT;
+            $updatePerformaConfig = <<<EOT
+# Update performa-satellite configuration
+Invoke-WebRequest -Uri "{$url}/performa/{$server->secret}" -OutFile "\$performaPath\config2.json"
+
+if (Test-Path "\$performaPath\config2.json") {
+    # Check if the file is a valid JSON
+    try {
+        \$config2 = Get-Content "\$performaPath\config2.json" | ConvertFrom-Json
+        if (\$null -ne \$config2) {
+            # Replace config.json with config2.json
+            Copy-Item "\$performaPath\config2.json" "\$performaPath\config.json" -Force
+            Remove-Item "\$performaPath\config2.json" -Force
+        }
+    } catch {
+        Write-Output "Erreur lors de la conversion du fichier config2.json en JSON."
+    }
+}
+
+# Collect CPU, memory and disks metrics every 5 minutes
+CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File ""\$cywisePath\localMetrics.ps1"""  -TaskName "LocalMetrics" -ExecutionType Custom -RepeatInterval 300
+EOT;
+            $updatePerformaScheduledTask = <<<EOT
+# Send metric to performa every minute
+CreateOrUpdate-ScheduledTask -Executable "\$performaPath\performa-satellite-win-x64.exe" -Arguments "--hostname {$server->name}"  -TaskName "performa-satellite" -ExecutionType Custom -RepeatInterval 60
+EOT;
+        }
         return <<<EOT
+# Create cywise directory
+\$cywisePath = "C:\Cywise"
+if (-not (Test-Path "\$cywisePath")) {
+    New-Item -Path \$cywisePath -ItemType Directory -Force
+}
+
 # Install Osquery
 # NOTA: the MSI package creates the osqueryd Windows Service as well
 \$osqueryPath = "C:\Program Files\osquery"
 if (-not (Test-Path "\$osqueryPath\osquery.conf")) {
-    Invoke-WebRequest -Uri "https://pkg.osquery.io/windows/osquery-5.11.0.msi" -OutFile "C:\osquery.msi"
-    Start-Process msiexec.exe -ArgumentList "/i C:\osquery.msi /quiet" -Wait
-    Remove-Item "C:\osquery.msi"
+    Invoke-WebRequest -Uri "https://pkg.osquery.io/windows/osquery-5.11.0.msi" -OutFile "\$cywisePath\osquery.msi"
+    Start-Process msiexec.exe -ArgumentList "/i \$cywisePath\osquery.msi /quiet" -Wait
 }
 
+$installPerforma
+
 # Install LogAlert
-\$logAlertPath = "C:\Program Files\LogAlert"
+\$logAlertPath = "\$cywisePath\LogAlert"
 if (-not (Test-Path "\$logAlertPath\config.json")) {
     New-Item -Path \$logAlertPath -ItemType Directory -Force
     Invoke-WebRequest -Uri "https://github.com/jhuckaby/logalert/releases/download/v1.0.4/logalert-win-x64.exe" -OutFile "\$logAlertPath\logalert.exe"
@@ -559,12 +604,6 @@ if (-not (Get-Service -Name "logalert" -ErrorAction SilentlyContinue)) {
     & \$logAlertPath\logalertd.exe install
 }
 
-# Create cywise directory
-\$cywisePath = "C:\Program Files\Cywise"
-if (-not (Test-Path "\$cywisePath")) {
-    New-Item -Path \$cywisePath -ItemType Directory -Force
-}
-
 # Stop Osquery then LogAlert because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)
 Stop-Service osqueryd
 Stop-Service logalert
@@ -579,11 +618,14 @@ if (Test-Path "\$logAlertPath\config2.json") {
         if (\$null -ne \$config2) {
             # Replace config.json with config2.json
             Copy-Item "\$logAlertPath\config2.json" "\$logAlertPath\config.json" -Force
+            Remove-Item "\$logAlertPath\config2.json" -Force            
         }
     } catch {
         Write-Output "Erreur lors de la conversion du fichier config2.json en JSON."
     }
 }
+
+$updatePerformaConfig
 
 # Update Osquery configuration
 Invoke-WebRequest -Uri "{$url}/osquery/{$server->secret}" -OutFile "\$osqueryPath\osquery2.conf"
@@ -595,6 +637,7 @@ if (Test-Path "\$osqueryPath\osquery2.conf") {
         if (\$null -ne \$osquery2) {
             # Replace osquery.conf with osquery2.conf
             Copy-Item "\$osqueryPath\osquery2.conf" "\$osqueryPath\osquery.conf" -Force
+            Remove-Item "\$osqueryPath\osquery2.conf" -Force            
         }
     } catch {
         Write-Output "Erreur lors de la conversion du fichier osquery2.json en JSON."
@@ -716,7 +759,7 @@ CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-Command "
 
 # Collect CPU, memory and disks metrics every 5 minutes
 CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File ""\$cywisePath\localMetrics.ps1"""  -TaskName "LocalMetrics" -ExecutionType Custom -RepeatInterval 300
-
+$updatePerformaScheduledTask
 EOT;
     }
 
