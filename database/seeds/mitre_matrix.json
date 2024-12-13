@@ -2,7 +2,7 @@
 	{
 		"id": "T1136",
 		"title": "Create Account",
-		"tactics": ["persistence"],
+		"tactics": ["Persistence"],
 		"impulse_iocs": ["groups", "users"],
 		"description": "Adversaries with a sufficient level of access may create a local system, domain, or cloud tenant account. Such accounts may be used for persistence that do not require persistent remote access tools to be deployed on the system. In cloud environments, adversaries may create accounts that only have access to specific services, which can reduce the chance of detection."		
 	},
