@@ -1165,7 +1165,7 @@
   },
   {
     "name": "wget_exfiltration",
-    "description": "Wget Exfiltration",
+    "description": "Wget exfiltration.",
     "query": "SELECT * FROM processes WHERE name = 'wget' AND cmdline NOT LIKE '%--post-file=%' AND cmdline LIKE '%nids-profile-analysis/analyse-flows%' AND cmdline LIKE '%scan-installed-pkgs%' AND cmdline NOT LIKE '%agent-gateway/send/full-status-update%'; ",
     "version": "1.4.5",
     "interval": 30,
@@ -1180,7 +1180,7 @@
   },
   {
     "name": "wget_file_download",
-    "description": "Wget file download",
+    "description": "Wget file download.",
     "query": "SELECT * FROM processes WHERE name = 'wget' AND cmdline NOT LIKE '%agent-gateway/send/full-status-update%' AND cmdline NOT LIKE '%local-endpoint/%'",
     "version": "1.4.5",
     "interval": 30,
@@ -1195,7 +1195,7 @@
   },
   {
     "name": "whois_exfiltration",
-    "description": "Whois Exfiltration",
+    "description": "Whois exfiltration.",
     "query": "SELECT * FROM processes WHERE cmdline LIKE '%whois -h%' ",
     "version": "1.4.5",
     "interval": 30,
