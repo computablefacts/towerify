@@ -603,6 +603,14 @@ class DatabaseSeeder extends Seeder
             "description" => "Retrieves all the installed DEB packages in the target Linux system.",
             "enabled" => true,
         ], [
+            'name' => "win_packages",
+            "query" => "SELECT * FROM programs;",
+            "interval" => 86400,
+            "platform" => "windows",
+            "version" => "1.4.5",
+            "description" => "Retrieves all the installed programs in the target Windows system.",
+            "enabled" => true,
+        ], [
             'name' => "apt_sources",
             "query" => "SELECT * FROM apt_sources;",
             "interval" => 86400,
