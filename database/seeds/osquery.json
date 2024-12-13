@@ -15,6 +15,15 @@
     "score": 0
   },
   {
+    "name": "ad_config",
+    "query": "select * from ad_config;",
+    "interval": "86400",
+    "platform": "darwin",
+    "version": "1.4.5",
+    "description": "Retrieves the Active Directory configuration for the target machine, attached to the domain (requires sudo). Helps you debug domain binding / Active Directory issues in your environment.",
+    "enabled": 1
+  },
+  {
     "name": "apt_sources",
     "description": "Retrieves all the APT sources to install packages from in the target Linux system.",
     "query": "SELECT * FROM apt_sources;",
@@ -121,7 +130,7 @@
   },
   {
     "name": "crontab",
-    "description": "Retrieves all the jobs scheduled in crontab in the target system.",
+    "description": "Retrieves all the jobs scheduled in crontab in the target system. Helps you identify malware that uses this persistence mechanism to launch at a given interval.",
     "query": "SELECT * FROM crontab;",
     "version": "1.4.5",
     "interval": 30,
@@ -196,7 +205,7 @@
   },
   {
     "name": "disk_encryption",
-    "description": "Retrieves the current disk encryption status for the target system.",
+    "description": "Retrieves the current disk encryption status for the target system. Helps you identify a system potentially vulnerable to disk cloning.",
     "query": "SELECT * FROM disk_encryption;",
     "version": "1.4.5",
     "interval": 86400,
@@ -256,7 +265,7 @@
   },
   {
     "name": "etc_hosts",
-    "description": "Retrieves all the entries in the target system /etc/hosts file.",
+    "description": "Retrieves all the entries in the target system /etc/hosts file. Helps you identify network communications that are being redirected.",
     "query": "SELECT * FROM etc_hosts;",
     "version": "1.4.5",
     "interval": 30,
@@ -406,7 +415,7 @@
   },
   {
     "name": "ip_forwarding",
-    "description": "Retrieves the current status of IP/IPv6 forwarding.",
+    "description": "Retrieves the current status of IP/IPv6 forwarding. Helps you identify if a machine is being used as relay.",
     "query": "SELECT * FROM system_controls WHERE oid = '4.30.41.1' UNION SELECT * FROM system_controls WHERE oid = '4.2.0.1';",
     "version": "1.4.5",
     "interval": 300,
@@ -421,7 +430,7 @@
   },
   {
     "name": "iptables",
-    "description": "Retrieves the current filters and chains per filter in the target system.",
+    "description": "Retrieves the current filters and chains per filter in the target system. Helps you verify firewall settings are as restrictive as you need. Identify unwanted firewall holes made by malware or humans",
     "query": "SELECT * FROM iptables;",
     "version": "1.4.5",
     "interval": 300,
@@ -436,7 +445,7 @@
   },
   {
     "name": "kernel_info",
-    "description": "Retrieves information from the current kernel in the target system.",
+    "description": "Retrieves information from the current kernel in the target system. Helps you identify out of date kernels or version drift across your infrastructure.",
     "query": "SELECT * FROM kernel_info;",
     "version": "1.4.5",
     "interval": 86400,
@@ -451,7 +460,7 @@
   },
   {
     "name": "kernel_modules",
-    "description": "Retrieves all the information for the current kernel modules in the target Linux system.",
+    "description": "Retrieves all the information for the current kernel modules in the target Linux system. Helps you identify malware that has a kernel module component.",
     "query": "SELECT * FROM kernel_modules;",
     "version": "1.4.5",
     "interval": 30,
@@ -481,7 +490,7 @@
   },
   {
     "name": "last",
-    "description": "Retrieves the list of the latest logins with PID, username and timestamp.",
+    "description": "Retrieves the list of the latest logins with PID, username and timestamp. Useful for intrusion detection and incident response. Verify assumptions of what accounts should be accessing what systems and identify machines accessed during a compromise.",
     "query": "SELECT * FROM last;",
     "version": "1.4.5",
     "interval": 30,
@@ -511,7 +520,7 @@
   },
   {
     "name": "listening_ports",
-    "description": "Retrieves all the listening ports in the target system.",
+    "description": "Retrieves all the listening ports in the target system. Detect if a listening port is not mapped to a known process. Find backdoors.",
     "query": "SELECT * FROM listening_ports;",
     "version": "1.4.5",
     "interval": 30,
@@ -571,7 +580,7 @@
   },
   {
     "name": "nbtscan_installed",
-    "description": "nbtscan was installed",
+    "description": "nbtscan was installed.",
     "query": "SELECT * FROM deb_packages where name = 'nbtscan';",
     "version": "1.4.5",
     "interval": 86400,
@@ -586,7 +595,7 @@
   },
   {
     "name": "netcat_installed",
-    "description": "Netcat was installed",
+    "description": "Netcat was installed.",
     "query": "SELECT * FROM deb_packages where name = 'netcat';",
     "version": "1.4.5",
     "interval": 86400,
@@ -601,7 +610,7 @@
   },
   {
     "name": "netcat_listener",
-    "description": "Netcat listener",
+    "description": "Netcat listener.",
     "query": "SELECT * FROM processes WHERE name = 'nc' AND cmdline LIKE '%-l%' ",
     "version": "1.4.5",
     "interval": 30,
@@ -616,7 +625,7 @@
   },
   {
     "name": "nmap_installed",
-    "description": "Nmap was installed",
+    "description": "Nmap was installed.",
     "query": "SELECT * FROM deb_packages where name = 'nmap';",
     "version": "1.4.5",
     "interval": 86400,
@@ -631,7 +640,7 @@
   },
   {
     "name": "nmap_process",
-    "description": "Nmap process",
+    "description": "Nmap process.",
     "query": "SELECT * FROM processes WHERE name = 'nmap'",
     "version": "1.4.5",
     "interval": 30,
@@ -646,7 +655,7 @@
   },
   {
     "name": "open_files",
-    "description": "Retrieves all the open files per process in the target system.",
+    "description": "Retrieves all the open files per process in the target system. Helps you identify processes accessing sensitive files they shouldn't.",
     "query": "SELECT DISTINCT pid, path FROM process_open_files WHERE path NOT LIKE '/private/var/folders%' AND path NOT LIKE '/System/Library/%' AND path NOT IN ('/dev/null', '/dev/urandom', '/dev/random');",
     "version": "1.4.5",
     "interval": 300,
@@ -661,7 +670,7 @@
   },
   {
     "name": "open_sockets",
-    "description": "Retrieves all the open sockets per process in the target system.",
+    "description": "Retrieves all the open sockets per process in the target system. Helps you identify malware via connections to known bad IP addresses as well as odd local or remote port bindings.",
     "query": "SELECT DISTINCT pid, family, protocol, local_address, local_port, remote_address, remote_port, path FROM process_open_sockets WHERE path <> '' OR remote_address <> '';",
     "version": "1.4.5",
     "interval": 300,
@@ -676,7 +685,7 @@
   },
   {
     "name": "openssh_server_installed",
-    "description": "OpenSsh was installed",
+    "description": "OpenSSH was installed.",
     "query": "SELECT * FROM deb_packages where name = 'openssh-server';",
     "version": "1.4.5",
     "interval": 86400,
@@ -691,7 +700,7 @@
   },
   {
     "name": "openssl_exfiltration",
-    "description": "OpenSSL Exfiltration",
+    "description": "OpenSSL exfiltration.",
     "query": "SELECT * FROM processes WHERE name = 'openssl' AND cmdline LIKE '%connect%' ",
     "version": "1.4.5",
     "interval": 30,
@@ -706,7 +715,7 @@
   },
   {
     "name": "os_version",
-    "description": "Retrieves information from the Operative System where osquery is currently running.",
+    "description": "Retrieves information from the Operative System where osquery is currently running. Helps you identify out of date operating systems or version drift across your infrastructure.",
     "query": "SELECT * FROM os_version;",
     "version": "1.4.5",
     "interval": 86400,
@@ -721,7 +730,7 @@
   },
   {
     "name": "php_server",
-    "description": "PHP server",
+    "description": "PHP server.",
     "query": "SELECT * FROM processes WHERE name = 'php' AND cmdline LIKE '%-S 0.0.0.0%' ",
     "version": "1.4.5",
     "interval": 30,
@@ -751,7 +760,7 @@
   },
   {
     "name": "process_env",
-    "description": "Retrieves all the environment variables per process in the target system.",
+    "description": "Retrieves all the environment variables per process in the target system. Insight into the process data: where was it started from, was it preloaded...",
     "query": "SELECT * FROM process_envs;",
     "version": "1.4.5",
     "interval": 300,
@@ -856,7 +865,7 @@
   },
   {
     "name": "ramdisk",
-    "description": "Retrieves all the ramdisk currently mounted in the target system.",
+    "description": "Retrieves all the ramdisk currently mounted in the target system. Helps you identify if an attacker is using temporary, memory storage to avoid touching disk for anti-forensics purposes.",
     "query": "SELECT * FROM block_devices WHERE type = 'Virtual Interface';",
     "version": "1.4.5",
     "interval": 300,
@@ -946,7 +955,7 @@
   },
   {
     "name": "shell_history",
-    "description": "Retrieves the command history, per user, by parsing the shell history files.",
+    "description": "Retrieves the command history, per user, by parsing the shell history files. Identify actions taken. Useful for compromised hosts.",
     "query": "SELECT * FROM users JOIN shell_history USING (uid);",
     "version": "1.4.5",
     "interval": 30,
@@ -961,7 +970,7 @@
   },
   {
     "name": "shell_history_root",
-    "description": "Record shell history for root user",
+    "description": "Record shell history for root user. Identify actions taken. Useful for compromised hosts.",
     "query": "select * from shell_history;",
     "version": "1.4.5",
     "interval": 30,
@@ -991,7 +1000,7 @@
   },
   {
     "name": "startup_items",
-    "description": "Retrieves the list of systemd services.",
+    "description": "Retrieves the list of systemd services. Helps you identify malware that uses this persistence mechanism to launch at a given interval.",
     "query": "SELECT * FROM startup_items;",
     "version": "1.4.5",
     "interval": 30,
@@ -1051,7 +1060,7 @@
   },
   {
     "name": "suid_bin",
-    "description": "Retrieves all the files in the target system that are setuid enabled.",
+    "description": "Retrieves all the files in the target system that are setuid enabled. Detect backdoor binaries (attacker may drop a copy of /bin/sh). Find potential elevation points / vulnerabilities in the standard build.",
     "query": "SELECT * FROM suid_bin;",
     "version": "1.4.5",
     "interval": 30,
@@ -1126,7 +1135,7 @@
   },
   {
     "name": "user_ssh_keys",
-    "description": "Returns the private keys in the users ~/.ssh directory and whether or not they are encrypted",
+    "description": "Returns the private keys in the users ~/.ssh directory and whether or not they are encrypted.",
     "query": "SELECT * FROM users CROSS JOIN user_ssh_keys USING (uid);",
     "version": "1.4.5",
     "interval": 300,
@@ -1216,7 +1225,7 @@
   },
   {
     "name": "wireless_networks",
-    "description": "Retrieves all the remembered wireless network that the target machine has connected to.",
+    "description": "Retrieves all the remembered wireless network that the target machine has connected to. Helps you identify connections to rogue access points.",
     "query": "SELECT ssid, network_name, security_type, last_connected, captive_portal, possibly_hidden, roaming, roaming_profile FROM wifi_networks;",
     "version": "1.6.0",
     "interval": 300,
