@@ -85,7 +85,7 @@
   },
   {
     "name": "busybox_server",
-    "description": "Busybox process",
+    "description": "Busybox process.",
     "query": "SELECT * FROM processes WHERE cmdline LIKE '%busybox httpd%' ",
     "version": "1.4.5",
     "interval": 30,
@@ -100,7 +100,7 @@
   },
   {
     "name": "cancel_exfiltration",
-    "description": "Cancel Exfiltration",
+    "description": "Cancel exfiltration.",
     "query": "SELECT * FROM processes WHERE name = 'cancel' AND cmdline LIKE '%-h %' ",
     "version": "1.4.5",
     "interval": 30,
@@ -145,7 +145,7 @@
   },
   {
     "name": "curl_exfiltration",
-    "description": "Curl Exfiltration",
+    "description": "Curl exfiltration.",
     "query": "SELECT * FROM processes WHERE name = 'curl' AND cmdline LIKE '%POST%' ",
     "version": "1.4.5",
     "interval": 30,
@@ -160,7 +160,7 @@
   },
   {
     "name": "curl_file_download",
-    "description": "Curl file download",
+    "description": "Curl file download.",
     "query": "SELECT * FROM processes WHERE name = 'curl' AND cmdline LIKE '%--output%' ",
     "version": "1.4.5",
     "interval": 30,
