@@ -55,7 +55,7 @@
   },
   {
     "name": "bash_exfiltration",
-    "description": "Bash Exfiltration",
+    "description": "Bash exfiltration.",
     "query": "SELECT * FROM processes WHERE name = 'bash' AND cmdline LIKE '%POST%' ",
     "version": "1.4.5",
     "interval": 30,
