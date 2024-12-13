@@ -397,7 +397,7 @@ class DatabaseSeeder extends Seeder
             'interval' => 300,
             "platform" => "posix",
             'snapshot' => true,
-            'enabled' => true,
+            'enabled' => false,
         ], [
             'name' => "memory_available_snapshot",
             'query' => "SELECT printf('%.2f',((memory_total - memory_available) * 1.0)/1073741824) AS used_space_gb, printf('%.2f',(1.0 * memory_available / 1073741824)) AS space_left_gb, printf('%.2f',(1.0 * memory_total / 1073741824)) AS total_space_gb, printf('%.2f',(((memory_total - memory_available) * 1.0)/1073741824)/(1.0 * memory_total / 1073741824)) * 100 AS '%_used', printf('%.2f',(1.0 * memory_available / 1073741824)/(1.0 * memory_total / 1073741824)) * 100 AS '%_available' FROM memory_info;",
@@ -406,7 +406,7 @@ class DatabaseSeeder extends Seeder
             'interval' => 300,
             "platform" => "linux",
             'snapshot' => true,
-            'enabled' => true,
+            'enabled' => false,
         ], [
             'name' => "disk_available_snapshot",
             'query' => "SELECT printf('%.2f',((blocks - blocks_available * 1.0) * blocks_size)/1073741824) AS used_space_gb, printf('%.2f',(1.0 * blocks_available * blocks_size / 1073741824)) AS space_left_gb, printf('%.2f',(1.0 * blocks * blocks_size / 1073741824)) AS total_space_gb, printf('%.2f',(((blocks - blocks_available * 1.0) * blocks_size)/1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 AS '%_used', printf('%.2f',(1.0 * blocks_available * blocks_size / 1073741824)/(1.0 * blocks * blocks_size / 1073741824)) * 100 AS '%_available' FROM mounts WHERE path = '/';",
@@ -415,7 +415,7 @@ class DatabaseSeeder extends Seeder
             'interval' => 300,
             "platform" => "posix",
             'snapshot' => true,
-            'enabled' => true,
+            'enabled' => false,
         ]];
     }
 
