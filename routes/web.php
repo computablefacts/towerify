@@ -262,7 +262,7 @@ Route::get('/localmetrics/{secret}', function (string $secret, \Illuminate\Http\
             ->header('Content-Type', 'text/plain');
     }
 
-    $script = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? \App\Models\YnhOsquery::monitorLocalMetricsWindows($server) : '# TODO';
+    $script = ($server->platform === OsqueryPlatformEnum::WINDOWS) ? '# Windows: no local metric' : '# Linux: no local metric';
 
     return response($script, 200)
         ->header('Content-Type', 'text/plain');
