@@ -734,36 +734,42 @@ EOT;
         $nbEvents = 0;
 
         foreach ($events as $event) {
+            try {
 
-            $columnsUid = YnhOsquery::computeColumnsUid($event['columns']);
-            $calendarTime = Carbon::createFromFormat('D M j H:i:s Y e', $event['calendarTime'])->setTimezone('UTC');
+                $columnsUid = YnhOsquery::computeColumnsUid($event['columns']);
+                $calendarTime = Carbon::createFromFormat('D M j H:i:s Y e', $event['calendarTime'])->setTimezone('UTC');
 
-            YnhOsquery::firstOrCreate([
-                'ynh_server_id' => $this->id,
-                'name' => $event['name'],
-                'host_identifier' => $event['hostIdentifier'],
-                'unix_time' => $event['unixTime'],
-                'epoch' => $event['epoch'],
-                'counter' => $event['counter'],
-                'numerics' => $event['numerics'],
-                'columns_uid' => $columnsUid,
-                'action' => $event['action'],
-            ], [
-                'ynh_server_id' => $this->id,
-                'row' => 0,
-                'name' => $event['name'],
-                'host_identifier' => $event['hostIdentifier'],
-                'calendar_time' => $calendarTime,
-                'unix_time' => $event['unixTime'],
-                'epoch' => $event['epoch'],
-                'counter' => $event['counter'],
-                'numerics' => $event['numerics'],
-                'columns' => $event['columns'],
-                'columns_uid' => $columnsUid,
-                'action' => $event['action'],
-            ]);
+                YnhOsquery::firstOrCreate([
+                    'ynh_server_id' => $this->id,
+                    'name' => $event['name'],
+                    'host_identifier' => $event['hostIdentifier'],
+                    'unix_time' => $event['unixTime'],
+                    'epoch' => $event['epoch'],
+                    'counter' => $event['counter'],
+                    'numerics' => $event['numerics'],
+                    'columns_uid' => $columnsUid,
+                    'action' => $event['action'],
+                ], [
+                    'ynh_server_id' => $this->id,
+                    'row' => 0,
+                    'name' => $event['name'],
+                    'host_identifier' => $event['hostIdentifier'],
+                    'calendar_time' => $calendarTime,
+                    'unix_time' => $event['unixTime'],
+                    'epoch' => $event['epoch'],
+                    'counter' => $event['counter'],
+                    'numerics' => $event['numerics'],
+                    'columns' => $event['columns'],
+                    'columns_uid' => $columnsUid,
+                    'action' => $event['action'],
+                ]);
 
-            $nbEvents++;
+                $nbEvents++;
+                
+            } catch (\Exception $e) {
+                Log::error($e);
+                Log::error($event);
+            }
         }
         return $nbEvents;
     }
