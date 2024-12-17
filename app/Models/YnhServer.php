@@ -943,7 +943,7 @@ EOT;
 
     public function iocs(Carbon $dateMin, Carbon $dateMax): Collection
     {
-        $rules = YnhOsqueryRule::where('is_ioc', true)->where('enabled', true)->get();
+        $rules = YnhOsqueryRule::where('enabled', true)->get();
         return YnhOsquery::where('ynh_server_id', $this->id)
             ->whereIn('name', $rules->pluck('name'))
             ->where('calendar_time', '>=', $dateMin)
