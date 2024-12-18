@@ -33,7 +33,6 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->job(new ComputeIoc())->everyTenMinutes();
-        // $schedule->job(new CheckServersHealth())->everyFifteenMinutes();
         $schedule->job(new PullServersInfos())->everyThreeHours();
         $schedule->job(new Summarize())->everySixHours();
         // $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
