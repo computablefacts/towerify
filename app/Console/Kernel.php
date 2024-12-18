@@ -2,7 +2,6 @@
 
 namespace App\Console;
 
-use App\Jobs\AgeOffOsqueryEvents;
 use App\Jobs\ComputeIoc;
 use App\Jobs\PullServersInfos;
 use App\Jobs\Summarize;
@@ -35,7 +34,6 @@ class Kernel extends ConsoleKernel
     {
         $schedule->job(new ComputeIoc())->everyTenMinutes();
         // $schedule->job(new CheckServersHealth())->everyFifteenMinutes();
-        $schedule->job(new AgeOffOsqueryEvents())->hourly();
         $schedule->job(new PullServersInfos())->everyThreeHours();
         $schedule->job(new Summarize())->everySixHours();
         // $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
