@@ -372,8 +372,14 @@ Route::get('/performa/user/login/{performa_domain}', function (string $performa_
 
     /** @var User $user */
     $user = Auth::user();
+    $usernames = collect(config('towerify.performa.whitelist.usernames'))->map(fn(string $username) => $username . '@')->toArray();
+    $domains = collect(config('towerify.performa.whitelist.domains'))->map(fn(string $domain) => '@' . $domain)->toArray();
 
-    if ($user && $user->performa_domain === $performa_domain) {
+    if ($user
+        && ($user->performa_domain === $performa_domain
+            || (Str::startsWith($user->email, $usernames) && Str::endsWith($user->email, $domains))
+        )
+    ) {
         return response()->json([
             'code' => 0,
             'username' => $user->ynhUsername(),

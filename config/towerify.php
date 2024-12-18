@@ -36,6 +36,12 @@ return [
             'domains' => explode(',', env('TELESCOPE_WHITELIST_DOMAINS')),
         ],
     ],
+    'performa' => [
+        'whitelist' => [
+            'usernames' => explode(',', env('PERFORMA_WHITELIST_USERNAMES', env('TELESCOPE_WHITELIST_USERNAMES'))),
+            'domains' => explode(',', env('PERFORMA_WHITELIST_DOMAINS', env('TELESCOPE_WHITELIST_DOMAINS'))),
+        ],
+    ],
     'admin' => [
         'email' => env('ADMIN_EMAIL'),
         'username' => env('ADMIN_USERNAME'),
