@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Log;
 
 class RebuildPackagesListListener extends AbstractListener
 {
+    public function viaQueue(): string
+    {
+        return self::MEDIUM;
+    }
+
     protected function handle2($event)
     {
         if (!($event instanceof RebuildPackagesList)) {
@@ -33,9 +38,11 @@ class RebuildPackagesListListener extends AbstractListener
                 Log::info("Processing packages for server {$server->name}...");
                 $osInfo = YnhOsquery::osInfos(collect([$server]))->first();
 
-                if ($osInfo) {
+                if (!$osInfo) {
+                    Log::info("No OS version found for server {$server->name}");
+                } else {
 
-                    Log::info("OS version is {$osInfo->os}/{$osInfo->codename}...");
+                    Log::info("OS version is {$osInfo->os}/{$osInfo->codename}");
                     YnhOsqueryPackage::where('ynh_server_id', $server->id)->delete();
 
                     /** @var YnhOsquery $latest */
@@ -79,7 +86,7 @@ class RebuildPackagesListListener extends AbstractListener
                             });
                     }
 
-                    Log::info("{$installed->count()} packages installed...");
+                    Log::info("{$installed->count()} packages installed");
 
                     // Save snapshot!
                     $installed->each(function (YnhOsquery $event) use ($server, $osInfo) {
