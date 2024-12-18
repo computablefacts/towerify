@@ -42,24 +42,27 @@ class TriggerDiscoveryShallow implements ShouldQueue
                     ->where('type', AssetTypesEnum::DNS)
                     ->get()
                     ->map(fn(Asset $asset) => $asset->tld())
+                    ->filter(fn(?string $tld) => !empty($tld))
                     ->unique()
                     ->each(function (string $tld) {
 
                         $discovered = $this->discover($tld);
 
                         if (isset($discovered['subdomains']) && count($discovered['subdomains'])) {
-                            collect($discovered['subdomains'])->each(function (string $domain) use ($tld) {
-                                Asset::where('tld', $tld)
-                                    ->get()
-                                    ->filter(function (Asset $asset) {
-                                        // Deal with clients using one of our many domains...
-                                        return $asset->createdBy()->email === config('towerify.admin.email')
-                                            || !Str::endsWith($asset->asset, ['computablefacts.com', 'computablefacts.io', 'towerify.io', 'cywise.io']);
-                                    })
-                                    ->each(function (Asset $asset) use ($domain) {
-                                        CreateAsset::dispatch($asset->createdBy(), $domain, true);
-                                    });
-                            });
+                            collect($discovered['subdomains'])
+                                ->filter(fn(?string $domain) => !empty($domain))
+                                ->each(function (string $domain) use ($tld) {
+                                    Asset::where('tld', $tld)
+                                        ->get()
+                                        ->filter(function (Asset $asset) {
+                                            // Deal with clients using one of our many domains...
+                                            return $asset->createdBy()->email === config('towerify.admin.email')
+                                                || !Str::endsWith($asset->asset, ['computablefacts.com', 'computablefacts.io', 'towerify.io', 'cywise.io']);
+                                        })
+                                        ->each(function (Asset $asset) use ($domain) {
+                                            CreateAsset::dispatch($asset->createdBy(), $domain, true);
+                                        });
+                                });
                         }
                     });
 
