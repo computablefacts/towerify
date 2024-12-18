@@ -44,25 +44,15 @@ class TriggerDiscoveryShallow implements ShouldQueue
                     ->map(fn(Asset $asset) => $asset->tld())
                     ->filter(fn(?string $tld) => !empty($tld))
                     ->unique()
-                    ->each(function (string $tld) {
+                    ->each(function (string $tld) use ($user) {
 
                         $discovered = $this->discover($tld);
 
                         if (isset($discovered['subdomains']) && count($discovered['subdomains'])) {
                             collect($discovered['subdomains'])
                                 ->filter(fn(?string $domain) => !empty($domain))
-                                ->each(function (string $domain) use ($tld) {
-                                    Asset::where('tld', $tld)
-                                        ->get()
-                                        ->filter(function (Asset $asset) {
-                                            // Deal with clients using one of our many domains...
-                                            return $asset->createdBy()->email === config('towerify.admin.email')
-                                                || !Str::endsWith($asset->asset, ['computablefacts.com', 'computablefacts.io', 'towerify.io', 'cywise.io']);
-                                        })
-                                        ->each(function (Asset $asset) use ($domain) {
-                                            CreateAsset::dispatch($asset->createdBy(), $domain, true);
-                                        });
-                                });
+                                ->filter(fn(string $domain) => $user->email === config('towerify.admin.email') || !Str::endsWith($domain, ['computablefacts.com', 'computablefacts.io', 'towerify.io', 'cywise.io']))
+                                ->each(fn(string $domain) => CreateAsset::dispatch($user, $domain, true));
                         }
                     });
 
