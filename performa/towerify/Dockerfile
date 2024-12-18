@@ -50,6 +50,12 @@ if [ -n "$PERFORMA_EXTERNAL_USER_API" ]; then
     jq '.User.external_user_api = "'"$PERFORMA_EXTERNAL_USER_API"'"' conf/config.json > /tmp/config.json && mv /tmp/config.json conf/config.json
 fi
 
+# Test if the PERFORMA_BASE_APP_URL environment variable exists
+if [ -n "$PERFORMA_BASE_APP_URL" ]; then
+    # Change the value of base_app_url in the config.json file
+    jq '.base_app_url = "'"$PERFORMA_BASE_APP_URL"'"' conf/config.json > /tmp/config.json && mv /tmp/config.json conf/config.json
+fi
+
 echo "Display conf after"
 jq . conf/config.json
 
