@@ -179,20 +179,20 @@ if [ -f /etc/os-release ]; then
 fi
 
 # Parse local history to get back dropped metrics and events
-if [ -f /var/log/osquery/osqueryd.snapshots.log ] && [ -f /var/log/osquery/osqueryd.results.log ]; then
-
-  cat /var/log/osquery/osqueryd.snapshots.log /var/log/osquery/osqueryd.results.log \
-    | grep -Eai "$(date +"%a %b %d")" \
-    | gzip -c >/opt/logparser/osquery.jsonl.gz
-
-  if [ -f /opt/logparser/osquery.jsonl.gz ]; then
-    curl -X POST \
-      -H "Content-Type: multipart/form-data" \
-      -F "data=@/opt/logparser/osquery.jsonl.gz" \
-      {$url}/logparser/{$server->secret}
-    rm -f /opt/logparser/osquery.jsonl.gz
-  fi
-fi
+# if [ -f /var/log/osquery/osqueryd.snapshots.log ] && [ -f /var/log/osquery/osqueryd.results.log ]; then
+# 
+#   cat /var/log/osquery/osqueryd.snapshots.log /var/log/osquery/osqueryd.results.log \
+#     | grep -Eai "$(date +"%a %b %d")" \
+#     | gzip -c >/opt/logparser/osquery.jsonl.gz
+# 
+#   if [ -f /opt/logparser/osquery.jsonl.gz ]; then
+#     curl -X POST \
+#       -H "Content-Type: multipart/form-data" \
+#       -F "data=@/opt/logparser/osquery.jsonl.gz" \
+#       {$url}/logparser/{$server->secret}
+#     rm -f /opt/logparser/osquery.jsonl.gz
+#   fi
+# fi
 
 EOT;
     }
