@@ -939,6 +939,21 @@
     "score": 0
   },
   {
+    "name": "scheduled_tasks",
+    "description": "Retrieves all the scheduled tasks in the target Windows system. Helps you identify malware that uses this persistence mechanism to launch at a given interval.",
+    "query": "SELECT * FROM scheduled_tasks;",
+    "version": "1.4.5",
+    "interval": 30,
+    "removed": 1,
+    "snapshot": 0,
+    "platform": "windows",
+    "category": "processes",
+    "enabled": 1,
+    "attck": "T1053/003",
+    "is_ioc": 0,
+    "score": 0
+  },
+  {
     "name": "scp_secure_copy",
     "description": "SCP Secure Copy.",
     "query": "SELECT * FROM processes WHERE name = 'scp'",
