@@ -599,6 +599,10 @@ class CyberBuddyController extends Controller
         $file_sha1 = sha1_file($file->getRealPath());
         $mime_type = $file->getClientMimeType();
 
+        if ($file_extension === 'jsonl' && $mime_type === 'application/octet-stream') {
+            $mime_type = 'application/x-ndjason';
+        }
+
         // Normalize filename
         $file_name_normalized = strtolower(trim($file_name));
         $file_name_normalized = preg_replace('/[\s\-]+/', '-', $file_name_normalized);

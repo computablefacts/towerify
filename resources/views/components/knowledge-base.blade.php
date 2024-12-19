@@ -5,7 +5,7 @@
       <div class="card-body p-2">
         <div class="row">
           <div class="col">
-            {{ __('Authorized file formats: PDF, DOC, DOCX, TXT, MP3, WAV, and WEBM.') }}
+            {{ __('Authorized file formats: PDF, DOC, DOCX, TXT, JSONL, MP3, WAV, and WEBM.') }}
           </div>
         </div>
       </div>

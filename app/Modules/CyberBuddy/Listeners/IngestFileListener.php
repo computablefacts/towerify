@@ -65,7 +65,7 @@ class IngestFileListener extends AbstractListener
 
                 // Cleanup
                 unlink($webmFilePath);
-                
+
                 if (!$process->isSuccessful() || !file_exists($mp3FilePath)) {
                     throw new \Exception("Failed to convert webm to mp3 : {$file->downloadUrl()}");
                 }
@@ -120,36 +120,88 @@ class IngestFileListener extends AbstractListener
                 // Cleanup
                 unlink($txtFilePath);
             }
+            if ($file->mime_type === 'application/x-ndjason' /* jsonl */) {
 
-            $response = ApiUtils::file_input($event->user->client(), $file->downloadUrl());
+                $jsonFileContent = file_get_contents($file->downloadUrl());
 
-            if ($response['error']) {
-                throw new \Exception($response['error_details']);
-            }
-
-            $fragments = $response['response'];
-
-            foreach ($fragments as $fragment) {
-
-                $tags = explode('>', $fragment['metadata']['title']);
-                $page = $fragment['metadata']['page_idx'] + 1;
-
-                if ($fragment['metadata']['tag'] === 'list') {
-                    $text = trim($fragment['metadata']['prevPara']['text']) . "\n" . trim($fragment['text']);
-                } else {
-                    $text = trim($fragment['text']);
+                if ($jsonFileContent === false) {
+                    throw new \Exception("Failed to download json file : {$file->downloadUrl()}");
                 }
 
-                /** @var Chunk $chunk */
-                $chunk = $collection->chunks()->create([
-                    'file_id' => $file->id,
-                    'url' => $file->downloadUrl(),
-                    'page' => $page,
-                    'text' => $text,
-                ]);
+                // Download json file
+                $jsonFilePath = "/tmp/{$file->name_normalized}.{$file->extension}";
+                file_put_contents($jsonFilePath, $jsonFileContent);
 
-                foreach ($tags as $tag) {
-                    $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                // Stream json rows as a collection
+                $jsonStream = fopen($jsonFilePath, 'r');
+
+                if ($jsonStream === false) {
+                    throw new \Exception("Failed to open json file for streaming : {$jsonFilePath}");
+                }
+                while (($line = fgets($jsonStream)) !== false) {
+
+                    $obj = json_decode(trim($line), true);
+
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        Log::error("JSON decoding error : " . json_last_error_msg());
+                        continue;
+                    }
+                    if (!isset($obj['page']) || !isset($obj['text'])) {
+                        Log::error("Invalid JSON format : " . $line);
+                        continue;
+                    }
+
+                    /** @var Chunk $chunk */
+                    $chunk = $collection->chunks()->create([
+                        'file_id' => $file->id,
+                        'url' => $file->downloadUrl(),
+                        'page' => $obj['page'],
+                        'text' => $obj['text'],
+                    ]);
+
+                    if (isset($obj['tags'])) {
+                        foreach ($obj['tags'] as $tag) {
+                            $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                        }
+                    }
+                }
+
+                // Cleanup
+                fclose($jsonStream);
+                unlink($jsonFilePath);
+
+            } else {
+
+                $response = ApiUtils::file_input($event->user->client(), $file->downloadUrl());
+
+                if ($response['error']) {
+                    throw new \Exception($response['error_details']);
+                }
+
+                $fragments = $response['response'];
+
+                foreach ($fragments as $fragment) {
+
+                    $tags = explode('>', $fragment['metadata']['title']);
+                    $page = $fragment['metadata']['page_idx'] + 1;
+
+                    if ($fragment['metadata']['tag'] === 'list') {
+                        $text = trim($fragment['metadata']['prevPara']['text']) . "\n" . trim($fragment['text']);
+                    } else {
+                        $text = trim($fragment['text']);
+                    }
+
+                    /** @var Chunk $chunk */
+                    $chunk = $collection->chunks()->create([
+                        'file_id' => $file->id,
+                        'url' => $file->downloadUrl(),
+                        'page' => $page,
+                        'text' => $text,
+                    ]);
+
+                    foreach ($tags as $tag) {
+                        $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                    }
                 }
             }
             if (!Chunk::where('file_id', $file->id)->exists()) { // no chunks -> no embeddings -> processing is complete
