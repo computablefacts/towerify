@@ -1239,6 +1239,21 @@
     "score": 0
   },
   {
+    "name": "win_patches",
+    "description": "Retrieves all the patches applied. Note: This does not include patches applied via MSI or downloaded from Windows Update (e.g. Service Packs).",
+    "query": "SELECT * FROM patches;",
+    "version": "1.4.5",
+    "interval": 86400,
+    "removed": 1,
+    "snapshot": 0,
+    "platform": "windows",
+    "category": "other",
+    "enabled": 1,
+    "attck": null,
+    "is_ioc": 0,
+    "score": 0
+  },
+  {
     "name": "wireless_networks",
     "description": "Retrieves all the remembered wireless network that the target machine has connected to. Helps you identify connections to rogue access points.",
     "query": "SELECT ssid, network_name, security_type, last_connected, captive_portal, possibly_hidden, roaming, roaming_profile FROM wifi_networks;",
