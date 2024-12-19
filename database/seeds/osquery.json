@@ -654,6 +654,21 @@
     "score": 0
   },
   {
+    "name": "npm_packages",
+    "description": "Retrieves the list of NPM packages.",
+    "query": "SELECT * FROM npm_packages;",
+    "version": "1.4.5",
+    "interval": 86400,
+    "removed": 1,
+    "snapshot": 0,
+    "platform": "all",
+    "category": "modules_and_packages",
+    "enabled": 1,
+    "attck": "T1059/006",
+    "is_ioc": 0,
+    "score": 0
+  },
+  {
     "name": "open_files",
     "description": "Retrieves all the open files per process in the target system. Helps you identify processes accessing sensitive files they shouldn't.",
     "query": "SELECT DISTINCT pid, path FROM process_open_files WHERE path NOT LIKE '/private/var/folders%' AND path NOT LIKE '/System/Library/%' AND path NOT IN ('/dev/null', '/dev/urandom', '/dev/random');",
