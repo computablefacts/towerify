@@ -68,8 +68,8 @@
     setTimeout(() => window.location.reload(), 15000);
   </script>
   @endif
-  @if($tab === 'ia_writer')
-  @include('modules.cyber-buddy.ia-writer')
+  @if($tab === 'ai_writer')
+  @include('modules.cyber-buddy.ai-writer')
   @endif
 </div>
 @endsection

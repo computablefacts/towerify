@@ -200,8 +200,8 @@ if (!function_exists('app_sidebar')) {
                     'section_items' => [
                         [
                             'label' => __('AI Writer'),
-                            'route' => route('home', ['tab' => 'ia_writer']),
-                            'active' => request()->route()->named('home') && request()->get('tab') === 'ia_writer',
+                            'route' => route('home', ['tab' => 'ai_writer']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'ai_writer',
                         ], [
                             'label' => __('CyberBuddy'),
                             'route' => route('home', ['tab' => 'ama']),
