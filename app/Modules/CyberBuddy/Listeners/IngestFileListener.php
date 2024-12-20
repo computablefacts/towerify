@@ -122,7 +122,7 @@ class IngestFileListener extends AbstractListener
                 // Cleanup
                 unlink($txtFilePath);
             }
-            if ($file->mime_type === 'application/x-ndjason' /* jsonl */) {
+            if ($file->mime_type === 'application/json' || $file->mime_type === 'application/x-ndjason' /* jsonl */) {
 
                 $jsonFileContent = file_get_contents($file->downloadUrl());
 

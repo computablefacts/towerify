@@ -28,6 +28,7 @@ class IsValidFileType implements ValidationRule
                 $mimeTypes->getMimeTypes('mp3'),
                 $mimeTypes->getMimeTypes('wav'),
                 $mimeTypes->getMimeTypes('webm'),
+                $mimeTypes->getMimeTypes('json'),
             );
             if (Str::contains($value->getMimeType(), $mimeTypesAllowed)) {
                 return;
