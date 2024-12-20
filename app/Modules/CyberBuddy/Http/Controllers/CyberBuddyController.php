@@ -67,6 +67,101 @@ class CyberBuddyController extends Controller
         return preg_replace("/\[((\[\d+],?)+)]/", "", $answer);
     }
 
+    public static function saveDistantFile(\App\Modules\CyberBuddy\Models\Collection $collection, string $url, bool $triggerIngest = true, bool $test = false): ?string
+    {
+        $content = file_get_contents($url);
+
+        if ($content === false) {
+            return null;
+        }
+
+        $filename = pathinfo(Str::afterLast($url, '/'), PATHINFO_FILENAME);
+        $extension = pathinfo(Str::afterLast($url, '/'), PATHINFO_EXTENSION);
+        $name_normalized = strtolower(trim($filename));
+        $path = "/tmp/{$name_normalized}.{$extension}";
+        file_put_contents($path, $content);
+
+        return self::saveLocalFile($collection, $path, $triggerIngest, $test);
+    }
+
+    public static function saveLocalFile(\App\Modules\CyberBuddy\Models\Collection $collection, string $path, bool $triggerIngest = true, bool $test = false): ?string
+    {
+        $name = \Illuminate\Support\Facades\File::name($path);
+        $extension = \Illuminate\Support\Facades\File::extension($path);
+        $originalName = "{$name}.{$extension}";
+        $mimeType = \Illuminate\Support\Facades\File::mimeType($path);
+        $error = null;
+        $uploadedFile = new UploadedFile($path, $originalName, $mimeType, $error, $test);
+        return self::saveUploadedFile($collection, $uploadedFile, $triggerIngest);
+    }
+
+    public static function saveUploadedFile(\App\Modules\CyberBuddy\Models\Collection $collection, UploadedFile $file, bool $triggerIngest = true): ?string
+    {
+        // Extract file metadata
+        $file_name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $file_extension = $file->getClientOriginalExtension();
+        $file_path = $file->getClientOriginalPath();
+        $file_size = $file->getSize();
+        $file_md5 = md5_file($file->getRealPath());
+        $file_sha1 = sha1_file($file->getRealPath());
+        $mime_type = $file->getClientMimeType();
+
+        if ($file_extension === 'jsonl' && $mime_type === 'application/octet-stream') {
+            $mime_type = 'application/x-ndjason';
+        }
+
+        // Normalize filename
+        $file_name_normalized = strtolower(trim($file_name));
+        $file_name_normalized = preg_replace('/[\s\-]+/', '-', $file_name_normalized);
+        $file_name_normalized = preg_replace('/[^-a-z0-9._]+/', '', $file_name_normalized);
+
+        /** @var File $fileRef */
+        $fileRef = $collection->files()->create([
+            'name' => $file_name,
+            'name_normalized' => $file_name_normalized,
+            'extension' => $file_extension,
+            'path' => $file_path,
+            'size' => $file_size,
+            'md5' => $file_md5,
+            'sha1' => $file_sha1,
+            'mime_type' => $mime_type,
+            'secret' => Str::random(32),
+            'created_by' => Auth::user()->id,
+        ]);
+
+        // Copy file to S3
+        $storage = Storage::disk('files-s3');
+        $filepath = self::storageFilePath($collection);
+        $filename = self::storageFileName($fileRef);
+
+        if (!$storage->exists($filepath)) {
+            if (!$storage->makeDirectory($filepath)) {
+                $fileRef->delete();
+                return null;
+            }
+        }
+        if (!$storage->putFileAs($filepath, $file, $filename)) {
+            $fileRef->delete();
+            return null;
+        }
+
+        // Process file ex. create embeddings
+        if ($triggerIngest) {
+            IngestFile::dispatch(Auth::user(), $collection->name, $fileRef->id);
+        }
+        return $fileRef->downloadUrl();
+    }
+
+    private static function storageFilePath(\App\Modules\CyberBuddy\Models\Collection $collection): string
+    {
+        return "/cyber-buddy/{$collection->id}";
+    }
+
+    private static function storageFileName(File $file): string
+    {
+        return "{$file->id}_{$file->name_normalized}.{$file->extension}";
+    }
+
     public function showPage()
     {
         return view('modules.cyber-buddy.page');
@@ -233,7 +328,7 @@ class CyberBuddyController extends Controller
 
         if ($file->isPdf() && $page > 0) {
 
-            $rawFile = $this->storageFileName($file);
+            $rawFile = self::storageFileName($file);
 
             if (!file_exists("/tmp/{$rawFile}")) {
                 file_put_contents("/tmp/{$rawFile}", $storage->get($path));
@@ -263,7 +358,7 @@ class CyberBuddyController extends Controller
             }
         }
 
-        $rawFile = $this->storageFileName($file);
+        $rawFile = self::storageFileName($file);
 
         if (file_exists("/tmp/{$rawFile}")) { // bypass S3 if possible
             return response()->download("/tmp/{$rawFile}", null, [
@@ -293,7 +388,7 @@ class CyberBuddyController extends Controller
         }
 
         $file = $request->file('file');
-        $url = $this->saveOneFile($collection, $file);
+        $url = self::saveUploadedFile($collection, $file);
 
         if ($url) {
             return response()->json([
@@ -321,7 +416,7 @@ class CyberBuddyController extends Controller
         $errors = [];
 
         foreach ($files['files'] as $file) {
-            $url = $this->saveOneFile($collection, $file);
+            $url = self::saveUploadedFile($collection, $file);
             if ($url) {
                 $successes[] = $url;
             } else {
@@ -588,75 +683,9 @@ class CyberBuddyController extends Controller
         return $user;
     }
 
-    private function saveOneFile(\App\Modules\CyberBuddy\Models\Collection $collection, UploadedFile $file): ?string
-    {
-        // Extract file metadata
-        $file_name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $file_extension = $file->getClientOriginalExtension();
-        $file_path = $file->getClientOriginalPath();
-        $file_size = $file->getSize();
-        $file_md5 = md5_file($file->getRealPath());
-        $file_sha1 = sha1_file($file->getRealPath());
-        $mime_type = $file->getClientMimeType();
-
-        if ($file_extension === 'jsonl' && $mime_type === 'application/octet-stream') {
-            $mime_type = 'application/x-ndjason';
-        }
-
-        // Normalize filename
-        $file_name_normalized = strtolower(trim($file_name));
-        $file_name_normalized = preg_replace('/[\s\-]+/', '-', $file_name_normalized);
-        $file_name_normalized = preg_replace('/[^-a-z0-9._]+/', '', $file_name_normalized);
-
-        /** @var File $fileRef */
-        $fileRef = $collection->files()->create([
-            'name' => $file_name,
-            'name_normalized' => $file_name_normalized,
-            'extension' => $file_extension,
-            'path' => $file_path,
-            'size' => $file_size,
-            'md5' => $file_md5,
-            'sha1' => $file_sha1,
-            'mime_type' => $mime_type,
-            'secret' => Str::random(32),
-            'created_by' => Auth::user()->id,
-        ]);
-
-        // Copy file to S3
-        $storage = Storage::disk('files-s3');
-        $filepath = $this->storageFilePath($collection);
-        $filename = $this->storageFileName($fileRef);
-
-        if (!$storage->exists($filepath)) {
-            if (!$storage->makeDirectory($filepath)) {
-                $fileRef->delete();
-                return null;
-            }
-        }
-        if (!$storage->putFileAs($filepath, $file, $filename)) {
-            $fileRef->delete();
-            return null;
-        }
-
-        // Process file ex. create embeddings
-        IngestFile::dispatch(Auth::user(), $collection->name, $fileRef->id);
-
-        return $fileRef->downloadUrl();
-    }
-
     private function storagePath(\App\Modules\CyberBuddy\Models\Collection $collection, File $file): string
     {
-        return "{$this->storageFilePath($collection)}/{$this->storageFileName($file)}";
-    }
-
-    private function storageFilePath(\App\Modules\CyberBuddy\Models\Collection $collection): string
-    {
-        return "/cyber-buddy/{$collection->id}";
-    }
-
-    private function storageFileName(File $file): string
-    {
-        return "{$file->id}_{$file->name_normalized}.{$file->extension}";
+        return self::storageFilePath($collection) . "/" . self::storageFileName($file);
     }
 
     private function tmpFileName(File $file, int $page): string

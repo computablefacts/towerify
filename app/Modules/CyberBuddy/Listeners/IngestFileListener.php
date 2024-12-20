@@ -5,6 +5,7 @@ namespace App\Modules\CyberBuddy\Listeners;
 use App\Listeners\AbstractListener;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
+use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
 use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\File;
@@ -30,6 +31,7 @@ class IngestFileListener extends AbstractListener
         Auth::login($event->user); // otherwise the tenant will not be properly set
 
         try {
+            /** @var Collection $collection */
             $collection = Collection::where('name', $event->collection)
                 ->where('is_deleted', false)
                 ->first();
@@ -138,6 +140,9 @@ class IngestFileListener extends AbstractListener
                 if ($jsonStream === false) {
                     throw new \Exception("Failed to open json file for streaming : {$jsonFilePath}");
                 }
+
+                $files = [];
+
                 while (($line = fgets($jsonStream)) !== false) {
 
                     $obj = json_decode(trim($line), true);
@@ -147,21 +152,56 @@ class IngestFileListener extends AbstractListener
                         continue;
                     }
                     if (!isset($obj['page']) || !isset($obj['text'])) {
-                        Log::error("Invalid JSON format : " . $line);
-                        continue;
-                    }
+                        if (isset($obj['file'])) { // {"file":"https://cyber.gouv.fr/sites/default/files/2017/01/guide_hygiene_informatique_anssi.pdf"}
+                            CyberBuddyController::saveDistantFile($collection, $obj['file']);
+                        } else {
+                            Log::error("Invalid JSON format : " . $line);
+                        }
+                    } else if (isset($obj['file'])) { // {"file":"https://cyber.gouv.fr/sites/default/files/2017/01/guide_hygiene_informatique_anssi.pdf", "page": 1, "text": "My own text!"}
 
-                    /** @var Chunk $chunk */
-                    $chunk = $collection->chunks()->create([
-                        'file_id' => $file->id,
-                        'url' => $file->downloadUrl(),
-                        'page' => $obj['page'],
-                        'text' => $obj['text'],
-                    ]);
+                        /** @var File $fileTmp */
+                        $fileTmp = $files[$obj['file']] ?? null;
 
-                    if (isset($obj['tags'])) {
-                        foreach ($obj['tags'] as $tag) {
-                            $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                        if (!$fileTmp) {
+                            $url = CyberBuddyController::saveDistantFile($collection, $obj['file'], false);
+                            /** @var File $fileTmp */
+                            $fileTmp = File::where('secret', Str::afterLast($url, '/'))->first();
+                            if ($fileTmp) {
+                                $files[$obj['file']] = $fileTmp;
+                            }
+                        }
+                        if (!$fileTmp) {
+                            Log::error("File cannot be downloaded : " . $obj['file']);
+                        } else {
+
+                            /** @var Chunk $chunk */
+                            $chunk = $collection->chunks()->create([
+                                'file_id' => $fileTmp->id,
+                                'url' => $fileTmp->downloadUrl(),
+                                'page' => $obj['page'],
+                                'text' => $obj['text'],
+                            ]);
+
+                            if (isset($obj['tags'])) {
+                                foreach ($obj['tags'] as $tag) {
+                                    $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                                }
+                            }
+                        }
+                    } else { // {"page":11,"tags":["titre","section","sous-section"], "text": "Bonjour monde."}
+
+                        /** @var Chunk $chunk */
+                        $chunk = $collection->chunks()->create([
+                            'file_id' => $file->id,
+                            'url' => $file->downloadUrl(),
+                            'page' => $obj['page'],
+                            'text' => $obj['text'],
+                        ]);
+
+                        if (isset($obj['tags'])) {
+                            foreach ($obj['tags'] as $tag) {
+                                $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                            }
                         }
                     }
                 }
