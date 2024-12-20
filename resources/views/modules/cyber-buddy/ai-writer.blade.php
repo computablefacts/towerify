@@ -1,7 +1,19 @@
 @if(Auth::check() && Auth::user()->canUseCyberBuddy())
 <div class="card mb-3">
   <div class="card-body">
-    <div id="templates"></div>
+    <div class="row">
+      <div class="col">
+        <div id="templates" class="mb-3"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-10">
+        <div id="file"></div>
+      </div>
+      <div class="col">
+        <div id="submit"></div>
+      </div>
+    </div>
   </div>
 </div>
 <div class="container mb-3">
@@ -32,6 +44,8 @@
 </div>
 <script>
 
+  let files = null;
+
   const elTemplates = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('templates'),
     item => item.name, item => item.type === 'template' ? item.type : `${item.type} (${item.user})`, null,
     query => query);
@@ -42,6 +56,37 @@
     }
   });
   elTemplates.defaultText = "{{ __('Load template...') }}";
+
+  const elSubmit = new com.computablefacts.blueprintjs.MinimalButton(document.getElementById('submit'),
+    "{{ __('Submit') }}");
+  elSubmit.disabled = true;
+  elSubmit.onClick(() => {
+
+    elSubmit.loading = true;
+    elSubmit.disabled = true;
+
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      axios.post('/cb/web/templates', {name: file.name, template: JSON.parse(e.target.result), is_model: true})
+      .then(response => {
+        elTemplates.items = elTemplates.items.concat(response.data); // TODO : sort by name?
+        toaster.toastSuccess("{{ __('Your model has been successfully uploaded!') }}");
+      }).catch(error => toaster.toastAxiosError(error)).finally(() => {
+        elSubmit.loading = false;
+        elSubmit.disabled = false;
+      });
+    };
+    reader.readAsText(file);
+  });
+
+  const elFile = new com.computablefacts.blueprintjs.MinimalFileInput(document.getElementById('file'), true);
+  elFile.onSelectionChange(items => {
+    files = items;
+    elSubmit.disabled = !files;
+  });
+  elFile.text = "{{ __('Import your own model...') }}";
+  elFile.buttonText = "{{ __('Browse') }}";
 
   document.addEventListener('DOMContentLoaded', function (event) {
     axios.get('/cb/web/templates').then(response => {
@@ -63,9 +108,9 @@
       if (!template.id) {
         template.id = response.data.id;
         template.type = response.data.type;
-        elTemplates.items = elTemplates.items.concat(response.data);
-        elTemplates.selectedItem = response.data;
       }
+      elTemplates.items = elTemplates.items.filter(item => item.id !== template.id).concat(response.data); // TODO : sort by name?
+      elTemplates.selectedItem = response.data;
       toaster.toastSuccess("{{ __('The document has been saved!') }}");
     })
     .catch(error => toaster.toastAxiosError(error));

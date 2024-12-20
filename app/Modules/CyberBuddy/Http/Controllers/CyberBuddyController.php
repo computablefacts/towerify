@@ -19,7 +19,6 @@ use App\Modules\CyberBuddy\Models\Template;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -198,24 +197,32 @@ class CyberBuddyController extends Controller
     {
         // TODO : validate request
         $id = $request->integer('id', 0);
-        $name = $request->string('name');
-        $template = $request->input('template', []);
+        $name = $request->string('name', '');
+        $blocks = $request->input('template', []);
+        $model = $request->boolean('is_model', false);
 
-        if (isset($template) && count($template) > 0) {
+        if (isset($blocks) && count($blocks) > 0) {
             if ($id === 0) {
                 $template = Template::create([
-                    'name' => (empty($name) ? "doc" : $name) . '-' . Carbon::now()->toIso8601ZuluString(),
-                    'template' => $template,
-                    'readonly' => false,
+                    'name' => $name,
+                    'template' => $blocks,
+                    'readonly' => $model,
                 ]);
             } else {
-                $template = Template::updateOrCreate([
-                    'id' => $id,
-                    'created_by' => Auth::user()->id,
-                    'readonly' => false,
-                ], [
-                    'template' => $template,
-                ]);
+                $template = Template::where('id', $id)->where('readonly', false)->first();
+                $version = ($template && Str::contains($template->name, 'v') ? Str::afterLast($template->name, 'v') : 0) + 1;
+                if ($template) {
+                    $template->name = Str::beforeLast($name, 'v') . "v{$version}";
+                    $template->template = $blocks;
+                    $template->save();
+                } else {
+                    $userId = Auth::user()->id;
+                    $template = Template::create([
+                        'name' => "{$name} u{$userId}v1",
+                        'template' => $blocks,
+                        'readonly' => false,
+                    ]);
+                }
             }
             return [
                 'id' => $template->id,

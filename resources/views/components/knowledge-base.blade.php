@@ -18,8 +18,7 @@
         <div id="files"></div>
       </div>
       <div class="col-3">
-        <div id="submit">
-        </div>
+        <div id="submit"></div>
       </div>
     </div>
   </div>
