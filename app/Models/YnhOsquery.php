@@ -563,6 +563,70 @@ if (-not (Test-Path "\$cywisePath")) {
     New-Item -Path \$cywisePath -ItemType Directory -Force
 }
 
+function CreateOrUpdate-ScheduledTask {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = \$true)]
+        [string]\$TaskName,
+
+        [Parameter(Mandatory = \$true)]
+        [string]\$Executable,
+
+        [Parameter(Mandatory = \$false)]
+        [string]\$Arguments = "",
+
+        [Parameter(Mandatory = \$true)]
+        [ValidateSet("Custom", "Daily", "Weekly")]
+        [string]\$ExecutionType,
+
+        [Parameter(Mandatory = \$false, ParameterSetName = "Custom")]
+        [int]\$RepeatInterval = 3600,
+
+        [Parameter(Mandatory = \$true, ParameterSetName = "Daily")]
+        [string]\$TimeOfDay,
+
+        [Parameter(Mandatory = \$true, ParameterSetName = "Weekly")]
+        [int]\$DayOfWeek,
+
+        [Parameter(Mandatory = \$true, ParameterSetName = "Weekly")]
+        [string]\$TimeOfWeek
+    )
+
+    # Create an object to define the scheduled task parameters
+    if ([string]::IsNullOrEmpty(\$Arguments)) {
+        \$Action = New-ScheduledTaskAction -Execute \$Executable
+    } else {
+        \$Action = New-ScheduledTaskAction -Execute \$Executable -Argument \$Arguments
+    }
+    \$Settings = New-ScheduledTaskSettingsSet
+    \$Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
+
+    # Define the trigger based on the execution type
+    switch (\$ExecutionType) {
+        "Custom" {
+            \$TimeOfDay = [DateTime]::Parse("00:00")
+            \$Trigger = New-ScheduledTaskTrigger -Once -At \$TimeOfDay -RepetitionInterval (New-TimeSpan -Seconds \$RepeatInterval) -RepetitionDuration (New-TimeSpan -Days 3650)
+        }
+        "Daily" {
+            \$TimeOfDay = [DateTime]::Parse(\$TimeOfDay)
+            \$Trigger = New-ScheduledTaskTrigger -Daily -At \$TimeOfDay
+        }
+        "Weekly" {
+            \$TimeOfWeek = [DateTime]::Parse(\$TimeOfWeek)
+            \$Trigger = New-ScheduledTaskTrigger -Weekly -At \$TimeOfWeek -DaysOfWeek \$DayOfWeek
+        }
+    }
+
+    # Check if the task already exists
+    if (\$null -ne (Get-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -ErrorAction SilentlyContinue)) {
+        # Update existing task
+        Set-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -Action \$Action -Principal \$Principal -Trigger \$Trigger -Settings \$Settings
+    } else {
+        # Create new task
+        Register-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -Action \$Action -Principal \$Principal -Trigger \$Trigger -Settings \$Settings
+    }
+}
+
 # Install Osquery
 # NOTA: the MSI package creates the osqueryd Windows Service as well
 \$osqueryPath = "C:\Program Files\osquery"
@@ -730,70 +794,6 @@ if (Test-Path "\$cywisePath\localMetrics2.ps1") {
 # Start LogAlert then Osquery because reloading resets LogAlert internal state (see https://github.com/jhuckaby/logalert for details)
 Start-Service logalert
 Start-Service osqueryd
-
-function CreateOrUpdate-ScheduledTask {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = \$true)]
-        [string]\$TaskName,
-
-        [Parameter(Mandatory = \$true)]
-        [string]\$Executable,
-
-        [Parameter(Mandatory = \$false)]
-        [string]\$Arguments = "",
-
-        [Parameter(Mandatory = \$true)]
-        [ValidateSet("Custom", "Daily", "Weekly")]
-        [string]\$ExecutionType,
-
-        [Parameter(Mandatory = \$false, ParameterSetName = "Custom")]
-        [int]\$RepeatInterval = 3600,
-
-        [Parameter(Mandatory = \$true, ParameterSetName = "Daily")]
-        [string]\$TimeOfDay,
-
-        [Parameter(Mandatory = \$true, ParameterSetName = "Weekly")]
-        [int]\$DayOfWeek,
-
-        [Parameter(Mandatory = \$true, ParameterSetName = "Weekly")]
-        [string]\$TimeOfWeek
-    )
-
-    # Create an object to define the scheduled task parameters
-    if ([string]::IsNullOrEmpty(\$Arguments)) {
-        \$Action = New-ScheduledTaskAction -Execute \$Executable
-    } else {
-        \$Action = New-ScheduledTaskAction -Execute \$Executable -Argument \$Arguments
-    }
-    \$Settings = New-ScheduledTaskSettingsSet
-    \$Principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-
-    # Define the trigger based on the execution type
-    switch (\$ExecutionType) {
-        "Custom" {
-            \$TimeOfDay = [DateTime]::Parse("00:00")
-            \$Trigger = New-ScheduledTaskTrigger -Once -At \$TimeOfDay -RepetitionInterval (New-TimeSpan -Seconds \$RepeatInterval) -RepetitionDuration (New-TimeSpan -Days 3650)
-        }
-        "Daily" {
-            \$TimeOfDay = [DateTime]::Parse(\$TimeOfDay)
-            \$Trigger = New-ScheduledTaskTrigger -Daily -At \$TimeOfDay
-        }
-        "Weekly" {
-            \$TimeOfWeek = [DateTime]::Parse(\$TimeOfWeek)
-            \$Trigger = New-ScheduledTaskTrigger -Weekly -At \$TimeOfWeek -DaysOfWeek \$DayOfWeek
-        }
-    }
-
-    # Check if the task already exists
-    if (\$null -ne (Get-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -ErrorAction SilentlyContinue)) {
-        # Update existing task
-        Set-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -Action \$Action -Principal \$Principal -Trigger \$Trigger -Settings \$Settings
-    } else {
-        # Create new task
-        Register-ScheduledTask -TaskPath "\Cywise\" -TaskName \$TaskName -Action \$Action -Principal \$Principal -Trigger \$Trigger -Settings \$Settings
-    }
-}
 
 # Parse web logs every hour
 CreateOrUpdate-ScheduledTask -Executable "powershell.exe" -Arguments "-File ""\$cywisePath\logparser.ps1"""  -TaskName "LogParser" -ExecutionType Custom -RepeatInterval 3600
