@@ -608,6 +608,56 @@ if (-not (Get-Service -Name "logalert" -ErrorAction SilentlyContinue)) {
 Stop-Service osqueryd
 Stop-Service logalert
 
+# Parse local history to get back dropped metrics and events
+if ((Test-Path "\$osqueryPath\log\osqueryd.snapshots.log") -And (Test-Path "\$osqueryPath\log\osqueryd.results.log")) {
+    Get-Content "\$osqueryPath\log\osqueryd.snapshots.log", "\$osqueryPath\log\osqueryd.results.log" `
+        | Set-Content -Path "\$cywisePath\osquery.jsonl" -Encoding ASCII
+
+    # Explicitly load the System.Net.Http assembly
+    Add-Type -AssemblyName "System.Net.Http"
+
+    # Step 1: Compress the file into .gz
+    if (Test-Path "\$cywisePath\osquery.jsonl.gz") {
+        Remove-Item "\$cywisePath\osquery.jsonl.gz" -Force
+    }
+
+    # Open input and output streams
+    \$fileStream = [System.IO.File]::OpenRead("\$cywisePath\osquery.jsonl")
+    \$outFileStream = [System.IO.File]::Create("\$cywisePath\osquery.jsonl.gz")
+    \$gzipStream = New-Object System.IO.Compression.GzipStream(\$outFileStream, [System.IO.Compression.CompressionMode]::Compress)
+
+    # Copy data to the compressed file
+    \$fileStream.CopyTo(\$gzipStream)
+
+    # Close streams
+    \$gzipStream.Dispose()
+    \$fileStream.Dispose()
+    \$outFileStream.Dispose()
+
+    # Step 2: Prepare and send the POST request
+    \$fileStream = [System.IO.File]::OpenRead("\$cywisePath\osquery.jsonl.gz")
+    \$httpContent = [System.Net.Http.MultipartFormDataContent]::new()
+
+    # Add the file to the form
+    \$fileContent = [System.Net.Http.StreamContent]::new(\$fileStream)
+    \$fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::new("application/gzip")
+    \$httpContent.Add(\$fileContent, "data", (Get-Item "\$cywisePath\osquery.jsonl.gz").Name)
+
+    # Add a User-Agent header to avoid server-related issues
+    \$client = [System.Net.Http.HttpClient]::new()
+    \$client.DefaultRequestHeaders.Add("User-Agent", "PowerShellCywise/1.0")
+
+    # Send the POST request
+    \$response = \$client.PostAsync("{$url}/logparser/{$server->secret}", \$httpContent).Result
+
+    # Cleanup
+    \$fileStream.Dispose()
+    \$client.Dispose()
+
+    Remove-Item "\$cywisePath\osquery.jsonl"
+    Remove-Item "\$cywisePath\osquery.jsonl.gz"
+}
+
 # Update LogAlert configuration
 Invoke-WebRequest -Uri "{$url}/logalert/{$server->secret}" -OutFile "\$logAlertPath\config2.json"
 
