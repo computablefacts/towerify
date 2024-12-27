@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\ComputeIoc;
+use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Jobs\PullServersInfos;
 use App\Jobs\Summarize;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
@@ -35,7 +36,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new ComputeIoc())->everyTenMinutes();
         $schedule->job(new PullServersInfos())->everyThreeHours();
         $schedule->job(new Summarize())->everySixHours();
-        // $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
+        $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
         $schedule->command('telescope:prune --hours=48')->daily();
 
         // AdversaryMeter
