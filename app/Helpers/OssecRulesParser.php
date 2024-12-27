@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
  *  - r: (for ossec regexes)
  *  - >: (for strcmp greater)
  *  - <: (for strcmp  lower)
+ *
  * Multiple patterns can be specified by using " && " between them. All of them must match for it to return true.
  */
 class OssecRulesParser
