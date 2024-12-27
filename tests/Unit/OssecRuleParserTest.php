@@ -24,7 +24,7 @@ class OssecRuleParserTest extends TestCase
         $this->assertEquals([[
             'application_name' => 'CIS - Apache Configuration - 2.3: WebDAV Modules are enabled',
             'match_type' => 'any',
-            'reference' => 'https://workbench.cisecurity.org/benchmarks/307, https://workbench.cisecurity.org/benchmarks/308',
+            'references' => ['https://workbench.cisecurity.org/benchmarks/307', 'https://workbench.cisecurity.org/benchmarks/308'],
             'rules' => [[
                 'type' => OssecRulesParser::DIRECTORY,
                 'negate' => false,
@@ -88,7 +88,7 @@ class OssecRuleParserTest extends TestCase
         $this->assertEquals([[
             'application_name' => 'CIS - Microsoft Windows Server 2012 R2 - 18.3.5: Ensure \'MSS: (KeepAliveTime) How often keep-alive packets are sent in milliseconds\' is set to \'Enabled: 300,000 or 5 minutes\'',
             'match_type' => 'any',
-            'reference' => 'https://workbench.cisecurity.org/benchmarks/288',
+            'references' => ['https://workbench.cisecurity.org/benchmarks/288'],
             'rules' => [[
                 'type' => OssecRulesParser::REGISTRY,
                 'negate' => false,
@@ -113,6 +113,80 @@ class OssecRuleParserTest extends TestCase
                     'expression' => 'KeepAliveTime',
                 ]],
                 'value_checks' => [],
+            ]]
+        ]], $rule);
+    }
+
+    public function testParseSimpleCommandRule()
+    {
+        $parser = new OssecRulesParser();
+        $rule = $parser->parse("
+            [Ensure rsync service is either not installed or masked] [any] []
+            c:dpkg-query -W -f='\${binary:Package}\\t\${Status}\\t\${db:Status-Status}\\n' rsync -> r:unknown ok not-installed|dpkg-query: no packages found matching rsync;
+            c:systemctl is-active rsync -> r:^inactive;
+            c:systemctl is-enabled rsync -> r:^masked;
+        ");
+
+        $this->assertEquals([[
+            'application_name' => 'Ensure rsync service is either not installed or masked',
+            'match_type' => 'any',
+            'references' => [],
+            'rules' => [[
+                'type' => OssecRulesParser::COMMAND,
+                'negate' => false,
+                'command' => 'dpkg-query -W -f=\'${binary:Package}\\t${Status}\\t${db:Status-Status}\\n\' rsync',
+                'checks' => [[
+                    'type' => OssecRulesParser::REGEX,
+                    'negate' => false,
+                    'expression' => 'unknown ok not-installed|dpkg-query: no packages found matching rsync',
+                ]],
+            ], [
+                'type' => OssecRulesParser::COMMAND,
+                'negate' => false,
+                'command' => 'systemctl is-active rsync',
+                'checks' => [[
+                    'type' => OssecRulesParser::REGEX,
+                    'negate' => false,
+                    'expression' => '^inactive',
+                ]],
+            ], [
+                'type' => OssecRulesParser::COMMAND,
+                'negate' => false,
+                'command' => 'systemctl is-enabled rsync',
+                'checks' => [[
+                    'type' => OssecRulesParser::REGEX,
+                    'negate' => false,
+                    'expression' => '^masked',
+                ]],
+            ]]
+        ]], $rule);
+    }
+
+    public function testParseComplexCommandRule()
+    {
+        $parser = new OssecRulesParser();
+        $rule = $parser->parse("
+            [Ensure only strong Ciphers are used] [none] [https://nvd.nist.gov/vuln/detail/CVE-2016-2183,https://www.openssh.com/txt/cbc.adv,https://nvd.nist.gov/vuln/detail/CVE-2008-5161]
+            c:sshd -T -> r:^ciphers && r:3des-cbc|aes128-cbc|aes192-cbc|aes256-cbc;
+        ");
+
+        $this->assertEquals([[
+            'application_name' => 'Ensure only strong Ciphers are used',
+            'match_type' => 'none',
+            'references' => ['https://nvd.nist.gov/vuln/detail/CVE-2016-2183', 'https://www.openssh.com/txt/cbc.adv', 'https://nvd.nist.gov/vuln/detail/CVE-2008-5161'],
+            'rules' => [[
+                'type' => OssecRulesParser::COMMAND,
+                'negate' => false,
+                'command' => 'sshd -T',
+                'checks' => [[
+                    'type' => OssecRulesParser::REGEX,
+                    'negate' => false,
+                    'expression' => '^ciphers',
+                ], [
+                    'type' => OssecRulesParser::REGEX,
+                    'negate' => false,
+                    'expression' => '3des-cbc|aes128-cbc|aes192-cbc|aes256-cbc',
+                ]],
             ]]
         ]], $rule);
     }

@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 /**
  * OSSEC rule parser.
  *
- * [Application name] [any or all] [reference]
+ * [Application name] [any or all or none] [reference]
  * type:<entry name>;
  *
  * Type can be:
@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
  *  - p (process running)
  *  - r (registry running)
  *  - d (any file inside the directory)
+ *  - c (for executing a command)
  *
  * Additional values:
  *  - For the registry and for directories, use "->" to look for a specific entry and another "->" to look for the value.
@@ -39,6 +40,7 @@ class OssecRulesParser
     const string GREATER_THAN = 'greater_than';
     const string LESS_THAN = 'less_than';
     const string REGEX = 'regex';
+    const string COMMAND = 'command';
 
     public function parse(string $text): array
     {
@@ -58,19 +60,20 @@ class OssecRulesParser
                 $var = trim(Str::substr($line, 0, $idx));
                 $files = array_map('trim', explode(',', Str::substr($line, $idx + 1, Str::length($line) - $idx - 2)));
                 $vars[$var] = $files;
-            } else if (preg_match('/\[(?<appname>.+)]\s*\[(?<matchtype>any|all)]\s*\[(?<reference>.+)]/i', $line, $matches)) {
+            } else if (preg_match('/\[(?<appname>.+)]\s*\[(?<matchtype>any|all|none)]\s*\[(?<references>.*)]/i', $line, $matches)) {
                 $rules[] = [
                     'application_name' => $matches['appname'],
                     'match_type' => $matches['matchtype'],
-                    'reference' => $matches['reference'],
+                    'references' => $matches['references'] ? explode(',', $matches['references']) : [],
                     'rules' => [],
                 ];
-            } else if (preg_match('/(?<type>[fpdr]:)(?<rule>.+);/i', $line, $matches)) {
+            } else if (preg_match('/(?<type>[fpdrc]:)(?<rule>.+);/i', $line, $matches)) {
                 $rule = match ($matches['type']) {
                     'f:' => $this->parseFileOrDirectory($matches['rule'], $vars),
                     'p:' => $this->parseRunningProcesses($matches['rule'], $vars),
                     'r:' => $this->parseRegistry($matches['rule'], $vars),
                     'd:' => $this->parseFilesInDirectory($matches['rule'], $vars),
+                    'c:' => $this->parseCommandOutput($matches['rule'], $vars),
                     default => null,
                 };
                 if (!empty($rules) && !empty($rule)) {
@@ -146,7 +149,7 @@ class OssecRulesParser
         ];
     }
 
-    private function parseRunningProcesses(string $rule, array $vars)
+    private function parseRunningProcesses(string $rule, array $vars): ?array
     {
         $rule = trim($rule);
         $negate = Str::startsWith($rule, "!");
@@ -201,6 +204,25 @@ class OssecRulesParser
             'registries' => $vars[$parts[0]] ?? [$parts[0]],
             'key_checks' => $this->parseExpression($parts[1]),
             'value_checks' => $this->parseExpression($parts[2]),
+        ];
+    }
+
+    private function parseCommandOutput(string $rule, array $vars): array
+    {
+        $rule = trim($rule);
+        $negate = Str::startsWith($rule, "!");
+        if ($negate) {
+            $rule = trim(Str::substr($rule, 1));
+        }
+        $parts = array_map('trim', explode("->", $rule));
+        if (count($parts) != 2) {
+            throw new \Exception("Invalid rule: {$rule}");
+        }
+        return [
+            'type' => self::COMMAND,
+            'negate' => $negate,
+            'command' => $vars[$parts[0]] ?? $parts[0],
+            'checks' => $this->parseExpression($parts[1]),
         ];
     }
 
