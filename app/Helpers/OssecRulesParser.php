@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -32,37 +33,49 @@ use Illuminate\Support\Str;
  */
 class OssecRulesParser
 {
-    const string PROCESS = 'process';
-    const string REGISTRY = 'registry';
-    const string DIRECTORY = 'directory';
-    const string FILE_OR_DIRECTORY = 'file_or_directory';
-    const string EQUALS_TO = 'equals_to';
-    const string GREATER_THAN = 'greater_than';
-    const string LESS_THAN = 'less_than';
-    const string REGEX = 'regex';
-    const string COMMAND = 'command';
+    const string PROCESS_RULE = 'process';
+    const string REGISTRY_RULE = 'registry';
+    const string DIRECTORY_RULE = 'directory';
+    const string FILE_OR_DIRECTORY_RULE = 'file_or_directory';
+    const string COMMAND_RULE = 'command';
+
+    public static function evaluate(array $ctx, array $rule): bool
+    {
+        $matchType = $rule['match_type'];
+        foreach ($rule['rules'] as $r) {
+            $isOk = match ($r['type']) {
+                self::FILE_OR_DIRECTORY_RULE => self::evaluateFileOrDirectory($ctx, $r),
+                default => false,
+            };
+            if (($matchType === 'all' && !$isOk) || ($matchType === 'none' && $isOk)) {
+                return false;
+            }
+            if ($matchType === 'any' && $isOk) {
+                return true;
+            }
+        }
+        return true;
+    }
 
     public static function parse(string $text): array
     {
         $rules = [];
         $lines = array_map('trim', explode("\n", $text));
         $vars = [];
-
         foreach ($lines as $line) {
-
             $line = trim($line);
-
             if (empty($line) || Str::startsWith($line, "#")) {
                 continue;
             }
-            if (Str::startsWith($line, "$") && Str::endsWith($line, ";")) {
+            $matches = null;
+            if (Str::startsWith($line, "$") && Str::endsWith($line, ";")) { // global variables
                 $idx = Str::position($line, "=");
                 $var = trim(Str::substr($line, 0, $idx));
                 $files = array_map('trim', explode(',', Str::substr($line, $idx + 1, Str::length($line) - $idx - 2)));
                 $vars[$var] = $files;
-            } else if (preg_match('/\[(?<appname>.+)]\s*\[(?<matchtype>any|all|none)]\s*\[(?<references>.*)]/i', $line, $matches)) {
+            } else if (preg_match('/\[(?<appname>.+)]\s*\[(?<matchtype>any|all|none)]\s*\[(?<references>.*)]/i', $line, $matches)) { // rule description
                 $rules[] = [
-                    'application_name' => $matches['appname'],
+                    'rule_name' => $matches['appname'],
                     'match_type' => $matches['matchtype'],
                     'references' => $matches['references'] ?
                         collect(explode(',', $matches['references']))
@@ -72,194 +85,193 @@ class OssecRulesParser
                         [],
                     'rules' => [],
                 ];
-            } else if (preg_match('/^(?<type>[fpdrc]:)(?<rule>.+);$/i', $line, $matches)) {
+            } else if (preg_match('/^(not\s+)*(?<type>[fpdrc]:)(?<rule>.+);$/i', $line, $matches)) { // rule patterns
                 $rule = match ($matches['type']) {
-                    'f:' => self::parseFileOrDirectory($matches['rule'], $vars),
-                    'p:' => self::parseRunningProcesses($matches['rule'], $vars),
-                    'r:' => self::parseRegistry($matches['rule'], $vars),
-                    'd:' => self::parseFilesInDirectory($matches['rule'], $vars),
-                    'c:' => self::parseCommandOutput($matches['rule'], $vars),
+                    'f:' => self::parseFileOrDirectory(trim($matches['rule']), $vars),
+                    'p:' => self::parseRunningProcesses(trim($matches['rule']), $vars),
+                    'r:' => self::parseRegistry(trim($matches['rule']), $vars),
+                    'd:' => self::parseFilesInDirectory(trim($matches['rule']), $vars),
+                    'c:' => self::parseCommandOutput(trim($matches['rule']), $vars),
                     default => null,
                 };
                 if (!empty($rules) && !empty($rule)) {
+                    $rule['negate'] = Str::startsWith($line, "not ");
                     $rules[count($rules) - 1]['rules'][] = $rule;
                 }
             }
         }
-        return $rules;
+        if (count($rules) != 1) {
+            throw new \Exception("Invalid number of rules: {$text}");
+        }
+        return $rules[0];
+    }
+
+    private static function evaluateFileOrDirectory(array $ctx, array $rule): bool
+    {
+        $results = [];
+        foreach ($rule['files'] as $file) {
+            if (!isset($rule['expr']) || count($rule['expr']) <= 0) {
+                $results[] = $ctx['file_exists']($file);
+            } else {
+                $isOk = true;
+                $lines = array_filter(array_map('trim', explode("\n", $ctx['file_get_contents']($file))), fn($line) => !empty($line));
+                foreach ($lines as $line) {
+                    foreach ($rule['expr'] as $expr) {
+                        $matches = null;
+                        $negate = Str::startsWith($expr, "!");
+                        if ($negate) {
+                            $expr = trim(Str::substr($expr, 1));
+                        }
+                        if (preg_match('/^n:(.*)\s+compare\s+([><=])+\s*(.*)$/i', $expr, $matches)) {
+                            $op = trim($matches[2]);
+                            $number = trim($matches[3]);
+                            $matchez = null;
+                            if (!preg_match("/{$matches[1]}/i", $line, $matchez)) {
+                                $isOk = $negate;
+                            } else if ($op === '>') {
+                                $isOk = $negate ? $matchez[1] <= $number : $matchez[1] > $number;
+                            } else if ($op === '<') {
+                                $isOk = $negate ? $matchez[1] >= $number : $matchez[1] < $number;
+                            } else if ($op === '=') {
+                                $isOk = $negate ? $matchez[1] != $number : $matchez[1] = $number;
+                            } else if ($op === '>=') {
+                                $isOk = $negate ? $matchez[1] < $number : $matchez[1] >= $number;
+                            } else if ($op === '<=') {
+                                $isOk = $negate ? $matchez[1] > $number : $matchez[1] <= $number;
+                            } else if ($op === '!=' || $op === '<>') {
+                                $isOk = $negate ? $matchez[1] == $number : $matchez[1] != $number;
+                            } else {
+                                Log::error("Unknown operator in rule: ");
+                                Log::error($rule);
+                                $isOk = false;
+                            }
+                        } else if (preg_match('/^r:(.*)$/i', $expr, $matches)) {
+                            if (preg_match("/{$matches[1]}/i", $line)) {
+                                $isOk = !$negate;
+                            } else {
+                                $isOk = $negate;
+                            }
+                        } else {
+                            Log::error("Unknown expression in rule: ");
+                            Log::error($rule);
+                            $isOk = false;
+                        }
+                        if (!$isOk) {
+                            break;
+                        }
+                    }
+                    if ($isOk) {
+                        break;
+                    }
+                }
+                $results[] = $isOk;
+            }
+        }
+        return collect($results)->reduce(fn($carry, $item) => $carry && $item, true);
     }
 
     private static function parseFileOrDirectory(string $rule, array $vars): array
     {
-        $rule = trim($rule);
-        $negate = Str::startsWith($rule, "!");
-        if ($negate) {
-            $rule = trim(Str::substr($rule, 1));
-        }
-        $parts = array_map('trim', explode("->", $rule));
-        if (count($parts) === 1) {
+        $matches = null;
+        if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
             return [
-                'type' => self::FILE_OR_DIRECTORY,
-                'negate' => $negate,
-                'files' => $vars[$parts[0]] ?? [$parts[0]],
-                'checks' => []
+                'type' => self::FILE_OR_DIRECTORY_RULE,
+                'files' => $vars[trim($matches[1])] ?? [trim($matches[1])],
+                'expr' => array_map('trim', explode(" && ", $matches[2])),
             ];
         }
-        if (count($parts) !== 2) {
-            throw new \Exception("Invalid FILE_OR_DIRECTORY rule: {$rule}");
+        if (!Str::contains($rule, "->")) {
+            return [
+                'type' => self::FILE_OR_DIRECTORY_RULE,
+                'files' => $vars[$rule] ?? [$rule],
+                'expr' => null,
+            ];
         }
-        return [
-            'type' => self::FILE_OR_DIRECTORY,
-            'negate' => $negate,
-            'files' => $vars[$parts[0]] ?? [$parts[0]],
-            'checks' => self::parseExpression($parts[1]),
-        ];
+        throw new \Exception("Invalid FILE_OR_DIRECTORY rule: {$rule}");
     }
 
     private static function parseFilesInDirectory(string $rule, array $vars): array
     {
-        $rule = trim($rule);
-        $negate = Str::startsWith($rule, "!");
-        if ($negate) {
-            $rule = trim(Str::substr($rule, 1));
-        }
-        $parts = array_map('trim', explode("->", $rule));
-        if (count($parts) === 1) {
+        $matches = null;
+        if (preg_match('/(.*)\s*->\s+(.*)\s*->\s+(.*)/i', $rule, $matches)) {
             return [
-                'type' => self::DIRECTORY,
-                'negate' => $negate,
-                'directories' => $vars[$parts[0]] ?? [$parts[0]],
-                'files_pattern' => null,
-                'checks' => [],
+                'type' => self::DIRECTORY_RULE,
+                'directories' => $vars[trim($matches[1])] ?? [trim($matches[1])],
+                'files' => trim($matches[2]),
+                'expr' => array_map('trim', explode(" && ", $matches[3])),
             ];
         }
-        if (count($parts) === 2) {
+        if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
             return [
-                'type' => self::DIRECTORY,
-                'negate' => $negate,
-                'directories' => $vars[$parts[0]] ?? [$parts[0]],
-                'files_pattern' => $parts[1],
-                'checks' => [],
+                'type' => self::DIRECTORY_RULE,
+                'directories' => $vars[trim($matches[1])] ?? [trim($matches[1])],
+                'files' => trim($matches[2]),
+                'expr' => null,
             ];
         }
-        if (count($parts) !== 3) {
-            throw new \Exception("Invalid DIRECTORY rule: {$rule}");
+        if (!Str::contains($rule, "->")) {
+            return [
+                'type' => self::DIRECTORY_RULE,
+                'directories' => $vars[$rule] ?? [$rule],
+                'files' => null,
+                'expr' => null,
+            ];
         }
-        return [
-            'type' => self::DIRECTORY,
-            'negate' => $negate,
-            'directories' => $vars[$parts[0]] ?? [$parts[0]],
-            'files_pattern' => $parts[1],
-            'checks' => self::parseExpression($parts[2]),
-        ];
+        throw new \Exception("Invalid DIRECTORY rule: {$rule}");
     }
 
-    private static function parseRunningProcesses(string $rule, array $vars): ?array
+    private static function parseRunningProcesses(string $rule, array $vars): array
     {
-        $rule = trim($rule);
-        $negate = Str::startsWith($rule, "!");
-        if ($negate) {
-            $rule = trim(Str::substr($rule, 1));
-        }
-        $parts = array_map('trim', explode("->", $rule));
-        if (count($parts) != 1) {
-            throw new \Exception("Invalid PROCESS rule: {$rule}");
-        }
-        return [
-            'type' => self::PROCESS,
-            'negate' => $negate,
-            'processes' => $vars[$parts[0]] ?? [$parts[0]],
-            'checks' => [],
-        ];
+        throw new \Exception("Invalid PROCESS rule: {$rule}");
     }
 
     private static function parseRegistry(string $rule, array $vars): array
     {
-        $rule = trim($rule);
-        $negate = Str::startsWith($rule, "!");
-        if ($negate) {
-            $rule = trim(Str::substr($rule, 1));
-        }
-        $parts = array_map('trim', explode("->", $rule));
-        if (count($parts) === 1) {
+        $matches = null;
+        if (preg_match('/(.*)\s*->\s+(.*)\s*->\s+(.*)/i', $rule, $matches)) {
             return [
-                'type' => self::REGISTRY,
-                'negate' => $negate,
-                'registries' => $vars[$parts[0]] ?? [$parts[0]],
-                'key_checks' => [],
-                'value_checks' => [],
+                'type' => self::REGISTRY_RULE,
+                'entry' => $vars[trim($matches[1])][0] ?? trim($matches[1]),
+                'key' => trim($matches[2]),
+                'value' => array_map('trim', explode(" && ", $matches[3])),
             ];
         }
-        if (count($parts) === 2) {
+        if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
             return [
-                'type' => self::REGISTRY,
-                'negate' => $negate,
-                'registries' => $vars[$parts[0]] ?? [$parts[0]],
-                'key_checks' => self::parseExpression($parts[1]),
-                'value_checks' => [],
+                'type' => self::REGISTRY_RULE,
+                'entry' => $vars[trim($matches[1])][0] ?? trim($matches[1]),
+                'key' => trim($matches[2]),
+                'value' => null,
             ];
         }
-        if (count($parts) !== 3) {
-            throw new \Exception("Invalid REGISTRY rule: {$rule}");
+        if (!Str::contains($rule, "->")) {
+            return [
+                'type' => self::REGISTRY_RULE,
+                'entry' => $vars[$rule][0] ?? [$rule],
+                'key' => null,
+                'value' => null,
+            ];
         }
-        return [
-            'type' => self::REGISTRY,
-            'negate' => $negate,
-            'registries' => $vars[$parts[0]] ?? [$parts[0]],
-            'key_checks' => self::parseExpression($parts[1]),
-            'value_checks' => self::parseExpression($parts[2]),
-        ];
+        throw new \Exception("Invalid REGISTRY rule: {$rule}");
     }
 
     private static function parseCommandOutput(string $rule, array $vars): array
     {
-        $rule = trim($rule);
-        $negate = Str::startsWith($rule, "!");
-        if ($negate) {
-            $rule = trim(Str::substr($rule, 1));
-        }
-        $parts = array_map('trim', explode("->", $rule));
-        if (count($parts) != 2) {
-            throw new \Exception("Invalid COMMAND rule: {$rule}");
-        }
-        return [
-            'type' => self::COMMAND,
-            'negate' => $negate,
-            'command' => $vars[$parts[0]] ?? $parts[0],
-            'checks' => self::parseExpression($parts[1]),
-        ];
-    }
-
-    private static function parseExpression(string $str): array
-    {
-        $expression = [];
-        $parts = array_map('trim', explode(" && ", $str));
-        foreach ($parts as $part) {
-            $type = self::EQUALS_TO;
-            $part = trim($part);
-            $negate = Str::startsWith($part, "!");
-            if ($negate) {
-                $part = trim(Str::substr($part, 1));
-            }
-            if (Str::startsWith($part, "r:")) {
-                $type = self::REGEX;
-                $part = trim(Str::substr($part, 2));
-            } else if (Str::startsWith($part, ">:")) {
-                $type = self::GREATER_THAN;
-                $part = trim(Str::substr($part, 2));
-            } else if (Str::startsWith($part, "<:")) {
-                $type = self::LESS_THAN;
-                $part = trim(Str::substr($part, 2));
-            } else if (Str::startsWith($part, "=:")) {
-                $type = self::EQUALS_TO;
-                $part = trim(Str::substr($part, 2));
-            }
-            $expression[] = [
-                'type' => $type,
-                'negate' => $negate,
-                'expression' => $part,
+        $matches = null;
+        if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
+            return [
+                'type' => self::COMMAND_RULE,
+                'cmd' => $vars[trim($matches[1])][0] ?? trim($matches[1]),
+                'expr' => array_map('trim', explode(" && ", $matches[2])),
             ];
         }
-        return $expression;
+        if (!Str::contains($rule, "->")) {
+            return [
+                'type' => self::COMMAND_RULE,
+                'cmd' => $vars[$rule][0] ?? $rule,
+                'expr' => null,
+            ];
+        }
+        throw new \Exception("Invalid COMMAND rule: {$rule}");
     }
 }

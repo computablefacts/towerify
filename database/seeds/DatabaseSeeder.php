@@ -293,11 +293,17 @@ class DatabaseSeeder extends Seeder
                     $expressions = collect($check['rules'])->join(";\n");
                     $str = "
                         [{$title}] [$condition] [{$references}]
-                        {$expressions}
+                        {$expressions};
                     ";
-                    $rule = \App\Helpers\OssecRulesParser::parse($str);
-                    // TODO
-                    $ok++;
+                    $rulez = \App\Helpers\OssecRulesParser::parse($str);
+                    if (count($rulez) <= 0 || count($rulez['rules']) <= 0) {
+                        Log::warning($str);
+                        Log::warning($rulez);
+                        $ko++;
+                    } else {
+                        // TODO
+                        $ok++;
+                    }
                 } catch (\Exception $e) {
                     Log::warning($e->getMessage());
                     $ko++;
