@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Str;
 
 class TriggerSendAuditReport implements ShouldQueue
 {
@@ -25,9 +26,11 @@ class TriggerSendAuditReport implements ShouldQueue
 
     public function handle()
     {
+        $domains = collect(config('towerify.telescope.whitelist.domains'))->map(fn(string $domain) => '@' . $domain)->toArray();
         User::where('is_active', true)
             ->get()
             ->filter(fn(User $user) => $user->canUseAdversaryMeter())
+            ->filter(fn(User $user) => !Str::endsWith($user->email, $domains) || !Str::contains(Str::before($user->email, '@'), '+')) // do not send emails to debug accounts
             ->each(fn(User $user) => SendAuditReport::dispatch($user));
     }
 }
