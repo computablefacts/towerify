@@ -25,6 +25,7 @@
         "league/flysystem-path-prefixing": "^3.0",
         "phpseclib/phpseclib": "^3.0",
         "symfony/process": "^7.0",
+        "symfony/yaml": "^7.2",
         "vanilo/admin": "^4.0",
         "vanilo/framework": "^4.0",
         "vanilo/payment": "^4.0"

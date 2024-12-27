@@ -13,7 +13,9 @@ use App\Models\TaxRate;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Konekt\Address\Models\ZoneScope;
+use Symfony\Component\Yaml\Yaml;
 
 class DatabaseSeeder extends Seeder
 {
@@ -35,6 +37,7 @@ class DatabaseSeeder extends Seeder
         $this->setupProductCategories();
         $this->setupProductProperties();
         $this->setupProducts();
+        $this->setupOssecRules();
         $this->setupOsqueryRules();
         $this->fillMissingOsqueryUids();
     }
@@ -261,6 +264,50 @@ class DatabaseSeeder extends Seeder
         }
     }
 
+    private function setupOssecRules(): void
+    {
+        $rules = [
+            $this->cisWin2022(),
+            $this->cisDebian11(),
+            $this->cisDebian12(),
+        ];
+        Log::debug('Parsing rules...');
+        $ok = 0;
+        $ko = 0;
+        foreach ($rules as $rule) {
+
+            $policy = $rule['policy'];
+            $requirements = $rule['requirements'];
+            $checks = $rule['checks'];
+
+            foreach ($checks as $check) {
+                try {
+                    $id = $check['id'];
+                    $title = $check['title'] ?? '';
+                    $description = $check['description'] ?? '';
+                    $rationale = $check['rationale'] ?? '';
+                    $impact = $check['impact'] ?? '';
+                    $remediation = $check['remediation'] ?? '';
+                    $condition = $check['condition'] ?? 'all';
+                    $references = isset($check['references']) ? collect($check['references'])->join(',') : '';
+                    $expressions = collect($check['rules'])->join(";\n");
+                    $str = "
+                        [{$title}] [$condition] [{$references}]
+                        {$expressions}
+                    ";
+                    $rule = \App\Helpers\OssecRulesParser::parse($str);
+                    // TODO
+                    $ok++;
+                } catch (\Exception $e) {
+                    Log::warning($e->getMessage());
+                    $ko++;
+                }
+            }
+        }
+        $total = $ok + $ko;
+        Log::debug("{$total} rules parsed. {$ok} OK. {$ko} KO.");
+    }
+
     private function setupOsqueryRules(): void
     {
         $mitreAttckMatrix = $this->mitreAttckMatrix();
@@ -314,5 +361,23 @@ class DatabaseSeeder extends Seeder
         $path = database_path('seeds/osquery.json');
         $json = Illuminate\Support\Facades\File::get($path);
         return json_decode($json, true);
+    }
+
+    private function cisWin2022(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win2022.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisDebian11(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian11.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisDebian12(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian12.yml');
+        return Yaml::parse($yaml);
     }
 }
