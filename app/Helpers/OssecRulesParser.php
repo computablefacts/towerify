@@ -72,7 +72,7 @@ class OssecRulesParser
                         [],
                     'rules' => [],
                 ];
-            } else if (preg_match('/(?<type>[fpdrc]:)(?<rule>.+);/i', $line, $matches)) {
+            } else if (preg_match('/^(?<type>[fpdrc]:)(?<rule>.+);$/i', $line, $matches)) {
                 $rule = match ($matches['type']) {
                     'f:' => self::parseFileOrDirectory($matches['rule'], $vars),
                     'p:' => self::parseRunningProcesses($matches['rule'], $vars),
@@ -106,7 +106,7 @@ class OssecRulesParser
             ];
         }
         if (count($parts) !== 2) {
-            throw new \Exception("Invalid rule: {$rule}");
+            throw new \Exception("Invalid FILE_OR_DIRECTORY rule: {$rule}");
         }
         return [
             'type' => self::FILE_OR_DIRECTORY,
@@ -143,7 +143,7 @@ class OssecRulesParser
             ];
         }
         if (count($parts) !== 3) {
-            throw new \Exception("Invalid rule: {$rule}");
+            throw new \Exception("Invalid DIRECTORY rule: {$rule}");
         }
         return [
             'type' => self::DIRECTORY,
@@ -162,16 +162,15 @@ class OssecRulesParser
             $rule = trim(Str::substr($rule, 1));
         }
         $parts = array_map('trim', explode("->", $rule));
-        if (count($parts) === 1) {
-            return [
-                'type' => self::PROCESS,
-                'negate' => $negate,
-                'processes' => $vars[$parts[0]] ?? [$parts[0]],
-                'checks' => [],
-            ];
+        if (count($parts) != 1) {
+            throw new \Exception("Invalid PROCESS rule: {$rule}");
         }
-        // TODO
-        return null;
+        return [
+            'type' => self::PROCESS,
+            'negate' => $negate,
+            'processes' => $vars[$parts[0]] ?? [$parts[0]],
+            'checks' => [],
+        ];
     }
 
     private static function parseRegistry(string $rule, array $vars): array
@@ -201,7 +200,7 @@ class OssecRulesParser
             ];
         }
         if (count($parts) !== 3) {
-            throw new \Exception("Invalid rule: {$rule}");
+            throw new \Exception("Invalid REGISTRY rule: {$rule}");
         }
         return [
             'type' => self::REGISTRY,
@@ -221,7 +220,7 @@ class OssecRulesParser
         }
         $parts = array_map('trim', explode("->", $rule));
         if (count($parts) != 2) {
-            throw new \Exception("Invalid rule: {$rule}");
+            throw new \Exception("Invalid COMMAND rule: {$rule}");
         }
         return [
             'type' => self::COMMAND,
