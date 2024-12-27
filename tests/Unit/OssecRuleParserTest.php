@@ -9,8 +9,7 @@ class OssecRuleParserTest extends TestCase
 {
     public function testParseLinuxRule()
     {
-        $parser = new OssecRulesParser();
-        $rule = $parser->parse("
+        $rule = OssecRulesParser::parse("
             \$conf-dirs=/etc/apache2/conf-enabled,/etc/apache2/mods-enabled,/etc/apache2/sites-enabled,/etc/httpd/conf.d,/etc/httpd/modsecurity.d;
             \$mods-en=/etc/apache2/mods-enabled;
             
@@ -78,8 +77,7 @@ class OssecRuleParserTest extends TestCase
 
     public function testParseWindowsRule()
     {
-        $parser = new OssecRulesParser();
-        $rule = $parser->parse("
+        $rule = OssecRulesParser::parse("
             [CIS - Microsoft Windows Server 2012 R2 - 18.3.5: Ensure 'MSS: (KeepAliveTime) How often keep-alive packets are sent in milliseconds' is set to 'Enabled: 300,000 or 5 minutes'] [any] [https://workbench.cisecurity.org/benchmarks/288]
             r:HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters -> KeepAliveTime -> !493e0;
             r:HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters -> !KeepAliveTime;
@@ -119,8 +117,7 @@ class OssecRuleParserTest extends TestCase
 
     public function testParseSimpleCommandRule()
     {
-        $parser = new OssecRulesParser();
-        $rule = $parser->parse("
+        $rule = OssecRulesParser::parse("
             [Ensure rsync service is either not installed or masked] [any] []
             c:dpkg-query -W -f='\${binary:Package}\\t\${Status}\\t\${db:Status-Status}\\n' rsync -> r:unknown ok not-installed|dpkg-query: no packages found matching rsync;
             c:systemctl is-active rsync -> r:^inactive;
@@ -164,8 +161,7 @@ class OssecRuleParserTest extends TestCase
 
     public function testParseComplexCommandRule()
     {
-        $parser = new OssecRulesParser();
-        $rule = $parser->parse("
+        $rule = OssecRulesParser::parse("
             [Ensure only strong Ciphers are used] [none] [https://nvd.nist.gov/vuln/detail/CVE-2016-2183,https://www.openssh.com/txt/cbc.adv,https://nvd.nist.gov/vuln/detail/CVE-2008-5161]
             c:sshd -T -> r:^ciphers && r:3des-cbc|aes128-cbc|aes192-cbc|aes256-cbc;
         ");

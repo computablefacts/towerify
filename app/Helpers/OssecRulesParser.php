@@ -42,7 +42,7 @@ class OssecRulesParser
     const string REGEX = 'regex';
     const string COMMAND = 'command';
 
-    public function parse(string $text): array
+    public static function parse(string $text): array
     {
         $rules = [];
         $lines = array_map('trim', explode("\n", $text));
@@ -64,16 +64,21 @@ class OssecRulesParser
                 $rules[] = [
                     'application_name' => $matches['appname'],
                     'match_type' => $matches['matchtype'],
-                    'references' => $matches['references'] ? explode(',', $matches['references']) : [],
+                    'references' => $matches['references'] ?
+                        collect(explode(',', $matches['references']))
+                            ->map(fn(string $ref) => trim($ref))
+                            ->filter(fn(string $ref) => !empty($ref))
+                            ->toArray() :
+                        [],
                     'rules' => [],
                 ];
             } else if (preg_match('/(?<type>[fpdrc]:)(?<rule>.+);/i', $line, $matches)) {
                 $rule = match ($matches['type']) {
-                    'f:' => $this->parseFileOrDirectory($matches['rule'], $vars),
-                    'p:' => $this->parseRunningProcesses($matches['rule'], $vars),
-                    'r:' => $this->parseRegistry($matches['rule'], $vars),
-                    'd:' => $this->parseFilesInDirectory($matches['rule'], $vars),
-                    'c:' => $this->parseCommandOutput($matches['rule'], $vars),
+                    'f:' => self::parseFileOrDirectory($matches['rule'], $vars),
+                    'p:' => self::parseRunningProcesses($matches['rule'], $vars),
+                    'r:' => self::parseRegistry($matches['rule'], $vars),
+                    'd:' => self::parseFilesInDirectory($matches['rule'], $vars),
+                    'c:' => self::parseCommandOutput($matches['rule'], $vars),
                     default => null,
                 };
                 if (!empty($rules) && !empty($rule)) {
@@ -84,7 +89,7 @@ class OssecRulesParser
         return $rules;
     }
 
-    private function parseFileOrDirectory(string $rule, array $vars): array
+    private static function parseFileOrDirectory(string $rule, array $vars): array
     {
         $rule = trim($rule);
         $negate = Str::startsWith($rule, "!");
@@ -107,11 +112,11 @@ class OssecRulesParser
             'type' => self::FILE_OR_DIRECTORY,
             'negate' => $negate,
             'files' => $vars[$parts[0]] ?? [$parts[0]],
-            'checks' => $this->parseExpression($parts[1]),
+            'checks' => self::parseExpression($parts[1]),
         ];
     }
 
-    private function parseFilesInDirectory(string $rule, array $vars): array
+    private static function parseFilesInDirectory(string $rule, array $vars): array
     {
         $rule = trim($rule);
         $negate = Str::startsWith($rule, "!");
@@ -145,11 +150,11 @@ class OssecRulesParser
             'negate' => $negate,
             'directories' => $vars[$parts[0]] ?? [$parts[0]],
             'files_pattern' => $parts[1],
-            'checks' => $this->parseExpression($parts[2]),
+            'checks' => self::parseExpression($parts[2]),
         ];
     }
 
-    private function parseRunningProcesses(string $rule, array $vars): ?array
+    private static function parseRunningProcesses(string $rule, array $vars): ?array
     {
         $rule = trim($rule);
         $negate = Str::startsWith($rule, "!");
@@ -169,7 +174,7 @@ class OssecRulesParser
         return null;
     }
 
-    private function parseRegistry(string $rule, array $vars): array
+    private static function parseRegistry(string $rule, array $vars): array
     {
         $rule = trim($rule);
         $negate = Str::startsWith($rule, "!");
@@ -191,7 +196,7 @@ class OssecRulesParser
                 'type' => self::REGISTRY,
                 'negate' => $negate,
                 'registries' => $vars[$parts[0]] ?? [$parts[0]],
-                'key_checks' => $this->parseExpression($parts[1]),
+                'key_checks' => self::parseExpression($parts[1]),
                 'value_checks' => [],
             ];
         }
@@ -202,12 +207,12 @@ class OssecRulesParser
             'type' => self::REGISTRY,
             'negate' => $negate,
             'registries' => $vars[$parts[0]] ?? [$parts[0]],
-            'key_checks' => $this->parseExpression($parts[1]),
-            'value_checks' => $this->parseExpression($parts[2]),
+            'key_checks' => self::parseExpression($parts[1]),
+            'value_checks' => self::parseExpression($parts[2]),
         ];
     }
 
-    private function parseCommandOutput(string $rule, array $vars): array
+    private static function parseCommandOutput(string $rule, array $vars): array
     {
         $rule = trim($rule);
         $negate = Str::startsWith($rule, "!");
@@ -222,11 +227,11 @@ class OssecRulesParser
             'type' => self::COMMAND,
             'negate' => $negate,
             'command' => $vars[$parts[0]] ?? $parts[0],
-            'checks' => $this->parseExpression($parts[1]),
+            'checks' => self::parseExpression($parts[1]),
         ];
     }
 
-    private function parseExpression(string $str): array
+    private static function parseExpression(string $str): array
     {
         $expression = [];
         $parts = array_map('trim', explode(" && ", $str));
