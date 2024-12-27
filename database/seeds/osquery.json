@@ -894,6 +894,21 @@
     "score": 0
   },
   {
+    "name": "registry_hives",
+    "description": "Retrieves all of the Windows registry hives.",
+    "query": "SELECT * FROM registry;",
+    "version": "1.4.5",
+    "interval": 86400,
+    "removed": 1,
+    "snapshot": 0,
+    "platform": "windows",
+    "category": "other",
+    "enabled": 1,
+    "attck": null,
+    "is_ioc": 0,
+    "score": 0
+  },
+  {
     "name": "rpm_packages",
     "description": "Retrieves all the installed RPM packages in the target Linux system.",
     "query": "SELECT * FROM rpm_packages;",
