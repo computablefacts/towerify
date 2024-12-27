@@ -45,8 +45,10 @@ class OssecRulesParser
         foreach ($rule['rules'] as $r) {
             $isOk = match ($r['type']) {
                 self::FILE_OR_DIRECTORY_RULE => self::evaluateFileOrDirectory($ctx, $r),
+                self::DIRECTORY_RULE => self::evaluateFilesInDirectory($ctx, $r),
                 default => false,
             };
+            $isOk = $r['negate'] ? !$isOk : $isOk;
             if (($matchType === 'all' && !$isOk) || ($matchType === 'none' && $isOk)) {
                 return false;
             }
@@ -188,6 +190,73 @@ class OssecRulesParser
             ];
         }
         throw new \Exception("Invalid FILE_OR_DIRECTORY rule: {$rule}");
+    }
+
+    private static function evaluateFilesInDirectory(array $ctx, array $rule): bool
+    {
+        $results = [];
+        foreach ($rule['directories'] as $directory) {
+            if ((!isset($rule['expr']) || count($rule['expr']) <= 0) && empty($rule['files'])) {
+                $results[] = $ctx['directory_exists']($directory);
+            } else if (!isset($rule['expr']) || count($rule['expr']) <= 0) {
+                $isOk = true;
+                foreach ($ctx['scandir']($directory) as $file) {
+                    $expr = $rule['files'];
+                    $negate = Str::startsWith($expr, "!");
+                    if ($negate) {
+                        $expr = trim(Str::substr($expr, 1));
+                    }
+                    $matches = null;
+                    if (preg_match("/^r:(.*)$/i", $expr, $matches)) {
+                        if (preg_match("/{$matches[1]}/i", $file)) {
+                            $isOk = !$negate;
+                        } else {
+                            $isOk = $negate;
+                        }
+                    } else {
+                        Log::error("Unknown expression in rule: ");
+                        Log::error($rule);
+                        $isOk = false;
+                    }
+                    if ($isOk) {
+                        break;
+                    }
+                }
+                $results[] = $isOk;
+            } else {
+                $isOk = true;
+                foreach ($ctx['scandir']($directory) as $file) {
+                    $expr = $rule['files'];
+                    $negate = Str::startsWith($expr, "!");
+                    if ($negate) {
+                        $expr = trim(Str::substr($expr, 1));
+                    }
+                    if (preg_match("/^r:(.*)$/i", $expr, $matches)) {
+                        if (preg_match("/{$matches[1]}/i", $file)) {
+                            $isOk = !$negate;
+                        } else {
+                            $isOk = $negate;
+                        }
+                        if ($isOk) {
+                            $isOk = self::evaluateFileOrDirectory($ctx, [
+                                'type' => self::FILE_OR_DIRECTORY_RULE,
+                                'files' => [$file],
+                                'expr' => $rule['expr'],
+                            ]);
+                        }
+                    } else {
+                        Log::error("Unknown expression in rule: ");
+                        Log::error($rule);
+                        $isOk = false;
+                    }
+                    if ($isOk) {
+                        break;
+                    }
+                }
+                $results[] = $isOk;
+            }
+        }
+        return collect($results)->reduce(fn($carry, $item) => $carry && $item, true);
     }
 
     private static function parseFilesInDirectory(string $rule, array $vars): array

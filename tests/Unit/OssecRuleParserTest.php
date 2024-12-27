@@ -325,4 +325,51 @@ class OssecRuleParserTest extends TestCase
 
         $this->assertTrue(OssecRulesParser::evaluate($ctx, $rule));
     }
+
+    public function testMatchFileInDirectory()
+    {
+        $ctx = [
+            'scandir' => function (string $dir) {
+                return ['/etc/hosts', '/etc/hosts.allow', '/etc/hosts.deny'];
+            },
+            'file_get_contents' => function (string $file) {
+                return $file === '/etc/hosts' ? "127.0.0.1       localhost" : "# 127.0.0.1       localhost";
+            },
+            'file_exists' => function (string $file) {
+                return true;
+            },
+            'directory_exists' => function (string $dir) {
+                return true;
+            },
+        ];
+        $rule = OssecRulesParser::parse("
+            [The hosts file contains resolution for localhost] [all] []
+            d:/etc;
+            d:/etc -> r:hosts;
+            d:/etc -> r:hosts -> !r:^# && r:127.0.0.1\s+localhost\s*$;
+        ");
+
+        $this->assertTrue(OssecRulesParser::evaluate($ctx, $rule));
+
+        $rule = OssecRulesParser::parse("
+            [The allow/deny hosts files do not contain resolution for localhost] [all] []
+            not d:/etc -> r:hosts\. -> !r:^# && r:127.0.0.1\s+localhost\s*$;
+        ");
+
+        $this->assertTrue(OssecRulesParser::evaluate($ctx, $rule));
+
+        $rule = OssecRulesParser::parse("
+            [The allow/deny hosts files do not contain resolution for localhost] [all] []
+            not d:/etc -> !r:hosts -> !r:^# && r:127.0.0.1\s+localhost\s*$;
+        ");
+
+        $this->assertTrue(OssecRulesParser::evaluate($ctx, $rule));
+
+        $rule = OssecRulesParser::parse("
+            [The allow/deny hosts files do not contain resolution for localhost] [none] []
+            d:/etc -> r:hosts\. -> !r:^# && r:127.0.0.1\s+localhost\s*$;
+        ");
+
+        $this->assertTrue(OssecRulesParser::evaluate($ctx, $rule));
+    }
 }
