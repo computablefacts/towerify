@@ -12,11 +12,11 @@ use Illuminate\Support\Str;
  * type:<entry name>;
  *
  * Type can be:
- *  - f (for file or directory)
- *  - p (process running)
- *  - r (registry running)
+ *  - f (for file)
+ *  - p (for process)
+ *  - r (for registry)
  *  - d (any file inside the directory)
- *  - c (for executing a command)
+ *  - c (for command)
  *
  * Additional values:
  *  - For the registry and for directories, use "->" to look for a specific entry and another "->" to look for the value.
@@ -36,19 +36,27 @@ class OssecRulesParser
     const string PROCESS_RULE = 'process';
     const string REGISTRY_RULE = 'registry';
     const string DIRECTORY_RULE = 'directory';
-    const string FILE_OR_DIRECTORY_RULE = 'file_or_directory';
+    const string FILE_RULE = 'file';
     const string COMMAND_RULE = 'command';
 
     public static function evaluate(array $ctx, array $rule): bool
     {
+        /*
+         * $ctx = [
+         *      'file_exists' => fn(string $file): bool => {...},
+         *      'directory_exists' => fn(string $directory): bool => {...},
+         *      'registry_entry_exists' => fn(string $entry): bool => {...},
+         *      'fetch_file' => fn(string $file): array => {...},
+         *      'list_files' => fn(string $directory): array => {...},
+         *      'fetch_registry_keys' => fn(string $entry): array => {...},
+         *      'fetch_registry_value' => fn(string $entry, string $key): string => {...},
+         *      'execute' => fn(string $command): array => {...},
+         * ]
+         */
         $matchType = $rule['match_type'];
         foreach ($rule['rules'] as $r) {
-            $isOk = match ($r['type']) {
-                self::FILE_OR_DIRECTORY_RULE => self::evaluateFileOrDirectory($ctx, $r),
-                self::DIRECTORY_RULE => self::evaluateFilesInDirectory($ctx, $r),
-                default => false,
-            };
-            $isOk = $r['negate'] ? !$isOk : $isOk;
+            $matches = self::match($ctx, $r);
+            $isOk = $r['negate'] ? !$matches : $matches;
             if (($matchType === 'all' && !$isOk) || ($matchType === 'none' && $isOk)) {
                 return false;
             }
@@ -89,11 +97,11 @@ class OssecRulesParser
                 ];
             } else if (preg_match('/^(not\s+)*(?<type>[fpdrc]:)(?<rule>.+);$/i', $line, $matches)) { // rule patterns
                 $rule = match ($matches['type']) {
-                    'f:' => self::parseFileOrDirectory(trim($matches['rule']), $vars),
-                    'p:' => self::parseRunningProcesses(trim($matches['rule']), $vars),
+                    'f:' => self::parseFile(trim($matches['rule']), $vars),
+                    'p:' => self::parseProcess(trim($matches['rule']), $vars),
                     'r:' => self::parseRegistry(trim($matches['rule']), $vars),
-                    'd:' => self::parseFilesInDirectory(trim($matches['rule']), $vars),
-                    'c:' => self::parseCommandOutput(trim($matches['rule']), $vars),
+                    'd:' => self::parseDirectory(trim($matches['rule']), $vars),
+                    'c:' => self::parseCommand(trim($matches['rule']), $vars),
                     default => null,
                 };
                 if (!empty($rules) && !empty($rule)) {
@@ -108,158 +116,27 @@ class OssecRulesParser
         return $rules[0];
     }
 
-    private static function evaluateFileOrDirectory(array $ctx, array $rule): bool
-    {
-        $results = [];
-        foreach ($rule['files'] as $file) {
-            if (!isset($rule['expr']) || count($rule['expr']) <= 0) {
-                $results[] = $ctx['file_exists']($file);
-            } else {
-                $isOk = true;
-                $lines = array_filter(array_map('trim', explode("\n", $ctx['file_get_contents']($file))), fn($line) => !empty($line));
-                foreach ($lines as $line) {
-                    foreach ($rule['expr'] as $expr) {
-                        $matches = null;
-                        $negate = Str::startsWith($expr, "!");
-                        if ($negate) {
-                            $expr = trim(Str::substr($expr, 1));
-                        }
-                        if (preg_match('/^n:(.*)\s+compare\s+([><=])+\s*(.*)$/i', $expr, $matches)) {
-                            $op = trim($matches[2]);
-                            $number = trim($matches[3]);
-                            $matchez = null;
-                            if (!preg_match("/{$matches[1]}/i", $line, $matchez)) {
-                                $isOk = $negate;
-                            } else if ($op === '>') {
-                                $isOk = $negate ? $matchez[1] <= $number : $matchez[1] > $number;
-                            } else if ($op === '<') {
-                                $isOk = $negate ? $matchez[1] >= $number : $matchez[1] < $number;
-                            } else if ($op === '=') {
-                                $isOk = $negate ? $matchez[1] != $number : $matchez[1] = $number;
-                            } else if ($op === '>=') {
-                                $isOk = $negate ? $matchez[1] < $number : $matchez[1] >= $number;
-                            } else if ($op === '<=') {
-                                $isOk = $negate ? $matchez[1] > $number : $matchez[1] <= $number;
-                            } else if ($op === '!=' || $op === '<>') {
-                                $isOk = $negate ? $matchez[1] == $number : $matchez[1] != $number;
-                            } else {
-                                Log::error("Unknown operator in rule: ");
-                                Log::error($rule);
-                                $isOk = false;
-                            }
-                        } else if (preg_match('/^r:(.*)$/i', $expr, $matches)) {
-                            if (preg_match("/{$matches[1]}/i", $line)) {
-                                $isOk = !$negate;
-                            } else {
-                                $isOk = $negate;
-                            }
-                        } else {
-                            Log::error("Unknown expression in rule: ");
-                            Log::error($rule);
-                            $isOk = false;
-                        }
-                        if (!$isOk) {
-                            break;
-                        }
-                    }
-                    if ($isOk) {
-                        break;
-                    }
-                }
-                $results[] = $isOk;
-            }
-        }
-        return collect($results)->reduce(fn($carry, $item) => $carry && $item, true);
-    }
-
-    private static function parseFileOrDirectory(string $rule, array $vars): array
+    private static function parseFile(string $rule, array $vars): array
     {
         $matches = null;
         if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
             return [
-                'type' => self::FILE_OR_DIRECTORY_RULE,
+                'type' => self::FILE_RULE,
                 'files' => $vars[trim($matches[1])] ?? [trim($matches[1])],
                 'expr' => array_map('trim', explode(" && ", $matches[2])),
             ];
         }
         if (!Str::contains($rule, "->")) {
             return [
-                'type' => self::FILE_OR_DIRECTORY_RULE,
+                'type' => self::FILE_RULE,
                 'files' => $vars[$rule] ?? [$rule],
                 'expr' => null,
             ];
         }
-        throw new \Exception("Invalid FILE_OR_DIRECTORY rule: {$rule}");
+        throw new \Exception("Invalid FILE rule: {$rule}");
     }
 
-    private static function evaluateFilesInDirectory(array $ctx, array $rule): bool
-    {
-        $results = [];
-        foreach ($rule['directories'] as $directory) {
-            if ((!isset($rule['expr']) || count($rule['expr']) <= 0) && empty($rule['files'])) {
-                $results[] = $ctx['directory_exists']($directory);
-            } else if (!isset($rule['expr']) || count($rule['expr']) <= 0) {
-                $isOk = true;
-                foreach ($ctx['scandir']($directory) as $file) {
-                    $expr = $rule['files'];
-                    $negate = Str::startsWith($expr, "!");
-                    if ($negate) {
-                        $expr = trim(Str::substr($expr, 1));
-                    }
-                    $matches = null;
-                    if (preg_match("/^r:(.*)$/i", $expr, $matches)) {
-                        if (preg_match("/{$matches[1]}/i", $file)) {
-                            $isOk = !$negate;
-                        } else {
-                            $isOk = $negate;
-                        }
-                    } else {
-                        Log::error("Unknown expression in rule: ");
-                        Log::error($rule);
-                        $isOk = false;
-                    }
-                    if ($isOk) {
-                        break;
-                    }
-                }
-                $results[] = $isOk;
-            } else {
-                $isOk = true;
-                foreach ($ctx['scandir']($directory) as $file) {
-                    $expr = $rule['files'];
-                    $negate = Str::startsWith($expr, "!");
-                    if ($negate) {
-                        $expr = trim(Str::substr($expr, 1));
-                    }
-                    if (preg_match("/^r:(.*)$/i", $expr, $matches)) {
-                        if (preg_match("/{$matches[1]}/i", $file)) {
-                            $isOk = !$negate;
-                        } else {
-                            $isOk = $negate;
-                        }
-                        if ($isOk) {
-                            $isOk = self::evaluateFileOrDirectory($ctx, [
-                                'type' => self::FILE_OR_DIRECTORY_RULE,
-                                'files' => [$file],
-                                'expr' => $rule['expr'],
-                            ]);
-                        }
-                    } else {
-                        Log::error("Unknown expression in rule: ");
-                        Log::error($rule);
-                        $isOk = false;
-                    }
-                    if ($isOk) {
-                        break;
-                    }
-                }
-                $results[] = $isOk;
-            }
-        }
-        return collect($results)->reduce(fn($carry, $item) => $carry && $item, true);
-    }
-
-    private static function parseFilesInDirectory(string $rule, array $vars): array
+    private static function parseDirectory(string $rule, array $vars): array
     {
         $matches = null;
         if (preg_match('/(.*)\s*->\s+(.*)\s*->\s+(.*)/i', $rule, $matches)) {
@@ -289,7 +166,7 @@ class OssecRulesParser
         throw new \Exception("Invalid DIRECTORY rule: {$rule}");
     }
 
-    private static function parseRunningProcesses(string $rule, array $vars): array
+    private static function parseProcess(string $rule, array $vars): array
     {
         throw new \Exception("Invalid PROCESS rule: {$rule}");
     }
@@ -302,7 +179,7 @@ class OssecRulesParser
                 'type' => self::REGISTRY_RULE,
                 'entry' => $vars[trim($matches[1])][0] ?? trim($matches[1]),
                 'key' => trim($matches[2]),
-                'value' => array_map('trim', explode(" && ", $matches[3])),
+                'expr' => array_map('trim', explode(" && ", $matches[3])),
             ];
         }
         if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
@@ -310,7 +187,7 @@ class OssecRulesParser
                 'type' => self::REGISTRY_RULE,
                 'entry' => $vars[trim($matches[1])][0] ?? trim($matches[1]),
                 'key' => trim($matches[2]),
-                'value' => null,
+                'expr' => null,
             ];
         }
         if (!Str::contains($rule, "->")) {
@@ -318,13 +195,13 @@ class OssecRulesParser
                 'type' => self::REGISTRY_RULE,
                 'entry' => $vars[$rule][0] ?? [$rule],
                 'key' => null,
-                'value' => null,
+                'expr' => null,
             ];
         }
         throw new \Exception("Invalid REGISTRY rule: {$rule}");
     }
 
-    private static function parseCommandOutput(string $rule, array $vars): array
+    private static function parseCommand(string $rule, array $vars): array
     {
         $matches = null;
         if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
@@ -342,5 +219,132 @@ class OssecRulesParser
             ];
         }
         throw new \Exception("Invalid COMMAND rule: {$rule}");
+    }
+
+    private static function match(array $ctx, array $rule): bool
+    {
+        Log::debug($rule);
+        return match ($rule['type']) {
+
+            self::FILE_RULE => collect($rule['files'])
+                ->filter(fn(string $file) => $ctx['file_exists']($file))
+                ->filter(function (string $file) use ($ctx, $rule) {
+                    return !isset($rule['expr']) || collect($ctx['fetch_file']($file))
+                            ->filter(fn(string $line) => self::matchExpression($line, $rule['expr']))
+                            ->isNotEmpty();
+                })
+                ->isNotEmpty(),
+
+            self::DIRECTORY_RULE => collect($rule['directories'])
+                ->filter(fn(string $directory) => $ctx['directory_exists']($directory))
+                ->filter(function (string $directory) use ($ctx, $rule) {
+                    return !isset($rule['files']) || collect($ctx['list_files']($directory))
+                            ->filter(fn(string $file) => self::matchPattern($file, $rule['files']))
+                            ->filter(function (string $file) use ($ctx, $rule) {
+                                return !isset($rule['expr']) || collect($ctx['fetch_file']($file))
+                                        ->filter(fn(string $line) => self::matchExpression($line, $rule['expr']))
+                                        ->isNotEmpty();
+                            })
+                            ->isNotEmpty();
+                })
+                ->isNotEmpty(),
+
+            self::REGISTRY_RULE => collect([$rule['entry']])
+                ->filter(fn(string $entry) => $ctx['registry_entry_exists']($entry))
+                ->filter(function (string $entry) use ($ctx, $rule) {
+                    return !isset($rule['key']) || collect($ctx['fetch_registry_keys']($entry))
+                            ->filter(fn(string $key) => self::matchPattern($key, $rule['key']))
+                            ->filter(function (string $key) use ($ctx, $rule, $entry) {
+                                return !isset($rule['expr']) || collect($ctx['fetch_registry_value']($entry, $key))
+                                        ->filter(fn(string $value) => self::matchExpression($value, $rule['expr']))
+                                        ->isNotEmpty();
+                            })
+                            ->isNotEmpty();
+                })
+                ->isNotEmpty(),
+
+            self::COMMAND_RULE => collect([$rule['entry']])
+                ->filter(function (string $cmd) use ($ctx, $rule) {
+                    return !isset($rule['expr']) || collect($ctx['execute']($cmd))
+                            ->filter(fn(string $line) => self::matchExpression($line, $rule['expr']))
+                            ->isNotEmpty();
+                })
+                ->isNotEmpty(),
+
+            default => [],
+        };
+    }
+
+    private static function matchExpression(string $string, array $expr): bool
+    {
+        foreach ($expr as $e) {
+            if (!self::matchPattern($string, $e)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static function matchPattern(string $string, string $pattern): bool
+    {
+        Log::debug("Matching {$string} against {$pattern}");
+
+        // Determine if the match must be negated
+        $negate = false;
+        if (Str::startsWith($pattern, '!')) {
+            $negate = true;
+            $pattern = Str::substr($pattern, 1);
+        }
+
+        // Simple regex match: either it matches or it doesn't!
+        if (Str::startsWith($pattern, 'r:')) {
+            $pattern = Str::substr($pattern, 2);
+            if ($negate) {
+                return !preg_match("/{$pattern}/i", $string);
+            }
+            return (bool)preg_match("/{$pattern}/i", $string);
+        }
+
+        // Simple comparisons
+        if (Str::startsWith($pattern, '<:')) {
+            $pattern = Str::substr($pattern, 2);
+            return $negate ? $pattern >= $string : $pattern < $string;
+        }
+        if (Str::startsWith($pattern, '>:')) {
+            $pattern = Str::substr($pattern, 2);
+            return $negate ? $pattern <= $string : $pattern > $string;
+        }
+        if (Str::startsWith($pattern, '=:')) {
+            $pattern = Str::substr($pattern, 2);
+            return $negate ? $pattern != $string : $pattern == $string;
+        }
+
+        // Extract a specific sequence from the input string then compare this sequence against a given value
+        $matches = null;
+        if (preg_match('/^n:(.*)\s+compare\s+([><=]+)\s*(.*)$/i', $pattern, $matches)) {
+            $pattern = trim($matches[1]);
+            $operator = trim($matches[2]);
+            $value = trim($matches[3]);
+            if (!preg_match("/{$pattern}/i", $string, $matches)) {
+                $isOk = $negate;
+            } else if ($operator === '>') {
+                $isOk = $negate ? $matches[1] <= $value : $matches[1] > $value;
+            } else if ($operator === '<') {
+                $isOk = $negate ? $matches[1] >= $value : $matches[1] < $value;
+            } else if ($operator === '=') {
+                $isOk = $negate ? $matches[1] != $value : $matches[1] = $value;
+            } else if ($operator === '>=') {
+                $isOk = $negate ? $matches[1] < $value : $matches[1] >= $value;
+            } else if ($operator === '<=') {
+                $isOk = $negate ? $matches[1] > $value : $matches[1] <= $value;
+            } else if ($operator === '!=' || $operator === '<>') {
+                $isOk = $negate ? $matches[1] == $value : $matches[1] != $value;
+            } else {
+                Log::error("Unknown operation: {$pattern} {$operator} {$value}");
+                $isOk = false;
+            }
+            return $isOk;
+        }
+        return $negate ? $string != $pattern : $string === $pattern;
     }
 }
