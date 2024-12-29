@@ -266,19 +266,69 @@ class DatabaseSeeder extends Seeder
 
     private function setupOssecRules(): void
     {
-        $rules = [
+        $policies = [
+            $this->cisNginx(),
+            $this->cisApache(),
+            $this->cisIis(),
+            $this->cisWeb(),
+            $this->cisUnixAudit(),
+            $this->cisWin10(),
+            $this->cisWin11(),
+            $this->cisWin2016(),
+            $this->cisWin2019(),
             $this->cisWin2022(),
+            $this->cisDebian7(),
+            $this->cisDebian8(),
+            $this->cisDebian9(),
+            $this->cisDebian10(),
             $this->cisDebian11(),
             $this->cisDebian12(),
+            $this->cisUbuntu1404(),
+            $this->cisUbuntu1604(),
+            $this->cisUbuntu1804(),
+            $this->cisUbuntu2004(),
+            $this->cisUbuntu2204(),
+            $this->cisCentOs6(),
+            $this->cisCentOs7(),
+            $this->cisCentOs8(),
         ];
+
         Log::debug('Parsing rules...');
+
         $ok = 0;
         $ko = 0;
-        foreach ($rules as $rule) {
 
-            $policy = $rule['policy'];
-            $requirements = $rule['requirements'];
-            $checks = $rule['checks'];
+        $frameworks = [];
+
+        foreach ($policies as $policy) {
+
+            $requirements = $policy['requirements'];
+            $checks = $policy['checks'];
+            $policyId = $policy['policy']['id'] ?? '';
+            $policyName = $policy['policy']['name'] ?? '';
+            $policyDescription = $policy['policy']['description'] ?? '';
+
+            Log::debug("Importing policies {$policyName}...");
+
+            $title = $requirements['title'];
+            $condition = $requirements['condition'] ?? 'all';
+            $references = isset($policy['policy']['references']) ? collect($policy['policy']['references'])->join(",") : '';
+            $expressions = collect($requirements['rules'])->join(";\n");
+            $str = "
+                [{$title}] [$condition] [{$references}]
+                {$expressions};
+            ";
+            $rules = \App\Helpers\OssecRulesParser::parse($str);
+
+            $pol = \App\Models\YnhOssecPolicy::updateOrCreate([
+                'uid' => $policyId,
+            ], [
+                'uid' => $policyId,
+                'name' => $policyName,
+                'description' => $policyDescription,
+                'references' => $policy['policy']['references'] ?? [],
+                'requirements' => $rules,
+            ]);
 
             foreach ($checks as $check) {
                 try {
@@ -288,6 +338,7 @@ class DatabaseSeeder extends Seeder
                     $rationale = $check['rationale'] ?? '';
                     $impact = $check['impact'] ?? '';
                     $remediation = $check['remediation'] ?? '';
+                    $compliance = $check['compliance'] ?? [];
                     $condition = $check['condition'] ?? 'all';
                     $references = isset($check['references']) ? collect($check['references'])->join(',') : '';
                     $expressions = collect($check['rules'])->join(";\n");
@@ -295,13 +346,27 @@ class DatabaseSeeder extends Seeder
                         [{$title}] [$condition] [{$references}]
                         {$expressions};
                     ";
-                    $rulez = \App\Helpers\OssecRulesParser::parse($str);
-                    if (count($rulez) <= 0 || count($rulez['rules']) <= 0) {
+                    $rules = \App\Helpers\OssecRulesParser::parse($str);
+                    if (count($rules) <= 0 || count($rules['rules']) <= 0) {
                         Log::warning($str);
-                        Log::warning($rulez);
+                        Log::warning($rules);
                         $ko++;
                     } else {
-                        // TODO
+                        \App\Models\YnhOssecCheck::updateOrCreate([
+                            'uid' => $id,
+                        ], [
+                            'ynh_ossec_policy_id' => $pol->id,
+                            'uid' => $id,
+                            'title' => $title,
+                            'description' => $description,
+                            'rationale' => $rationale,
+                            'impact' => $impact,
+                            'remediation' => $remediation,
+                            'compliance' => $compliance,
+                            'references' => $check['references'] ?? [],
+                            'requirements' => $rules,
+                        ]);
+                        $frameworks = array_merge($frameworks, collect($compliance)->flatMap(fn(array $compliance) => array_keys($compliance))->toArray());
                         $ok++;
                     }
                 } catch (\Exception $e) {
@@ -310,7 +375,19 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+
+        $frameworks = collect($frameworks)
+            ->map(fn(string $framework) => \Illuminate\Support\Str::upper(\Illuminate\Support\Str::replace('_', ' ', $framework)))
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+
+        Log::debug('Frameworks:');
+        Log::debug($frameworks);
+
         $total = $ok + $ko;
+
         Log::debug("{$total} rules parsed. {$ok} OK. {$ko} KO.");
     }
 
@@ -369,9 +446,57 @@ class DatabaseSeeder extends Seeder
         return json_decode($json, true);
     }
 
+    private function cisWin10(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win10_enterprise.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisWin11(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win11_enterprise.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisWin2016(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win2016.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisWin2019(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win2019.yml');
+        return Yaml::parse($yaml);
+    }
+
     private function cisWin2022(): array
     {
         $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win2022.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisDebian7(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian7.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisDebian8(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian8.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisDebian9(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian9.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisDebian10(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian10.yml');
         return Yaml::parse($yaml);
     }
 
@@ -384,6 +509,84 @@ class DatabaseSeeder extends Seeder
     private function cisDebian12(): array
     {
         $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian12.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisUbuntu1404(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu14_04.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisUbuntu1604(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu16_04.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisUbuntu1804(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu18_04.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisUbuntu2004(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu20_04.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisUbuntu2204(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu22_04.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisCentOs6(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/centos/6/cis_centos6_linux.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisCentOs7(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/centos/7/cis_centos7_linux.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisCentOs8(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/centos/8/cis_centos8_linux.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisUnixAudit(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/generic/sca_unix_audit.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisNginx(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/nginx/cis_nginx_1.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisApache(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/applications/cis_apache_24.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisIis(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/applications/cis_iis_10.yml');
+        return Yaml::parse($yaml);
+    }
+
+    private function cisWeb(): array
+    {
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/applications/web_vulnerabilities.yml');
         return Yaml::parse($yaml);
     }
 }

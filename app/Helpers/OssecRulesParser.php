@@ -119,7 +119,7 @@ class OssecRulesParser
     private static function parseFile(string $rule, array $vars): array
     {
         $matches = null;
-        if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
+        if (preg_match('/(.*)\s*->\s*(.*)/i', $rule, $matches)) {
             return [
                 'type' => self::FILE_RULE,
                 'files' => $vars[trim($matches[1])] ?? [trim($matches[1])],
@@ -139,7 +139,7 @@ class OssecRulesParser
     private static function parseDirectory(string $rule, array $vars): array
     {
         $matches = null;
-        if (preg_match('/(.*)\s*->\s+(.*)\s*->\s+(.*)/i', $rule, $matches)) {
+        if (preg_match('/(.*)\s*->\s*(.*)\s*->\s*(.*)/i', $rule, $matches)) {
             return [
                 'type' => self::DIRECTORY_RULE,
                 'directories' => $vars[trim($matches[1])] ?? [trim($matches[1])],
@@ -147,7 +147,7 @@ class OssecRulesParser
                 'expr' => array_map('trim', explode(" && ", $matches[3])),
             ];
         }
-        if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
+        if (preg_match('/(.*)\s*->\s*(.*)/i', $rule, $matches)) {
             return [
                 'type' => self::DIRECTORY_RULE,
                 'directories' => $vars[trim($matches[1])] ?? [trim($matches[1])],
@@ -174,7 +174,7 @@ class OssecRulesParser
     private static function parseRegistry(string $rule, array $vars): array
     {
         $matches = null;
-        if (preg_match('/(.*)\s*->\s+(.*)\s*->\s+(.*)/i', $rule, $matches)) {
+        if (preg_match('/(.*)\s*->\s*(.*)\s*->\s*(.*)/i', $rule, $matches)) {
             return [
                 'type' => self::REGISTRY_RULE,
                 'entry' => $vars[trim($matches[1])][0] ?? trim($matches[1]),
@@ -182,7 +182,7 @@ class OssecRulesParser
                 'expr' => array_map('trim', explode(" && ", $matches[3])),
             ];
         }
-        if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
+        if (preg_match('/(.*)\s*->\s*(.*)/i', $rule, $matches)) {
             return [
                 'type' => self::REGISTRY_RULE,
                 'entry' => $vars[trim($matches[1])][0] ?? trim($matches[1]),
@@ -204,7 +204,7 @@ class OssecRulesParser
     private static function parseCommand(string $rule, array $vars): array
     {
         $matches = null;
-        if (preg_match('/(.*)\s*->\s+(.*)/i', $rule, $matches)) {
+        if (preg_match('/(.*)\s*->\s*(.*)/i', $rule, $matches)) {
             return [
                 'type' => self::COMMAND_RULE,
                 'cmd' => $vars[trim($matches[1])][0] ?? trim($matches[1]),
