@@ -131,6 +131,7 @@ if (!function_exists('app_sidebar')) {
             return [
                 [
                     'section_name' => __('Home'),
+                    'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
                     'section_items' => [
                         [
                             'label' => __('Overview'),
@@ -149,6 +150,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Vulnerability Scanner'),
+                    'hidden' => !Auth::user()->canUseVulnerabilityScanner(),
                     'section_items' => [
                         [
                             'label' => __('Assets'),
@@ -166,6 +168,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Agents'),
+                    'hidden' => !Auth::user()->canUseAgents(),
                     'section_items' => [
                         [
                             'label' => __('Servers'),
@@ -179,6 +182,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Honeypots'),
+                    'hidden' => !Auth::user()->canUseHoneypots(),
                     'section_items' => [
                         [
                             'label' => __('Honeypots'),
@@ -216,8 +220,8 @@ if (!function_exists('app_sidebar')) {
                             'active' => request()->route()->named('home') && request()->get('tab') === 'collections',
                         ], [
                             'label' => __('Documents'),
-                            'route' => route('home', ['tab' => 'knowledge_base']),
-                            'active' => request()->route()->named('home') && request()->get('tab') === 'knowledge_base',
+                            'route' => route('home', ['tab' => 'documents']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'documents',
                         ], [
                             'label' => __('Chunks'),
                             'route' => route('home', ['tab' => 'chunks']),
@@ -230,6 +234,7 @@ if (!function_exists('app_sidebar')) {
                     ],
                 ], [
                     'section_name' => __('YunoHost'),
+                    'hidden' => !Auth::user()->canUseYunoHost(),
                     'section_items' => [
                         [
                             'label' => __('Desktop'),
@@ -269,6 +274,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Marketplace'),
+                    'hidden' => !Auth::user()->canUseMarketplace(),
                     'section_items' => [
                         [
                             'label' => __('Admin'),

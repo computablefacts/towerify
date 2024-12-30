@@ -159,9 +159,34 @@ class User extends \Konekt\AppShell\Models\User
         return $this->hasPermissionTo(Permission::USE_ADVERSARY_METER);
     }
 
+    public function canUseVulnerabilityScanner(): bool
+    {
+        return $this->canUseAdversaryMeter() || $this->hasPermissionTo(Permission::USE_VULNERABILITY_SCANNER);
+    }
+
+    public function canUseHoneypots(): bool
+    {
+        return $this->canUseAdversaryMeter() || $this->hasPermissionTo(Permission::USE_HONEYPOTS);
+    }
+
+    public function canUseAgents(): bool
+    {
+        return $this->canManageServers() || $this->hasPermissionTo(Permission::USE_AGENTS);
+    }
+
     public function canUseCyberBuddy(): bool
     {
         return $this->hasPermissionTo(Permission::USE_CYBER_BUDDY);
+    }
+
+    public function canUseYunoHost(): bool
+    {
+        return $this->canManageApps() || $this->hasPermissionTo(Permission::USE_YUNOHOST);
+    }
+
+    public function canUseMarketplace(): bool
+    {
+        return $this->canBuyStuff() || $this->hasPermissionTo(Permission::USE_MARKETPLACE);
     }
 
     public function ynhUsername(): string

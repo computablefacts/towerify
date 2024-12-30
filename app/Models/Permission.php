@@ -16,5 +16,10 @@ class Permission extends PermissionBase
 
     const BUY_STUFF = 'buy stuff'; // display store & cart
     const USE_ADVERSARY_METER = 'use adversary meter';
+    const USE_HONEYPOTS = 'use honeypots';
+    const USE_VULNERABILITY_SCANNER = 'use vulnerability scanner';
+    const USE_AGENTS = 'use agents';
     const USE_CYBER_BUDDY = 'use cyber buddy';
+    const USE_YUNOHOST = 'use yunohost';
+    const USE_MARKETPLACE = 'use marketplace';
 }

@@ -10,16 +10,19 @@ class Role extends RoleBase
     const ADMINISTRATOR = 'administrator';
     const LIMITED_ADMINISTRATOR = 'limited administrator';
     const BASIC_END_USER = 'basic end user';
+    const CYBERBUDDY_ONLY = 'cyberbuddy only';
     const ROLES = [
         self::ADMIN => [
 
             // Hardware
             Permission::LIST_SERVERS,
             Permission::MANAGE_SERVERS,
+            Permission::USE_AGENTS,
 
             // Software
             Permission::LIST_APPS,
             Permission::MANAGE_APPS,
+            Permission::USE_YUNOHOST,
 
             // Users
             Permission::LIST_USERS,
@@ -27,9 +30,12 @@ class Role extends RoleBase
 
             // Access to store and cart
             Permission::BUY_STUFF,
+            Permission::USE_MARKETPLACE,
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
+            Permission::USE_VULNERABILITY_SCANNER,
+            Permission::USE_HONEYPOTS,
 
             // Access to CyberBuddy
             Permission::USE_CYBER_BUDDY,
@@ -39,10 +45,12 @@ class Role extends RoleBase
             // Hardware
             Permission::LIST_SERVERS,
             Permission::MANAGE_SERVERS,
+            Permission::USE_AGENTS,
 
             // Software
             Permission::LIST_APPS,
             Permission::MANAGE_APPS,
+            Permission::USE_YUNOHOST,
 
             // Users
             Permission::LIST_USERS,
@@ -50,9 +58,12 @@ class Role extends RoleBase
 
             // Access to store and cart
             // Permission::BUY_STUFF,
+            // Permission::USE_MARKETPLACE,
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
+            Permission::USE_VULNERABILITY_SCANNER,
+            Permission::USE_HONEYPOTS,
 
             // Access to CyberBuddy
             Permission::USE_CYBER_BUDDY,
@@ -71,6 +82,7 @@ class Role extends RoleBase
             // Software
             Permission::LIST_APPS,
             Permission::MANAGE_APPS,
+            Permission::USE_YUNOHOST,
 
             // Users
             Permission::LIST_USERS,
@@ -78,15 +90,21 @@ class Role extends RoleBase
 
             // Access to store and cart
             // Permission::BUY_STUFF,
+            // Permission::USE_MARKETPLACE,
 
             // Access to AdversaryMeter
             Permission::USE_ADVERSARY_METER,
+            Permission::USE_VULNERABILITY_SCANNER,
+            Permission::USE_HONEYPOTS,
 
             // Access to CyberBuddy
             Permission::USE_CYBER_BUDDY,
         ],
         self::BASIC_END_USER => [
             Permission::LIST_APPS,
+        ],
+        self::CYBERBUDDY_ONLY => [
+            Permission::USE_CYBER_BUDDY,
         ],
     ];
 }
