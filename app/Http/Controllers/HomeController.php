@@ -28,49 +28,49 @@ class HomeController extends Controller
         $tab = $request->input('tab', 'overview');
 
         if ($user->hasRole(Role::CYBERBUDDY_ONLY)) {
-            $tab = 'ama';
-            $servers = collect();
-            $notifications = collect();
-        } else {
-
-            // LEGACY CODE BEGINS : AUTOMATICALLY SYNC THE USER'S ACCOUNT ACROSS YNH SERVERS
-            try {
-                event(new PasswordReset($user));
-            } catch (\Exception $exception) {
-                Log::error($exception->getMessage());
+            if (!in_array($tab, ['ama', 'sca', 'ai_writer', 'conversations', 'collections', 'documents', 'chunks', 'prompts'])) {
+                return redirect()->route('home', ['tab' => 'ama']);
             }
-            // LEGACY CODE ENDS
-            // LEGACY CODE BEGINS : AUTOMATICALLY CREATE A PROPER SUPERSET ACCOUNT FOR ALL USERS
-            try {
-                if (!$user->superset_id) {
-
-                    $json = ApiUtils::get_or_add_user($user);
-
-                    $user->superset_id = $json['id'];
-                    $user->save();
-                }
-            } catch (\Exception $exception) {
-                Log::error($exception->getMessage());
-            }
-            // LEGACY CODE ENDS
-
-            $servers = YnhServer::forUser($user)
-                ->filter(fn(YnhServer $server) => $servers_type !== 'ynh' || $server->isYunoHost());
-
-            $notifications = $user->unreadNotifications
-                ->map(function ($notification) {
-                    return [
-                        'id' => $notification->id,
-                        'data' => $notification->data,
-                        'timestamp' => $notification->updated_at->format('Y-m-d H:i') . ' UTC',
-                    ];
-                })
-                ->sortBy([
-                    ['timestamp', 'desc']
-                ])
-                ->values()
-                ->all();
         }
+
+        // LEGACY CODE BEGINS : AUTOMATICALLY SYNC THE USER'S ACCOUNT ACROSS YNH SERVERS
+        try {
+            event(new PasswordReset($user));
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+        }
+        // LEGACY CODE ENDS
+        // LEGACY CODE BEGINS : AUTOMATICALLY CREATE A PROPER SUPERSET ACCOUNT FOR ALL USERS
+        try {
+            if (!$user->superset_id) {
+
+                $json = ApiUtils::get_or_add_user($user);
+
+                $user->superset_id = $json['id'];
+                $user->save();
+            }
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+        }
+        // LEGACY CODE ENDS
+
+        $servers = YnhServer::forUser($user)
+            ->filter(fn(YnhServer $server) => $servers_type !== 'ynh' || $server->isYunoHost());
+
+        $notifications = $user->unreadNotifications
+            ->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'data' => $notification->data,
+                    'timestamp' => $notification->updated_at->format('Y-m-d H:i') . ' UTC',
+                ];
+            })
+            ->sortBy([
+                ['timestamp', 'desc']
+            ])
+            ->values()
+            ->all();
+
         return view('index', compact(
             'tab',
             'limit',
