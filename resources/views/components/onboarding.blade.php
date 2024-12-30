@@ -98,7 +98,7 @@
       </li>
       <li class="{{ $hasPssi ? 'completed' : 'incomplete' }}">
         @if($hasPssi)
-        <a href="{{ route('home', ['tab' => 'knowledge_base']) }}" target="_blank">
+        <a href="{{ route('home', ['tab' => 'documents']) }}" target="_blank">
           {{ __('ISSP') }}
         </a>
         @else

@@ -8,7 +8,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 
-class KnowledgeBase extends Component
+class Documents extends Component
 {
     public Collection $files;
     public string $collection;
@@ -61,6 +61,6 @@ class KnowledgeBase extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.knowledge-base');
+        return view('components.documents');
     }
 }

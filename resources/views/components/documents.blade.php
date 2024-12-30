@@ -111,20 +111,20 @@
         <ul class="pagination justify-content-center mt-3 mb-3">
           <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('home', ['tab' => 'knowledge_base', 'page' => 1, 'collection' => $collection]) }}">
+               href="{{ route('home', ['tab' => 'documents', 'page' => 1, 'collection' => $collection]) }}">
               <span>&laquo;&nbsp;{{ __('First') }}</span>
             </a>
           </li>
           <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage <= 1 ? 1 : $currentPage - 1, 'collection' => $collection]) }}">
+               href="{{ route('home', ['tab' => 'documents', 'page' => $currentPage <= 1 ? 1 : $currentPage - 1, 'collection' => $collection]) }}">
               <span>&lt;&nbsp;{{ __('Previous') }}</span>
             </a>
           </li>
           <!--
           @if($currentPage > 1)
           <li class="page-item">
-            <a class="page-link" href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage - 1, 'collection' => $collection]) }}">
+            <a class="page-link" href="{{ route('home', ['tab' => 'documents', 'page' => $currentPage - 1, 'collection' => $collection]) }}">
               {{ $currentPage - 1 }}
             </a>
           </li>
@@ -132,14 +132,14 @@
           -->
           <li class="page-item">
             <a class="page-link active"
-               href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage, 'collection' => $collection]) }}">
+               href="{{ route('home', ['tab' => 'documents', 'page' => $currentPage, 'collection' => $collection]) }}">
               {{ $currentPage }}
             </a>
           </li>
           <!--
           @if($currentPage < $nbPages)
           <li class="page-item">
-            <a class="page-link" href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage + 1, 'collection' => $collection]) }}">
+            <a class="page-link" href="{{ route('home', ['tab' => 'documents', 'page' => $currentPage + 1, 'collection' => $collection]) }}">
               {{ $currentPage + 1 }}
             </a>
           </li>
@@ -147,12 +147,12 @@
           -->
           <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $currentPage >= $nbPages ? $nbPages : $currentPage + 1, 'collection' => $collection])}}">
+               href="{{ route('home', ['tab' => 'documents', 'page' => $currentPage >= $nbPages ? $nbPages : $currentPage + 1, 'collection' => $collection])}}">
               <span>{{ __('Next') }}&nbsp;&gt;</span>
             </a>
           </li>
           <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
-            <a class="page-link" href="{{ route('home', ['tab' => 'knowledge_base', 'page' => $nbPages]) }}">
+            <a class="page-link" href="{{ route('home', ['tab' => 'documents', 'page' => $nbPages]) }}">
               <span>{{ __('Last') }}&nbsp;&raquo;</span>
             </a>
           </li>

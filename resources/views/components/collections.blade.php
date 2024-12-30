@@ -30,7 +30,7 @@
         </td>
         <td><span class="lozenge new">{{ $collection->name }}</span></td>
         <td style="text-align:right">
-          <a href="{{ route('home', ['tab' => 'knowledge_base', 'page' => 1, 'collection' => $collection->name]) }}">
+          <a href="{{ route('home', ['tab' => 'documents', 'page' => 1, 'collection' => $collection->name]) }}">
             {{ Illuminate\Support\Number::format($collection->files->count(), locale:'sv') }}
           </a>
         </td>

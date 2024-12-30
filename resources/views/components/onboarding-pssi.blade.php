@@ -12,7 +12,7 @@
       garantissant ainsi une sécurité optimale et proactive face aux risques émergents.
     </div>
     <div class="card-text">
-      Pour importer votre PSSI, cliquez <a href="{{ route('home', ['tab' => 'knowledge_base']) }}"
+      Pour importer votre PSSI, cliquez <a href="{{ route('home', ['tab' => 'documents']) }}"
                                            target="_blank">ici</a>.
     </div>
   </div>
