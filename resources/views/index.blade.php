@@ -52,7 +52,8 @@
   @endif
   @if($tab === 'sca')
   <x-sca :policy="request()->input('policy') ? request()->input('policy') : ''"
-         :framework="request()->input('framework') ? request()->input('framework') : ''"/>
+         :framework="request()->input('framework') ? request()->input('framework') : ''"
+         :search="request()->input('search') ? request()->input('search') : ''"/>
   @endif
   @if($tab === 'interdependencies')
   <x-interdependencies/>

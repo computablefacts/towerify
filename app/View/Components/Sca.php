@@ -7,28 +7,33 @@ use App\Models\YnhOssecPolicy;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 
 class Sca extends Component
 {
     public ?string $policy;
     public ?string $framework;
+    public ?string $search;
     public Collection $policies;
     public Collection $frameworks;
     public Collection $checks;
 
-    public function __construct(?string $policy = null, ?string $framework = null)
+    public function __construct(?string $policy = null, ?string $framework = null, ?string $search = null)
     {
-        $this->policies = YnhOssecPolicy::select('id', 'uid', 'name')->orderBy('name')->get();
-
-        $checks = YnhOssecCheck::query();
-
-        if (!empty($policy) && $policy !== 'null') {
-            $checks = $checks->whereIn('ynh_ossec_policy_id', $this->policies->filter(fn(YnhOssecPolicy $p) => $p->uid === $policy)->pluck('id'));
-        }
-
         $this->policy = empty($policy) || $policy === 'null' ? null : $policy;
         $this->framework = empty($framework) || $framework === 'null' ? null : $framework;
+        $this->search = empty($search) || $search === 'null' ? null : $search;
+        $this->policies = YnhOssecPolicy::select('id', 'uid', 'name')->orderBy('name')->get();
+        $checks = YnhOssecCheck::query();
+
+        if ($this->policy) {
+            $checks = $checks->whereIn('ynh_ossec_policy_id', $this->policies->filter(fn(YnhOssecPolicy $p) => $p->uid === $this->policy)->pluck('id'));
+        }
+        if ($this->search) {
+            $checks = $checks->whereFullText(['title', 'description', 'rationale', 'remediation'], $this->search);
+        }
+
         $this->frameworks = $checks->get()
             ->flatMap(fn(YnhOssecCheck $check) => $check->frameworks())
             ->unique()

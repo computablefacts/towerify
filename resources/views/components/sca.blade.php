@@ -10,6 +10,14 @@
         <div id="frameworks"></div>
       </div>
     </div>
+    <div class="row mt-3">
+      <div class="col">
+        <div id="search"></div>
+      </div>
+      <div class="col col-auto">
+        <div id="submit"></div>
+      </div>
+    </div>
   </div>
 </div>
 @foreach($checks as $check)
@@ -119,9 +127,10 @@
 
   let selectedPolicy = null;
   let selectedFramework = null;
+  let searchText = null;
 
   const queryString = () => '?tab=sca' + (selectedPolicy ? '&policy=' + selectedPolicy.uid : '') + (selectedFramework
-    ? '&framework=' + selectedFramework : '');
+    ? '&framework=' + selectedFramework : '') + (searchText ? '&search=' + searchText : '');
 
   const elPolicies = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('policies'),
     item => item.name);
@@ -132,7 +141,9 @@
   elPolicies.onSelectionChange(item => {
     selectedPolicy = item;
     selectedFramework = null;
+    searchText = null;
     elFrameworks.disabled = !selectedPolicy;
+    elSearch.disabled = !selectedPolicy;
     window.location = window.location.href.split('?')[0] + queryString();
   });
 
@@ -143,8 +154,24 @@
   elFrameworks.selectedItem = selectedFramework;
   elFrameworks.onSelectionChange(item => {
     selectedFramework = item;
+    searchText = null;
     window.location = window.location.href.split('?')[0] + queryString();
   });
   elFrameworks.disabled = !selectedPolicy;
+
+  const elSearch = new com.computablefacts.blueprintjs.MinimalTextInput(document.getElementById('search'),
+    "{{ $search }}");
+  elSearch.icon = 'filter';
+  elSearch.placeholder = "{{ __('Filtrer...') }}";
+  elSearch.disabled = !selectedPolicy;
+
+  const elSubmit = new com.computablefacts.blueprintjs.MinimalButton(document.getElementById('submit'),
+    "{{ __('Apply') }}");
+  elSubmit.rightIcon = 'chevron-right';
+  elSubmit.disabled = !selectedPolicy;
+  elSubmit.onClick(() => {
+    searchText = elSearch.value;
+    window.location = window.location.href.split('?')[0] + queryString();
+  });
 
 </script>
