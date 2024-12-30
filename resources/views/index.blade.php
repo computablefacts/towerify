@@ -50,6 +50,10 @@
   @if($tab === 'prompts')
   <x-prompts :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
+  @if($tab === 'sca')
+  <x-sca :policy="request()->input('policy') ? request()->input('policy') : ''"
+         :framework="request()->input('framework') ? request()->input('framework') : ''"/>
+  @endif
   @if($tab === 'interdependencies')
   <x-interdependencies/>
   @endif

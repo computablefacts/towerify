@@ -1359,9 +1359,14 @@ blueprintjs.MinimalSelect = class extends blueprintjs.Blueprintjs {
         if (!props.modifiers.matchesPredicate) {
           return null;
         }
+        let active = props.modifiers.active;
+        if (this.selectedItem) {
+          active = (this.itemToText_ ? this.itemToText_(this.selectedItem) : this.selectedItem) === (this.itemToText_
+            ? this.itemToText_(item) : item);
+        }
         return React__default["default"].createElement(core.MenuItem, {
           key: props.index,
-          selected: props.modifiers.active,
+          selected: active,
           text: this.itemToText_ ? this.itemToText_(item) : item,
           label: this.itemToLabel_ ? this.itemToLabel_(item) : '',
           onFocus: props.handleFocus,

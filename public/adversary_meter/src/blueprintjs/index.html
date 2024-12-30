@@ -50,6 +50,7 @@
 <div id="slider"></div>
 <div id="select-with-filter"></div>
 <div id="select-without-filter"></div>
+<div id="select-without-filter-2"></div>
 <div id="table">
   Loading...
   <noscript>JavaScript is required.</noscript>
@@ -103,7 +104,10 @@
     }).then(response => console.log(response));
 */
     httpClient.findObjects({
-      format: 'arrays',dataset: 'job-syndics-clients-avec-codes-communes-2', sample_size: 10, json_query: 'NOM:"sevig*" AND CAGTCO:[94 TO 94]',
+      format: 'arrays',
+      dataset: 'job-syndics-clients-avec-codes-communes-2',
+      sample_size: 10,
+      json_query: 'NOM:"sevig*" AND CAGTCO:[94 TO 94]',
     }).then(response => console.log(response));
 
     /*
@@ -245,6 +249,23 @@
       filterable: false,
       items: ['A', 'B', 'C'],
       selected_item: 'B',
+      on_selection_change: item => console.log(item),
+    });
+  }
+
+  function testSelect3() {
+
+    const root = document.getElementById('select-without-filter-2');
+    root.style.width = '300px';
+    root.style.height = '50px';
+
+    const select = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Select',
+      container: 'select-without-filter-2',
+      filterable: false,
+      items: [{id: 1, name: 'A'}, {id: 2, name: 'B'}, {id: 3, name: 'C'}],
+      selected_item: {id: 3, name: 'C'},
+      item_to_text: item => item.name,
       on_selection_change: item => console.log(item),
     });
   }
@@ -668,6 +689,7 @@
   testTable();
   testSelect1();
   testSelect2();
+  testSelect3();
   testSlider();
   testRangeSlider();
   testDrawer();

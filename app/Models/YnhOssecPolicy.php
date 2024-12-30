@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int id
@@ -36,4 +37,9 @@ class YnhOssecPolicy extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function checks(): HasMany
+    {
+        return $this->hasMany(YnhOssecCheck::class, 'ynh_ossec_policy_id', 'id');
+    }
 }

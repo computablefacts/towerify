@@ -203,6 +203,10 @@ if (!function_exists('app_sidebar')) {
                     'hidden' => !Auth::user()->canUseCyberBuddy(),
                     'section_items' => [
                         [
+                            'label' => __('Policies'),
+                            'route' => route('home', ['tab' => 'sca']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'sca',
+                        ], [
                             'label' => __('AI Writer'),
                             'route' => route('home', ['tab' => 'ai_writer']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ai_writer',

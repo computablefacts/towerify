@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 /**
  * @property int id
@@ -53,5 +54,56 @@ class YnhOssecCheck extends Model
     public function policy(): BelongsTo
     {
         return $this->belongsTo(YnhOssecPolicy::class, 'ynh_ossec_policy_id', 'id');
+    }
+
+    public function frameworks(): array
+    {
+        return collect($this->compliance)
+            ->flatMap(fn(array $compliance) => array_keys($compliance))
+            ->map(fn(string $framework) => Str::upper(Str::replace('_', ' ', $framework)))
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+    }
+
+    public function hasMitreTactics(): bool
+    {
+        return in_array('MITRE TACTICS', $this->frameworks());
+    }
+
+    public function mitreTactics(): array
+    {
+        return collect($this->compliance)
+            ->flatMap(fn(array $compliance) => $compliance['mitre_tactics'] ?? [])
+            ->values()
+            ->toArray();
+    }
+
+    public function hasMitreTechniques(): bool
+    {
+        return in_array('MITRE TECHNIQUES', $this->frameworks());
+    }
+
+    public function mitreTechniques()
+    {
+        return collect($this->compliance)
+            ->flatMap(fn(array $compliance) => $compliance['mitre_techniques'] ?? [])
+            ->map(fn(string $technic) => Str::replace('.', '/', $technic))
+            ->values()
+            ->toArray();
+    }
+
+    public function hasMitreMitigations(): bool
+    {
+        return in_array('MITRE MITIGATIONS', $this->frameworks());
+    }
+
+    public function mitreMitigations()
+    {
+        return collect($this->compliance)
+            ->flatMap(fn(array $compliance) => $compliance['mitre_mitigations'] ?? [])
+            ->values()
+            ->toArray();
     }
 }

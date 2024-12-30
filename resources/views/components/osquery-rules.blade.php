@@ -48,9 +48,15 @@
           </div>
           <div class="text-muted">
             @foreach(explode(',', $rule->attck) as $attck)
+            @if(\Illuminate\Support\Str::startsWith($attck, 'TA'))
+            <a href="https://attack.mitre.org/tactics/{{ $attck }}/">
+              {{ $attck }}
+            </a>&nbsp;
+            @else
             <a href="https://attack.mitre.org/techniques/{{ $attck }}/">
               {{ $attck }}
             </a>&nbsp;
+            @endif
             @endforeach
           </div>
           @endif

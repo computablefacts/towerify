@@ -363,7 +363,7 @@ class DatabaseSeeder extends Seeder
                             'impact' => $impact,
                             'remediation' => $remediation,
                             'compliance' => $compliance,
-                            'references' => $check['references'] ?? [],
+                            'references' => array_filter(explode(',', $references), fn(string $ref) => !empty($ref)),
                             'requirements' => $rules,
                         ]);
                         $frameworks = array_merge($frameworks, collect($compliance)->flatMap(fn(array $compliance) => array_keys($compliance))->toArray());
