@@ -120,6 +120,9 @@
   let selectedPolicy = null;
   let selectedFramework = null;
 
+  const queryString = () => '?tab=sca' + (selectedPolicy ? '&policy=' + selectedPolicy.uid : '') + (selectedFramework
+    ? '&framework=' + selectedFramework : '');
+
   const elPolicies = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('policies'),
     item => item.name);
   elPolicies.defaultText = "{{ __('Select policy...') }}";
@@ -128,8 +131,9 @@
   elPolicies.selectedItem = selectedPolicy;
   elPolicies.onSelectionChange(item => {
     selectedPolicy = item;
-    window.location = window.location.href.split('?')[0] + '?tab=sca' + '&policy=' + selectedPolicy.uid
-      + (selectedFramework ? '&framework=' + selectedFramework : '');
+    selectedFramework = null;
+    elFrameworks.disabled = !selectedPolicy;
+    window.location = window.location.href.split('?')[0] + queryString();
   });
 
   const elFrameworks = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('frameworks'));
@@ -139,8 +143,8 @@
   elFrameworks.selectedItem = selectedFramework;
   elFrameworks.onSelectionChange(item => {
     selectedFramework = item;
-    window.location = window.location.href.split('?')[0] + '?tab=sca' + (selectedPolicy ? '&policy='
-      + selectedPolicy.uid : '') + '&framework=' + selectedFramework;
+    window.location = window.location.href.split('?')[0] + queryString();
   });
+  elFrameworks.disabled = !selectedPolicy;
 
 </script>

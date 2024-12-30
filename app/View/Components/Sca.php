@@ -23,11 +23,11 @@ class Sca extends Component
 
         $checks = YnhOssecCheck::query();
 
-        if (!empty($policy)) {
+        if (!empty($policy) && $policy !== 'null') {
             $checks = $checks->whereIn('ynh_ossec_policy_id', $this->policies->filter(fn(YnhOssecPolicy $p) => $p->uid === $policy)->pluck('id'));
         }
 
-        $this->policy = empty($policy) ? null : $policy;
+        $this->policy = empty($policy) || $policy === 'null' ? null : $policy;
         $this->framework = empty($framework) || $framework === 'null' ? null : $framework;
         $this->frameworks = $checks->get()
             ->flatMap(fn(YnhOssecCheck $check) => $check->frameworks())
@@ -35,7 +35,7 @@ class Sca extends Component
             ->sort()
             ->values();
         $this->checks = $checks->get()
-            ->filter(fn(YnhOssecCheck $check) => $this->framework || in_array($framework, $check->frameworks()))
+            ->filter(fn(YnhOssecCheck $check) => !$this->framework || in_array($framework, $check->frameworks()))
             ->sort(fn(YnhOssecCheck $check1, YnhOssecCheck $check2) => strcmp($check1->title, $check2->title));
     }
 
