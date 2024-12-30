@@ -1053,7 +1053,7 @@
     "snapshot": 0,
     "platform": "posix",
     "category": "network",
-    "enabled": 1,
+    "enabled": 0,
     "attck": "T1021,T1210",
     "is_ioc": 0,
     "score": 0
