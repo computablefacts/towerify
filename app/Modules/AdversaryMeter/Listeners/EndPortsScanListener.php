@@ -89,17 +89,28 @@ class EndPortsScanListener extends AbstractListener
                 $portNumber = $port['port'] ?? null;
                 $protocol = $port['protocol'] ?? null;
 
-                $geoloc = $this->ipGeoLoc($ip);
-                $country = $geoloc['data']['country']['iso_code'] ?? null;
-
-                $hostingProvider = $this->hostingProvider($ip);
-                $description = $hostingProvider['data']['asn_description'] ?? null;
-                $registry = $hostingProvider['data']['asn_registry'] ?? null;
-                $asn = $hostingProvider['data']['asn'] ?? null;
-                $cidr = $hostingProvider['data']['asn_cidr'] ?? null;
-                $countryCode = $hostingProvider['data']['asn_country_code'] ?? null;
-                $date = $hostingProvider['data']['asn_date'] ?? null;
-
+                try {
+                    $geoloc = $this->ipGeoLoc($ip);
+                    $country = $geoloc['data']['country']['iso_code'] ?? null;
+                } catch (\Exception $e) {
+                    $country = null;
+                }
+                try {
+                    $hostingProvider = $this->hostingProvider($ip);
+                    $description = $hostingProvider['data']['asn_description'] ?? null;
+                    $registry = $hostingProvider['data']['asn_registry'] ?? null;
+                    $asn = $hostingProvider['data']['asn'] ?? null;
+                    $cidr = $hostingProvider['data']['asn_cidr'] ?? null;
+                    $countryCode = $hostingProvider['data']['asn_country_code'] ?? null;
+                    $date = $hostingProvider['data']['asn_date'] ?? null;
+                } catch (\Exception $e) {
+                    $description = null;
+                    $registry = null;
+                    $asn = null;
+                    $cidr = null;
+                    $countryCode = null;
+                    $date = null;
+                }
                 if ($pos === 0) {
                     $scan->ports_scan_ends_at = Carbon::now();
                     $scan->save();
