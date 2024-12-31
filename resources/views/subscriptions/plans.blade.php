@@ -15,7 +15,7 @@
         <div class="card-header text-center bg-transparent">
           <h3 class="font-weight-bold mt-2 text-center">Essentiel</h3>
           <h1 class="font-weight-bold mt-2">
-            100<small class="text-lg me-1">€ (excl. taxes) / mois</small>
+            150<small class="text-lg me-1">€ (excl. taxes) / mois</small>
           </h1>
         </div>
         <div class="card-body text-lg-start text-center pt-0">
@@ -114,7 +114,7 @@
         <div class="card-header text-center bg-transparent">
           <h3 class="font-weight-bold mt-2 text-center">Standard</h3>
           <h1 class="font-weight-bold mt-2">
-            300<small class="text-lg me-1">€ (excl. taxes) / mois</small>
+            400<small class="text-lg me-1">€ (excl. taxes) / mois</small>
           </h1>
         </div>
         <div class="card-body text-lg-start text-center pt-0">
@@ -212,7 +212,7 @@
         <div class="card-header text-center bg-transparent">
           <h3 class="font-weight-bold mt-2 text-center">Premium</h3>
           <h1 class="font-weight-bold mt-2">
-            500<small class="text-lg me-1">€ (excl. taxes) / mois</small>
+            600<small class="text-lg me-1">€ (excl. taxes) / mois</small>
           </h1>
         </div>
         <div class="card-body text-lg-start text-center pt-0">
