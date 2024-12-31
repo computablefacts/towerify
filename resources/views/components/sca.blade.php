@@ -162,11 +162,11 @@
   const elSearch = new com.computablefacts.blueprintjs.MinimalTextInput(document.getElementById('search'),
     "{{ $search }}");
   elSearch.icon = 'filter';
-  elSearch.placeholder = "{{ __('Search...') }}";
+  elSearch.placeholder = "{{ __('Enter one or more keywords...') }}";
   elSearch.disabled = !selectedPolicy;
 
   const elSubmit = new com.computablefacts.blueprintjs.MinimalButton(document.getElementById('submit'),
-    "{{ __('Apply') }}");
+    "{{ __('Search') }}");
   elSubmit.rightIcon = 'chevron-right';
   elSubmit.disabled = !selectedPolicy;
   elSubmit.onClick(() => {
