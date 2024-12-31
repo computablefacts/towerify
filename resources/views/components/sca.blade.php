@@ -1,3 +1,12 @@
+<style>
+
+  .pre-light {
+    color: #565656;
+    padding: 0.5rem;
+    background-color: #fff3cd;
+  }
+
+</style>
 <div class="card">
   <div class="card-body">
     <div class="row">
@@ -120,6 +129,18 @@
       </div>
     </div>
     @endif
+    <div class="row mt-2">
+      <div class="col col-2 text-end">
+        <b>{{ __('Rule') }}</b>
+      </div>
+      <div class="col">
+        <div style="display:grid;">
+          <div class="overflow-auto">
+            <pre class="mb-0 w-100 pre-light">{{ $check->rule }}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 @endforeach

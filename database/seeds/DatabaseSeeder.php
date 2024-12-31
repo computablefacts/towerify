@@ -342,10 +342,7 @@ class DatabaseSeeder extends Seeder
                     $condition = $check['condition'] ?? 'all';
                     $references = isset($check['references']) ? collect($check['references'])->join(',') : '';
                     $expressions = collect($check['rules'])->join(";\n");
-                    $str = "
-                        [{$title}] [$condition] [{$references}]
-                        {$expressions};
-                    ";
+                    $str = "[{$title}] [$condition] [{$references}]\n{$expressions};";
                     $rules = \App\Helpers\OssecRulesParser::parse($str);
                     if (count($rules) <= 0 || count($rules['rules']) <= 0) {
                         Log::warning($str);
@@ -365,6 +362,7 @@ class DatabaseSeeder extends Seeder
                             'compliance' => $compliance,
                             'references' => array_filter(explode(',', $references), fn(string $ref) => !empty($ref)),
                             'requirements' => $rules,
+                            'rule' => $str,
                         ]);
                         $frameworks = array_merge($frameworks, collect($compliance)->flatMap(fn(array $compliance) => array_keys($compliance))->toArray());
                         $ok++;

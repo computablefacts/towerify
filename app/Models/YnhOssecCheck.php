@@ -22,6 +22,7 @@ use Illuminate\Support\Str;
  * @property array references
  * @property array compliance
  * @property array requirements
+ * @property string rule
  */
 class YnhOssecCheck extends Model
 {
@@ -40,6 +41,7 @@ class YnhOssecCheck extends Model
         'references',
         'compliance',
         'requirements',
+        'rule',
     ];
 
     protected $casts = [
