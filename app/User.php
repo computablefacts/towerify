@@ -34,6 +34,16 @@ class User extends \Konekt\AppShell\Models\User
             !$this->subscribed(); // the customer has been set but the subscription ended
     }
 
+    public function endsTrialSoon(): bool
+    {
+        return $this->isInTrial() && \Carbon\Carbon::now()->startOfDay()->gte($this->endOfTrial()->subDays(7));
+    }
+
+    public function endsTrialVerySoon(): bool
+    {
+        return $this->isInTrial() && \Carbon\Carbon::now()->startOfDay()->gte($this->endOfTrial()->subDays(3));
+    }
+
     public function isInTrial(): bool
     {
         return $this->customer_id == null && \Carbon\Carbon::now()->startOfDay()->lte($this->endOfTrial());

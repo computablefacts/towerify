@@ -46,6 +46,8 @@
     "Cart Items": "Articles dans le panier",
     "Checkout": "Vérification",
     "City": "Ville",
+    "Click <a href=\":plans\" style=\"color:white\">here</a> to continue using Cywise.": "Cliquez <a href=\":plans\" style=\"color:white\">ici</a> pour continuer à utiliser Cywise.",
+    "Click <a href=\":plans\" style=\"color:white\">here</a> to upgrade to a paid plan.": "Cliquez <a href=\":plans\" style=\"color:white\">ici</a> pour passer à une offre payante.",
     "clear": "effacer",
     "click here to request another": "cliquez ici pour en demander un autre",
     "Company name": "Nom de l'entreprise",
