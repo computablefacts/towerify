@@ -1,7 +1,7 @@
 [
   {
     "name": "active_connections",
-    "description": "Network connections from system processes",
+    "description": "Network connections from system processes.",
     "query": "select * from process_open_sockets LEFT JOIN processes ON process_open_sockets.pid = processes.pid WHERE process_open_sockets.remote_port != 0 AND processes.name != '' AND processes.name != 'nginx' AND processes.name != 'chronyd' AND processes.name != 'sendmail' AND processes.name != 'go-cve-dictiona' AND process_open_sockets.remote_address NOT LIKE '%172.%' AND process_open_sockets.remote_address NOT LIKE '%192.168.%' AND process_open_sockets.remote_address NOT IN('127.0.0.1', '10.0.2.2', '172.24.0.1', '172.23.0.1', '172.22.0.1', '172.21.0.1', '172.21.0.2', '172.21.0.3', '10.0.2.3', '127.0.0.53') AND process_open_sockets.path NOT LIKE '%usr/lib/firefox-esr/firefox-esr%' AND process_open_sockets.path NOT LIKE '%/usr/local/bin/node%' AND process_open_sockets.cwd NOT LIKE '%/opt/impulse/managerd%' AND process_open_sockets.cwd NOT LIKE '%usr/local/bin/celery%';",
     "version": "1.4.5",
     "interval": 30,
@@ -1145,6 +1145,21 @@
     "category": "other",
     "enabled": 1,
     "attck": null,
+    "is_ioc": 0,
+    "score": 0
+  },
+  {
+    "name": "systemd",
+    "description": "Lists all installed Linux services and their relevant data. Helps you identify malware that uses this persistence mechanism to launch at a given interval.",
+    "query": "SELECT * FROM systemd_units;",
+    "version": "1.4.5",
+    "interval": 300,
+    "removed": 1,
+    "snapshot": 0,
+    "platform": "linux",
+    "category": "processes",
+    "enabled": 1,
+    "attck": "T1543/002",
     "is_ioc": 0,
     "score": 0
   },
