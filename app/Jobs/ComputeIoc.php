@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\YnhIoc;
+use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -45,6 +46,9 @@ class ComputeIoc implements ShouldQueue
 
     public function handle()
     {
+        // LEGACY CODE BEGINS : CLEANUP DISABLED EVENTS
+        YnhOsquery::whereIn('name', ['socket_events', 'listening_ports'])->limit(10000)->delete();
+        // LEGACY CODE ENDS : CLEANUP DISABLED EVENTS
         YnhServer::where('is_ready', true)
             ->where('is_frozen', false)
             ->get()

@@ -528,7 +528,7 @@
     "snapshot": 0,
     "platform": "all",
     "category": "network",
-    "enabled": 1,
+    "enabled": 0,
     "attck": "T1029,T1011,T1041,T1048,T1020,T1071,T1219,T1505/003",
     "is_ioc": 0,
     "score": 0
