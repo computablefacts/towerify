@@ -223,7 +223,6 @@ class OssecRulesParser
 
     private static function match(array $ctx, array $rule): bool
     {
-        Log::debug($rule);
         return match ($rule['type']) {
 
             self::FILE_RULE => collect($rule['files'])
