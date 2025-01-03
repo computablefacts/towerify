@@ -24,7 +24,7 @@ class RebuildLatestEventsCacheListener extends AbstractListener
         $server = $event->server;
 
         // For each event type, update the cache of the latest events
-        YnhOsquery::select('name')->distinct()->pluck('name')->each(function (string $name) use ($server) {
+        YnhOsquery::select('name')->whereNotIn('name', ['socket_events', 'listening_ports']/** see ComputeIoc */)->distinct()->pluck('name')->each(function (string $name) use ($server) {
 
             Log::debug("Updating cache for server {$server->name} and event type {$name}");
 
