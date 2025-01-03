@@ -17,4 +17,9 @@ class RebuildLatestEventsCache
     {
         $this->server = $server;
     }
+
+    public static function sink()
+    {
+        YnhServer::all()->each(fn(YnhServer $server) => RebuildLatestEventsCache::dispatch($server));
+    }
 }

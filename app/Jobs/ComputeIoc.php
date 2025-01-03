@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Events\RebuildLatestEventsCache;
 use App\Models\YnhIoc;
 use App\Models\YnhOsquery;
 use App\Models\YnhServer;
@@ -110,7 +109,6 @@ class ComputeIoc implements ShouldQueue
                         $ioc->save();
                     }
                 }
-                RebuildLatestEventsCache::dispatch($server);
             });
     }
 }
