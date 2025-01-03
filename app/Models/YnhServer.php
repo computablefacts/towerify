@@ -732,7 +732,6 @@ EOT;
     public function addOsqueryEvents(array $events): int
     {
         $nbEvents = 0;
-        $names = [];
 
         foreach ($events as $event) {
             try {
@@ -766,52 +765,12 @@ EOT;
                 ]);
 
                 $nbEvents++;
-                $names[] = $event['name'];
 
             } catch (\Exception $e) {
                 Log::error($e);
                 Log::error($event);
             }
         }
-
-        // Remove duplicate event types
-        $names = collect($names)->unique();
-
-        // For each event type, update the cache of the latest events
-        DB::transaction(function () use ($names) {
-
-            // Copy the most recent events to the cache
-            $names->each(function (string $name) {
-                YnhOsquery::select('id', 'calendar_time')
-                    ->where('ynh_server_id', $this->id)
-                    ->where('name', $name)
-                    ->orderBy('calendar_time', 'desc')
-                    ->limit(1000)
-                    ->get()
-                    ->each(function (YnhOsquery $event) use ($name) {
-                        YnhOsqueryLatestEvent::updateOrCreate([
-                            'ynh_server_id' => $this->id,
-                            'ynh_osquery_id' => $event->id,
-                        ], [
-                            'ynh_server_id' => $this->id,
-                            'ynh_osquery_id' => $event->id,
-                            'calendar_time' => $event->calendar_time,
-                            'event_name' => $name,
-                            'server_name' => $this->name,
-                            'updated' => true,
-                        ]);
-                    });
-            });
-
-            // Remove out of scope events
-            YnhOsqueryLatestEvent::where('ynh_server_id', $this->id)
-                ->whereIn('event_name', $names)
-                ->where('updated', false)
-                ->delete();
-            YnhOsqueryLatestEvent::where('ynh_server_id', $this->id)
-                ->whereIn('event_name', $names)
-                ->update(['updated' => false]);
-        });
         return $nbEvents;
     }
 

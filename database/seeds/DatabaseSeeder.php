@@ -10,8 +10,6 @@ use App\Models\TaxCategory;
 use App\Models\Taxon;
 use App\Models\Taxonomy;
 use App\Models\TaxRate;
-use App\Models\YnhOsquery;
-use App\Models\YnhOsqueryLatestEvent;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +40,6 @@ class DatabaseSeeder extends Seeder
         $this->setupOssecRules();
         $this->setupOsqueryRules();
         $this->fillMissingOsqueryUids();
-        $this->fillMissingOsqueryCacheEntries();
     }
 
     private function setupTenants(): void
@@ -423,50 +420,6 @@ class DatabaseSeeder extends Seeder
                     $osquery->save();
                 });
             });
-    }
-
-    private function fillMissingOsqueryCacheEntries(): void
-    {
-        $names = YnhOsquery::select('name')->distinct()->pluck('name');
-
-        \App\Models\YnhServer::all()->each(function (\App\Models\YnhServer $server) use ($names) {
-
-            // For each event type, update the cache of the latest events
-            DB::transaction(function () use ($server, $names) {
-
-                // Copy the most recent events to the cache
-                $names->each(function (string $name) use ($server) {
-                    YnhOsquery::select('id', 'calendar_time')
-                        ->where('ynh_server_id', $server->id)
-                        ->where('name', $name)
-                        ->orderBy('calendar_time', 'desc')
-                        ->limit(1000)
-                        ->get()
-                        ->each(function (YnhOsquery $event) use ($server, $name) {
-                            YnhOsqueryLatestEvent::updateOrCreate([
-                                'ynh_server_id' => $server->id,
-                                'ynh_osquery_id' => $event->id,
-                            ], [
-                                'ynh_server_id' => $server->id,
-                                'ynh_osquery_id' => $event->id,
-                                'calendar_time' => $event->calendar_time,
-                                'event_name' => $name,
-                                'server_name' => $server->name,
-                                'updated' => true,
-                            ]);
-                        });
-                });
-
-                // Remove out of scope events
-                YnhOsqueryLatestEvent::where('ynh_server_id', $server->id)
-                    ->whereIn('event_name', $names)
-                    ->where('updated', false)
-                    ->delete();
-                YnhOsqueryLatestEvent::where('ynh_server_id', $server->id)
-                    ->whereIn('event_name', $names)
-                    ->update(['updated' => false]);
-            });
-        });
     }
 
     private function mitreAttckMatrix(): array
