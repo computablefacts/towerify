@@ -947,26 +947,6 @@ EOT;
         $ssh->newTrace(SshTraceStateEnum::DONE, 'Infos pulled from server.');
     }
 
-    public function iocs(Carbon $dateMin, Carbon $dateMax): Collection
-    {
-        $rules = YnhOsqueryRule::where('enabled', true)->get();
-        return YnhOsquery::where('ynh_server_id', $this->id)
-            ->whereIn('name', $rules->pluck('name'))
-            ->where('calendar_time', '>=', $dateMin)
-            ->where('calendar_time', '<=', $dateMax)
-            ->get()
-            ->map(function (YnhOsquery $event) use ($rules) {
-                /** @var YnhOsqueryRule $rule */
-                $rule = $rules->filter(fn(YnhOsqueryRule $rule) => $rule->name === $event->name)->first();
-                return [
-                    'event_id' => $event->id,
-                    'rule_id' => $rule->id,
-                    'rule_name' => $rule->name,
-                    'rule_score' => $rule->score,
-                ];
-            });
-    }
-
     protected function sshPrivateKey(): Attribute
     {
         return Attribute::make(
