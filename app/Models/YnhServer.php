@@ -739,7 +739,8 @@ EOT;
                 $columnsUid = YnhOsquery::computeColumnsUid($event['columns']);
                 $calendarTime = Carbon::createFromFormat('D M j H:i:s Y e', $event['calendarTime'])->setTimezone('UTC');
 
-                YnhOsquery::firstOrCreate([
+                /** @var YnhOsquery $e */
+                $e = YnhOsquery::firstOrCreate([
                     'ynh_server_id' => $this->id,
                     'name' => $event['name'],
                     'host_identifier' => $event['hostIdentifier'],
@@ -762,6 +763,19 @@ EOT;
                     'columns' => $event['columns'],
                     'columns_uid' => $columnsUid,
                     'action' => $event['action'],
+                ]);
+                
+                /** @var YnhOsqueryLatestEvent $le */
+                $le = YnhOsqueryLatestEvent::updateOrCreate([
+                    'ynh_server_id' => $this->id,
+                    'ynh_osquery_id' => $e->id,
+                    'event_name' => $e->name,
+                ], [
+                    'ynh_server_id' => $this->id,
+                    'ynh_osquery_id' => $e->id,
+                    'event_name' => $e->name,
+                    'calendar_time' => $e->calendar_time,
+                    'server_name' => $this->name,
                 ]);
 
                 $nbEvents++;
