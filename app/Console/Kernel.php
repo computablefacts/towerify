@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\Cleanup;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Jobs\PullServersInfos;
 use App\Jobs\Summarize;
@@ -32,6 +33,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->job(new Cleanup())->everyThreeMinutes();
         $schedule->job(new PullServersInfos())->everyThreeHours();
         $schedule->job(new Summarize())->everySixHours();
         $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
