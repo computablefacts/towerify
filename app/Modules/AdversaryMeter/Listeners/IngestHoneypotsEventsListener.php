@@ -142,9 +142,14 @@ class IngestHoneypotsEventsListener extends AbstractListener
 
     private function hostingProvider(string $ip): array
     {
-        if (!isset($this->cache[$ip])) {
-            $this->cache[$ip] = ApiUtils::ip_whois_public($ip);
+        try {
+            if (!isset($this->cache[$ip])) {
+                $this->cache[$ip] = ApiUtils::ip_whois_public($ip);
+            }
+            return $this->cache[$ip];
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return [];
         }
-        return $this->cache[$ip];
     }
 }
