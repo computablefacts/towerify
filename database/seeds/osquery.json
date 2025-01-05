@@ -549,6 +549,21 @@
     "score": 0
   },
   {
+    "name": "logon_sessions",
+    "description": "Retrieves the list of the latest logins with PID, username and timestamp. Useful for intrusion detection and incident response. Verify assumptions of what accounts should be accessing what systems and identify machines accessed during a compromise.",
+    "query": "SELECT * FROM logon_sessions;",
+    "version": "1.4.5",
+    "interval": 30,
+    "removed": 1,
+    "snapshot": 0,
+    "platform": "windows",
+    "category": "users_and_authentication",
+    "enabled": 1,
+    "attck": "T1078",
+    "is_ioc": 0,
+    "score": 0
+  },
+  {
     "name": "memory_available_snapshot",
     "description": "Track memory usage.",
     "query": "SELECT printf('%.2f',((memory_total - memory_available) * 1.0)/1073741824) AS used_space_gb, printf('%.2f',(1.0 * memory_available / 1073741824)) AS space_left_gb, printf('%.2f',(1.0 * memory_total / 1073741824)) AS total_space_gb, printf('%.2f',(((memory_total - memory_available) * 1.0)/1073741824)/(1.0 * memory_total / 1073741824)) * 100 AS '%_used', printf('%.2f',(1.0 * memory_available / 1073741824)/(1.0 * memory_total / 1073741824)) * 100 AS '%_available' FROM memory_info;",
