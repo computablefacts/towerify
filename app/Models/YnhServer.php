@@ -729,6 +729,26 @@ EOT;
         return '<unavailable>';
     }
 
+    public function osqueryEvents(Carbon $dateMin, Carbon $dateMax): Collection
+    {
+        $rules = YnhOsqueryRule::where('enabled', true)->get();
+        return YnhOsquery::where('ynh_server_id', $this->id)
+            ->whereIn('name', $rules->pluck('name'))
+            ->where('calendar_time', '>=', $dateMin)
+            ->where('calendar_time', '<=', $dateMax)
+            ->get()
+            ->map(function (YnhOsquery $event) use ($rules) {
+                /** @var YnhOsqueryRule $rule */
+                $rule = $rules->filter(fn(YnhOsqueryRule $rule) => $rule->name === $event->name)->first();
+                return [
+                    'event_id' => $event->id,
+                    'event_name' => $event->name,
+                    'rule_id' => $rule->id,
+                    'rule_name' => $rule->name,
+                ];
+            });
+    }
+
     public function addOsqueryEvents(array $events): int
     {
         $nbEvents = 0;
@@ -764,7 +784,7 @@ EOT;
                     'columns_uid' => $columnsUid,
                     'action' => $event['action'],
                 ]);
-                
+
                 /** @var YnhOsqueryLatestEvent $le */
                 $le = YnhOsqueryLatestEvent::updateOrCreate([
                     'ynh_server_id' => $this->id,
