@@ -81,6 +81,11 @@ class Cleanup implements ShouldQueue
                 for ($dateMin = $dateBegin; $dateMin->lt($dateEnd); $dateMin->addMinutes(10)) {
 
                     $dateMax = $dateMin->copy()->addMinutes(10);
+
+                    if ($dateMax->gt($dateEnd)) {
+                        break; // if date max is in the future, wait for a later run
+                    }
+
                     $events = $server->osqueryEvents($dateMin, $dateMax);
 
                     Log::debug("Grouping {$events->count()} events for server {$server->name}");
