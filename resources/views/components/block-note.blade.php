@@ -59,10 +59,13 @@
     return [];
   };
   const updateSummary = () => {
+    const summary = headings();
     const elSummary = document.getElementById('block-note-headings');
     elSummary.innerHTML = `
-      <div class="pt-2 pb-1 bn-h1"><b>Table des matières</b></div>
-      ${headings().map(heading => {
+      <div class="pt-2 ${summary.length === 0 ? 'pb-2' : 'pb-1'} bn-h1">
+        <b>Table des matières</b>
+      </div>
+      ${summary.map(heading => {
       if (heading.level === 1) {
         return `<div class="bp4-text-overflow-ellipsis pt-1 bn-h2"><a id="bn-${heading.id}" href="#">${heading.text}</a></div>`;
       }
