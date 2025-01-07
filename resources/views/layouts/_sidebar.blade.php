@@ -108,3 +108,14 @@
     </div>
   </div>
 </aside>
+<script>
+
+  /* see _header.blade.php for details */
+  const sidebar = document.getElementsByTagName('aside')[0];
+  if (localStorage.getItem('sidebar') === 'd-none') {
+    sidebar.classList.add('d-none');
+  } else {
+    sidebar.classList.remove('d-none');
+  }
+
+</script>

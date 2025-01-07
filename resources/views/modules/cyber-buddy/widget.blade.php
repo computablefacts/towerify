@@ -19,9 +19,6 @@
   };
 
   const iframe = document.getElementById('chatBotManFrame');
-  const container = iframe.parentElement;
-  const paddingTop = parseInt(getComputedStyle(container).paddingTop);
-  const paddingBottom = parseInt(getComputedStyle(container).paddingBottom);
   const url = `/cb/web/cyber-buddy/chat?conf=${encodeURIComponent(JSON.stringify(window.botmanWidget))}`;
 
   iframe.onload = () => {
@@ -32,7 +29,7 @@
     }
   };
   iframe.placeholder = "test";
-  iframe.style.height = `${container.offsetHeight - paddingTop - paddingBottom}px`;
+  iframe.style.height = 'calc(100vh - 58px)'; // 56px = --bs-navbar-height
   iframe.src = url;
 
 </script>
