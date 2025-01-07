@@ -106,9 +106,9 @@
     axios.post('/cb/web/templates', {id: template.id, name: template.name, template: ctx.blocks})
     .then(response => {
       if (!template.id) {
-        template.id = response.data.id;
         template.type = response.data.type;
       }
+      template.id = response.data.id;
       elTemplates.items = elTemplates.items.filter(item => item.id !== template.id).concat(response.data); // TODO : sort by name?
       elTemplates.selectedItem = response.data;
       toaster.toastSuccess("{{ __('The document has been saved!') }}");

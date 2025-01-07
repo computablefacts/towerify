@@ -212,7 +212,7 @@ class CyberBuddyController extends Controller
                 $template = Template::where('id', $id)->where('readonly', false)->first();
                 $version = ($template && Str::contains($template->name, 'v') ? Str::afterLast($template->name, 'v') : 0) + 1;
                 if ($template) {
-                    $template->name = Str::beforeLast($name, 'v') . "v{$version}";
+                    $template->name = Str::beforeLast($template->name, 'v') . "v{$version}";
                     $template->template = $blocks;
                     $template->save();
                 } else {
