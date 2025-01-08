@@ -7,7 +7,6 @@ use App\Models\YnhOssecPolicy;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\Component;
 
 class Sca extends Component
@@ -29,6 +28,8 @@ class Sca extends Component
 
         if ($this->policy) {
             $checks = $checks->whereIn('ynh_ossec_policy_id', $this->policies->filter(fn(YnhOssecPolicy $p) => $p->uid === $this->policy)->pluck('id'));
+        } else {
+            $checks = $checks->whereRaw('1=0');
         }
         if ($this->search) {
             $checks = $checks->whereFullText(['title', 'description', 'rationale', 'remediation'], $this->search);
