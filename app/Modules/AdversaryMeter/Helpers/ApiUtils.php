@@ -110,9 +110,12 @@ class ApiUtils
 
     public function ip_whois_public(string $ip): array
     {
+        return [];
+        /*
         return $this->post('/ipwhois', [
             'input' => $ip
         ]);
+        */
     }
 
     public function task_discover_full_public(array $urls): array
