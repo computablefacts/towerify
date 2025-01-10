@@ -603,7 +603,7 @@
     "snapshot": 0,
     "platform": "posix",
     "category": "other",
-    "enabled": 1,
+    "enabled": 0,
     "attck": null,
     "is_ioc": 0,
     "score": 0
@@ -813,7 +813,7 @@
     "snapshot": 0,
     "platform": "posix",
     "category": "other",
-    "enabled": 1,
+    "enabled": 0,
     "attck": null,
     "is_ioc": 0,
     "score": 0
