@@ -18,7 +18,7 @@ class CyberBuddyControllerTest extends TestCase
 
     public function testItCreatesATooltipWhenASingleReferenceIsUsed()
     {
-        $tooltip = "La source est \n                  <div class=\"tooltip\">\n                    <b style=\"color:#f8b500\">[36]</b>\n                    <span class=\"tooltiptext tooltip-top\">Source !</span>\n                  </div>\n                .";
+        $tooltip = "La source est \n                  <div class=\"cb-tooltip\">\n                    <b style=\"color:#f8b500\">[36]</b>\n                    <span class=\"cb-tooltiptext cb-tooltip-top\">Source !</span>\n                  </div>\n                .";
 
         $html = CyberBuddyController::enhanceAnswerWithSources(
             "La source est [[36]].",
@@ -41,7 +41,7 @@ class CyberBuddyControllerTest extends TestCase
 
     public function testItCreatesATooltipWhenMultipleReferencesAreUsed()
     {
-        $tooltip = "La source est \n                  <div class=\"tooltip\">\n                    <b style=\"color:#f8b500\">[36]</b>\n                    <span class=\"tooltiptext tooltip-top\">Source n°1</span>\n                  </div>\n                ,\n                  <div class=\"tooltip\">\n                    <b style=\"color:#f8b500\">[44]</b>\n                    <span class=\"tooltiptext tooltip-top\">Source n°2</span>\n                  </div>\n                .";
+        $tooltip = "La source est \n                  <div class=\"cb-tooltip\">\n                    <b style=\"color:#f8b500\">[36]</b>\n                    <span class=\"cb-tooltiptext cb-tooltip-top\">Source n°1</span>\n                  </div>\n                ,\n                  <div class=\"cb-tooltip\">\n                    <b style=\"color:#f8b500\">[44]</b>\n                    <span class=\"cb-tooltiptext cb-tooltip-top\">Source n°2</span>\n                  </div>\n                .";
 
         $html = CyberBuddyController::enhanceAnswerWithSources(
             "La source est [[36],[44]].",

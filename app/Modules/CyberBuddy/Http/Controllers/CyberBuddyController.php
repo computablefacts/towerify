@@ -47,12 +47,18 @@ class CyberBuddyController extends Controller
         $refs = $matches[0];
         foreach ($refs as $ref) {
             $id = Str::replace(['[', ']'], '', $ref);
+            /** @var array $tooltip */
             $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
+            /** @var Chunk $chunk */
+            $chunk = Chunk::find($id);
+            /** @var File $file */
+            $file = $chunk?->file()->first();
+            $src = $file ? "<br><br><b>{$file->name_normalized}.{$file->extension}, p. {$chunk->page}</b>" : "";
             if ($tooltip) {
                 $answer = Str::replace($ref, "
                   <div class=\"cb-tooltip\">
                     <b style=\"color:#f8b500\">[{$id}]</b>
-                    <span class=\"cb-tooltiptext cb-tooltip-top\">{$tooltip['text']}</span>
+                    <span class=\"cb-tooltiptext cb-tooltip-top\">{$tooltip['text']}{$src}</span>
                   </div>
                 ", $answer);
             }
