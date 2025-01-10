@@ -30,6 +30,7 @@ class TriggerSendAuditReport implements ShouldQueue
         User::where('is_active', true)
             ->get()
             ->filter(fn(User $user) => !$user->isAdmin()) // do not spam the admin
+            ->filter(fn(User $user) => $user->gets_audit_report)
             ->filter(fn(User $user) => $user->canUseAdversaryMeter())
             ->filter(fn(User $user) => !Str::endsWith($user->email, $domains) || !Str::contains(Str::before($user->email, '@'), '+')) // do not send emails to debug accounts
             ->each(fn(User $user) => SendAuditReport::dispatch($user));

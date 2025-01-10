@@ -488,6 +488,9 @@ Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'invitations', 'as' => 'invitations.'], function () {
         Route::post('create', 'YnhInvitationController@create')->name('create');
     });
+    Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
+        Route::get('{user}/toggle-gets-audit-report', 'UserController@toggleGetsAuditReport')->name('toggle-gets-audit-report');
+    });
 })->middleware([Subscribed::class]);
 
 Route::group(['prefix' => 'shop', 'as' => 'product.'], function () {

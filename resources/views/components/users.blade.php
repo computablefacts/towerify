@@ -16,6 +16,7 @@
         <th>{{ __('Name') }}</th>
         <th>{{ __('Username') }}</th>
         <th>{{ __('Email') }}</th>
+        <th>{{ __('Audit Report') }}</th>
         <th></th>
         <th></th>
       </tr>
@@ -35,6 +36,12 @@
           <a href="mailto:{{ $user->email }}" target="_blank">
             {{ $user->email }}
           </a>
+        </td>
+        <td>
+          <input
+            type="checkbox"
+            data-user-id="{{ $user->id }}"
+            {{ $user->gets_audit_report ? 'checked' : '' }}>
         </td>
         <td>
           @if(Auth::user()->canManageUsers())
@@ -144,6 +151,10 @@
 </div>
 <script>
 
+  document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+    checkbox.addEventListener('change', (event) => toggleGetsAuditReport(event.target.getAttribute('data-user-id')));
+  });
+
   function addUserPermission(serverId, userId, permission) {
     axios.post(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`).then(function (response) {
       if (response.data.success) {
@@ -158,6 +169,18 @@
 
   function removeUserPermission(serverId, userId, permission) {
     axios.delete(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`).then(function (response) {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
+      } else {
+        console.log(response.data);
+      }
+    }).catch(error => toaster.toastAxiosError(error));
+  }
+
+  function toggleGetsAuditReport(userId) {
+    axios.get(`/ynh/users/${userId}/toggle-gets-audit-report`).then(function (response) {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
