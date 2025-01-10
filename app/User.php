@@ -12,6 +12,16 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * DO NOT MOVE OR REMOVE THIS CLASS OTHERWISE EVERYTHING FALLS APART...
+ *
+ * @property int tenant_id
+ * @property Carbon trial_ends_at
+ * @property string am_api_token
+ * @property string se_api_token
+ * @property string stripe_id
+ * @property string performa_domain
+ * @property string performa_secret
+ * @property boolean terms_accepted
+ * @property boolean gets_audit_report
  */
 class User extends \Konekt\AppShell\Models\User
 {
@@ -74,6 +84,7 @@ class User extends \Konekt\AppShell\Models\User
         if ($customerId) {
 
             // Find the first user of this customer with an API token
+            /** @var User $userTmp */
             $userTmp = User::where('customer_id', $customerId)
                 ->where('tenant_id', $tenantId)
                 ->whereNotNull('am_api_token')
@@ -86,6 +97,7 @@ class User extends \Konekt\AppShell\Models\User
         if ($tenantId) {
 
             // Find the first user of this tenant with an API token
+            /** @var User $userTmp */
             $userTmp = User::where('tenant_id', $tenantId)
                 ->whereNotNull('am_api_token')
                 ->first();
