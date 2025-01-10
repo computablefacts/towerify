@@ -50,20 +50,34 @@ class ApiUtils
     }
 
     /** @deprecated */
-    public function ask_chunks_demo(string $collection, string $question, string $prompt = ""): array
+    public function ask_chunks_demo(?string $collection, string $question, string $prompt = ""): array
     {
         return $this->ask_chunks($question, $collection, $prompt, true, true, 'fr');
     }
 
-    public function ask_chunks(string $question, string $collectionName, ?string $prompt = null, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10, bool $generateQuestion = false): array
+    public function ask_chunks(string $question, ?string $collectionName, ?string $prompt = null, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10, bool $generateQuestion = false): array
     {
-        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
-        array_unshift($collections, $collectionName);
+        if (empty($collectionName)) {
+            $collections = Collection::query()
+                ->orderBy('priority')
+                ->orderBy('name')
+                ->get()
+                ->pluck('name')
+                ->toArray();
+        } else {
+            $collections = Collection::where('name', '<>', $collectionName)
+                ->orderBy('priority')
+                ->orderBy('name')
+                ->get()
+                ->pluck('name')
+                ->toArray();
+            array_unshift($collections, $collectionName);
+        }
         return $this->post('/ask_chunks', [
             'question' => $question,
             'generate_question' => $generateQuestion,
-            'collection_name' => $collectionName,
             'collections' => $collections,
+            'collection_name' => $collections[0],
             'prompt' => $prompt,
             'reranking' => $rerankings,
             'show_context' => $showContext,
@@ -72,14 +86,28 @@ class ApiUtils
         ]);
     }
 
-    public function search_chunks(string $question, string $collectionName, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
+    public function search_chunks(string $question, ?string $collectionName, bool $rerankings = true, bool $showContext = true, string $lang = 'en', int $maxDocsUsed = 10): array
     {
-        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
-        array_unshift($collections, $collectionName);
+        if (empty($collectionName)) {
+            $collections = Collection::query()
+                ->orderBy('priority')
+                ->orderBy('name')
+                ->get()
+                ->pluck('name')
+                ->toArray();
+        } else {
+            $collections = Collection::where('name', '<>', $collectionName)
+                ->orderBy('priority')
+                ->orderBy('name')
+                ->get()
+                ->pluck('name')
+                ->toArray();
+            array_unshift($collections, $collectionName);
+        }
         return $this->post('/search_chunks', [
             'question' => $question,
-            'collection_name' => $collectionName,
             'collections' => $collections,
+            'collection_name' => $collections[0],
             'reranking' => $rerankings,
             'show_context' => $showContext,
             'lang' => $lang,
@@ -123,7 +151,7 @@ class ApiUtils
     }
 
     /** @deprecated */
-    public function chat_manual_demo(string $historyKey, string $collection, string $question): array
+    public function chat_manual_demo(string $historyKey, ?string $collection, string $question): array
     {
         /** @var Prompt $prompt */
         $prompt = Prompt::where('name', 'default_chat')->firstOrfail();
@@ -131,14 +159,28 @@ class ApiUtils
         return $this->chat_manual($question, $collection, $historyKey, $prompt->template, $promptHistory->template, 10, 'fr');
     }
 
-    public function chat_manual(string $question, string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 10, string $lang = 'en'): array
+    public function chat_manual(string $question, ?string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 10, string $lang = 'en'): array
     {
-        $collections = Collection::where('name', '<>', $collectionName)->pluck('name')->toArray();
-        array_unshift($collections, $collectionName);
+        if (empty($collectionName)) {
+            $collections = Collection::query()
+                ->orderBy('priority')
+                ->orderBy('name')
+                ->get()
+                ->pluck('name')
+                ->toArray();
+        } else {
+            $collections = Collection::where('name', '<>', $collectionName)
+                ->orderBy('priority')
+                ->orderBy('name')
+                ->get()
+                ->pluck('name')
+                ->toArray();
+            array_unshift($collections, $collectionName);
+        }
         return $this->post('/chat_manual', [
             'question' => $question,
-            'collection_name' => $collectionName,
             'collections' => $collections,
+            'collection_name' => $collections[0],
             'history_key' => $historyKey,
             'prompt' => $prompt,
             'history_prompt' => $historyPrompt,
