@@ -43,6 +43,7 @@ class CyberBuddyController extends Controller
         if (!$isOk) {
             return Str::replace(["\n\n", "\n-"], "<br>", $answer);
         }
+        $references = [];
         /** @var array $refs */
         $refs = $matches[0];
         foreach ($refs as $ref) {
@@ -53,16 +54,22 @@ class CyberBuddyController extends Controller
             $chunk = Chunk::find($id);
             /** @var File $file */
             $file = $chunk?->file()->first();
-            $src = $file ? "<br><br><b>{$file->name_normalized}.{$file->extension}, p. {$chunk->page}</b>" : "";
+            $src = $file ? "<a href=\"{$file->downloadUrl()}\" style=\"text-decoration:none;color:black\">{$file->name_normalized}.{$file->extension}</a>, p. {$chunk->page}" : "";
             if ($tooltip) {
-                $answer = Str::replace($ref, "
-                  <div class=\"cb-tooltip\">
-                    <b style=\"color:#f8b500\">[{$id}]</b>
-                    <span class=\"cb-tooltiptext cb-tooltip-top\">{$tooltip['text']}{$src}</span>
-                  </div>
-                ", $answer);
+                $answer = Str::replace($ref, "<b style=\"color:#f8b500\">[{$id}]</b>", $answer);
+                $references[$id] = "
+                  <li style=\"padding:0;margin-bottom:0.25rem\">
+                    <b style=\"color:#f8b500\">[{$id}]</b>&nbsp;
+                    <div class=\"cb-tooltip-list\">
+                      {$src}
+                      <span class=\"cb-tooltiptext cb-tooltip-list-top\">{$tooltip['text']}</span>
+                    </div>
+                  </li>
+                ";
             }
         }
+        ksort($references);
+        $answer = "{$answer}<br><br><b>Sources :</b><ul style=\"padding:0\">" . collect($references)->values()->join("") . "</ul>";
         return Str::replace(["\n\n", "\n-"], "<br>", $answer);
     }
 

@@ -100,6 +100,13 @@
 
 /* TOOLTIP */
 
+.cb-tooltip-list {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+  cursor: pointer;
+}
+
 .cb-tooltip {
   position: relative;
   display: inline-block;
@@ -107,6 +114,7 @@
   cursor: pointer;
 }
 
+.cb-tooltip-list .cb-tooltiptext,
 .cb-tooltip .cb-tooltiptext {
   visibility: hidden;
   width: 460px;
@@ -124,9 +132,15 @@
   transition: opacity 0.3s;
 }
 
+.cb-tooltip-list:hover .cb-tooltiptext,
 .cb-tooltip:hover .cb-tooltiptext {
   visibility: visible;
   opacity: 1;
+}
+
+.cb-tooltip-list-top {
+  bottom: 125%;
+  left: 0;
 }
 
 .cb-tooltip-top {
@@ -135,6 +149,7 @@
   margin-left: -60px;
 }
 
+.cb-tooltip-list-top::after,
 .cb-tooltip-top::after {
   /* content: ""; */
   position: absolute;
