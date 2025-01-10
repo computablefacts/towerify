@@ -754,6 +754,9 @@ EOT;
         $nbEvents = 0;
 
         foreach ($events as $event) {
+            if (!isset($event)) {
+                continue;
+            }
             try {
 
                 $columnsUid = YnhOsquery::computeColumnsUid($event['columns']);
