@@ -1,3 +1,27 @@
+@if(Auth::user()->canManageUsers())
+<div class="card mb-3">
+  <div class="card-body p-3">
+    <h6 class="card-title">{{ __('Import a CSV file of your users') }}</h6>
+    <div class="card mb-3" style="background-color:#fff3cd;">
+      <div class="card-body p-2">
+        <div class="row">
+          <div class="col">
+            {{ __('Your CSV file should contain the following columns: NAME and EMAIL') }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div id="files"></div>
+      </div>
+      <div class="col-3">
+        <div id="submit"></div>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 @if(Auth::user()->canListUsers())
 <div class="card">
   @if(Auth::user()->canManageUsers())
@@ -76,6 +100,87 @@
   @endif
 </div>
 <script>
+
+  let files = null;
+
+  const elSubmit = new com.computablefacts.blueprintjs.MinimalButton(document.getElementById('submit'),
+    "{{ __('Submit') }}");
+  elSubmit.disabled = true;
+  elSubmit.onClick(() => {
+
+    elSubmit.loading = true;
+    elSubmit.disabled = true;
+
+    for (let i = 0; i < files.length; i++) {
+
+      const file = files[i];
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+
+        const content = event.target.result;
+        const lines = content.split('\n');
+        const rows = lines.map(line => line.trim().split(';'));
+        const header = rows.shift();
+        const nameIndex = header.findIndex(
+          column => column.trim().toUpperCase() === 'NOM' || column.trim().toUpperCase() === 'NAME');
+        const emailIndex = header.findIndex(column => column.trim().toUpperCase() === 'EMAIL');
+
+        if (nameIndex === -1) {
+          toaster.toastError("{{ __('NAME column not found in CSV file.') }}");
+          return;
+        }
+        if (emailIndex === -1) {
+          toaster.toastError("{{ __('EMAIL column not found in CSV file.') }}");
+          return;
+        }
+
+        const users = [];
+
+        rows.filter((line) => line.length === header.length).forEach((line) => {
+
+          const emailRegex = /(?:\s*|\b)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\s*|\b)/;
+          const name = line[nameIndex];
+          let email = line[emailIndex].match(emailRegex);
+
+          if (!email) {
+            toaster.toastError(line[emailIndex] + " is an invalid email address.");
+          } else {
+            email = email[0];
+            users.push({name: name, email: email});
+          }
+        });
+
+        axios.post("{{ route('ynh.invitations.create') }}", {
+          users: users,
+        }).then(function (response) {
+          if (response.data.success) {
+            toaster.toastSuccess(response.data.success);
+          } else if (response.data.error) {
+            toaster.toastError(response.data.error);
+          } else {
+            console.log(response.data);
+          }
+        })
+        .catch(error => toaster.toastAxiosError(error))
+        .finally(() => {
+          elSubmit.loading = false;
+          elSubmit.disabled = false;
+        });
+      };
+      reader.onerror = (event) => {
+        toaster.toastError("Error reading file: " + event.target.error);
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  const elFile = new com.computablefacts.blueprintjs.MinimalFileInput(document.getElementById('files'), true);
+  elFile.onSelectionChange(items => {
+    files = items;
+    elSubmit.disabled = !files;
+  });
+  elFile.buttonText = "{{ __('Browse') }}";
 
   function toggleForm() {
     document.getElementById('form-invitation').classList.toggle('d-none');
