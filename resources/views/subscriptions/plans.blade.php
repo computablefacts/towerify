@@ -80,12 +80,11 @@
             <span class="ps-3">Métriques des serveurs</span>
           </div>
           <div class="d-flex justify-content-lg-start justify-content-center align-items-center p-1">
-            <span style="color:red">
+            <span style="color:green">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M18 6l-12 12"/>
-                <path d="M6 6l12 12"/>
+                <path d="M5 12l5 5l10 -10"/>
               </svg>
             </span>
             <span class="ps-3">PSSI (chatbot)</span>
