@@ -207,6 +207,10 @@ if (!function_exists('app_sidebar')) {
                             'route' => route('home', ['tab' => 'sca']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'sca',
                         ], [
+                            'label' => __('Frameworks'),
+                            'route' => route('home', ['tab' => 'frameworks']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'frameworks',
+                        ], [
                             'label' => __('AI Writer'),
                             'route' => route('home', ['tab' => 'ai_writer']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ai_writer',

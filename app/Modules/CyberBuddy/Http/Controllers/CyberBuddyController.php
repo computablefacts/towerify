@@ -2,6 +2,7 @@
 
 namespace App\Modules\CyberBuddy\Http\Controllers;
 
+use App\Models\YnhFramework;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Conversations\QuestionsAndAnswers;
@@ -390,6 +391,58 @@ class CyberBuddyController extends Controller
             'pragma' => 'private',
             'Cache-Control' => 'private, max-age=3600',
         ]);
+    }
+
+    public function unloadFramework(int $id, Request $request)
+    {
+        /** @var YnhFramework $framework */
+        $framework = YnhFramework::where('id', $id)->firstOrFail();
+        if ($framework->collection()) {
+            File::where('is_deleted', false)
+                ->where('collection_id', $framework->collection()->id)
+                ->where('name', trim(basename($framework->file, '.jsonl')))
+                ->where('extension', 'jsonl')
+                ->delete();
+        }
+        return response()->json([
+            'success' => 'The framework has been unloaded and will be removed soon.',
+        ]);
+    }
+
+    public function loadFramework(int $id, Request $request)
+    {
+        /** @var YnhFramework $framework */
+        $framework = YnhFramework::where('id', $id)->firstOrFail();
+
+        /** @var \App\Modules\CyberBuddy\Models\Collection $collection */
+        $collection = \App\Modules\CyberBuddy\Models\Collection::where('name', $framework->collectionName())
+            ->where('is_deleted', false)
+            ->first();
+
+        if (!$collection) {
+            if (!IsValidCollectionName::test($framework->collectionName())) {
+                return response()->json(['error' => 'Invalid collection name.'], 500);
+            }
+            $collection = \App\Modules\CyberBuddy\Models\Collection::create(['name' => $framework->collectionName()]);
+        }
+
+        $path = database_path($framework->file);
+        $file = new \Illuminate\Http\UploadedFile(
+            $path,
+            basename($path),
+            mime_content_type($path),
+            null,
+            true
+        );
+        $url = self::saveUploadedFile($collection, $file);
+
+        if ($url) {
+            return response()->json([
+                'success' => 'The framework has been loaded and will be processed soon.',
+                'url' => $url,
+            ]);
+        }
+        return response()->json(['error' => 'The framework could not be loaded.'], 500);
     }
 
     public function uploadOneFile(UploadOneFileRequest $request)

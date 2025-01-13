@@ -55,6 +55,9 @@
          :framework="request()->input('framework') ? request()->input('framework') : ''"
          :search="request()->input('search') ? request()->input('search') : ''"/>
   @endif
+  @if($tab === 'frameworks')
+  <x-frameworks/>
+  @endif
   @if($tab === 'interdependencies')
   <x-interdependencies/>
   @endif

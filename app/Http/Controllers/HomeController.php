@@ -28,7 +28,7 @@ class HomeController extends Controller
         $tab = $request->input('tab', 'overview');
 
         if ($user->hasRole(Role::CYBERBUDDY_ONLY)) {
-            if (!in_array($tab, ['ama', 'sca', 'ai_writer', 'conversations', 'collections', 'documents', 'chunks', 'prompts'])) {
+            if (!in_array($tab, ['ama', 'sca', 'frameworks', 'ai_writer', 'conversations', 'collections', 'documents', 'chunks', 'prompts'])) {
                 return redirect()->route('home', ['tab' => 'ama']);
             }
         }

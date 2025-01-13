@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
         $this->setupOssecRules();
         $this->setupOsqueryRules();
         $this->fillMissingOsqueryUids();
+        $this->setupFrameworks();
     }
 
     private function setupTenants(): void
@@ -420,6 +421,34 @@ class DatabaseSeeder extends Seeder
                     $osquery->save();
                 });
             });
+    }
+
+    private function setupFrameworks(): void
+    {
+        $this->importFramework('seeds/frameworks/anssi');
+        $this->importFramework('seeds/frameworks/nist');
+        $this->importFramework('seeds/frameworks/owasp');
+    }
+
+    private function importFramework($root): void
+    {
+        $path = database_path($root);
+        foreach (glob($path . '/*.json') as $file) {
+            Log::debug("Importing {$file}...");
+            $json = json_decode(Illuminate\Support\Facades\File::get($file), true);
+            \App\Models\YnhFramework::updateOrCreate([
+                'name' => $json['name'],
+            ], [
+                'name' => $json['name'],
+                'description' => $json['description'],
+                'copyright' => $json['copyright'],
+                'version' => $json['version'],
+                'provider' => $json['provider'],
+                'locale' => $json['locale'],
+                'file' => $root . '/' . basename($file, '.json') . '.jsonl',
+            ]);
+            Log::debug("{$file} imported.");
+        }
     }
 
     private function mitreAttckMatrix(): array

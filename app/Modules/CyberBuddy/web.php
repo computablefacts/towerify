@@ -40,6 +40,10 @@ Route::post('/prompts/{id}', 'CyberBuddyController@savePrompt')->middleware('aut
 
 Route::delete('/conversations/{id}', 'CyberBuddyController@deleteConversation')->middleware('auth');
 
+Route::delete('/frameworks/{id}', 'CyberBuddyController@unloadFramework')->middleware('auth');
+
+Route::post('/frameworks/{id}', 'CyberBuddyController@loadFramework')->middleware('auth');
+
 Route::get('/cyber-buddy', 'CyberBuddyController@showPage')->middleware('auth');
 
 Route::get('/cyber-buddy/chat', 'CyberBuddyController@showChat');

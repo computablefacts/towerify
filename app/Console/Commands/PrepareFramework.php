@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Symfony\Component\Yaml\Yaml;
 
 class PrepareFramework extends Command
@@ -13,7 +14,7 @@ class PrepareFramework extends Command
      *
      * @var string
      */
-    protected $signature = 'framework:prepare {input} {output}';
+    protected $signature = 'framework:prepare {input}';
 
     /**
      * The console command description.
@@ -27,8 +28,59 @@ class PrepareFramework extends Command
      */
     public function handle()
     {
-        $yaml = File::get($this->argument('input'));
+        if (is_dir($this->argument('input'))) {
+            $this->processDirectory($this->argument('input'));
+        } elseif (is_file($this->argument('input'))) {
+            $this->processFile($this->argument('input'));
+        } else {
+            throw new \Exception('Invalid input path : ' . $this->argument('input'));
+        }
+    }
+
+    private function processDirectory(string $dir): void
+    {
+        $ffs = scandir($dir);
+
+        unset($ffs[array_search('.', $ffs, true)]);
+        unset($ffs[array_search('..', $ffs, true)]);
+
+        if (count($ffs) < 1) {
+            return;
+        }
+        foreach ($ffs as $ff) {
+            if (is_dir($dir . '/' . $ff)) {
+                $this->processDirectory($dir . '/' . $ff);
+            } else if (is_file($dir . '/' . $ff)) {
+                $this->processFile($dir . '/' . $ff);
+            }
+        }
+    }
+
+    private function processFile(string $file): void
+    {
+        if (!Str::endsWith($file, '.yaml')) {
+            return;
+        }
+
+        $yaml = File::get($file);
         $json = Yaml::parse($yaml);
+
+        if (!isset($json['objects']['framework'])) {
+            return;
+        }
+
+        $infos = [
+            'locale' => $json['locale'],
+            'name' => $json['name'],
+            'description' => $json['description'],
+            'copyright' => $json['copyright'],
+            'version' => $json['version'],
+            'provider' => $json['provider'],
+            'file' => Str::replace('.yaml', '.jsonl', basename($file)),
+        ];
+
+        file_put_contents(Str::replace('.yaml', '.json', $file), json_encode($infos) . PHP_EOL, FILE_APPEND);
+
         $framework = $json['objects']['framework'];
         $requirements = $framework['requirement_nodes'];
         $tree = [];
@@ -52,7 +104,7 @@ class PrepareFramework extends Command
             $chunks = [];
             $this->generateChunk($node, [], $chunks);
             foreach ($chunks as $chunk) {
-                file_put_contents($this->argument('output'), json_encode($chunk) . PHP_EOL, FILE_APPEND);
+                file_put_contents(Str::replace('.yaml', '.jsonl', $file), json_encode($chunk) . PHP_EOL, FILE_APPEND);
             }
         }
     }
