@@ -47,7 +47,7 @@ class YnhFramework extends Model
     {
         /** @var Auth $user */
         $user = Auth::user();
-        return Str::lower("{$this->provider}{$user->tenant_id}");
+        return Str::lower("{$this->provider}-{$user->tenant_id}-{$this->locale}");
     }
 
     public function collection(): ?Collection
