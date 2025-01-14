@@ -14,6 +14,7 @@ use App\Events\PullServerInfos;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Events\RemoveUserPermission;
+use App\Events\SendInvitation;
 use App\Events\UninstallApp;
 use App\Listeners\AddTwrUserPermissionListener;
 use App\Listeners\AddUserPermissionListener;
@@ -28,6 +29,7 @@ use App\Listeners\ProcessLogparserPayloadListener;
 use App\Listeners\RebuildLatestEventsCacheListener;
 use App\Listeners\RebuildPackagesListListener;
 use App\Listeners\RemoveUserPermissionListener;
+use App\Listeners\SendInvitationListener;
 use App\Listeners\StripeEventListener;
 use App\Listeners\UninstallAppListener;
 use App\Listeners\UpdateServerInfosListener;
@@ -114,6 +116,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         RebuildLatestEventsCache::class => [
             RebuildLatestEventsCacheListener::class,
+        ],
+        SendInvitation::class => [
+            SendInvitationListener::class
         ],
 
         // AdversaryMeter

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\SendInvitation;
 use App\Http\Requests\CreateInvitationRequest;
+use App\Http\Requests\SendInvitationRequest;
+use App\Models\Invitation;
 use App\User;
 use Konekt\User\Models\InvitationProxy;
 
@@ -41,5 +44,12 @@ class YnhInvitationController extends Controller
             }
         }
         return response()->json(['success' => "The invitations have been created!"]);
+    }
+
+    public function send(SendInvitationRequest $request)
+    {
+        $invitation = Invitation::query()->where('id', $request->integer('id'))->firstOrFail();
+        SendInvitation::dispatch($invitation);
+        return response()->json(['success' => "The invitation has been sent!"]);
     }
 }

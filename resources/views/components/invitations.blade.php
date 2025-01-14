@@ -47,7 +47,7 @@
       </div>
       <div class="mb-3 col-2 col-md-2 d-flex align-items-end">
         <button type="button"
-                onclick="createInvitation()"
+                onclick="createInvitation(event)"
                 class="form-control btn btn-xs btn-outline-success float-end">
           {{ __('Create Invitation') }}
         </button>
@@ -84,12 +84,15 @@
           </a>
         </td>
         <td>
-          <button class="btn btn-link p-0" onclick="copyInvitationToClipboard('{{ $invitation->id }}')">
+          <button class="btn btn-link p-0" onclick="copyInvitationToClipboard('{{ $invitation->id }}', event)">
             {{ __('copy invitation') }}
             <input type="text" class="invisible"
                    style="height: 0.5rem; width: 2rem; padding: 0;"
                    id="__invitation_link_{{ $invitation->id }}"
                    value="{{ route('appshell.public.invitation.show', $invitation->hash) }}"
+          </button>
+          <button class="btn btn-link p-0" onclick="sendInvitation('{{ $invitation->id }}', event)">
+            {{ __('send invitation') }}
           </button>
         </td>
       </tr>
@@ -186,7 +189,11 @@
     document.getElementById('form-invitation').classList.toggle('d-none');
   }
 
-  function copyInvitationToClipboard(id) {
+  function copyInvitationToClipboard(id, event) {
+
+    event.preventDefault();
+    event.stopPropagation();
+
     const element = document.getElementById("__invitation_link_" + id);
     element.classList.remove('invisible');
     element.select();
@@ -196,7 +203,10 @@
     toaster.toastSuccess("{{ __('Text successfully copied to clipboard.') }}");
   }
 
-  function createInvitation() {
+  function createInvitation(event) {
+
+    event.preventDefault();
+    event.stopPropagation();
 
     const fullname = document.querySelector('#fullname').value;
     const email = document.querySelector('#email').value;
@@ -207,6 +217,24 @@
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
         toggleForm();
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
+      } else {
+        console.log(response.data);
+      }
+    }).catch(error => toaster.toastAxiosError(error));
+  }
+
+  function sendInvitation(id, event) {
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    axios.post("{{ route('ynh.invitations.send') }}", {
+      id: id,
+    }).then(function (response) {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
         toaster.toastError(response.data.error);
       } else {

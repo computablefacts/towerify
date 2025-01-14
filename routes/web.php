@@ -487,6 +487,7 @@ Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     });
     Route::group(['prefix' => 'invitations', 'as' => 'invitations.'], function () {
         Route::post('create', 'YnhInvitationController@create')->name('create');
+        Route::post('send', 'YnhInvitationController@send')->name('send');
     });
     Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
         Route::get('{user}/toggle-gets-audit-report', 'UserController@toggleGetsAuditReport')->name('toggle-gets-audit-report');
@@ -517,4 +518,4 @@ Route::get('/plans', 'StripeController@plan')->name('plans');
 Route::get('/subscribe', 'StripeController@subscribe')->name('subscribe');
 Route::get('/subscribe/success/{tx_id}', 'StripeController@subscribed')->name('subscribed');
 Route::get('/customer-portal', 'StripeController@customerPortal')->middleware('auth')->name('customer-portal');
-
+Route::get('/invitation', fn() => new \App\Mail\Invitation(\App\Models\Invitation::query()->latest()->first()))->middleware('auth');

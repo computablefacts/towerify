@@ -4,7 +4,7 @@ return [
     'modules' => [
         Konekt\AppShell\Providers\ModuleServiceProvider::class => [
             'ui' => [
-                'name' => 'Towerify',
+                'name' => env('APP_NAME', 'Cywise'),
                 'url' => '/admin/product',
             ]
         ],
