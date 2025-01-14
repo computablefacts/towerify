@@ -447,7 +447,6 @@ class DatabaseSeeder extends Seeder
                 'locale' => $json['locale'],
                 'file' => $root . '/' . basename($file, '.json') . '.jsonl',
             ]);
-            Log::debug("{$file} imported.");
         }
     }
 
