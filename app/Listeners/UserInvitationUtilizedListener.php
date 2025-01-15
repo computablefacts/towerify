@@ -38,19 +38,30 @@ class UserInvitationUtilizedListener extends AbstractListener
                     $created->customer_id = $creator->customer_id;
                 }
 
-                // Add the 'basic end user' role to the user
-                $basicEndUser = Role::where('name', Role::BASIC_END_USER)->first();
+                // Add the 'cyberbuddy only' role to some user
+                if ($created->tenant_id === 18 && $created->customer_id === 9) {
 
-                if ($basicEndUser) {
-                    $created->roles()->syncWithoutDetaching($basicEndUser);
+                    $cyberBuddyEndUser = Role::where('name', Role::CYBERBUDDY_ONLY)->first();
+
+                    if ($cyberBuddyEndUser) {
+                        $created->roles()->syncWithoutDetaching($cyberBuddyEndUser);
+                    }
+                } else {
+
+                    // Add the 'basic end user' role to the user
+                    $basicEndUser = Role::where('name', Role::BASIC_END_USER)->first();
+
+                    if ($basicEndUser) {
+                        $created->roles()->syncWithoutDetaching($basicEndUser);
+                    }
+
+                    // Add the 'limited administrator' role to the user
+                    $limitedAdministrator = Role::where('name', Role::LIMITED_ADMINISTRATOR)->first();
+
+                    if ($limitedAdministrator) {
+                        $created->roles()->syncWithoutDetaching($limitedAdministrator);
+                    }
                 }
-
-                $limitedAdministrator = Role::where('name', Role::LIMITED_ADMINISTRATOR)->first();
-
-                if ($limitedAdministrator) {
-                    $created->roles()->syncWithoutDetaching($limitedAdministrator);
-                }
-
                 $created->save();
             }
         }

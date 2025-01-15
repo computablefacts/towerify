@@ -210,6 +210,7 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Frameworks'),
                             'route' => route('home', ['tab' => 'frameworks']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'frameworks',
+                            'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
                         ], [
                             'label' => __('AI Writer'),
                             'route' => route('home', ['tab' => 'ai_writer']),
@@ -226,18 +227,22 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Collections'),
                             'route' => route('home', ['tab' => 'collections']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'collections',
+                            'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
                         ], [
                             'label' => __('Documents'),
                             'route' => route('home', ['tab' => 'documents']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'documents',
+                            'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
                         ], [
                             'label' => __('Chunks'),
                             'route' => route('home', ['tab' => 'chunks']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'chunks',
+                            'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
                         ], [
                             'label' => __('Prompts'),
                             'route' => route('home', ['tab' => 'prompts']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'prompts',
+                            'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
                         ]
                     ],
                 ], [
@@ -305,6 +310,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Settings'),
+                    'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
                     'section_items' => [
                         [
                             'label' => __('Users'),
