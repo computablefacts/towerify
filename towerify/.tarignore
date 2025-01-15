@@ -4,4 +4,4 @@ bootstrap/cache/*.*
 storage/app/public/*
 performa
 node_modules
-vendor
+./vendor/*
