@@ -27,7 +27,7 @@
         </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
-            {{ \Illuminate\Support\Str::upper($framework->name) }}
+            {{ \Illuminate\Support\Str::lower($framework->name) }}
           </span>
           <div class="text-muted">
             {{ $framework->description }}
