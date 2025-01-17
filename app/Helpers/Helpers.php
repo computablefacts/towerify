@@ -203,7 +203,7 @@ if (!function_exists('app_sidebar')) {
                     'hidden' => !Auth::user()->canUseCyberBuddy(),
                     'section_items' => [
                         [
-                            'label' => __('Policies'),
+                            'label' => __('Hardening'),
                             'route' => route('home', ['tab' => 'sca']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'sca',
                         ], [
