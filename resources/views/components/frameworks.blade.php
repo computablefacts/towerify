@@ -23,11 +23,11 @@
       @foreach($frameworks as $framework)
       <tr>
         <td>
-          <span class="lozenge information">{{ $framework->provider }}</span>
+          <span class="lozenge information">{{ \Illuminate\Support\Str::lower($framework->provider) }}</span>
         </td>
         <td>
           <span class="font-lg mb-3 fw-bold">
-            {{ \Illuminate\Support\Str::lower($framework->name) }}
+            {{ \Illuminate\Support\Str::upper($framework->name) }}
           </span>
           <div class="text-muted">
             {{ $framework->description }}
