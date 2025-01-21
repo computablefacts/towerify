@@ -426,6 +426,7 @@ class DatabaseSeeder extends Seeder
     private function setupFrameworks(): void
     {
         $this->importFramework('seeds/frameworks/anssi');
+        $this->importFramework('seeds/frameworks/dora');
         $this->importFramework('seeds/frameworks/gdpr');
         $this->importFramework('seeds/frameworks/ncsc');
         $this->importFramework('seeds/frameworks/nist');
@@ -443,7 +444,7 @@ class DatabaseSeeder extends Seeder
             ], [
                 'name' => $json['name'],
                 'description' => $json['description'],
-                'copyright' => $json['copyright'],
+                'copyright' => \Illuminate\Support\Str::limit($json['copyright'], 187, '[...]'),
                 'version' => $json['version'],
                 'provider' => $json['provider'],
                 'locale' => $json['locale'],
