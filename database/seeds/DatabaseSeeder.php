@@ -426,6 +426,7 @@ class DatabaseSeeder extends Seeder
     private function setupFrameworks(): void
     {
         $this->importFramework('seeds/frameworks/anssi');
+        $this->importFramework('seeds/frameworks/gdpr');
         $this->importFramework('seeds/frameworks/nist');
         $this->importFramework('seeds/frameworks/owasp');
     }
