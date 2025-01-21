@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property Carbon updated_at
  * @property string thread_id
  * @property string dom
+ * @property boolean autosaved
  * @property int created_by
  */
 class Conversation extends Model
@@ -24,10 +25,12 @@ class Conversation extends Model
     protected $fillable = [
         'thread_id',
         'dom',
+        'autosaved',
         'created_by',
     ];
 
     protected $casts = [
+        'autosaved' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

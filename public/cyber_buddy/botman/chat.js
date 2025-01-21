@@ -65,6 +65,18 @@
                   })
                 });
               };
+
+              fetch('/cb/web/botman', {
+                method: 'POST', headers: {
+                  'Content-Type': 'application/json', 'Accept': 'application/json'
+                }, body: JSON.stringify({
+                  driver: 'web',
+                  userId: 0,
+                  message: `/autosave ${threadId} ${elMessageArea.outerHTML}`,
+                  attachment: null,
+                  interactive: 0,
+                })
+              });
             }
           });
         });

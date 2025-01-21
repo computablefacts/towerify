@@ -712,6 +712,20 @@ class CyberBuddyController extends Controller
             }
         })->skipsConversation();
 
+        $botman->hears('/autosave ([a-z0-9]+) (.*)', function (BotMan $botman, string $threadId, string $dom) {
+            $user = $this->user($botman);
+            if ($user) {
+                $dom = Str::after($botman->getMessage()->getPayload()['message'], "/autosave {$threadId} ");
+                $conversation = Conversation::updateOrCreate([
+                    'thread_id' => $threadId
+                ], [
+                    'thread_id' => $threadId,
+                    'autosaved' => true,
+                    'dom' => $dom,
+                ]);
+            }
+        });
+        
         $botman->hears('/rate ([a-z0-9]+) (.*)', function (BotMan $botman, string $threadId, string $dom) {
             $user = $this->user($botman);
             if ($user) {
@@ -720,6 +734,7 @@ class CyberBuddyController extends Controller
                     'thread_id' => $threadId
                 ], [
                     'thread_id' => $threadId,
+                    'autosaved' => false,
                     'dom' => $dom,
                 ]);
             }
