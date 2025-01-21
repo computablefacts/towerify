@@ -111,12 +111,16 @@ class PrepareFramework extends Command
 
     private function generateChunk(array $node, array $parentTags, array &$chunks): void
     {
-        $currentTags = array_merge($parentTags, [$node['name'] ?? 'Unnamed Node']);
+        if (isset($node['name'])) {
+            $currentTags = array_merge($parentTags, [trim($node['name'])]);
+        } else {
+            $currentTags = $parentTags;
+        }
         if (empty($node['children'])) {
             $chunks[] = [
                 'page' => 1,
                 'tags' => $currentTags,
-                'text' => $node['description'] ?? 'No description available'
+                'text' => trim($node['description'] ?? 'No description available'),
             ];
         } else {
             foreach ($node['children'] as $childNode) {
