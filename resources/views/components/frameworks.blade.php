@@ -13,6 +13,38 @@
 
 </style>
 <div class="card">
+  <div class="card-body">
+    <div class="row">
+      <div class="col">
+        <div id="search"></div>
+      </div>
+      <div class="col col-auto">
+        <div id="submit"></div>
+      </div>
+    </div>
+  </div>
+</div>
+@foreach($highlights as $highlight)
+<div class="card mt-3">
+  <div class="card-header p-2 background-light-grey">
+    <h5 class="mb-0">
+      <span class="lozenge information">{{ \Illuminate\Support\Str::lower($highlight->framework->provider) }}</span>
+      &nbsp;
+      <b>{{ \Illuminate\Support\Str::upper($highlight->framework->name) }}</b>
+    </h5>
+  </div>
+  <div class="card-body pt-0">
+    @foreach($highlight->highlights as $h)
+    <div class="row mt-1 mb-3" style="background-color:#fff3cd;">
+      <div class="col p-3">
+        <pre class="pre-light mb-0">{!! $h !!}</pre>
+      </div>
+    </div>
+    @endforeach
+  </div>
+</div>
+@endforeach
+<div class="card mt-3">
   @if($frameworks->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -122,5 +154,22 @@
       }
     }).catch(error => toaster.toastAxiosError(error));
   };
+
+  let searchText = null;
+
+  const queryString = () => '?tab=frameworks' + (searchText ? '&search=' + searchText : '');
+
+  const elSearch = new com.computablefacts.blueprintjs.MinimalTextInput(document.getElementById('search'),
+    "{{ $search }}");
+  elSearch.icon = 'filter';
+  elSearch.placeholder = "{{ __('Enter one or more keywords...') }}";
+
+  const elSubmit = new com.computablefacts.blueprintjs.MinimalButton(document.getElementById('submit'),
+    "{{ __('Search') }}");
+  elSubmit.rightIcon = 'chevron-right';
+  elSubmit.onClick(() => {
+    searchText = elSearch.value;
+    window.location = window.location.href.split('?')[0] + queryString();
+  });
 
 </script>

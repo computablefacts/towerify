@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\Snippet;
 use App\Modules\CyberBuddy\Models\Collection;
 use App\Modules\CyberBuddy\Models\File;
 use Carbon\Carbon;
@@ -111,6 +112,16 @@ class YnhFramework extends Model
         return $tree;
     }
 
+    public function highlights(array $words): \Illuminate\Support\Collection
+    {
+        $words = collect($words)->map(fn(string $word) => trim(Snippet::normalize($word)))->toArray();
+        return collect($this->blocks())
+            ->filter(fn(string $block) => Snippet::extract($words, Snippet::normalize($block), true)->isNotEmpty())
+            ->map(fn(string $block) => preg_replace_callback('/(' . implode('|', array_map('preg_quote', $words)) . ')/i', function ($matches) {
+                return '<b>' . $matches[0] . '</b>';
+            }, Snippet::normalize($block)));
+    }
+
     public function html(): string
     {
         $text = '';
@@ -143,11 +154,12 @@ class YnhFramework extends Model
         return "<ul class=\"ul-small-padding\">$text</ul>";
     }
 
-    public function markdown(): string
+    private function blocks(): array
     {
         $text = '';
+        $blocks = [];
         $tree = $this->tree();
-        $generateIndentedText = function (array $tree, int $level = 0) use (&$generateIndentedText, &$text) {
+        $generateIndentedText = function (array $tree, int $level = 0) use (&$generateIndentedText, &$text, &$blocks) {
             foreach ($tree as $key => $value) {
                 $indentation = str_repeat('#', $level + 1);
                 if (is_array($value)) {
@@ -158,8 +170,12 @@ class YnhFramework extends Model
                     $text .= "\n{$value}\n";
                 }
             }
+            if (array_is_list($tree)) {
+                $blocks[] = $text;
+                $text = '';
+            }
         };
         $generateIndentedText($tree);
-        return trim($text);
+        return $blocks;
     }
 }

@@ -56,7 +56,7 @@
          :search="request()->input('search') ? request()->input('search') : ''"/>
   @endif
   @if($tab === 'frameworks')
-  <x-frameworks/>
+  <x-frameworks :search="request()->input('search') ? request()->input('search') : ''"/>
   @endif
   @if($tab === 'interdependencies')
   <x-interdependencies/>
