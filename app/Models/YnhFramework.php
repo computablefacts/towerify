@@ -71,4 +71,9 @@ class YnhFramework extends Model
     {
         return $this->file() !== null;
     }
+
+    public function path(): string
+    {
+        return database_path($this->file);
+    }
 }

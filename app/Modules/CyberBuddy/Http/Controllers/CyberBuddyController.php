@@ -426,8 +426,8 @@ class CyberBuddyController extends Controller
             $collection = \App\Modules\CyberBuddy\Models\Collection::create(['name' => $framework->collectionName()]);
         }
 
-        $path = database_path($framework->file);
-        $file = new \Illuminate\Http\UploadedFile(
+        $path = $framework->path();
+        $file = new UploadedFile(
             $path,
             basename($path),
             mime_content_type($path),
@@ -725,7 +725,7 @@ class CyberBuddyController extends Controller
                 ]);
             }
         });
-        
+
         $botman->hears('/rate ([a-z0-9]+) (.*)', function (BotMan $botman, string $threadId, string $dom) {
             $user = $this->user($botman);
             if ($user) {
