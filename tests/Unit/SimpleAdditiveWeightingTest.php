@@ -3,9 +3,9 @@
 namespace Tests\Unit;
 
 use App\Helpers\SimpleAdditiveWeighting;
-use Tests\TestCase;
+use Tests\TestCaseNoDb;
 
-class SimpleAdditiveWeightingTest extends TestCase
+class SimpleAdditiveWeightingTest extends TestCaseNoDb
 {
     public function testPickACar()
     {

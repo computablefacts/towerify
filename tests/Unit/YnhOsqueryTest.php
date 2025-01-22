@@ -3,9 +3,9 @@
 namespace Tests\Unit;
 
 use App\Models\YnhOsquery;
-use Tests\TestCase;
+use Tests\TestCaseNoDb;
 
-class YnhOsqueryTest extends TestCase
+class YnhOsqueryTest extends TestCaseNoDb
 {
     public function testComputeColumnsUidOnArray()
     {

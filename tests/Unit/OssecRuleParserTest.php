@@ -3,9 +3,9 @@
 namespace Tests\Unit;
 
 use App\Helpers\OssecRulesParser;
-use Tests\TestCase;
+use Tests\TestCaseNoDb;
 
-class OssecRuleParserTest extends TestCase
+class OssecRuleParserTest extends TestCaseNoDb
 {
     public function testMatchFile()
     {
