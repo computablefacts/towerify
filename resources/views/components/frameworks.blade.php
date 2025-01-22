@@ -30,7 +30,7 @@
         <th>{{ __('Framework') }}</th>
         <th>{{ __('Version') }}</th>
         <th>{{ __('Language') }}</th>
-        <th></th>
+        <th style="width:100px"></th>
       </tr>
       </thead>
       <tbody>
