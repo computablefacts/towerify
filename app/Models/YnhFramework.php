@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -75,5 +76,90 @@ class YnhFramework extends Model
     public function path(): string
     {
         return database_path($this->file);
+    }
+
+    public function tree(): array
+    {
+        $tree = [];
+        $jsonStream = fopen($this->path(), 'r');
+
+        if ($jsonStream === false) {
+            throw new \Exception("Failed to open json file for streaming : {$this->path()}");
+        }
+        while (($line = fgets($jsonStream)) !== false) {
+
+            $obj = json_decode(trim($line), true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error("JSON decoding error : " . json_last_error_msg());
+                continue;
+            }
+            if (isset($obj['tags'])) {
+                $levelCur = &$tree;
+                foreach ($obj['tags'] as $tag) {
+                    if (!isset($levelCur[$tag])) {
+                        $levelCur[$tag] = [];
+                    }
+                    $levelCur = &$levelCur[$tag];
+                }
+                $levelCur[] = $obj['text'];
+            } else {
+                Log::error("Missing tags : {$this->path()} {$line}");
+            }
+        }
+        fclose($jsonStream);
+        return $tree;
+    }
+
+    public function html(): string
+    {
+        $text = '';
+        $tree = $this->tree();
+        $generateIndentedText = function (array $tree, int $level = 0, $uid = null) use (&$generateIndentedText, &$text) {
+            if (array_is_list($tree)) {
+                $text .= "<div class=\"collapse\" id=\"$uid\"><div style=\"display:grid;\"><div class=\"overflow-auto\"><p>";
+            }
+            foreach ($tree as $key => $value) {
+                $indentation = str_repeat('  ', $level);
+                if (is_array($value)) {
+                    $uid = Str::random(10);
+                    if (array_is_list($value)) {
+                        $text .= "<li>{$indentation} <a data-bs-toggle=\"collapse\" href=\"#$uid\" class=\"text-decoration-none\">{$key}</a><ul class=\"ul-small-padding\">";
+                    } else {
+                        $text .= "<li>{$indentation} {$key}<ul class=\"ul-small-padding\">";
+                    }
+                    $generateIndentedText($value, $level + 1, $uid);
+                    $text .= "</ul></li>";
+                } else {
+                    $value = Str::replace("\n", "</p><p>", $value);
+                    $text .= "<p>$value</p>";
+                }
+            }
+            if (array_is_list($tree)) {
+                $text .= "</p></div></div></div>";
+            }
+        };
+        $generateIndentedText($tree);
+        return "<ul class=\"ul-small-padding\">$text</ul>";
+    }
+
+    public function markdown(): string
+    {
+        $text = '';
+        $tree = $this->tree();
+        $generateIndentedText = function (array $tree, int $level = 0) use (&$generateIndentedText, &$text) {
+            foreach ($tree as $key => $value) {
+                $indentation = str_repeat('#', $level + 1);
+                if (is_array($value)) {
+                    $text .= "\n{$indentation} {$key}\n";
+                    $generateIndentedText($value, $level + 1);
+                } else {
+                    $value = Str::replace("\n", "\n\n", $value);
+                    $text .= "\n{$value}\n";
+                }
+            }
+        };
+        $generateIndentedText($tree);
+        return trim($text);
     }
 }

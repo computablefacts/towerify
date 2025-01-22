@@ -1,3 +1,17 @@
+<style>
+
+  .pre-light {
+    color: #565656;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .ul-small-padding {
+    padding-left: 1rem;
+  }
+
+</style>
 <div class="card">
   @if($frameworks->isEmpty())
   <div class="card-body">
@@ -37,7 +51,7 @@
         <td>
           <span class="lozenge new">{{ $framework->locale }}</span>
         </td>
-        <td>
+        <td class="text-end">
           @if($framework->loaded())
           <a href="#" onclick="unload({{ $framework->id }}, event)" class="text-danger">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -58,6 +72,19 @@
             </svg>
           </a>
           @endif
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <a data-bs-toggle="collapse" href="#framework{{ $framework->id }}" class="text-decoration-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M9 6l6 6l-6 6"/>
+            </svg>
+          </a>
+        </td>
+      </tr>
+      <tr class="collapse" id="framework{{ $framework->id }}">
+        <td colspan="5" style="background-color:#fff3cd;">
+          {!! $framework->html() !!}
         </td>
       </tr>
       @endforeach
