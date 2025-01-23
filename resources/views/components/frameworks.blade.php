@@ -24,6 +24,7 @@
     </div>
   </div>
 </div>
+@if($highlights->isNotEmpty())
 @foreach($highlights as $highlight)
 <div class="card mt-3">
   <div class="card-header p-2 background-light-grey">
@@ -44,6 +45,7 @@
   </div>
 </div>
 @endforeach
+@else
 <div class="card mt-3">
   @if($frameworks->isEmpty())
   <div class="card-body">
@@ -125,6 +127,7 @@
   </div>
   @endif
 </div>
+@endif
 <script>
 
   const load = (id, event) => {
