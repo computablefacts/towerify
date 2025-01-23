@@ -14,6 +14,18 @@ const ctx = {
   history: [],
 };
 
+const text2blocks = (text) => {
+  return text.split("\n")
+  .map(block => {
+    block = block.trim();
+    if (block.startsWith("- ")) {
+      return {type: "bulletListItem", content: block.substring(2).trim()};
+    }
+    return {type: "paragraph", content: block};
+  })
+  .filter(block => block.content.length > 0);
+};
+
 // This component render a list of questions. The user answers the questions. Then, a paragraph is generated using the
 // provided paragraph template and answers.
 const QaBlock = createReactBlockSpec({
@@ -58,7 +70,7 @@ const QaBlock = createReactBlockSpec({
       })
       .then(function (response) {
         if (response.data) {
-          props.editor.insertBlocks([{type: "paragraph", content: response.data}], props.block, 'after');
+          props.editor.insertBlocks(text2blocks(response.data), props.block, 'after');
         } else {
           console.log(response.data);
         }
@@ -129,7 +141,7 @@ const AiBlock = createReactBlockSpec({
           axios.post(`/cb/web/llm1`, {collection: propz.collection, prompt: propz.prompt})
           .then(function (response) {
             if (response.data) {
-              props.editor.insertBlocks([{type: "paragraph", content: response.data}], props.block, 'after');
+              props.editor.insertBlocks(text2blocks(response.data), props.block, 'after');
               // insertOrUpdateBlock(props.editor, {type: "paragraph", content: response.data});
             } else {
               console.log(response.data);
