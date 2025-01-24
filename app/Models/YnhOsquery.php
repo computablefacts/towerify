@@ -1117,6 +1117,7 @@ EOT;
                         } else {
                             $cves = YnhCve::appCves($osInfo->os, $osInfo->codename, $event->columns['name'], $event->columns['version'])
                                 ->pluck('cve')
+                                ->unique()
                                 ->join(', ');
                         }
 
