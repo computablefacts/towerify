@@ -27,6 +27,7 @@
         <div id="submit"></div>
       </div>
     </div>
+    @if($checks->isNotEmpty())
     <div class="row mt-3">
       <div class="col col-2 text-end">
         <b>{{ __('Download test script') }}</b>
@@ -44,6 +45,7 @@
         </a>
       </div>
     </div>
+    @endif
   </div>
 </div>
 @foreach($checks as $check)
