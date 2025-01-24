@@ -10,8 +10,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 
+/**
+ * SCA = Security Configuration Assessment
+ */
 class Sca extends Component
 {
+    public ?int $checkId;
     public ?string $policy;
     public ?string $framework;
     public ?string $search;
@@ -20,8 +24,9 @@ class Sca extends Component
     public Collection $frameworks;
     public Collection $checks;
 
-    public function __construct(?string $policy = null, ?string $framework = null, ?string $search = null)
+    public function __construct(?string $policy = null, ?string $framework = null, ?string $search = null, ?string $check = null)
     {
+        $this->checkId = empty($check) || $check === 'null' ? null : (int)$check;
         $this->policy = empty($policy) || $policy === 'null' ? null : $policy;
         $this->framework = empty($framework) || $framework === 'null' ? null : $framework;
         $this->search = empty($search) || $search === 'null' ? null : $search;
@@ -42,10 +47,13 @@ class Sca extends Component
             ->unique()
             ->sort()
             ->values();
-        $this->checks = $checks->get()
+        $this->checks = $checks
+            ->whereRaw($this->checkId ? "uid={$this->checkId}" : '1=1')
+            ->get()
             ->filter(fn(YnhOssecCheck $check) => !$this->framework || in_array($framework, $check->frameworks()))
             ->sort(fn(YnhOssecCheck $check1, YnhOssecCheck $check2) => strcmp($check1->title, $check2->title));
 
+        // TODO : when a check fails, display a link to the check infos /home?tab=sca&policy=<policy.uid>&rule=<check.uid>
         $this->allChecksWindowsTestScript = OssecRuleWindowsTestScript::begin() . "\n" .
             $this->checks->map(fn(YnhOssecCheck $check) => json_encode($check->requirements) . "\n")->join("\n") .
             OssecRuleWindowsTestScript::end();
