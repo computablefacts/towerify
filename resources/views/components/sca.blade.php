@@ -29,7 +29,7 @@
     </div>
   </div>
 </div>
-@if($checks->isNotEmpty())
+@if($checks->isNotEmpty() && $policies->filter(fn($p) => $p->uid === $policy && $p->isWindows())->first())
 <div class="row mt-3">
   <div class="col text-end">
     <a href="data:text/plain;charset=utf-8,{{ rawurlencode($allChecksWindowsTestScript) }}"
@@ -158,6 +158,7 @@
         </div>
       </div>
     </div>
+    @if($check->policy->isWindows())
     <div class="row mt-2">
       <div class="col col-2 text-end">
         <b>{{ __('Script') }}</b>
@@ -177,6 +178,7 @@
         </a>
       </div>
     </div>
+    @endif
   </div>
 </div>
 @endforeach
