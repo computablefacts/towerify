@@ -27,6 +27,25 @@
         <div id="submit"></div>
       </div>
     </div>
+    @if($checks->isNotEmpty())
+    <div class="row mt-3">
+      <div class="col col-2 text-end">
+        <b>{{ __('Download test script') }}</b>
+      </div>
+      <div class="col">
+        <a
+                href="data:text/plain;charset=utf-8,{{ rawurlencode($allChecksWindowsTestScript) }}"
+                download="Test-OssecRules.ps1">
+          <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M17.8 20l-12 -1.5c-1 -.1 -1.8 -.9 -1.8 -1.9v-9.2c0 -1 .8 -1.8 1.8 -1.9l12 -1.5c1.2 -.1 2.2 .8 2.2 1.9v12.1c0 1.2 -1.1 2.1 -2.2 1.9z" />
+            <path d="M12 5l0 14" />
+            <path d="M4 12l16 0" />
+          </svg>
+        </a>
+      </div>
+    </div>
+    @endif
   </div>
 </div>
 @foreach($checks as $check)
@@ -139,6 +158,23 @@
             <pre class="mb-0 w-100 pre-light">{{ $check->rule }}</pre>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="row mt-2">
+      <div class="col col-2 text-end">
+        <b>{{ __('Download test script') }}</b>
+      </div>
+      <div class="col">
+        <a
+                href="data:text/plain;charset=utf-8,{{ rawurlencode($check->getTestOssecRuleWindowsScript()) }}"
+                download="Test-OssecRule-{{ $check->id }}.ps1">
+          <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="1"  stroke-linecap="round"  stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M17.8 20l-12 -1.5c-1 -.1 -1.8 -.9 -1.8 -1.9v-9.2c0 -1 .8 -1.8 1.8 -1.9l12 -1.5c1.2 -.1 2.2 .8 2.2 1.9v12.1c0 1.2 -1.1 2.1 -2.2 1.9z" />
+            <path d="M12 5l0 14" />
+            <path d="M4 12l16 0" />
+          </svg>
+        </a>
       </div>
     </div>
   </div>
