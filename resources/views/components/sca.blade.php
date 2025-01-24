@@ -30,7 +30,7 @@
     @if($checks->isNotEmpty())
     <div class="row mt-3">
       <div class="col col-2 text-end">
-        <b>{{ __('Download test script') }}</b>
+        <b>{{ __('Script') }}</b>
       </div>
       <div class="col">
         <a
@@ -162,7 +162,7 @@
     </div>
     <div class="row mt-2">
       <div class="col col-2 text-end">
-        <b>{{ __('Download test script') }}</b>
+        <b>{{ __('Script') }}</b>
       </div>
       <div class="col">
         <a
