@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\OssecRuleWindowsTestScript;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -108,4 +109,12 @@ class YnhOssecCheck extends Model
             ->values()
             ->toArray();
     }
+
+    public function getTestOssecRuleWindowsScript(): string
+    {
+        return OssecRuleWindowsTestScript::begin() . "\n" .
+            json_encode($this->requirements) . "\n" .
+            OssecRuleWindowsTestScript::end();
+    }
+
 }

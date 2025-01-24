@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Helpers\OssecRuleWindowsTestScript;
 use App\Models\YnhOssecCheck;
 use App\Models\YnhOssecPolicy;
 use Closure;
@@ -14,6 +15,7 @@ class Sca extends Component
     public ?string $policy;
     public ?string $framework;
     public ?string $search;
+    public ?string $allChecksWindowsTestScript;
     public Collection $policies;
     public Collection $frameworks;
     public Collection $checks;
@@ -43,6 +45,10 @@ class Sca extends Component
         $this->checks = $checks->get()
             ->filter(fn(YnhOssecCheck $check) => !$this->framework || in_array($framework, $check->frameworks()))
             ->sort(fn(YnhOssecCheck $check1, YnhOssecCheck $check2) => strcmp($check1->title, $check2->title));
+
+        $this->allChecksWindowsTestScript = OssecRuleWindowsTestScript::begin() . "\n" .
+            $this->checks->map(fn(YnhOssecCheck $check) => json_encode($check->requirements) . "\n")->join("\n") .
+            OssecRuleWindowsTestScript::end();
     }
 
     public function render(): View|Closure|string
