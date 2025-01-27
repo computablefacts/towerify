@@ -969,7 +969,7 @@ EOT;
 
     public static function suspiciousEvents(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return Messages::getEx($servers, $cutOffTime);
+        return Messages::get($servers, $cutOffTime);
     }
 
     /** @deprecated */

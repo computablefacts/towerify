@@ -56,13 +56,13 @@ class Messages
     const string USERS = 'Users';
     const string GROUPS = 'Groups';
 
-    public static function getEx(Collection $servers, Carbon $cutOffTime): Collection
+    public static function get(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return self::processesAndBackgroundTasks($servers, $cutOffTime)
-            ->concat(self::shellHistoryAndRootCommands($servers, $cutOffTime))
-            ->concat(self::connectionsAndSocketEvents($servers, $cutOffTime))
+        return self::shellHistoryAndRootCommands($servers, $cutOffTime)
+            // ->concat(self::connectionsAndSocketEvents($servers, $cutOffTime))
+            // ->concat(self::processesAndBackgroundTasks($servers, $cutOffTime))
             ->concat(self::authenticationAndSshActivity($servers, $cutOffTime))
-            ->concat(self::portsAndInterfaces($servers, $cutOffTime))
+            // ->concat(self::portsAndInterfaces($servers, $cutOffTime))
             ->concat(self::servicesAndScheduledTasks($servers, $cutOffTime))
             ->concat(self::usersAndGroups($servers, $cutOffTime))
             ->concat(self::packages($servers, $cutOffTime))
@@ -70,7 +70,8 @@ class Messages
             ->concat(self::ldPreload($servers, $cutOffTime))
             ->concat(self::kernelModules($servers, $cutOffTime))
             ->filter(fn(array $event) => count($event) >= 1)
-            ->sortByDesc('timestamp');
+            ->sortByDesc('timestamp')
+            ->values();
     }
 
     public static function processesAndBackgroundTasks(Collection $servers, Carbon $cutOffTime): Collection
@@ -133,11 +134,13 @@ class Messages
                     ->get()
                     ->map(function (VProcessWithOpenNetworkSockets $event) {
                         if ($event->action === 'added') {
-                            $msg = "Le processus {$event->path} a une connexion ouverte de {$event->local_address}:{$event->local_port} vers {$event->remote_address}:{$event->remote_port}.";
+                            $process = empty($event->path) ? "{$event->pid}" : "{$event->path} ($event->pid)";
+                            $msg = "Le processus {$process} a une connexion ouverte de {$event->local_address}:{$event->local_port} vers {$event->remote_address}:{$event->remote_port}.";
                             return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_OPEN_NETWORK_SOCKETS, $msg);
                         }
                         if ($event->action === 'removed') {
-                            $msg = "Le processus {$event->path} n'a plus de connexion ouverte de {$event->local_address}:{$event->local_port} vers {$event->remote_address}:{$event->remote_port}.";
+                            $process = empty($event->path) ? "{$event->pid}" : "{$event->path} ($event->pid)";
+                            $msg = "Le processus {$process} n'a plus de connexion ouverte de {$event->local_address}:{$event->local_port} vers {$event->remote_address}:{$event->remote_port}.";
                             return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_OPEN_NETWORK_SOCKETS, $msg);
                         }
                         return [];
@@ -286,7 +289,12 @@ class Messages
                             } else {
                                 $schedule = $event->cron;
                             }
-                            $msg = "La tâche planifiée {$event->command} ({$schedule}) a été ajoutée au fichier {$event->file}.";
+                            if ($event->file === 'n/a') {
+                                $file = "";
+                            } else {
+                                $file = " au fichier {$event->file}";
+                            }
+                            $msg = "La tâche planifiée {$event->command} ({$schedule}) a été ajoutée{$file}.";
                             return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SCHEDULED_TASKS, $msg);
                         }
                         if ($event->action === 'removed') {
@@ -295,7 +303,12 @@ class Messages
                             } else {
                                 $schedule = $event->cron;
                             }
-                            $msg = "La tâche planifiée {$event->command} ({$schedule}) a été supprimée du fichier {$event->file}.";
+                            if ($event->file === 'n/a') {
+                                $file = "";
+                            } else {
+                                $file = " du fichier {$event->file}";
+                            }
+                            $msg = "La tâche planifiée {$event->command} ({$schedule}) a été supprimée{$file}.";
                             return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SCHEDULED_TASKS, $msg);
                         }
                         return [];
@@ -354,7 +367,7 @@ class Messages
             ->map(function (VPackage $event) {
                 if ($event->action === 'added') {
 
-                    $osInfo = YnhOsquery::osInfos(collect([$event->server()]))->first();
+                    $osInfo = YnhOsquery::osInfos(collect([$event->server->first()]))->first();
 
                     if (!$osInfo) {
                         $cves = '';

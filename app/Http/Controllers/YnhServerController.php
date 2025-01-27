@@ -11,6 +11,7 @@ use App\Events\InstallApp;
 use App\Events\PullServerInfos;
 use App\Events\RemoveUserPermission;
 use App\Events\UninstallApp;
+use App\Helpers\Messages;
 use App\Helpers\SshKeyPair;
 use App\Http\Requests\AddUserPermissionRequest;
 use App\Http\Requests\ConfigureHostRequest;
@@ -19,6 +20,7 @@ use App\Http\Requests\CreateHostRequest;
 use App\Http\Requests\DownloadBackupRequest;
 use App\Http\Requests\ExecuteShellCommandRequest;
 use App\Http\Requests\InstallAppRequest;
+use App\Http\Requests\LoadMessagesRequest;
 use App\Http\Requests\PullServerInfosRequest;
 use App\Http\Requests\RemoveHostRequest;
 use App\Http\Requests\RemoveUserPermissionRequest;
@@ -33,6 +35,7 @@ use App\Models\YnhUser;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
 use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -424,5 +427,10 @@ class YnhServerController extends Controller
             }
         }
         return response()->json(['error' => 'An error occurred'], 500);
+    }
+
+    public function messages(YnhServer $server, LoadMessagesRequest $request)
+    {
+        return response()->json(Messages::get(collect([$server]), Carbon::now()->subDays(10)), 200);
     }
 }

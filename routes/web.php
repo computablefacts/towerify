@@ -484,6 +484,7 @@ Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
         Route::post('{server}/users/{ynhUser}/permissions/{perm}', 'YnhServerController@addUserPermission')->name('add-user-permission');
         Route::delete('{server}/users/{ynhUser}/permissions/{perm}', 'YnhServerController@removeUserPermission')->name('remove-user-permission');
         Route::post('{server}/twr-users/{user}/permissions/{perm}', 'YnhServerController@addTwrUserPermission')->name('add-twr-user-permission');
+        Route::get('{server}/messages', 'YnhServerController@messages')->name('messages');
     });
     Route::group(['prefix' => 'invitations', 'as' => 'invitations.'], function () {
         Route::post('create', 'YnhInvitationController@create')->name('create');
