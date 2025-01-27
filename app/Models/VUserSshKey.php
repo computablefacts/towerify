@@ -16,16 +16,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string type
- * @property string package
- * @property string version
+ * @property string username
+ * @property string directory
+ * @property string shell
+ * @property string ssh_key
  * @property string action
  */
-class VPackages extends Model
+class VUserSshKey extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_packages';
+    protected $table = 'v_user_ssh_keys';
 
     protected $fillable = [
         'user_id',
@@ -36,9 +37,10 @@ class VPackages extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'type',
-        'package',
-        'version',
+        'username',
+        'directory',
+        'shell',
+        'ssh_key',
         'action',
     ];
 

@@ -969,26 +969,10 @@ EOT;
 
     public static function suspiciousEvents(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return YnhOsquery::where('calendar_time', '>=', $cutOffTime)
-            ->whereIn('name', [
-                'authorized_keys',
-                'last',
-                'users',
-                'suid_bin',
-                'ld_preload',
-                'kernel_modules',
-                'crontab',
-                'etc_hosts',
-                'deb_packages',
-            ])
-            ->where('dismissed', false)
-            ->whereIn('ynh_server_id', $servers->pluck('id'))
-            ->orderBy('calendar_time', 'desc')
-            ->get()
-            ->map(fn(YnhOsquery $event) => Messages::get($event))
-            ->filter(fn(array $event) => count($event) >= 1);
+        return Messages::getEx($servers, $cutOffTime);
     }
 
+    /** @deprecated */
     public static function suspiciousMetrics(Collection $servers, Carbon $cutOffTime): Collection
     {
         return $servers->map(function (YnhServer $server) use ($cutOffTime) {

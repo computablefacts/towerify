@@ -16,17 +16,15 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string username
- * @property string directory
- * @property string shell
- * @property string ssh_key
+ * @property string name
+ * @property string gid
  * @property string action
  */
-class VUserSshKeys extends Model
+class VGroup extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_user_ssh_keys';
+    protected $table = 'v_groups';
 
     protected $fillable = [
         'user_id',
@@ -37,10 +35,8 @@ class VUserSshKeys extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'username',
-        'directory',
-        'shell',
-        'ssh_key',
+        'name',
+        'gid',
         'action',
     ];
 

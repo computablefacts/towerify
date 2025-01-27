@@ -16,17 +16,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string pid
  * @property string name
- * @property string command
+ * @property string type
+ * @property string status
  * @property string path
  * @property string action
  */
-class VProcesses extends Model
+class VStartupItem extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_processes';
+    protected $table = 'v_startup_items';
 
     protected $fillable = [
         'user_id',
@@ -37,9 +37,9 @@ class VProcesses extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'pid',
         'name',
-        'command',
+        'type',
+        'status',
         'path',
         'action',
     ];

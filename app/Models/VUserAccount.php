@@ -16,19 +16,18 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string pid
- * @property string entry_host
- * @property string entry_timestamp
- * @property string entry_terminal
- * @property string entry_type
- * @property string entry_username
- * @property string actions
+ * @property string user
+ * @property string group
+ * @property string username
+ * @property string home_directory
+ * @property string default_shell
+ * @property string action
  */
-class VLoginsAndLogouts extends Model
+class VUserAccount extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_logins_and_logouts';
+    protected $table = 'v_user_accounts';
 
     protected $fillable = [
         'user_id',
@@ -39,12 +38,11 @@ class VLoginsAndLogouts extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'pid',
-        'entry_host',
-        'entry_timestamp',
-        'entry_terminal',
-        'entry_type',
-        'entry_username',
+        'user',
+        'group',
+        'username',
+        'home_directory',
+        'default_shell',
         'action',
     ];
 

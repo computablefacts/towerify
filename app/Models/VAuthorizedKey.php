@@ -16,18 +16,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string name
- * @property string path
- * @property string type
- * @property string status
- * @property string user
+ * @property string key_file
+ * @property string key
+ * @property string key_comment
+ * @property string algorithm
  * @property string action
  */
-class VServices extends Model
+class VAuthorizedKey extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_services';
+    protected $table = 'v_authorized_keys';
 
     protected $fillable = [
         'user_id',
@@ -38,11 +37,10 @@ class VServices extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'name',
-        'path',
-        'type',
-        'status',
-        'user',
+        'key_file',
+        'key',
+        'key_comment',
+        'algorithm',
         'action',
     ];
 

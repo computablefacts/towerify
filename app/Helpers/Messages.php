@@ -2,214 +2,452 @@
 
 namespace App\Helpers;
 
+use App\Models\VAuthorizedKey;
+use App\Models\VEtcHost;
+use App\Models\VEtcService;
+use App\Models\VGroup;
+use App\Models\VLoginAndLogout;
+use App\Models\VNetworkInterface;
+use App\Models\VPackage;
+use App\Models\VProcess;
+use App\Models\VProcessWithBoundNetworkSockets;
+use App\Models\VProcessWithOpenNetworkSockets;
+use App\Models\VScheduledTask;
+use App\Models\VService;
+use App\Models\VShellHistory;
+use App\Models\VUserAccount;
+use App\Models\VUserSshKey;
 use App\Models\YnhCve;
 use App\Models\YnhOsquery;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Messages
 {
-    public static function get(YnhOsquery $event)
+    // Categories
+    const string PROCESSES_AND_BACKGROUND_TASKS = 'Processes & Background Tasks';
+    const string SHELL_HISTORY_AND_ROOT_COMMANDS = 'Shell History & Root Commands';
+    const string CONNECTIONS_AND_SOCKET_EVENTS = 'Connections & Socket Events';
+    const string AUTHENTICATION_AND_SSH_ACTIVITY = 'Authentication & SSH Activity';
+    const string PORTS_AND_INTERFACES = 'Ports & Interfaces';
+    const string SERVICES_AND_SCHEDULED_TASKS = 'Services & Scheduled Tasks';
+    const string USERS_AND_GROUPS = 'Users & Groups';
+    const string PACKAGES = 'Packages';
+    const string SUID_BIN = 'SUID Bin';
+    const string LD_PRELOAD = 'LD_PRELOAD';
+    const string KERNEL_MODULES = 'Kernel Modules';
+
+    // Subcategories
+    const string PROCESSES = 'Processes';
+    const string BACKGROUND_TASKS = 'Background tasks';
+    const string SHELL_HISTORY = 'Shell history';
+    const string ROOT_COMMANDS = 'Root commands';
+    const string PROCESSES_WITH_BOUND_NETWORK_SOCKETS = 'Processes with listening (bound) network sockets/ports';
+    const string PROCESSES_WITH_OPEN_NETWORK_SOCKETS = 'Processes which have open network sockets on the system';
+    const string LOGINS_AND_LOGOUTS = 'Logins & Logouts';
+    const string SSH_KEYS_IN_THE_USERS_SSH_DIRECTORY = 'SSH keys in the users ~/.ssh directory';
+    const string AUTHORIZED_KEYS = 'Authorized keys';
+    const string ETC_SERVICES = 'Etc services';
+    const string ETC_HOSTS = 'Etc hosts';
+    const string NETWORK_INTERFACES = 'Network interfaces';
+    const string SERVICES = 'Services';
+    const string SCHEDULED_TASKS = 'Scheduled tasks';
+    const string USERS = 'Users';
+    const string GROUPS = 'Groups';
+
+    public static function getEx(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return match ($event->name) {
-            'authorized_keys' => self::authorizedKeys($event),
-            'last' => self::last($event),
-            'users' => self::users($event),
-            'suid_bin' => self::suidBin($event),
-            'ld_preload' => self::ldPreload($event),
-            'kernel_modules' => self::kernelModules($event),
-            'crontab' => self::crontab($event),
-            'etc_hosts' => self::etcHosts($event),
-            'deb_packages' => self::debPackages($event),
-            default => [],
-        };
+        return self::processesAndBackgroundTasks($servers, $cutOffTime)
+            ->concat(self::shellHistoryAndRootCommands($servers, $cutOffTime))
+            ->concat(self::connectionsAndSocketEvents($servers, $cutOffTime))
+            ->concat(self::authenticationAndSshActivity($servers, $cutOffTime))
+            ->concat(self::portsAndInterfaces($servers, $cutOffTime))
+            ->concat(self::servicesAndScheduledTasks($servers, $cutOffTime))
+            ->concat(self::usersAndGroups($servers, $cutOffTime))
+            ->concat(self::packages($servers, $cutOffTime))
+            ->concat(self::suidBin($servers, $cutOffTime))
+            ->concat(self::ldPreload($servers, $cutOffTime))
+            ->concat(self::kernelModules($servers, $cutOffTime))
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
     }
 
-    private static function authorizedKeys(YnhOsquery $event): array
+    public static function processesAndBackgroundTasks(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Une clef SSH a été ajoutée au trousseau de l'utilisateur {$event->columns['username']}.",
-            ];
-        } elseif ($event->action === 'removed') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Une clef SSH a été supprimée du trousseau de l'utilisateur {$event->columns['username']}.",
-            ];
-        }
-        return [];
+        return VProcess::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->map(function (VProcess $event) {
+                if ($event->action === 'added') {
+                    $msg = "Le processus {$event->name} est lancé.";
+                    return self::message($event, self::PROCESSES_AND_BACKGROUND_TASKS, self::PROCESSES, $msg);
+                }
+                if ($event->action === 'removed') {
+                    $msg = "Le processus {$event->name} est arrêté.";
+                    return self::message($event, self::PROCESSES_AND_BACKGROUND_TASKS, self::PROCESSES, $msg);
+                }
+                return [];
+            })
+            ->filter(fn(array $event) => count($event) >= 1);
     }
 
-    private static function last(YnhOsquery $event): array
+    public static function shellHistoryAndRootCommands(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
-            if ($event->columns['type_name'] === 'user-process') {
-                return [
-                    'id' => $event->id,
-                    'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                    'server' => $event->server->name,
-                    'ip' => $event->server->ip(),
-                    'message' => "L'utilisateur {$event->columns['username']} s'est connecté au serveur."
-                ];
-            }
-        }
-        return [];
+        return VShellHistory::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->map(function (VShellHistory $event) {
+                if ($event->action === 'added') {
+                    $msg = "L'utilisateur {$event->username} a lancé la commande {$event->command}.";
+                    return self::message($event, self::SHELL_HISTORY_AND_ROOT_COMMANDS, self::SHELL_HISTORY, $msg);
+                }
+                return [];
+            })
+            ->filter(fn(array $event) => count($event) >= 1);
     }
 
-    private static function users(YnhOsquery $event): array
+    public static function connectionsAndSocketEvents(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "L'utilisateur {$event->columns['username']} a été créé.",
-            ];
-        } elseif ($event->action === 'removed') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "L'utilisateur {$event->columns['username']} a été supprimé.",
-            ];
-        }
-        return [];
+        return VProcessWithBoundNetworkSockets::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->map(function (VProcessWithBoundNetworkSockets $event) {
+                if ($event->action === 'added') {
+                    $msg = "Le processus {$event->path} écoute à l'adresse {$event->local_address}:{$event->local_port}.";
+                    return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_BOUND_NETWORK_SOCKETS, $msg);
+                }
+                if ($event->action === 'removed') {
+                    $msg = "Le processus {$event->path} n'écoute plus à l'adresse {$event->local_address}:{$event->local_port}.";
+                    return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_BOUND_NETWORK_SOCKETS, $msg);
+                }
+                return [];
+            })
+            ->concat(
+                VProcessWithOpenNetworkSockets::where('timestamp', '>=', $cutOffTime)
+                    ->whereIn('server_id', $servers->pluck('id'))
+                    ->orderBy('timestamp', 'desc')
+                    ->get()
+                    ->map(function (VProcessWithOpenNetworkSockets $event) {
+                        if ($event->action === 'added') {
+                            $msg = "Le processus {$event->path} a une connexion ouverte de {$event->local_address}:{$event->local_port} vers {$event->remote_address}:{$event->remote_port}.";
+                            return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_OPEN_NETWORK_SOCKETS, $msg);
+                        }
+                        if ($event->action === 'removed') {
+                            $msg = "Le processus {$event->path} n'a plus de connexion ouverte de {$event->local_address}:{$event->local_port} vers {$event->remote_address}:{$event->remote_port}.";
+                            return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_OPEN_NETWORK_SOCKETS, $msg);
+                        }
+                        return [];
+                    })
+            )
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
     }
 
-    private static function suidBin(YnhOsquery $event): array
+    public static function authenticationAndSshActivity(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Les privilèges du binaire {$event->columns['path']} ont été élevés.",
-            ];
-        }
-        return [];
+        return VLoginAndLogout::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->map(function (VLoginAndLogout $event) {
+                if ($event->action === 'added') {
+                    $msg = "L'utilisateur {$event->entry_username} s'est connecté au serveur.";
+                    return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::LOGINS_AND_LOGOUTS, $msg);
+                }
+                if ($event->action === 'removed') {
+                    $msg = "L'utilisateur {$event->entry_username} s'est déconnecté du serveur.";
+                    return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::LOGINS_AND_LOGOUTS, $msg);
+                }
+                return [];
+            })
+            ->concat(
+                VAuthorizedKey::where('timestamp', '>=', $cutOffTime)
+                    ->whereIn('server_id', $servers->pluck('id'))
+                    ->orderBy('timestamp', 'desc')
+                    ->get()
+                    ->map(function (VAuthorizedKey $event) {
+                        if ($event->action === 'added') {
+                            $msg = "Une clef SSH a été ajoutée au trousseau {$event->key_file}.";
+                            return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::AUTHORIZED_KEYS, $msg);
+                        }
+                        if ($event->action === 'removed') {
+                            $msg = "Une clef SSH a été supprimée du trousseau {$event->key_file}.";
+                            return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::AUTHORIZED_KEYS, $msg);
+                        }
+                        return [];
+                    })
+            )
+            ->concat(
+                VUserSshKey::where('timestamp', '>=', $cutOffTime)
+                    ->whereIn('server_id', $servers->pluck('id'))
+                    ->orderBy('timestamp', 'desc')
+                    ->get()
+                    ->map(function (VUserSshKey $event) {
+                        if ($event->action === 'added') {
+                            $msg = "L'utilisateur {$event->username} a créé une clef SSH ({$event->ssh_key}).";
+                            return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::SSH_KEYS_IN_THE_USERS_SSH_DIRECTORY, $msg);
+                        }
+                        if ($event->action === 'removed') {
+                            $msg = "L'utilisateur {$event->username} a supprimé une clef SSH ({$event->ssh_key}).";
+                            return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::SSH_KEYS_IN_THE_USERS_SSH_DIRECTORY, $msg);
+                        }
+                        return [];
+                    })
+            )
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
     }
 
-    private static function ldPreload(YnhOsquery $event): array
+    public static function portsAndInterfaces(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Le binaire {$event->columns['value']} a été ajouté à la variable d'environnement LD_PRELOAD.",
-            ];
-        }
-        return [];
+        return VEtcService::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->map(function (VEtcService $event) {
+                if ($event->action === 'added') {
+                    $msg = "Le service {$event->name} ($event->comment) écoute sur le port {$event->port} ({$event->protocol}).";
+                    return self::message($event, self::PORTS_AND_INTERFACES, self::ETC_SERVICES, $msg);
+                }
+                if ($event->action === 'removed') {
+                    $msg = "Le service {$event->name} ($event->comment) n'écoute plus sur le port {$event->port} ({$event->protocol}).";
+                    return self::message($event, self::PORTS_AND_INTERFACES, self::ETC_SERVICES, $msg);
+                }
+                return [];
+            })
+            ->concat(
+                VEtcHost::where('timestamp', '>=', $cutOffTime)
+                    ->whereIn('server_id', $servers->pluck('id'))
+                    ->orderBy('timestamp', 'desc')
+                    ->get()
+                    ->map(function (VEtcHost $event) {
+                        if ($event->action === 'added') {
+                            $msg = "L'hôte {$event->hostnames} redirige vers {$event->address}.";
+                            return self::message($event, self::PORTS_AND_INTERFACES, self::ETC_HOSTS, $msg);
+                        }
+                        if ($event->action === 'removed') {
+                            $msg = "L'hôte {$event->hostnames} ne redirige plus vers {$event->address}.";
+                            return self::message($event, self::PORTS_AND_INTERFACES, self::ETC_HOSTS, $msg);
+                        }
+                        return [];
+                    })
+            )
+            ->concat(
+                VNetworkInterface::where('timestamp', '>=', $cutOffTime)
+                    ->whereIn('server_id', $servers->pluck('id'))
+                    ->orderBy('timestamp', 'desc')
+                    ->get()
+                    ->map(function (VNetworkInterface $event) {
+                        if ($event->action === 'added') {
+                            $msg = "L'interface réseau {$event->interface} ({$event->address}) a été ajoutée.";
+                            return self::message($event, self::PORTS_AND_INTERFACES, self::NETWORK_INTERFACES, $msg);
+                        }
+                        if ($event->action === 'removed') {
+                            $msg = "L'interface réseau {$event->interface} ({$event->address}) a été supprimée.";
+                            return self::message($event, self::PORTS_AND_INTERFACES, self::NETWORK_INTERFACES, $msg);
+                        }
+                        return [];
+                    })
+            )
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
     }
 
-    private static function kernelModules(YnhOsquery $event): array
+    public static function servicesAndScheduledTasks(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Le module {$event->columns['name']} a été ajouté au noyau.",
-            ];
-        } elseif ($event->action === 'removed') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Le module {$event->columns['name']} a été enlevé du noyau.",
-            ];
-        }
-        return [];
+        return VService::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->map(function (VService $event) {
+                if ($event->action === 'added') {
+                    $msg = "Le service {$event->name} ({$event->type}) a été ajouté.";
+                    return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SERVICES, $msg);
+                }
+                if ($event->action === 'removed') {
+                    $msg = "Le service {$event->name} ({$event->type}) a été supprimé.";
+                    return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SERVICES, $msg);
+                }
+                return [];
+            })
+            ->concat(
+                VScheduledTask::where('timestamp', '>=', $cutOffTime)
+                    ->whereIn('server_id', $servers->pluck('id'))
+                    ->orderBy('timestamp', 'desc')
+                    ->get()
+                    ->map(function (VScheduledTask $event) {
+                        if ($event->action === 'added') {
+                            if ($event->cron === 'n/a') {
+                                $schedule = "last_run={$event->last_run_time}, next_run={$event->next_run_time}";
+                            } else {
+                                $schedule = $event->cron;
+                            }
+                            $msg = "La tâche planifiée {$event->command} ({$schedule}) a été ajoutée au fichier {$event->file}.";
+                            return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SCHEDULED_TASKS, $msg);
+                        }
+                        if ($event->action === 'removed') {
+                            if ($event->cron === 'n/a') {
+                                $schedule = "last_run={$event->last_run_time}, next_run={$event->next_run_time}";
+                            } else {
+                                $schedule = $event->cron;
+                            }
+                            $msg = "La tâche planifiée {$event->command} ({$schedule}) a été supprimée du fichier {$event->file}.";
+                            return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SCHEDULED_TASKS, $msg);
+                        }
+                        return [];
+                    })
+            )
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
     }
 
-    private static function crontab(YnhOsquery $event): array
+    public static function usersAndGroups(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Une tâche planifiée a été ajoutée: {$event->columns['command']}",
-            ];
-        } elseif ($event->action === 'removed') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Une tâche planifiée a été supprimée: {$event->columns['command']}",
-            ];
-        }
-        return [];
+        return VUserAccount::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->map(function (VUserAccount $event) {
+                if ($event->action === 'added') {
+                    $home = empty($event->home_directory) ? "" : " ({$event->home_directory})";
+                    $msg = "L'utilisateur {$event->username}{$home} a été créé.";
+                    return self::message($event, self::USERS_AND_GROUPS, self::USERS, $msg);
+                }
+                if ($event->action === 'removed') {
+                    $home = empty($event->home_directory) ? "" : " ({$event->home_directory})";
+                    $msg = "L'utilisateur {$event->username}{$home} a été supprimé.";
+                    return self::message($event, self::USERS_AND_GROUPS, self::USERS, $msg);
+                }
+                return [];
+            })
+            ->concat(
+                VGroup::where('timestamp', '>=', $cutOffTime)
+                    ->whereIn('server_id', $servers->pluck('id'))
+                    ->orderBy('timestamp', 'desc')
+                    ->get()
+                    ->map(function (VGroup $event) {
+                        if ($event->action === 'added') {
+                            $msg = "Le groupe {$event->name} a été créé.";
+                            return self::message($event, self::USERS_AND_GROUPS, self::GROUPS, $msg);
+                        }
+                        if ($event->action === 'removed') {
+                            $msg = "Le groupe {$event->name} a été supprimé.";
+                            return self::message($event, self::USERS_AND_GROUPS, self::GROUPS, $msg);
+                        }
+                        return [];
+                    })
+            )
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
     }
 
-    private static function etcHosts(YnhOsquery $event): array
+    public static function packages(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Le traffic réseau vers {$event->columns['hostnames']} est maintenant redirigé vers {$event->columns['address']}.",
-            ];
-        } elseif ($event->action === 'removed') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Le traffic réseau vers {$event->columns['hostnames']} n'est maintenant plus redirigé vers {$event->columns['address']}.",
-            ];
-        }
-        return [];
+        return VPackage::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
+            ->get()
+            ->map(function (VPackage $event) {
+                if ($event->action === 'added') {
+
+                    $osInfo = YnhOsquery::osInfos(collect([$event->server()]))->first();
+
+                    if (!$osInfo) {
+                        $cves = '';
+                    } else {
+                        $cves = YnhCve::appCves($osInfo->os, $osInfo->codename, $event->package, $event->version)
+                            ->pluck('cve')
+                            ->unique()
+                            ->join(', ');
+                    }
+
+                    $warning = empty($cves) ? '' : "Attention, ce paquet est vulnérable: {$cves}.";
+                    $msg = "Le paquet {$event->package} {$event->version} ({$event->type}) a été installé. {$warning}";
+                    return self::message($event, self::USERS_AND_GROUPS, self::USERS, $msg);
+                }
+                if ($event->action === 'removed') {
+                    $msg = "Le paquet {$event->package} {$event->version} ({$event->type}) a été désinstallé.";
+                    return self::message($event, self::USERS_AND_GROUPS, self::USERS, $msg);
+                }
+                return [];
+            })
+            ->filter(fn(array $event) => count($event) >= 1);
     }
 
-    private static function debPackages(YnhOsquery $event): array
+    public static function suidBin(Collection $servers, Carbon $cutOffTime): Collection
     {
-        if ($event->action === 'added') {
+        return YnhOsquery::where('calendar_time', '>=', $cutOffTime)
+            ->whereIn('ynh_server_id', $servers->pluck('id'))
+            ->where('name', 'suid_bin')
+            ->get()
+            ->map(function (YnhOsquery $event) {
+                if ($event->action === 'added') {
+                    $msg = "Les privilèges du binaire {$event->columns['path']} ont été élevés.";
+                    return self::message($event, self::SUID_BIN, self::SUID_BIN, $msg);
+                }
+                return [];
+            })
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
+    }
 
-            $osInfo = YnhOsquery::osInfos(collect([$event->server]))->first();
+    public static function ldPreload(Collection $servers, Carbon $cutOffTime): Collection
+    {
+        return YnhOsquery::where('calendar_time', '>=', $cutOffTime)
+            ->whereIn('ynh_server_id', $servers->pluck('id'))
+            ->where('name', 'ld_preload')
+            ->get()
+            ->map(function (YnhOsquery $event) {
+                if ($event->action === 'added') {
+                    $msg = "Le binaire {$event->columns['value']} a été ajouté à la variable d'environnement LD_PRELOAD.";
+                    return self::message($event, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
+                }
+                return [];
+            })
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
+    }
 
-            if (!$osInfo) {
-                $cves = '';
-            } else {
-                $cves = YnhCve::appCves($osInfo->os, $osInfo->codename, $event->columns['name'], $event->columns['version'])
-                    ->pluck('cve')
-                    ->unique()
-                    ->join(', ');
-            }
+    public static function kernelModules(Collection $servers, Carbon $cutOffTime): Collection
+    {
+        return YnhOsquery::where('calendar_time', '>=', $cutOffTime)
+            ->whereIn('ynh_server_id', $servers->pluck('id'))
+            ->where('name', 'kernel_modules')
+            ->get()
+            ->map(function (YnhOsquery $event) {
+                if ($event->action === 'added') {
+                    $msg = "Le module {$event->columns['name']} a été ajouté au noyau.";
+                    return self::message($event, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
+                }
+                if ($event->action === 'removed') {
+                    $msg = "Le module {$event->columns['name']} a été enlevé du noyau.";
+                    return self::message($event, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
+                }
+                return [];
+            })
+            ->filter(fn(array $event) => count($event) >= 1)
+            ->sortByDesc('timestamp');
+    }
 
-            $warning = empty($cves) ? '' : "Attention, ce paquet est vulnérable: {$cves}.";
+    private static function message(Model $event, string $category, string $subcategory, string $message): array
+    {
+        return self::messageEx($event->event_id, $event->timestamp, $event->server_name, $event->server_ip_address, $category, $subcategory, $message);
+    }
 
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Le paquet {$event->columns['name']} ({$event->columns['version']}) a été installé. {$warning}",
-            ];
-        } elseif ($event->action === 'removed') {
-            return [
-                'id' => $event->id,
-                'timestamp' => $event->calendar_time->format('Y-m-d H:i:s'),
-                'server' => $event->server->name,
-                'ip' => $event->server->ip(),
-                'message' => "Le paquet {$event->columns['name']} ({$event->columns['version']}) a été désinstallé.",
-            ];
-        }
-        return [];
+    private static function messageEx(int $id, Carbon $timestamp, string $serverName, string $serverIpAddress, string $category, string $subcategory, string $message): array
+    {
+        return [
+            'id' => $id,
+            'timestamp' => $timestamp->format('Y-m-d H:i:s'),
+            'server' => $serverName,
+            'ip' => $serverIpAddress,
+            'category' => $category,
+            'subcategory' => $subcategory,
+            'message' => $message,
+        ];
     }
 }

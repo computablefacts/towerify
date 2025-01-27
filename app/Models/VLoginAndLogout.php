@@ -16,19 +16,19 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string address
- * @property string broadcast
- * @property string interface
- * @property string mask
- * @property string point_to_point
- * @property string type
- * @property string actions
+ * @property string pid
+ * @property string entry_host
+ * @property string entry_timestamp
+ * @property string entry_terminal
+ * @property string entry_type
+ * @property string entry_username
+ * @property string action
  */
-class VNetworkInterfaces extends Model
+class VLoginAndLogout extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_network_interfaces';
+    protected $table = 'v_logins_and_logouts';
 
     protected $fillable = [
         'user_id',
@@ -39,12 +39,12 @@ class VNetworkInterfaces extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'address',
-        'broadcast',
-        'interface',
-        'mask',
-        'point_to_point',
-        'type',
+        'pid',
+        'entry_host',
+        'entry_timestamp',
+        'entry_terminal',
+        'entry_type',
+        'entry_username',
         'action',
     ];
 

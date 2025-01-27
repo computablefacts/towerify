@@ -16,19 +16,19 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string file
- * @property string command
- * @property string last_run_time
- * @property string next_run_time
- * @property string cron
- * @property string enabled
+ * @property string address
+ * @property string broadcast
+ * @property string interface
+ * @property string mask
+ * @property string point_to_point
+ * @property string type
  * @property string action
  */
-class VScheduledTasks extends Model
+class VNetworkInterface extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_scheduled_tasks';
+    protected $table = 'v_network_interfaces';
 
     protected $fillable = [
         'user_id',
@@ -39,12 +39,12 @@ class VScheduledTasks extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'file',
-        'command',
-        'last_run_time',
-        'next_run_time',
-        'cron',
-        'enabled',
+        'address',
+        'broadcast',
+        'interface',
+        'mask',
+        'point_to_point',
+        'type',
         'action',
     ];
 

@@ -16,15 +16,18 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string address
- * @property string hostnames
+ * @property string name
+ * @property string path
+ * @property string type
+ * @property string status
+ * @property string user
  * @property string action
  */
-class VEtcHosts extends Model
+class VService extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_etc_hosts';
+    protected $table = 'v_services';
 
     protected $fillable = [
         'user_id',
@@ -35,8 +38,11 @@ class VEtcHosts extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'address',
-        'hostnames',
+        'name',
+        'path',
+        'type',
+        'status',
+        'user',
         'action',
     ];
 

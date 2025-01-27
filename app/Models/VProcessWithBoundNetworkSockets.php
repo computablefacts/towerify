@@ -16,19 +16,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string pid
  * @property string path
  * @property string local_address
  * @property string local_port
- * @property string remote_address
- * @property string remote_port
  * @property string action
  */
-class VProcessesWithOpenNetworkSockets extends Model
+class VProcessWithBoundNetworkSockets extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_processes_with_open_network_sockets';
+    protected $table = 'v_processes_with_bound_network_sockets';
 
     protected $fillable = [
         'user_id',
@@ -39,12 +36,9 @@ class VProcessesWithOpenNetworkSockets extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'pid',
         'path',
         'local_address',
         'local_port',
-        'remote_address',
-        'remote_port',
         'action',
     ];
 

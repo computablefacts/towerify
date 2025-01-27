@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use App\Traits\IsView;
-use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int user_id
@@ -18,17 +16,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string key_file
- * @property string key
- * @property string key_comment
- * @property string algorithm
+ * @property string address
+ * @property string hostnames
  * @property string action
  */
-class VAuthorizedKeys extends Model
+class VEtcHost extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_authorized_keys';
+    protected $table = 'v_etc_hosts';
 
     protected $fillable = [
         'user_id',
@@ -39,10 +35,8 @@ class VAuthorizedKeys extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'key_file',
-        'key',
-        'key_comment',
-        'algorithm',
+        'address',
+        'hostnames',
         'action',
     ];
 

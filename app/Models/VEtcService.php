@@ -17,14 +17,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_ip_address
  * @property Carbon timestamp
  * @property string name
- * @property string gid
+ * @property string port
+ * @property string protocol
+ * @property string comment
  * @property string action
  */
-class VGroups extends Model
+class VEtcService extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_groups';
+    protected $table = 'v_etc_services';
 
     protected $fillable = [
         'user_id',
@@ -36,7 +38,9 @@ class VGroups extends Model
         'server_ip_address',
         'timestamp',
         'name',
-        'gid',
+        'port',
+        'protocol',
+        'comment',
         'action',
     ];
 

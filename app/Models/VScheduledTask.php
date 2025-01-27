@@ -16,16 +16,19 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string server_ip_address
  * @property Carbon timestamp
- * @property string path
- * @property string local_address
- * @property string local_port
+ * @property string file
+ * @property string command
+ * @property string last_run_time
+ * @property string next_run_time
+ * @property string cron
+ * @property string enabled
  * @property string action
  */
-class VProcessesWithBoundNetworkSockets extends Model
+class VScheduledTask extends Model
 {
     use HasFactory, IsView;
 
-    protected $table = 'v_processes_with_bound_network_sockets';
+    protected $table = 'v_scheduled_tasks';
 
     protected $fillable = [
         'user_id',
@@ -36,9 +39,12 @@ class VProcessesWithBoundNetworkSockets extends Model
         'server_name',
         'server_ip_address',
         'timestamp',
-        'path',
-        'local_address',
-        'local_port',
+        'file',
+        'command',
+        'last_run_time',
+        'next_run_time',
+        'cron',
+        'enabled',
         'action',
     ];
 
