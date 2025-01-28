@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "38727fb7a18495dd5a69c2a0cd95eaf6",
+    "content-hash": "cf4c52c167086370c2d90da9c63a7941",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -6804,16 +6804,16 @@
         },
         {
             "name": "spatie/laravel-package-tools",
-            "version": "1.16.5",
+            "version": "1.18.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-package-tools.git",
-                "reference": "c7413972cf22ffdff97b68499c22baa04eddb6a2"
+                "reference": "ba67eee37d86ed775dab7dad58a7cbaf9a6cfe78"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-package-tools/zipball/c7413972cf22ffdff97b68499c22baa04eddb6a2",
-                "reference": "c7413972cf22ffdff97b68499c22baa04eddb6a2",
+                "url": "https://api.github.com/repos/spatie/laravel-package-tools/zipball/ba67eee37d86ed775dab7dad58a7cbaf9a6cfe78",
+                "reference": "ba67eee37d86ed775dab7dad58a7cbaf9a6cfe78",
                 "shasum": ""
             },
             "require": {
@@ -6822,10 +6822,10 @@
             },
             "require-dev": {
                 "mockery/mockery": "^1.5",
-                "orchestra/testbench": "^7.7|^8.0",
-                "pestphp/pest": "^1.22",
-                "phpunit/phpunit": "^9.5.24",
-                "spatie/pest-plugin-test-time": "^1.1"
+                "orchestra/testbench": "^7.7|^8.0|^9.0",
+                "pestphp/pest": "^1.22|^2",
+                "phpunit/phpunit": "^9.5.24|^10.5",
+                "spatie/pest-plugin-test-time": "^1.1|^2.2"
             },
             "type": "library",
             "autoload": {
@@ -6852,7 +6852,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-package-tools/issues",
-                "source": "https://github.com/spatie/laravel-package-tools/tree/1.16.5"
+                "source": "https://github.com/spatie/laravel-package-tools/tree/1.18.3"
             },
             "funding": [
                 {
@@ -6860,7 +6860,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-27T18:56:10+00:00"
+            "time": "2025-01-22T08:51:18+00:00"
         },
         {
             "name": "spatie/macroable",

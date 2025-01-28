@@ -6,6 +6,7 @@ use App\Models\YnhFramework;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Conversations\QuestionsAndAnswers;
+use App\Modules\CyberBuddy\Events\ImportTable;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Http\Requests\DownloadOneFileRequest;
@@ -619,6 +620,148 @@ class CyberBuddyController extends Controller
         Prompt::where('id', $id)->update(['template' => $text]);
         return response()->json([
             'success' => __('The prompt has been saved!'),
+        ]);
+    }
+
+    public function listAwsTables(Request $request)
+    {
+        $this->validate($request, [
+            'region' => 'required|string|min:0|max:100',
+            'access_key_id' => 'required|string|min:0|max:100',
+            'secret_access_key' => 'required|string|min:0|max:100',
+            'input_folder' => 'string|min:0|max:100',
+            'output_folder' => 'string|min:0|max:100',
+        ]);
+        $region = $request->input('region');
+        $accessKeyId = $request->input('access_key_id');
+        $secretAccessKey = $request->input('secret_access_key');
+        $inputFolder = $request->input('input_folder', '');
+        $outputFolder = $request->input('output_folder', '');
+        $s3Client = new \Aws\S3\S3Client([
+            'region' => $region,
+            'version' => 'latest',
+            'credentials' => [
+                'key' => $accessKeyId,
+                'secret' => $secretAccessKey,
+            ],
+        ]);
+        try {
+            $bucket = explode('/', $inputFolder, 2)[0];
+            $prefix = isset(explode('/', $inputFolder, 2)[1]) ? explode('/', $inputFolder, 2)[1] : '';
+            $objects = $s3Client->listObjectsV2([
+                'Bucket' => $bucket,
+                'Prefix' => $prefix,
+            ]);
+            $files = [];
+            if (isset($objects['Contents'])) {
+                foreach ($objects['Contents'] as $object) {
+                    $extension = pathinfo($object['Key'], PATHINFO_EXTENSION);
+                    if (in_array(strtolower($extension), ['tsv'])) { // only TSV files are allowed
+                        $files[] = [
+                            'object' => $object['Key'],
+                            'size' => \Illuminate\Support\Number::format($object['Size'], locale: 'sv'),
+                            'last_modified' => $object['LastModified']->format('Y-m-d H:i') . ' UTC',
+                        ];
+                    }
+                }
+            }
+            return response()->json([
+                'success' => 'The tables have been listed.',
+                'tables' => collect($files)->sortBy('object')->values()->all(),
+            ]);
+        } catch (\Aws\S3\Exception\S3Exception $e) {
+            return response()->json(['error' => __('Unable to list files: ') . $e->getMessage(),]);
+        }
+    }
+
+    public function listAwsTablesColumns(Request $request)
+    {
+        $this->validate($request, [
+            'region' => 'required|string|min:0|max:100',
+            'access_key_id' => 'required|string|min:0|max:100',
+            'secret_access_key' => 'required|string|min:0|max:100',
+            'input_folder' => 'string|min:0|max:100',
+            'output_folder' => 'string|min:0|max:100',
+            'tables' => 'required|array|min:1|max:1',
+            'tables.*' => 'required|string|min:0|max:250',
+        ]);
+        $region = $request->input('region');
+        $accessKeyId = $request->input('access_key_id');
+        $secretAccessKey = $request->input('secret_access_key');
+        $inputFolder = $request->input('input_folder', '');
+        $outputFolder = $request->input('output_folder', '');
+        $tables = collect($request->input('tables', []));
+        $columns = $tables->map(function (string $table) use ($region, $accessKeyId, $secretAccessKey, $inputFolder) {
+
+            $bucket = explode('/', $inputFolder, 2)[0];
+            $s3 = "s3('https://s3.{$region}.amazonaws.com/{$bucket}/{$table}', '{$accessKeyId}', '{$secretAccessKey}', 'TabSeparatedWithNames')";
+            $query = "DESCRIBE TABLE {$s3}";
+            $process = Process::fromShellCommandline("clickhouse-local --query \"{$query}\"");
+            $process->setTimeout(null);
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                Log::error("An error occurred while loading the schema of the table {$table}: {$process->getErrorOutput()}");
+                return [
+                    'table' => $table,
+                    'columns' => [],
+                ];
+            }
+            return [
+                'table' => $table,
+                'columns' => collect(explode("\n", $process->getOutput()))
+                    ->map(function (string $line) {
+                        $line = trim($line);
+                        return [
+                            'old_name' => Str::beforeLast($line, "\t"),
+                            'new_name' => Str::upper(Str::replace([' '], '_', Str::beforeLast($line, "\t"))),
+                            'type' => Str::replace("\'", "'", Str::afterLast($line, "\t")),
+                        ];
+                    })
+                    ->filter(fn(array $column) => $column['old_name'] !== '')
+                    ->sortBy('old_name')
+                    ->values(),
+            ];
+        });
+        return response()->json([
+            'success' => 'The table columns have been listed.',
+            'tables' => collect($columns)->sortBy('table')->values()->all(),
+        ]);
+    }
+
+    public function importAwsTables(Request $request)
+    {
+        $this->validate($request, [
+            'region' => 'required|string|min:0|max:100',
+            'access_key_id' => 'required|string|min:0|max:100',
+            'secret_access_key' => 'required|string|min:0|max:100',
+            'input_folder' => 'string|min:0|max:100',
+            'output_folder' => 'string|min:0|max:100',
+            'tables' => 'required|array|min:1|max:500',
+            'tables.*.table' => 'required|string|min:1|max:100',
+            'tables.*.old_name' => 'required|string|min:1|max:100',
+            'tables.*.new_name' => 'required|string|min:1|max:100',
+            'tables.*.type' => 'required|string|min:1|max:50',
+            'copy' => 'required|boolean',
+            'deduplicate' => 'required|boolean',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        $region = $request->input('region');
+        $accessKeyId = $request->input('access_key_id');
+        $secretAccessKey = $request->input('secret_access_key');
+        $inputFolder = $request->input('input_folder', '');
+        $outputFolder = $request->input('output_folder', '');
+        $tables = collect($request->input('tables', []))->groupBy('table');
+        $copy = $request->boolean('copy', false);
+        $deduplicate = $request->boolean('deduplicate', true);
+
+        foreach ($tables as $table => $columns) {
+            ImportTable::dispatch($user, $region, $accessKeyId, $secretAccessKey, $inputFolder, $outputFolder, $copy, $deduplicate, $table, $columns->toArray());
+        }
+        return response()->json([
+            'success' => "{$tables->count()} table will be imported soon.",
         ]);
     }
 

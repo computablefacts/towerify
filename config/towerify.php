@@ -65,4 +65,9 @@ return [
             'premium' => env('STRIPE_PLAN_PREMIUM'),
         ],
     ],
+    'clickhouse' => [
+        'host' => env('CH_HOST'),
+        'username' => env('CH_USERNAME'),
+        'password' => env('CH_PASSWORD'),
+    ],
 ];
