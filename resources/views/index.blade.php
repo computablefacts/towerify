@@ -39,6 +39,9 @@
   <x-documents :collection="request()->input('collection') ? request()->input('collection') : ''"
                :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
+  @if($tab === 'tables')
+  <x-tables :step="request()->input('step') ? request()->input('step') : ''"/>
+  @endif
   @if($tab === 'chunks')
   <x-chunks :collection="request()->input('collection') ? request()->input('collection') : ''"
             :file="request()->input('file') ? request()->input('file') : ''"

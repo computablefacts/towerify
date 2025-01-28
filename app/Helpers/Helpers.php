@@ -234,6 +234,11 @@ if (!function_exists('app_sidebar')) {
                             'active' => request()->route()->named('home') && request()->get('tab') === 'documents',
                             'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
                         ], [
+                            'label' => __('Tables'),
+                            'route' => route('home', ['tab' => 'tables']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'tables',
+                            'hidden' => Auth::user()->hasRole(\App\Models\Role::CYBERBUDDY_ONLY),
+                        ], [
                             'label' => __('Chunks'),
                             'route' => route('home', ['tab' => 'chunks']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'chunks',
