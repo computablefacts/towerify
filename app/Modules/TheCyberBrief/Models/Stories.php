@@ -3,11 +3,10 @@
 namespace App\Modules\TheCyberBrief\Models;
 
 use App\Enums\LanguageEnum;
+use App\Modules\TheCyberBrief\Helpers\OpenAi;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -71,7 +70,7 @@ class Stories extends Model
 
             $brief = $response['choices'][0]['message']['content'];
 
-            if ($this->isHyperlink()) {
+            if (OpenAi::isHyperlink($this->news)) {
                 $this->hyperlink = Str::limit(trim($this->news), 500);
                 $this->website = Str::before(Str::after($this->news, '://'), '/');
             }
@@ -112,37 +111,8 @@ class Stories extends Model
 
     private function summary(LanguageEnum $language): array
     {
-        if ($this->isHyperlink()) {
-            if (config('towerify.scrapfly.api_key')) {
-                $news = Http::get('https://api.scrapfly.io/scrape?render_js=true&key=' . config('towerify.scrapfly.api_key') . '&url=' . $this->news);
-                $news = json_decode($news, true)['result']['content'];
-            } else if (config('towerify.scraperapi.api_key')) {
-                $news = Http::get('http://api.scraperapi.com?api_key=' . config('towerify.scraperapi.api_key') . '&url=' . $this->news);
-            } else {
-                Log::error('Missing scraper API key!');
-                return [];
-            }
-        } else {
-            $news = $this->news;
-        }
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . config('towerify.openai.api_key'),
-            'Accept' => 'application/json',
-        ])->post('https://api.openai.com/v1/chat/completions', [
-            'model' => 'gpt-4o',
-            'messages' => [[
-                'role' => 'user',
-                'content' => $this->prompt($language, $news)
-            ]],
-            'temperature' => 0.7
-        ]);
-        if ($response->successful()) {
-            $json = $response->json();
-            // Log::debug($json);
-            return $json;
-        }
-        Log::error($response->body());
-        return [];
+        $news = OpenAi::download($this->news);
+        return OpenAi::summarize($this->prompt($language, $news));
     }
 
     private function prompt(LanguageEnum $language, string $news): string
@@ -194,10 +164,5 @@ Below is another example of an original news rewritten using SmartBrevity's news
 
 Now, take the following text and summarizes it in {$lang} using SmartBrevity's news format: {$news}
         ";
-    }
-
-    private function isHyperlink(): bool
-    {
-        return Str::startsWith(Str::lower($this->news), ["https://", "http://"]);
     }
 }
