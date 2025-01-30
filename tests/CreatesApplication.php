@@ -44,23 +44,35 @@ trait CreatesApplication
 
     protected function loadSchemaDump()
     {
-        // Turn off foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        if (file_exists(database_path('schema/mysql-schema.dmp'))) {
 
-        // Get all table names
-        $tables = DB::select('SHOW TABLES');
+            // Turn off foreign key checks
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        // Drop all tables
-        foreach ($tables as $table) {
-            $tableName = $table->Tables_in_tw_testdb;
-            DB::statement("DROP TABLE IF EXISTS {$tableName}");
+            // Get all view names
+            $views = DB::select("SHOW FULL TABLES WHERE TABLE_TYPE LIKE 'VIEW'");
+
+            // Drop all views
+            foreach ($views as $view) {
+                $viewName = $view->Tables_in_tw_testdb;
+                DB::statement("DROP VIEW IF EXISTS {$viewName}");
+            }
+
+            // Get all table names
+            $tables = DB::select('SHOW TABLES');
+
+            // Drop all tables
+            foreach ($tables as $table) {
+                $tableName = $table->Tables_in_tw_testdb;
+                DB::statement("DROP TABLE IF EXISTS {$tableName}");
+            }
+
+            // Turn foreign key checks back on
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            // Load the schema dump generated via 'php artisan schema:dump'
+            DB::unprepared(file_get_contents(database_path('schema/mysql-schema.dmp')));
         }
-
-        // Turn foreign key checks back on
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-        // Load the schema dump generated via 'php artisan schema:dump'
-        DB::unprepared(file_get_contents(database_path('schema/mysql-schema.dmp')));
     }
 
     protected function runDatabaseMigrations()

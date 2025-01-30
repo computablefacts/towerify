@@ -539,7 +539,7 @@ CREATE TABLE `cb_chunks` (
   KEY `cb_chunks_collection_id_foreign` (`collection_id`),
   CONSTRAINT `cb_chunks_collection_id_foreign` FOREIGN KEY (`collection_id`) REFERENCES `cb_collections` (`id`) ON DELETE CASCADE,
   CONSTRAINT `cb_chunks_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1558 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4354 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -561,7 +561,7 @@ CREATE TABLE `cb_chunks_tags` (
   KEY `cb_chunks_tags_chunk_id_foreign` (`chunk_id`),
   CONSTRAINT `cb_chunks_tags_chunk_id_foreign` FOREIGN KEY (`chunk_id`) REFERENCES `cb_chunks` (`id`) ON DELETE CASCADE,
   CONSTRAINT `cb_chunks_tags_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4281 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10181 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -582,7 +582,7 @@ CREATE TABLE `cb_collections` (
   PRIMARY KEY (`id`),
   KEY `cb_chunks_collections_created_by_foreign` (`created_by`),
   CONSTRAINT `cb_chunks_collections_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -599,11 +599,12 @@ CREATE TABLE `cb_conversations` (
   `created_by` int(10) unsigned NOT NULL,
   `thread_id` varchar(191) NOT NULL,
   `dom` text NOT NULL,
+  `autosaved` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `cb_conversations_created_by_foreign` (`created_by`),
   KEY `cb_conversations_thread_id_index` (`thread_id`),
   CONSTRAINT `cb_conversations_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -636,7 +637,7 @@ CREATE TABLE `cb_files` (
   KEY `cb_files_collection_id_foreign` (`collection_id`),
   CONSTRAINT `cb_files_collection_id_foreign` FOREIGN KEY (`collection_id`) REFERENCES `cb_collections` (`id`) ON DELETE CASCADE,
   CONSTRAINT `cb_files_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -678,7 +679,7 @@ CREATE TABLE `cb_templates` (
   UNIQUE KEY `cb_templates_name_unique` (`name`),
   KEY `cb_templates_created_by_foreign` (`created_by`),
   CONSTRAINT `cb_templates_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -929,7 +930,7 @@ CREATE TABLE `invitations` (
   KEY `invitations_created_by_foreign` (`created_by`),
   CONSTRAINT `invitations_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `invitations_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=117 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -949,7 +950,7 @@ CREATE TABLE `jobs` (
   `created_at` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `jobs_queue_index` (`queue`)
-) ENGINE=InnoDB AUTO_INCREMENT=243819 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=245134 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1142,7 +1143,7 @@ CREATE TABLE `media` (
   UNIQUE KEY `media_uuid_unique` (`uuid`),
   KEY `media_model_type_model_id_index` (`model_type`,`model_id`),
   KEY `media_order_column_index` (`order_column`)
-) ENGINE=InnoDB AUTO_INCREMENT=7423 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9097 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1157,7 +1158,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(191) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=328 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=399 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2025,7 +2026,7 @@ CREATE TABLE `telescope_entries` (
   KEY `telescope_entries_family_hash_index` (`family_hash`),
   KEY `telescope_entries_created_at_index` (`created_at`),
   KEY `telescope_entries_type_should_display_on_index_index` (`type`,`should_display_on_index`)
-) ENGINE=InnoDB AUTO_INCREMENT=5551928 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6239576 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2107,6 +2108,7 @@ CREATE TABLE `users` (
   `superset_id` varchar(191) DEFAULT NULL,
   `performa_domain` varchar(191) DEFAULT NULL,
   `performa_secret` varchar(191) DEFAULT NULL,
+  `gets_audit_report` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_email_unique` (`email`),
   KEY `users_tenant_id_foreign` (`tenant_id`),
@@ -2213,6 +2215,28 @@ CREATE TABLE `ynh_domains` (
   KEY `ynh_domains_ynh_server_id_foreign` (`ynh_server_id`),
   CONSTRAINT `ynh_domains_ynh_server_id_foreign` FOREIGN KEY (`ynh_server_id`) REFERENCES `ynh_servers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ynh_frameworks`
+--
+
+DROP TABLE IF EXISTS `ynh_frameworks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ynh_frameworks` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `name` varchar(191) NOT NULL,
+  `description` varchar(2000) NOT NULL,
+  `locale` varchar(191) DEFAULT NULL,
+  `copyright` varchar(191) DEFAULT NULL,
+  `version` varchar(191) DEFAULT NULL,
+  `provider` varchar(191) DEFAULT NULL,
+  `file` varchar(191) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2333,13 +2357,13 @@ CREATE TABLE `ynh_osquery_events_counts` (
   `date_min` datetime NOT NULL,
   `date_max` datetime NOT NULL,
   `count` int(11) NOT NULL DEFAULT 0,
-  `events` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`events`)),
+  `events` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`events`)),
   PRIMARY KEY (`id`),
   KEY `ynh_osquery_events_counts_ynh_server_id_foreign` (`ynh_server_id`),
   KEY `ynh_osquery_events_counts_date_min_index` (`date_min`),
   KEY `ynh_osquery_events_counts_date_max_index` (`date_max`),
   CONSTRAINT `ynh_osquery_events_counts_ynh_server_id_foreign` FOREIGN KEY (`ynh_server_id`) REFERENCES `ynh_servers` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7637 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2424,7 +2448,7 @@ CREATE TABLE `ynh_osquery_rules` (
   `is_ioc` tinyint(1) NOT NULL DEFAULT 0,
   `score` double NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=387 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=390 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2448,7 +2472,7 @@ CREATE TABLE `ynh_ossec_checks` (
   `references` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`references`)),
   `compliance` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`compliance`)),
   `requirements` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`requirements`)),
-  `rule` varchar(1000) NOT NULL,
+  `rule` longtext NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ynh_ossec_checks_uid_unique` (`uid`),
   KEY `ynh_ossec_checks_ynh_ossec_policy_id_foreign` (`ynh_ossec_policy_id`),
@@ -2638,7 +2662,7 @@ CREATE TABLE `zone_members` (
   KEY `zone_members_created_by_foreign` (`created_by`),
   CONSTRAINT `zone_members_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `zone_members_zone_id_foreign` FOREIGN KEY (`zone_id`) REFERENCES `zones` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7480 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9154 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2670,7 +2694,501 @@ CREATE TABLE `zones` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-01-05 19:20:02
+create view v_authorized_keys as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.key_file')) AS `key_file`,
+  CONCAT(LEFT(JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.key')), 15), '[...]',
+         RIGHT(JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.key')), 15)) AS `key`,
+  CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.comment')) = 'null' THEN NULL
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.comment'))
+  END AS `key_comment`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.algorithm')) AS `algorithm`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((`ynh_osquery` JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+WHERE `ynh_osquery`.`name` = 'authorized_keys';
+
+create view v_etc_hosts as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.address')) AS `address`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.hostnames')) AS `hostnames`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((`ynh_osquery` JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+WHERE `ynh_osquery`.`name` = 'etc_hosts';
+
+create view v_etc_services as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name')) AS `name`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.port')) AS `port`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.protocol')) AS `protocol`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.comment')) AS `comment`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((`ynh_osquery` JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+WHERE `ynh_osquery`.`name` = 'etc_services';
+
+create view v_groups as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.groupname')) AS `name`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.gid')) AS `gid`,
+  `ynh_osquery`.`action` AS `action`
+FROM (((`ynh_osquery` JOIN `ynh_osquery_latest_events`
+ON (`ynh_osquery_latest_events`.`ynh_osquery_id` = `ynh_osquery`.`id` AND
+    `ynh_osquery_latest_events`.`event_name` = 'groups')) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`));
+
+create view v_logins_and_logouts as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.pid')) AS `pid`,
+  CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.host')) = 'null' THEN NULL
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.host'))
+  END AS `entry_host`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.time')) AS `entry_timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.tty')) AS `entry_terminal`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.type_name')) AS `entry_type`,
+  CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.username')) = 'null' THEN NULL
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.username'))
+  END AS `entry_username`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((`ynh_osquery` JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+WHERE `ynh_osquery`.`name` = 'last';
+
+create view v_network_interfaces as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.address')) AS `address`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.broadcast')) AS `broadcast`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.interface')) AS `interface`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.mask')) AS `mask`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.point_to_point')) AS `point_to_point`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.type')) AS `type`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((`ynh_osquery` JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+WHERE `ynh_osquery`.`name` = 'interface_addresses';
+
+create view v_packages as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  CASE `t`.`_type` WHEN 1 THEN 'win'
+                   WHEN 2 THEN 'deb'
+                   WHEN 3 THEN 'portage'
+                   WHEN 4 THEN 'npm'
+                   WHEN 5 THEN 'python'
+                   WHEN 6 THEN 'rpm'
+                   WHEN 7 THEN 'homebrew'
+                   WHEN 8 THEN 'chocolatey'
+                   ELSE 'n/a'
+  END AS `type`,
+  CASE `t`.`_type` WHEN 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+                   WHEN 2 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+                   WHEN 3 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+                   WHEN 4 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+                   WHEN 5 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+                   WHEN 6 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+                   WHEN 7 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+                   WHEN 8 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+                   ELSE 'n/a'
+  END AS `package`,
+  CASE `t`.`_type` WHEN 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.version'))
+                   WHEN 2 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.version'))
+                   WHEN 3 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.version'))
+                   WHEN 4 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.version'))
+                   WHEN 5 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.version'))
+                   WHEN 6 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.version'))
+                   WHEN 7 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.version'))
+                   WHEN 8 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.version'))
+                   ELSE 'n/a'
+  END AS `version`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((((
+  SELECT
+    1 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'win_packages'
+  UNION
+  SELECT
+    2 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'deb_packages'
+  UNION
+  SELECT
+    3 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'portage_packages'
+  UNION
+  SELECT
+    4 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'npm_packages'
+  UNION
+  SELECT
+    5 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'python_packages'
+  UNION
+  SELECT
+    6 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'rpm_packages'
+  UNION
+  SELECT
+    7 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'homebrew_packages'
+  UNION
+  SELECT
+    8 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'chocolatey_packages'
+) `t` JOIN `ynh_osquery` ON (`ynh_osquery`.`id` = `t`.`_oid`)) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `t`.`_sid`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`));
+
+create view v_processes as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.pid')) AS `pid`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name')) AS `name`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.cmdline')) AS `command`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.path')) AS `path`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((((
+  SELECT
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'processes'
+) `t` JOIN `ynh_osquery` ON (`ynh_osquery`.`id` = `t`.`_oid`)) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `t`.`_sid`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+WHERE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.cmdline')) NOT LIKE '%performa%'
+  AND JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.cmdline')) NOT LIKE '%logalert%';
+
+create view v_processes_with_bound_network_sockets as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.path')) AS `path`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.address')) AS `local_address`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.port')) AS `local_port`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((((
+  SELECT
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'process_listening_port'
+) `t` JOIN `ynh_osquery` ON (`ynh_osquery`.`id` = `t`.`_oid`)) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `t`.`_sid`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`));
+
+create view v_processes_with_open_network_sockets as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.pid')) AS `pid`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.path')) AS `path`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.local_address')) AS `local_address`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.local_port')) AS `local_port`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.remote_address')) AS `remote_address`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.remote_port')) AS `remote_port`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((((
+  SELECT
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'open_sockets'
+) `t` JOIN `ynh_osquery` ON (`ynh_osquery`.`id` = `t`.`_oid`)) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `t`.`_sid`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+HAVING TRIM(`path`) <> ''
+    OR TRIM(`remote_address`) <> '';
+
+create view v_scheduled_tasks as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  CASE WHEN `t`.`_type` = 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.path'))
+       ELSE 'n/a'
+  END AS `file`,
+  CASE WHEN `t`.`_type` = 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.command'))
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.action'))
+  END AS `command`,
+  CASE WHEN `t`.`_type` = 1 THEN 'n/a'
+       ELSE DATE_FORMAT(FROM_UNIXTIME(JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.last_run_time'))),
+                        '%Y-%m-%d %H:%i:%s')
+  END AS `last_run_time`,
+  CASE WHEN `t`.`_type` = 1 THEN 'n/a'
+       ELSE DATE_FORMAT(FROM_UNIXTIME(JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.next_run_time'))),
+                        '%Y-%m-%d %H:%i:%s')
+  END AS `next_run_time`,
+  CASE WHEN `t`.`_type` = 1 THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.minute')), ' ',
+                                        JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.hour')), ' ',
+                                        JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.day_of_month')),
+                                        ' ', JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.month')),
+                                        ' ',
+                                        JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.day_of_week')))
+       ELSE 'n/a'
+  END AS `cron`,
+  CASE WHEN `t`.`_type` = 1 THEN 'yes'
+       WHEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.enabled')) = 1 THEN 'yes'
+       ELSE 'no'
+  END AS `enabled`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((((
+  SELECT
+    1 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'crontab'
+  UNION
+  SELECT
+    2 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'scheduled_tasks'
+) `t` JOIN `ynh_osquery` ON (`ynh_osquery`.`id` = `t`.`_oid`)) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `t`.`_sid`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`));
+
+create view v_services as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  CASE WHEN `t`.`_type` = 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name'))
+  END AS `name`,
+  CASE WHEN `t`.`_type` = 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.path'))
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.path'))
+  END AS `path`,
+  CASE WHEN `t`.`_type` = 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.type'))
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.service_type'))
+  END AS `type`,
+  CASE WHEN `t`.`_type` = 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.status'))
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.status'))
+  END AS `status`,
+  CASE WHEN `t`.`_type` = 1 THEN JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.username'))
+       ELSE JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.user_account'))
+  END AS `user`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((((
+  SELECT
+    1 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'startup_items'
+  UNION
+  SELECT
+    2 AS `_type`,
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'services'
+) `t` JOIN `ynh_osquery` ON (`ynh_osquery`.`id` = `t`.`_oid`)) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `t`.`_sid`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`));
+
+create view v_shell_history as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.username')) AS `username`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.shell')) AS `shell`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.command')) AS `command`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((`ynh_osquery` JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+WHERE `ynh_osquery`.`name` = 'shell_history';
+
+create view v_startup_items as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.name')) AS `name`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.type')) AS `type`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.status')) AS `status`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.path')) AS `path`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((`ynh_osquery` JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`))
+WHERE `ynh_osquery`.`name` = 'startup_items';
+
+create view v_user_accounts as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.uid')) AS `user`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.gid')) AS `group`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.username')) AS `username`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.directory')) AS `home_directory`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.shell')) AS `default_shell`,
+  `ynh_osquery`.`action` AS `action`
+FROM (((`ynh_osquery` JOIN `ynh_osquery_latest_events`
+ON (`ynh_osquery_latest_events`.`ynh_osquery_id` = `ynh_osquery`.`id` AND
+    `ynh_osquery_latest_events`.`event_name` = 'users')) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `ynh_osquery_latest_events`.`ynh_server_id`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`));
+
+create view v_user_ssh_keys as
+SELECT DISTINCT
+  `ynh_servers`.`user_id` AS `user_id`,
+  `users`.`customer_id` AS `customer_id`,
+  `users`.`tenant_id` AS `tenant_id`,
+  `ynh_osquery`.`id` AS `event_id`,
+  `ynh_osquery`.`ynh_server_id` AS `server_id`,
+  `ynh_servers`.`name` AS `server_name`,
+  `ynh_servers`.`ip_address` AS `server_ip_address`,
+  `ynh_osquery`.`calendar_time` AS `timestamp`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.username')) AS `username`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.directory')) AS `directory`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.shell')) AS `shell`,
+  JSON_UNQUOTE(JSON_EXTRACT(`ynh_osquery`.`columns`, '$.path')) AS `ssh_key`,
+  `ynh_osquery`.`action` AS `action`
+FROM ((((
+  SELECT
+    `ynh_osquery_latest_events`.`ynh_osquery_id` AS `_oid`,
+    `ynh_osquery_latest_events`.`ynh_server_id` AS `_sid`
+  FROM `ynh_osquery_latest_events`
+  WHERE `ynh_osquery_latest_events`.`event_name` = 'user_ssh_keys'
+) `t` JOIN `ynh_osquery` ON (`ynh_osquery`.`id` = `t`.`_oid`)) JOIN `ynh_servers`
+ON (`ynh_servers`.`id` = `t`.`_sid`)) JOIN `users`
+ON (`users`.`id` = `ynh_servers`.`user_id`));
+
+-- Dump completed on 2025-01-30 19:29:50
 INSERT INTO migrations (id, migration, batch) VALUES (1, '2014_10_12_000000_create_users_table', 1);
 INSERT INTO migrations (id, migration, batch) VALUES (2, '2014_10_12_100000_create_password_resets_table', 1);
 INSERT INTO migrations (id, migration, batch) VALUES (3, '2014_10_13_100000_create_cache_table', 1);
@@ -2917,3 +3435,23 @@ INSERT INTO migrations (id, migration, batch) VALUES (322, '2025_01_03_145000_cr
 INSERT INTO migrations (id, migration, batch) VALUES (323, '2025_01_03_153400_add_column_updated_to_table_ynh_osquery_latest_events', 55);
 INSERT INTO migrations (id, migration, batch) VALUES (324, '2025_01_04_100500_drop_table_compute_ioc', 56);
 INSERT INTO migrations (id, migration, batch) VALUES (327, '2025_01_05_184500_create_table_ynh_osquery_events_counts', 57);
+INSERT INTO migrations (id, migration, batch) VALUES (328, '2025_01_10_022400_add_column_gets_audit_report_to_table_users', 58);
+INSERT INTO migrations (id, migration, batch) VALUES (333, '2025_01_13_160500_create_table_ynh_frameworks', 59);
+INSERT INTO migrations (id, migration, batch) VALUES (337, '2025_01_14_134500_increase_column_rule_length_in_table_ynh_ossec_checks', 60);
+INSERT INTO migrations (id, migration, batch) VALUES (338, '2025_01_21_155200_add_column_autosaved_to_table_conversations', 61);
+INSERT INTO migrations (id, migration, batch) VALUES (383, '2025_01_24_105900_create_view_packages', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (384, '2025_01_24_110900_create_view_etc_hosts', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (385, '2025_01_24_111000_create_view_etc_services', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (386, '2025_01_24_111600_create_view_shell_history', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (387, '2025_01_24_111900_create_view_user_ssh_keys', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (388, '2025_01_24_112100_create_view_authorized_keys', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (389, '2025_01_24_112400_create_view_logins_and_logouts', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (390, '2025_01_24_112600_create_view_scheduled_tasks', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (391, '2025_01_24_112800_create_view_services', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (392, '2025_01_24_113000_create_view_user_accounts', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (393, '2025_01_24_113300_create_view_groups', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (394, '2025_01_24_144900_create_view_network_interfaces', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (395, '2025_01_24_145100_create_view_startup_items', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (396, '2025_01_24_145600_create_view_processes', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (397, '2025_01_24_145800_create_view_processes_with_open_network_sockets', 62);
+INSERT INTO migrations (id, migration, batch) VALUES (398, '2025_01_24_150000_create_view_processes_with_bound_network_sockets', 62);
