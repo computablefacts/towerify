@@ -51,9 +51,10 @@ Route::get('/cyber-buddy/chat', 'CyberBuddyController@showChat');
 Route::match(['get', 'post'], 'botman', 'CyberBuddyController@handle');
 
 Route::group([
-    'prefix' => 'aws',
+    'prefix' => 'aws/tables',
 ], function () {
-    Route::get('/list-tables', 'CyberBuddyController@listAwsTables')->name('list-aws-tables');
-    Route::post('/list-tables-columns', 'CyberBuddyController@listAwsTablesColumns')->name('list-aws-tables-columns');
-    Route::post('/import-tables', 'CyberBuddyController@importAwsTables')->name('import-aws-tables');
+    Route::get('/', 'CyberBuddyController@listAwsTables')->name('list-aws-tables');
+    Route::post('/columns', 'CyberBuddyController@listAwsTablesColumns')->name('list-aws-tables-columns');
+    Route::post('/import', 'CyberBuddyController@importAwsTables')->name('import-aws-tables');
+    Route::get('/available', 'CyberBuddyController@availableAwsTables')->name('available-aws-tables');
 })->middleware(['auth']);

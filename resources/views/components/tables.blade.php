@@ -54,6 +54,9 @@
   <div class="step" data-step="4">
     {{ __('Step 4') }}
   </div>
+  <div class="step" data-step="5">
+    {{ __('Step 5') }}
+  </div>
 </div>
 <div class="content">
   <div class="card step-content active">
@@ -200,6 +203,24 @@
       <div class="row mt-2">
         <div class="col text-center">
           <button class="btn btn-primary prev-button" data-prev="3">{{ __('Previous') }}</button>
+          <button class="btn btn-primary next-button" data-next="5">{{ __('Next') }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card step-content">
+    <div class="card-body">
+      <h5 class="card-title">
+        {{ __('5. Start import!') }}
+      </h5>
+      <div class="row mt-2">
+        <div class="col text-center">
+          <x-sql-editor/>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col text-center">
+          <button class="btn btn-primary prev-button" data-prev="4">{{ __('Previous') }}</button>
           <button id="import-tables" class="btn btn-primary next-button">{{ __('Import!') }}</button>
         </div>
       </div>
@@ -246,12 +267,14 @@
   });
 
   const goToStep = (stepIndex) => {
-    steps.forEach((step, index) => {
-      step.classList.toggle('active', index === stepIndex);
-    });
-    stepContents.forEach((content, index) => {
-      content.classList.toggle('active', index === stepIndex);
-    });
+    if (stepIndex === 1 /* 0-based */ && elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
+      stepIndex = 4; // 0-based, when next is clicked bypass steps 2, 3 and 4
+    }
+    if (stepIndex === 3 /* 0-based */ && elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
+      stepIndex = 0; // 0-based, when prev is clicked bypass steps 2, 3 and 4
+    }
+    steps.forEach((step, index) => step.classList.toggle('active', index === stepIndex));
+    stepContents.forEach((content, index) => content.classList.toggle('active', index === stepIndex));
     if (stepIndex === 2 /* 0-based */) {
       listAwsTables();
     }
@@ -261,7 +284,7 @@
     label: 'Physical', value: 'physical'
   };
   const VIRTUAL_TABLE = {
-    label: 'Virtual', value: 'virtual', disabled: true
+    label: 'Virtual', value: 'virtual'
   };
 
   const elTableType = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
@@ -277,27 +300,19 @@
   });
 
   const elAwsAccessKeyId = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-    type: 'TextInput',
-    container: 'aws-access-key-id',
-    placeholder: 'ex. AKIAIOSFODNN7EXAMPLE',
+    type: 'TextInput', container: 'aws-access-key-id', placeholder: 'ex. AKIAIOSFODNN7EXAMPLE',
   });
 
   const elAwsSecretAccessKey = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-    type: 'TextInput',
-    container: 'aws-secret-access-key',
-    placeholder: 'ex. wJalrXUtnFEMI/K7MDENG/bPxRfiCYzEXAMPLEKEY',
+    type: 'TextInput', container: 'aws-secret-access-key', placeholder: 'ex. wJalrXUtnFEMI/K7MDENG/bPxRfiCYzEXAMPLEKEY',
   });
 
   const elAwsInputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-    type: 'TextInput',
-    container: 'aws-input-folder',
-    placeholder: 'ex. in/',
+    type: 'TextInput', container: 'aws-input-folder', placeholder: 'ex. in/',
   });
 
   const elAwsOutputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-    type: 'TextInput',
-    container: 'aws-output-folder',
-    placeholder: 'ex. out/',
+    type: 'TextInput', container: 'aws-output-folder', placeholder: 'ex. out/',
   });
 
   const listAwsTables = () => {
@@ -307,7 +322,7 @@
 
     if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
       axios.get(
-        `/cb/web/aws/list-tables?region=${elAwsRegion.el.value}&access_key_id=${elAwsAccessKeyId.el.value}&secret_access_key=${elAwsSecretAccessKey.el.value}&input_folder=${elAwsInputFolder.el.value}&output_folder=${elAwsOutputFolder.el.value}`).then(
+        `/cb/web/aws/tables/?region=${elAwsRegion.el.value}&access_key_id=${elAwsAccessKeyId.el.value}&secret_access_key=${elAwsSecretAccessKey.el.value}&input_folder=${elAwsInputFolder.el.value}&output_folder=${elAwsOutputFolder.el.value}`).then(
         response => {
           if (response.data.success) {
             if (!response.data.tables || response.data.tables.length === 0) {
@@ -352,7 +367,7 @@
     const elAwsTablesColumns = document.getElementById('aws-tables-columns');
     elAwsTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
-    axios.post('/cb/web/aws/list-tables-columns', {
+    axios.post('/cb/web/aws/tables/columns', {
       region: elAwsRegion.el.value,
       access_key_id: elAwsAccessKeyId.el.value,
       secret_access_key: elAwsSecretAccessKey.el.value,
@@ -392,39 +407,45 @@
   };
 
   const importAwsTables = () => {
+    if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
 
-    const checkboxes = Array.from(document.querySelectorAll('#aws-tables-columns input[type="checkbox"]:checked'));
-    const tables = checkboxes.map(
-      checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
+      const checkboxes = Array.from(document.querySelectorAll('#aws-tables-columns input[type="checkbox"]:checked'));
+      const tables = checkboxes.map(
+        checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
 
-    if (tables.length === 0) {
-      toaster.toastError("{{ __('Please select the table to import.') }}");
+      if (tables.length === 0) {
+        toaster.toastError("{{ __('Please select the table to import.') }}");
+        return false;
+      }
+
+      const copy = document.getElementById('toggle-copy').checked === true;
+      const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
+
+      axios.post('/cb/web/aws/tables/import', {
+        region: elAwsRegion.el.value,
+        access_key_id: elAwsAccessKeyId.el.value,
+        secret_access_key: elAwsSecretAccessKey.el.value,
+        input_folder: elAwsInputFolder.el.value,
+        output_folder: elAwsOutputFolder.el.value,
+        tables: tables,
+        copy: copy,
+        deduplicate: deduplicate,
+      }).then(response => {
+        if (response.data.success) {
+          toaster.toastSuccess(response.data.success);
+        } else if (response.data.error) {
+          toaster.toastError(response.data.error);
+        } else {
+          console.log(response.data);
+        }
+      }).catch(error => toaster.toastAxiosError(error));
+
       return false;
     }
-
-    const copy = document.getElementById('toggle-copy').checked === true;
-    const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
-
-    axios.post('/cb/web/aws/import-tables', {
-      region: elAwsRegion.el.value,
-      access_key_id: elAwsAccessKeyId.el.value,
-      secret_access_key: elAwsSecretAccessKey.el.value,
-      input_folder: elAwsInputFolder.el.value,
-      output_folder: elAwsOutputFolder.el.value,
-      tables: tables,
-      copy: copy,
-      deduplicate: deduplicate,
-    }).then(response => {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
-
-    return false;
+    if (elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
+      // TODO
+      return false;
+    }
   };
 
 </script>

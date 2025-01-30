@@ -69,5 +69,6 @@ return [
         'host' => env('CH_HOST'),
         'username' => env('CH_USERNAME'),
         'password' => env('CH_PASSWORD'),
+        'database' => env('CH_DATABASE'),
     ],
 ];

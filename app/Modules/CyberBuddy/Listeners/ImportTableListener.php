@@ -35,6 +35,7 @@ class ImportTableListener extends AbstractListener
             $clickhouseHost = config('towerify.clickhouse.host');
             $clickhouseUsername = config('towerify.clickhouse.username');
             $clickhousePassword = config('towerify.clickhouse.password');
+            $clickhouseDatabase = config('towerify.clickhouse.database');
             $filename = Str::replace(['-', ' '], '_', Str::lower(Str::beforeLast(Str::afterLast($table, '/'), '.')));
             $bucket = explode('/', $inputFolder, 2)[0];
             $s3In = "s3('https://s3.{$region}.amazonaws.com/{$bucket}/{$table}', '{$accessKeyId}', '{$secretAccessKey}', 'TabSeparatedWithNames')";
@@ -72,7 +73,7 @@ class ImportTableListener extends AbstractListener
 
             // Drop the existing table if it already exists in clickhouse server
             $query = "DROP TABLE IF EXISTS {$filename}";
-            $process = Process::fromShellCommandline("clickhouse-client --host '{$clickhouseHost}' --secure --user '{$clickhouseUsername}' --password '{$clickhousePassword}' --database 'cyrille_dev' --query \"{$query}\"");
+            $process = Process::fromShellCommandline("clickhouse-client --host '{$clickhouseHost}' --secure --user '{$clickhouseUsername}' --password '{$clickhousePassword}' --database '{$clickhouseDatabase}' --query \"{$query}\"");
             $process->setTimeout(null);
             $process->run();
 
@@ -84,7 +85,7 @@ class ImportTableListener extends AbstractListener
 
                 // Create the table structure in clickhouse server
                 $query = "CREATE TABLE IF NOT EXISTS {$filename} ({$schema}) ENGINE = MergeTree() ORDER BY tuple() SETTINGS index_granularity = 8192";
-                $process = Process::fromShellCommandline("clickhouse-client --host '{$clickhouseHost}' --secure --user '{$clickhouseUsername}' --password '{$clickhousePassword}' --database 'cyrille_dev' --query \"{$query}\"");
+                $process = Process::fromShellCommandline("clickhouse-client --host '{$clickhouseHost}' --secure --user '{$clickhouseUsername}' --password '{$clickhousePassword}' --database '{$clickhouseDatabase}' --query \"{$query}\"");
                 $process->setTimeout(null);
                 $process->run();
 
@@ -95,8 +96,8 @@ class ImportTableListener extends AbstractListener
 
                 // Load the data in clickhouse server
                 // https://clickhouse.com/docs/en/integrations/s3#remote-insert-using-clickhouse-local
-                $query = "INSERT INTO TABLE FUNCTION remoteSecure('{$clickhouseHost}', 'cyrille_dev.{$filename}', '{$clickhouseUsername}', '{$clickhousePassword}') (*) SELECT * FROM {$s3Out}";
-                $process = Process::fromShellCommandline("clickhouse-local --database 'cyrille_dev' --query \"{$query}\"");
+                $query = "INSERT INTO TABLE FUNCTION remoteSecure('{$clickhouseHost}', '{$clickhouseDatabase}.{$filename}', '{$clickhouseUsername}', '{$clickhousePassword}') (*) SELECT * FROM {$s3Out}";
+                $process = Process::fromShellCommandline("clickhouse-local --database '{$clickhouseDatabase}' --query \"{$query}\"");
                 $process->setTimeout(null);
                 $process->run();
 
@@ -109,7 +110,7 @@ class ImportTableListener extends AbstractListener
                 // Create a view over the Parquet file in clickhouse server
                 $s3Engine = Str::replace('s3(', 'S3(', $s3Out);
                 $query = "CREATE TABLE IF NOT EXISTS {$filename} ({$schema}) ENGINE = {$s3Engine}";
-                $process = Process::fromShellCommandline("clickhouse-client --host '{$clickhouseHost}' --secure --user '{$clickhouseUsername}' --password '{$clickhousePassword}' --database 'cyrille_dev' --query \"{$query}\"");
+                $process = Process::fromShellCommandline("clickhouse-client --host '{$clickhouseHost}' --secure --user '{$clickhouseUsername}' --password '{$clickhousePassword}' --database '{$clickhouseDatabase}' --query \"{$query}\"");
                 $process->setTimeout(null);
                 $process->run();
 

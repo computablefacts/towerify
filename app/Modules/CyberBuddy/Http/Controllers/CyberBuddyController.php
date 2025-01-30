@@ -765,6 +765,32 @@ class CyberBuddyController extends Controller
         ]);
     }
 
+    public function availableAwsTables(Request $request)
+    {
+        $clickhouseHost = config('towerify.clickhouse.host');
+        $clickhouseUsername = config('towerify.clickhouse.username');
+        $clickhousePassword = config('towerify.clickhouse.password');
+        $clickhouseDatabase = config('towerify.clickhouse.database');
+
+        $query = "SHOW TABLES";
+        $process = Process::fromShellCommandline("clickhouse-client --host '{$clickhouseHost}' --secure --user '{$clickhouseUsername}' --password '{$clickhousePassword}' --database '{$clickhouseDatabase}' --query \"{$query}\"");
+        $process->setTimeout(null);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            Log::error("An error occurred while listing the tables: {$process->getErrorOutput()}");
+            response()->json(['error' => 'The tables cannot be listed.', 'tables' => []]);
+        }
+
+        $tables = explode("\n", trim($process->getOutput()));
+        sort($tables);
+
+        return response()->json([
+            'success' => 'The tables have been listed.',
+            'tables' => $tables,
+        ]);
+    }
+
     public function handle(): void
     {
         $botman = app('botman');
