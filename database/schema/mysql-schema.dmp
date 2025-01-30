@@ -2357,7 +2357,7 @@ CREATE TABLE `ynh_osquery_events_counts` (
   `date_min` datetime NOT NULL,
   `date_max` datetime NOT NULL,
   `count` int(11) NOT NULL DEFAULT 0,
-  `events` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]' CHECK (json_valid(`events`)),
+  `events` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`events`)),
   PRIMARY KEY (`id`),
   KEY `ynh_osquery_events_counts_ynh_server_id_foreign` (`ynh_server_id`),
   KEY `ynh_osquery_events_counts_date_min_index` (`date_min`),
