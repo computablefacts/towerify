@@ -51,8 +51,10 @@ use App\Modules\AdversaryMeter\Listeners\EndVulnsScanListener;
 use App\Modules\AdversaryMeter\Listeners\IngestHoneypotsEventsListener;
 use App\Modules\AdversaryMeter\Listeners\SendAuditReportListener;
 use App\Modules\CyberBuddy\Events\ImportTable;
+use App\Modules\CyberBuddy\Events\ImportVirtualTable;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Listeners\ImportTableListener;
+use App\Modules\CyberBuddy\Listeners\ImportVirtualTableListener;
 use App\Modules\CyberBuddy\Listeners\IngestFileListener;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -155,6 +157,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         ImportTable::class => [
             ImportTableListener::class,
+        ],
+        ImportVirtualTable::class => [
+            ImportVirtualTableListener::class,
         ],
 
         // Stripe

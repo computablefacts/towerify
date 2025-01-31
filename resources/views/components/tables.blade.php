@@ -57,6 +57,9 @@
   <div class="step" data-step="5">
     {{ __('Step 5') }}
   </div>
+  <div class="step" data-step="6">
+    {{ __('Step 6') }}
+  </div>
 </div>
 <div class="content">
   <div class="card step-content active">
@@ -203,7 +206,7 @@
       <div class="row mt-2">
         <div class="col text-center">
           <button class="btn btn-primary prev-button" data-prev="3">{{ __('Previous') }}</button>
-          <button class="btn btn-primary next-button" data-next="5">{{ __('Next') }}</button>
+          <button id="import-tables" class="btn btn-primary next-button" data-next="6">{{ __('Next') }}</button>
         </div>
       </div>
     </div>
@@ -211,17 +214,45 @@
   <div class="card step-content">
     <div class="card-body">
       <h5 class="card-title">
-        {{ __('5. Start import!') }}
+        {{ __('5. Input the SQL query to generate the new virtual table.') }}
       </h5>
       <div class="row mt-2">
-        <div class="col text-center">
+        <div class="col">
+          <div id="aws-vtable-name"></div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
+          <input type="checkbox" id="toggle-materialize"/>
+          <label for="toggle-materialize">{{ __('Materialize') }}</label>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
           <x-sql-editor/>
         </div>
       </div>
       <div class="row mt-2">
         <div class="col text-center">
-          <button class="btn btn-primary prev-button" data-prev="4">{{ __('Previous') }}</button>
-          <button id="import-tables" class="btn btn-primary next-button">{{ __('Import!') }}</button>
+          <button class="btn btn-primary prev-button" data-prev="1">{{ __('Previous') }}</button>
+          <button id="create-vtable" class="btn btn-primary next-button" data-next="6">{{ __('Next') }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card step-content">
+    <div class="card-body">
+      <h5 class="card-title">
+        {{ __('6. Your data will be accessible shortly!') }}
+      </h5>
+      <div class="row mt-2">
+        <div class="col text-center">
+          <!-- TODO : ADD IMAGE HERE -->
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col text-center">
+          <button class="btn btn-primary prev-button" data-prev="1">{{ __('New import') }}</button>
         </div>
       </div>
     </div>
@@ -252,6 +283,10 @@
         event.preventDefault();
         event.stopPropagation();
         moveToNextStep = importAwsTables();
+      } else if (event.target && event.target.id === 'create-vtable') {
+        event.preventDefault();
+        event.stopPropagation();
+        moveToNextStep = createAwsVirtualTables();
       }
       if (moveToNextStep) {
         goToStep(currentStep);
@@ -269,9 +304,6 @@
   const goToStep = (stepIndex) => {
     if (stepIndex === 1 /* 0-based */ && elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
       stepIndex = 4; // 0-based, when next is clicked bypass steps 2, 3 and 4
-    }
-    if (stepIndex === 3 /* 0-based */ && elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
-      stepIndex = 0; // 0-based, when prev is clicked bypass steps 2, 3 and 4
     }
     steps.forEach((step, index) => step.classList.toggle('active', index === stepIndex));
     stepContents.forEach((content, index) => content.classList.toggle('active', index === stepIndex));
@@ -313,6 +345,10 @@
 
   const elAwsOutputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
     type: 'TextInput', container: 'aws-output-folder', placeholder: 'ex. out/',
+  });
+
+  const elAwsVirtualTableName = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+    type: 'TextInput', container: 'aws-vtable-name', placeholder: 'The virtual table name such as active_users'
   });
 
   const listAwsTables = () => {
@@ -407,30 +443,58 @@
   };
 
   const importAwsTables = () => {
-    if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
 
-      const checkboxes = Array.from(document.querySelectorAll('#aws-tables-columns input[type="checkbox"]:checked'));
-      const tables = checkboxes.map(
-        checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
+    const checkboxes = Array.from(document.querySelectorAll('#aws-tables-columns input[type="checkbox"]:checked'));
+    const tables = checkboxes.map(
+      checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
 
-      if (tables.length === 0) {
-        toaster.toastError("{{ __('Please select the table to import.') }}");
-        return false;
+    if (tables.length === 0) {
+      toaster.toastError("{{ __('Please select the table to import.') }}");
+      return false;
+    }
+
+    const copy = document.getElementById('toggle-copy').checked === true;
+    const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
+
+    axios.post('/cb/web/aws/tables/import', {
+      region: elAwsRegion.el.value,
+      access_key_id: elAwsAccessKeyId.el.value,
+      secret_access_key: elAwsSecretAccessKey.el.value,
+      input_folder: elAwsInputFolder.el.value,
+      output_folder: elAwsOutputFolder.el.value,
+      tables: tables,
+      copy: copy,
+      deduplicate: deduplicate,
+    }).then(response => {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
+      } else {
+        console.log(response.data);
       }
+    }).catch(error => toaster.toastAxiosError(error));
 
-      const copy = document.getElementById('toggle-copy').checked === true;
-      const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
+    return true;
+  };
 
-      axios.post('/cb/web/aws/tables/import', {
-        region: elAwsRegion.el.value,
-        access_key_id: elAwsAccessKeyId.el.value,
-        secret_access_key: elAwsSecretAccessKey.el.value,
-        input_folder: elAwsInputFolder.el.value,
-        output_folder: elAwsOutputFolder.el.value,
-        tables: tables,
-        copy: copy,
-        deduplicate: deduplicate,
-      }).then(response => {
+  const createAwsVirtualTables = () => {
+
+    const name = elAwsVirtualTableName.el.value;
+    const sql = editor.getValue(); // from x-sql-editor
+    const materialize = document.getElementById('toggle-materialize').checked === true;
+
+    if (name.trim() === '') {
+      toaster.toastError("{{ __('Please enter a table name.') }}");
+      return false;
+    }
+    if (sql.trim() === '') {
+      toaster.toastError("{{ __('Please enter a SQL query.') }}");
+      return false;
+    }
+
+    axios.post(`/cb/web/aws/tables/query`, {query: sql, store: true, name: name, materialize: materialize}).then(
+      response => {
         if (response.data.success) {
           toaster.toastSuccess(response.data.success);
         } else if (response.data.error) {
@@ -438,14 +502,10 @@
         } else {
           console.log(response.data);
         }
-      }).catch(error => toaster.toastAxiosError(error));
+      })
+    .catch(error => toaster.toastAxiosError(error));
 
-      return false;
-    }
-    if (elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
-      // TODO
-      return false;
-    }
+    return true;
   };
 
 </script>

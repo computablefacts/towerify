@@ -7,6 +7,7 @@ use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Conversations\QuestionsAndAnswers;
 use App\Modules\CyberBuddy\Events\ImportTable;
+use App\Modules\CyberBuddy\Events\ImportVirtualTable;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Helpers\ClickhouseClient;
@@ -19,10 +20,12 @@ use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\Conversation;
 use App\Modules\CyberBuddy\Models\File;
 use App\Modules\CyberBuddy\Models\Prompt;
+use App\Modules\CyberBuddy\Models\Table;
 use App\Modules\CyberBuddy\Models\Template;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -765,18 +768,94 @@ class CyberBuddyController extends Controller
 
     public function availableAwsTables(Request $request)
     {
-        $output = ClickhouseClient::showTables();
-
-        if (!$output) {
-            response()->json(['error' => 'The tables cannot be listed.', 'tables' => []]);
-        }
-
-        $tables = explode("\n", $output);
-        sort($tables);
-
         return response()->json([
             'success' => 'The tables have been listed.',
-            'tables' => $tables,
+            'tables' => Table::query()
+                ->orderBy('name')
+                ->get()
+                ->map(fn(Table $table) => [
+                    'name' => $table->name,
+                    'last_update' => $table->finished_at ? $table->finished_at->format('Y-m-d H:i') : '',
+                    'last_error' => $table->last_error ?? '',
+                ]),
+        ]);
+    }
+
+    public function queryAwsTables(Request $request)
+    {
+        $this->validate($request, [
+            'query' => 'required|string|min:1|max:5000',
+            'store' => 'required|boolean',
+        ]);
+
+        $user = Auth::user();
+        $name = $request->input('name', 'v_table');
+        $query = $request->input('query');
+        $store = $request->boolean('store', false);
+        $materialize = $request->boolean('materialize', false);
+
+        if ($store) {
+            if ($materialize) {
+                ImportVirtualTable::dispatch($user, $name, $query);
+                response()->json([
+                    'success' => 'The table will be materialized soon.',
+                    'result' => []
+                ]);
+            }
+
+            $tableName = Str::replace(['-', ' '], '_', Str::lower(Str::beforeLast(Str::afterLast($name, '/'), '.')));
+            $tbl = Table::updateOrCreate([
+                'name' => $tableName,
+                'created_by' => $user->id,
+            ], [
+                'name' => $tableName,
+                'description' => '',
+                'copied' => $materialize,
+                'deduplicated' => false,
+                'last_error' => null,
+                'started_at' => Carbon::now(),
+                'finished_at' => null,
+                'created_by' => $user->id,
+            ]);
+
+            $output = ClickhouseClient::dropViewIfExists($tableName);
+
+            if (!$output) {
+                $tbl->last_error = 'Error #8';
+                $tbl->save();
+                return response()->json(['error' => 'The query cannot be stored.']);
+            }
+
+            $query = "CREATE VIEW {$tableName} AS {$query}";
+            $output = ClickhouseClient::executeQuery($query);
+
+            if (!$output) {
+                $tbl->last_error = 'Error #9';
+                $tbl->save();
+                return response()->json(['error' => 'The query cannot be stored.']);
+            }
+
+            $tbl->last_error = null;
+            $tbl->finished_at = Carbon::now();
+            $tbl->save();
+
+            $query = "SELECT * FROM {$tableName} LIMIT 10 FORMAT TabSeparatedWithNames";
+        } else {
+            $query = "WITH t AS ({$query}) SELECT * FROM t LIMIT 10 FORMAT TabSeparatedWithNames";
+        }
+
+        $output = ClickhouseClient::executeQuery($query);
+
+        if (!$output) {
+            return response()->json(['error' => 'The query has failed.']);
+        }
+        return response()->json([
+            'success' => 'The query has been executed.',
+            'result' => collect(explode("\n", $output))
+                ->filter(fn(string $line) => $line !== '')
+                ->map(fn(string $line) => explode("\t", $line))
+                ->values()
+                ->all(),
         ]);
     }
 

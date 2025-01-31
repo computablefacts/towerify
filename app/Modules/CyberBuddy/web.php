@@ -57,4 +57,5 @@ Route::group([
     Route::post('/columns', 'CyberBuddyController@listAwsTablesColumns')->name('list-aws-tables-columns');
     Route::post('/import', 'CyberBuddyController@importAwsTables')->name('import-aws-tables');
     Route::get('/available', 'CyberBuddyController@availableAwsTables')->name('available-aws-tables');
+    Route::post('/query', 'CyberBuddyController@queryAwsTables')->name('query-aws-tables');
 })->middleware(['auth']);
