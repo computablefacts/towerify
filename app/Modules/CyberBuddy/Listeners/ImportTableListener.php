@@ -153,7 +153,7 @@ class ImportTableListener extends AbstractListener
             $tbl->last_error = null;
             $tbl->finished_at = Carbon::now();
             $tbl->save();
-            
+
             // TODO : create tmp_* view in clickhouse server for backward compatibility
 
         } catch (\Exception $exception) {
