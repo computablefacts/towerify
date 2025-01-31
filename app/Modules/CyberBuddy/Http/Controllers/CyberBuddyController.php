@@ -9,6 +9,8 @@ use App\Modules\CyberBuddy\Conversations\QuestionsAndAnswers;
 use App\Modules\CyberBuddy\Events\ImportTable;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
+use App\Modules\CyberBuddy\Helpers\ClickhouseClient;
+use App\Modules\CyberBuddy\Helpers\ClickhouseLocal;
 use App\Modules\CyberBuddy\Http\Requests\DownloadOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
@@ -695,13 +697,9 @@ class CyberBuddyController extends Controller
 
             $bucket = explode('/', $inputFolder, 2)[0];
             $s3 = "s3('https://s3.{$region}.amazonaws.com/{$bucket}/{$table}', '{$accessKeyId}', '{$secretAccessKey}', 'TabSeparatedWithNames')";
-            $query = "DESCRIBE TABLE {$s3}";
-            $process = Process::fromShellCommandline("clickhouse-local --query \"{$query}\"");
-            $process->setTimeout(null);
-            $process->run();
+            $output = ClickhouseLocal::describeTable($s3);
 
-            if (!$process->isSuccessful()) {
-                Log::error("An error occurred while loading the schema of the table {$table}: {$process->getErrorOutput()}");
+            if (!$output) {
                 return [
                     'table' => $table,
                     'columns' => [],
@@ -709,7 +707,7 @@ class CyberBuddyController extends Controller
             }
             return [
                 'table' => $table,
-                'columns' => collect(explode("\n", $process->getOutput()))
+                'columns' => collect(explode("\n", $output))
                     ->map(function (string $line) {
                         $line = trim($line);
                         return [
@@ -767,22 +765,13 @@ class CyberBuddyController extends Controller
 
     public function availableAwsTables(Request $request)
     {
-        $clickhouseHost = config('towerify.clickhouse.host');
-        $clickhouseUsername = config('towerify.clickhouse.username');
-        $clickhousePassword = config('towerify.clickhouse.password');
-        $clickhouseDatabase = config('towerify.clickhouse.database');
+        $output = ClickhouseClient::showTables();
 
-        $query = "SHOW TABLES";
-        $process = Process::fromShellCommandline("clickhouse-client --host '{$clickhouseHost}' --secure --user '{$clickhouseUsername}' --password '{$clickhousePassword}' --database '{$clickhouseDatabase}' --query \"{$query}\"");
-        $process->setTimeout(null);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            Log::error("An error occurred while listing the tables: {$process->getErrorOutput()}");
+        if (!$output) {
             response()->json(['error' => 'The tables cannot be listed.', 'tables' => []]);
         }
 
-        $tables = explode("\n", trim($process->getOutput()));
+        $tables = explode("\n", $output);
         sort($tables);
 
         return response()->json([
