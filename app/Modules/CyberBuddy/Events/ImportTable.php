@@ -6,7 +6,6 @@ use App\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 class ImportTable
 {
@@ -22,8 +21,9 @@ class ImportTable
     public bool $deduplicate;
     public string $table;
     public array $columns;
+    public string $description;
 
-    public function __construct(User $user, string $region, string $accessKeyId, string $secretAccessKey, string $inputFolder, string $outputFolder, bool $copy, bool $deduplicate, string $table, array $columns)
+    public function __construct(User $user, string $region, string $accessKeyId, string $secretAccessKey, string $inputFolder, string $outputFolder, bool $copy, bool $deduplicate, string $table, array $columns, string $description = '')
     {
         $this->user = $user;
         $this->region = $region;
@@ -35,5 +35,6 @@ class ImportTable
         $this->deduplicate = $deduplicate;
         $this->table = $table;
         $this->columns = $columns;
+        $this->description = $description;
     }
 }
