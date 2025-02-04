@@ -18,11 +18,12 @@ class ApiUtils
         ]);
     }
 
-    public function file_input(string $client, string $url): array
+    public function file_input(string $client, string $url, ?string $filename = null): array
     {
         return $this->post('/api/file-input', [
             'url' => $url,
             'client' => $client,
+            'filename' => $filename,
         ]);
     }
 

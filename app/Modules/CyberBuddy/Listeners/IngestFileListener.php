@@ -212,7 +212,7 @@ class IngestFileListener extends AbstractListener
 
             } else {
 
-                $response = ApiUtils::file_input($event->user->client(), $file->downloadUrl());
+                $response = ApiUtils::file_input($event->user->client(), $file->downloadUrl(), "{$file->name}.{$file->extension}");
 
                 if ($response['error']) {
                     throw new \Exception($response['error_details']);
