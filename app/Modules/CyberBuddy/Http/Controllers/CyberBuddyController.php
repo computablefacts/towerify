@@ -63,13 +63,24 @@ class CyberBuddyController extends Controller
             $file = $chunk?->file()->first();
             $src = $file ? "<a href=\"{$file->downloadUrl()}\" style=\"text-decoration:none;color:black\">{$file->name_normalized}.{$file->extension}</a>, p. {$chunk->page}" : "";
             if ($tooltip) {
-                $answer = Str::replace($ref, "<b style=\"color:#f8b500\">[{$id}]</b>", $answer);
+                if (Str::startsWith($tooltip['text'], 'ESSENTIAL DIRECTIVE')) {
+                    $color = '#1DD288';
+                } else if (Str::startsWith($tooltip['text'], 'STANDARD DIRECTIVE')) {
+                    $color = '#C5C3C3';
+                } else if (Str::startsWith($tooltip['text'], 'ADVANCED DIRECTIVE')) {
+                    $color = '#FDC99D';
+                } else {
+                    $color = '#F8B500';
+                }
+                $answer = Str::replace($ref, "<b style=\"color:{$color}\">[{$id}]</b>", $answer);
                 $references[$id] = "
                   <li style=\"padding:0;margin-bottom:0.25rem\">
-                    <b style=\"color:#f8b500\">[{$id}]</b>&nbsp;
+                    <b style=\"color:{$color}\">[{$id}]</b>&nbsp;
                     <div class=\"cb-tooltip-list\">
                       {$src}
-                      <span class=\"cb-tooltiptext cb-tooltip-list-top\">{$tooltip['text']}</span>
+                      <span class=\"cb-tooltiptext cb-tooltip-list-top\" style=\"background-color:{$color}\">
+                        {$tooltip['text']}
+                      </span>
                     </div>
                   </li>
                 ";
