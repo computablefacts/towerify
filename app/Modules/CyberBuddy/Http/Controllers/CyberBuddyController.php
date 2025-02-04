@@ -756,6 +756,7 @@ class CyberBuddyController extends Controller
             'tables.*.type' => 'required|string|min:1|max:50',
             'copy' => 'required|boolean',
             'deduplicate' => 'required|boolean',
+            'description' => 'required|string|min:1',
         ]);
 
         /** @var User $user */
@@ -768,9 +769,10 @@ class CyberBuddyController extends Controller
         $tables = collect($request->input('tables', []))->groupBy('table');
         $copy = $request->boolean('copy', false);
         $deduplicate = $request->boolean('deduplicate', true);
+        $description = $request->input('description', '');
 
         foreach ($tables as $table => $columns) {
-            ImportTable::dispatch($user, $region, $accessKeyId, $secretAccessKey, $inputFolder, $outputFolder, $copy, $deduplicate, $table, $columns->toArray());
+            ImportTable::dispatch($user, $region, $accessKeyId, $secretAccessKey, $inputFolder, $outputFolder, $copy, $deduplicate, $table, $columns->toArray(), $description);
         }
         return response()->json([
             'success' => "{$tables->count()} table will be imported soon.",
@@ -786,6 +788,7 @@ class CyberBuddyController extends Controller
                 ->get()
                 ->map(fn(Table $table) => [
                     'name' => $table->name,
+                    'description' => $table->description,
                     'last_update' => $table->finished_at ? $table->finished_at->format('Y-m-d H:i') : '',
                     'last_error' => $table->last_error ?? '',
                 ]),
@@ -801,13 +804,14 @@ class CyberBuddyController extends Controller
 
         $user = Auth::user();
         $name = $request->input('name', 'v_table');
+        $description = $request->input('description', '');
         $query = $request->input('query');
         $store = $request->boolean('store', false);
         $materialize = $request->boolean('materialize', false);
 
         if ($store) {
             if ($materialize) {
-                ImportVirtualTable::dispatch($user, $name, $query);
+                ImportVirtualTable::dispatch($user, $name, $query, $description);
                 response()->json([
                     'success' => 'The table will be materialized soon.',
                     'result' => []
@@ -820,7 +824,7 @@ class CyberBuddyController extends Controller
                 'created_by' => $user->id,
             ], [
                 'name' => $tableName,
-                'description' => '',
+                'description' => $description,
                 'copied' => $materialize,
                 'deduplicated' => false,
                 'last_error' => null,

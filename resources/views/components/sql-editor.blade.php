@@ -26,6 +26,7 @@
       <thead>
       <tr>
         <th>{{ __('Table') }}</th>
+        <th>{{ __('Description') }}</th>
         <th>{{ __('Last Update') }}</th>
         <th>{{ __('Last Error') }}</th>
       </tr>
@@ -44,18 +45,19 @@
   editor.session.setMode("ace/mode/sql");
 
   const elDatabasesAndTables = document.getElementById('databases-and-tables');
-  elDatabasesAndTables.innerHTML = "<tr><td>{{ __('Loading...') }}</td></tr>";
+  elDatabasesAndTables.innerHTML = "<tr><td colspan='4'>{{ __('Loading...') }}</td></tr>";
 
   document.addEventListener('DOMContentLoaded', function () {
     axios.get(`/cb/web/aws/tables/available`).then(response => {
       if (response.data.success) {
         if (!response.data.tables || response.data.tables.length === 0) {
-          elDatabasesAndTables.innerHTML = "<tr><td>{{ __('No tables found.') }}</td></tr>";
+          elDatabasesAndTables.innerHTML = "<tr><td colspan='4'>{{ __('No tables found.') }}</td></tr>";
         } else {
           const rows = response.data.tables.map(table => {
             return `
                 <tr>
                   <td>${table.name}</td>
+                  <td>${table.description}</td>
                   <td>${table.last_update}</td>
                   <td>${table.last_error}</td>
                 </tr>

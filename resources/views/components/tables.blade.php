@@ -169,6 +169,14 @@
       </h5>
       <div class="row mt-2">
         <div class="col">
+          <textarea id="aws-table-description"
+                    class="form-control mt-2"
+                    rows="4"
+                    placeholder="{{ __('Please provide a detailed description of the table and explain the significance of the key columns. The more information you include, the better.') }}"></textarea>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
           <input type="checkbox" id="toggle-columns-selection"/>
           <label for="toggle-columns-selection">{{ __('Toggle selection') }}</label>
         </div>
@@ -219,6 +227,14 @@
       <div class="row mt-2">
         <div class="col">
           <div id="aws-vtable-name"></div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
+          <textarea id="aws-vtable-description"
+                    class="form-control mt-2"
+                    rows="4"
+                    placeholder="{{ __('Please provide a detailed description of the table and explain the significance of the key columns. The more information you include, the better.') }}"></textarea>
         </div>
       </div>
       <div class="row mt-2">
@@ -444,12 +460,17 @@
 
   const importAwsTables = () => {
 
+    const description = document.getElementById('aws-table-description').value;
     const checkboxes = Array.from(document.querySelectorAll('#aws-tables-columns input[type="checkbox"]:checked'));
     const tables = checkboxes.map(
       checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
 
     if (tables.length === 0) {
       toaster.toastError("{{ __('Please select the table to import.') }}");
+      return false;
+    }
+    if (description.trim() === '') {
+      toaster.toastError("{{ __('Please enter a table description.') }}");
       return false;
     }
 
@@ -465,6 +486,7 @@
       tables: tables,
       copy: copy,
       deduplicate: deduplicate,
+      description: description,
     }).then(response => {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
@@ -480,6 +502,7 @@
 
   const createAwsVirtualTables = () => {
 
+    const description = document.getElementById('aws-vtable-description').value;
     const name = elAwsVirtualTableName.el.value;
     const sql = editor.getValue(); // from x-sql-editor
     const materialize = document.getElementById('toggle-materialize').checked === true;
@@ -488,21 +511,25 @@
       toaster.toastError("{{ __('Please enter a table name.') }}");
       return false;
     }
+    if (description.trim() === '') {
+      toaster.toastError("{{ __('Please enter a table description.') }}");
+      return false;
+    }
     if (sql.trim() === '') {
       toaster.toastError("{{ __('Please enter a SQL query.') }}");
       return false;
     }
 
-    axios.post(`/cb/web/aws/tables/query`, {query: sql, store: true, name: name, materialize: materialize}).then(
-      response => {
-        if (response.data.success) {
-          toaster.toastSuccess(response.data.success);
-        } else if (response.data.error) {
-          toaster.toastError(response.data.error);
-        } else {
-          console.log(response.data);
-        }
-      })
+    axios.post(`/cb/web/aws/tables/query`,
+      {query: sql, store: true, name: name, materialize: materialize, description: description}).then(response => {
+      if (response.data.success) {
+        toaster.toastSuccess(response.data.success);
+      } else if (response.data.error) {
+        toaster.toastError(response.data.error);
+      } else {
+        console.log(response.data);
+      }
+    })
     .catch(error => toaster.toastAxiosError(error));
 
     return true;
