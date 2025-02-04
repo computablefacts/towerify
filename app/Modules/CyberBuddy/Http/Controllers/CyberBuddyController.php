@@ -78,7 +78,7 @@ class CyberBuddyController extends Controller
                     <b style=\"color:{$color}\">[{$id}]</b>&nbsp;
                     <div class=\"cb-tooltip-list\">
                       {$src}
-                      <span class=\"cb-tooltiptext cb-tooltip-list-top\" style=\"background-color:{$color}\">
+                      <span class=\"cb-tooltiptext cb-tooltip-list-top\" style=\"background-color:{$color};color:#444;\">
                         {$tooltip['text']}
                       </span>
                     </div>
