@@ -204,12 +204,13 @@ class ApiUtils
     {
         $url = Config::get('towerify.cyberbuddy.api') . $endpoint;
 
-        $response = Http::withBasicAuth(
-            config('towerify.cyberbuddy.api_username'),
-            config('towerify.cyberbuddy.api_password')
-        )->withHeaders([
-            'Accept' => 'application/json',
-        ])->post($url, $json);
+        $response = Http::timeout(180)
+            ->withBasicAuth(
+                config('towerify.cyberbuddy.api_username'),
+                config('towerify.cyberbuddy.api_password')
+            )->withHeaders([
+                'Accept' => 'application/json',
+            ])->post($url, $json);
 
         if ($response->successful()) {
             $json = $response->json();
