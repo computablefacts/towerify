@@ -136,79 +136,70 @@ class User extends \Konekt\AppShell\Models\User
         return $plainTextToken;
     }
 
+    /** @deprecated */
     public function canListServers(): bool
     {
         return $this->hasPermissionTo(Permission::LIST_SERVERS) || $this->canManageServers();
     }
 
+    /** @deprecated */
     public function canManageServers(): bool
     {
         return $this->hasPermissionTo(Permission::MANAGE_SERVERS);
     }
 
+    /** @deprecated */
     public function canListApps(): bool
     {
         return $this->hasPermissionTo(Permission::LIST_APPS) || $this->canManageApps();
     }
 
+    /** @deprecated */
     public function canManageApps(): bool
     {
         return $this->hasPermissionTo(Permission::MANAGE_APPS);
     }
 
+    /** @deprecated */
     public function canListUsers(): bool
     {
         return $this->hasPermissionTo(Permission::LIST_USERS) || $this->canManageUsers();
     }
 
+    /** @deprecated */
     public function canManageUsers(): bool
     {
         return $this->hasPermissionTo(Permission::MANAGE_USERS);
     }
 
+    /** @deprecated */
     public function canListOrders(): bool
     {
         return $this->canListServers() && $this->canListApps();
     }
 
+    /** @deprecated */
     public function canBuyStuff(): bool
     {
         return $this->hasPermissionTo(Permission::BUY_STUFF);
     }
 
+    /** @deprecated */
     public function canUseAdversaryMeter(): bool
     {
         return $this->hasPermissionTo(Permission::USE_ADVERSARY_METER);
     }
 
-    public function canUseVulnerabilityScanner(): bool
-    {
-        return $this->canUseAdversaryMeter() || $this->hasPermissionTo(Permission::USE_VULNERABILITY_SCANNER);
-    }
-
-    public function canUseHoneypots(): bool
-    {
-        return $this->canUseAdversaryMeter() || $this->hasPermissionTo(Permission::USE_HONEYPOTS);
-    }
-
+    /** @deprecated */
     public function canUseAgents(): bool
     {
         return $this->canManageServers() || $this->hasPermissionTo(Permission::USE_AGENTS);
     }
 
+    /** @deprecated */
     public function canUseCyberBuddy(): bool
     {
         return $this->hasPermissionTo(Permission::USE_CYBER_BUDDY);
-    }
-
-    public function canUseYunoHost(): bool
-    {
-        return $this->canManageApps() || $this->hasPermissionTo(Permission::USE_YUNOHOST);
-    }
-
-    public function canUseMarketplace(): bool
-    {
-        return $this->canBuyStuff() || $this->hasPermissionTo(Permission::USE_MARKETPLACE);
     }
 
     public function ynhUsername(): string
