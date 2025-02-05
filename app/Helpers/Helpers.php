@@ -131,7 +131,7 @@ if (!function_exists('app_sidebar')) {
             return [
                 [
                     'section_name' => __('Home'),
-                    'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_HOME),
+                    'hidden' => !Auth::user()->canViewHome(),
                     'section_items' => [
                         [
                             'label' => __('Overview'),
@@ -152,7 +152,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Vulnerability Scanner'),
-                    'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_VULNERABILITY_SCANNER),
+                    'hidden' => !Auth::user()->canViewVulnerabilityScanner(),
                     'section_items' => [
                         [
                             'label' => __('Assets'),
@@ -173,7 +173,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Agents'),
-                    'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_AGENTS),
+                    'hidden' => !Auth::user()->canViewAgents(),
                     'section_items' => [
                         [
                             'label' => __('Servers'),
@@ -189,7 +189,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Honeypots'),
-                    'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_HONEYPOTS),
+                    'hidden' => !Auth::user()->canViewHoneypots(),
                     'section_items' => [
                         [
                             'label' => __('Honeypots'),
@@ -210,7 +210,7 @@ if (!function_exists('app_sidebar')) {
                     ],
                 ], [
                     'section_name' => __('ISSP'),
-                    'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_ISSP),
+                    'hidden' => !Auth::user()->canViewIssp(),
                     'section_items' => [
                         [
                             'label' => __('Hardening'),
@@ -266,7 +266,7 @@ if (!function_exists('app_sidebar')) {
                     ],
                 ], [
                     'section_name' => __('YunoHost'),
-                    'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_YUNOHOST),
+                    'hidden' => !Auth::user()->canViewYunoHost(),
                     'section_items' => [
                         [
                             'label' => __('Desktop'),
@@ -307,7 +307,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Marketplace'),
-                    'hidden' => !Auth::user()->isAdmin() && !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_MARKETPLACE),
+                    'hidden' => !Auth::user()->canViewMarketplace(),
                     'section_items' => [
                         [
                             'label' => __('Admin'),
@@ -333,7 +333,7 @@ if (!function_exists('app_sidebar')) {
                     ]
                 ], [
                     'section_name' => __('Settings'),
-                    'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_SETTINGS),
+                    'hidden' => !Auth::user()->canViewSettings(),
                     'section_items' => [
                         [
                             'label' => __('Users'),

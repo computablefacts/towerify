@@ -38,12 +38,10 @@ class Role extends RoleBase
             'view tax categories',
 
             // New
-            Permission::VIEW_HOME,
             Permission::VIEW_OVERVIEW,
             Permission::VIEW_METRICS,
             Permission::VIEW_EVENTS,
 
-            Permission::VIEW_VULNERABILITY_SCANNER,
             Permission::VIEW_ASSETS,
             Permission::VIEW_VULNERABILITIES,
             Permission::VIEW_SERVICE_PROVIDER_DELEGATION,
@@ -55,7 +53,6 @@ class Role extends RoleBase
             Permission::VIEW_ATTACKERS,
             Permission::VIEW_IP_BLACKLIST,
 
-            Permission::VIEW_ISSP,
             Permission::VIEW_HARDENING,
             Permission::VIEW_FRAMEWORKS,
             Permission::VIEW_AI_WRITER,
@@ -67,7 +64,6 @@ class Role extends RoleBase
             Permission::VIEW_CHUNKS,
             Permission::VIEW_PROMPTS,
 
-            Permission::VIEW_YUNOHOST,
             Permission::VIEW_DESKTOP,
             Permission::VIEW_SERVERS,
             Permission::VIEW_APPLICATIONS,
@@ -76,12 +72,10 @@ class Role extends RoleBase
             Permission::VIEW_INTERDEPENDENCIES,
             Permission::VIEW_TRACES,
 
-            Permission::VIEW_MARKETPLACE,
             Permission::VIEW_PRODUCTS,
             Permission::VIEW_CART,
             Permission::VIEW_ORDERS,
 
-            Permission::VIEW_SETTINGS,
             Permission::VIEW_USERS,
             Permission::VIEW_INVITATIONS,
             Permission::VIEW_PLANS,
@@ -113,12 +107,10 @@ class Role extends RoleBase
             'view tax categories',
 
             // New
-            Permission::VIEW_HOME,
             Permission::VIEW_OVERVIEW,
             Permission::VIEW_METRICS,
             Permission::VIEW_EVENTS,
 
-            Permission::VIEW_VULNERABILITY_SCANNER,
             Permission::VIEW_ASSETS,
             Permission::VIEW_VULNERABILITIES,
             Permission::VIEW_SERVICE_PROVIDER_DELEGATION,
@@ -130,7 +122,6 @@ class Role extends RoleBase
             Permission::VIEW_ATTACKERS,
             Permission::VIEW_IP_BLACKLIST,
 
-            Permission::VIEW_ISSP,
             Permission::VIEW_HARDENING,
             Permission::VIEW_FRAMEWORKS,
             Permission::VIEW_AI_WRITER,
@@ -142,7 +133,6 @@ class Role extends RoleBase
             Permission::VIEW_CHUNKS,
             Permission::VIEW_PROMPTS,
 
-            Permission::VIEW_YUNOHOST,
             Permission::VIEW_DESKTOP,
             Permission::VIEW_SERVERS,
             Permission::VIEW_APPLICATIONS,
@@ -151,7 +141,6 @@ class Role extends RoleBase
             Permission::VIEW_INTERDEPENDENCIES,
             Permission::VIEW_TRACES,
 
-            Permission::VIEW_SETTINGS,
             Permission::VIEW_USERS,
             Permission::VIEW_INVITATIONS,
             Permission::VIEW_PLANS,
@@ -175,12 +164,10 @@ class Role extends RoleBase
             Permission::USE_CYBER_BUDDY,
 
             // New
-            Permission::VIEW_HOME,
             Permission::VIEW_OVERVIEW,
             Permission::VIEW_METRICS,
             Permission::VIEW_EVENTS,
 
-            Permission::VIEW_VULNERABILITY_SCANNER,
             Permission::VIEW_ASSETS,
             Permission::VIEW_VULNERABILITIES,
             Permission::VIEW_SERVICE_PROVIDER_DELEGATION,
@@ -192,7 +179,6 @@ class Role extends RoleBase
             Permission::VIEW_ATTACKERS,
             Permission::VIEW_IP_BLACKLIST,
 
-            Permission::VIEW_ISSP,
             Permission::VIEW_HARDENING,
             Permission::VIEW_FRAMEWORKS,
             Permission::VIEW_AI_WRITER,
@@ -204,7 +190,6 @@ class Role extends RoleBase
             Permission::VIEW_CHUNKS,
             Permission::VIEW_PROMPTS,
 
-            Permission::VIEW_YUNOHOST,
             Permission::VIEW_DESKTOP,
             Permission::VIEW_SERVERS,
             Permission::VIEW_APPLICATIONS,
@@ -213,7 +198,6 @@ class Role extends RoleBase
             Permission::VIEW_INTERDEPENDENCIES,
             Permission::VIEW_TRACES,
 
-            Permission::VIEW_SETTINGS,
             Permission::VIEW_USERS,
             Permission::VIEW_INVITATIONS,
             // Permission::VIEW_PLANS,
@@ -228,12 +212,14 @@ class Role extends RoleBase
             Permission::LIST_APPS,
 
             // New
-            Permission::VIEW_YUNOHOST,
             Permission::VIEW_DESKTOP,
         ],
         self::CYBERBUDDY_ONLY => [
+
+            // Legacy
             Permission::USE_CYBER_BUDDY,
-            Permission::VIEW_ISSP,
+
+            // New
             Permission::VIEW_CYBERBUDDY,
         ],
         self::CYBERBUDDY_ADMIN => [
@@ -242,7 +228,6 @@ class Role extends RoleBase
             Permission::USE_CYBER_BUDDY,
 
             // ISSP
-            Permission::VIEW_ISSP,
             Permission::VIEW_HARDENING,
             Permission::VIEW_FRAMEWORKS,
             Permission::VIEW_AI_WRITER,
@@ -255,7 +240,6 @@ class Role extends RoleBase
             Permission::VIEW_PROMPTS,
 
             // Settings
-            Permission::VIEW_SETTINGS,
             Permission::VIEW_USERS,
             Permission::VIEW_INVITATIONS,
             Permission::VIEW_DOCUMENTATION,

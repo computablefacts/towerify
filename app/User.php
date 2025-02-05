@@ -136,6 +136,77 @@ class User extends \Konekt\AppShell\Models\User
         return $plainTextToken;
     }
 
+    public function canViewHome(): bool
+    {
+        return $this->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_METRICS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_EVENTS);
+    }
+
+    public function canViewVulnerabilityScanner(): bool
+    {
+        return $this->hasPermissionTo(\App\Models\Permission::VIEW_ASSETS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_VULNERABILITIES)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_SERVICE_PROVIDER_DELEGATION);
+    }
+
+    public function canViewAgents(): bool
+    {
+        return $this->hasPermissionTo(\App\Models\Permission::VIEW_AGENTS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_SECURITY_RULES);
+    }
+
+    public function canViewHoneypots(): bool
+    {
+        return $this->hasPermissionTo(\App\Models\Permission::VIEW_HONEYPOTS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_ATTACKERS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_IP_BLACKLIST);
+    }
+
+    public function canViewIssp(): bool
+    {
+        return $this->hasPermissionTo(\App\Models\Permission::VIEW_HARDENING)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_FRAMEWORKS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_AI_WRITER)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_CYBERBUDDY)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_CONVERSATIONS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_COLLECTIONS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_DOCUMENTS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_TABLES)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_CHUNKS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_PROMPTS);
+    }
+
+    public function canViewYunoHost(): bool
+    {
+        return $this->hasPermissionTo(\App\Models\Permission::VIEW_DESKTOP)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_SERVERS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_APPLICATIONS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_DOMAINS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_BACKUPS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_INTERDEPENDENCIES)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_TRACES);
+    }
+
+    public function canViewMarketplace(): bool
+    {
+        return $this->isAdmin()
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_PRODUCTS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_CART)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_ORDERS);
+    }
+
+    public function canViewSettings(): bool
+    {
+        return $this->hasPermissionTo(\App\Models\Permission::VIEW_USERS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_INVITATIONS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_PLANS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_MY_SUBSCRIPTION)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_DOCUMENTATION)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_TERMS)
+            || $this->hasPermissionTo(\App\Models\Permission::VIEW_RESET_PASSWORD);
+    }
+
     /** @deprecated */
     public function canListServers(): bool
     {

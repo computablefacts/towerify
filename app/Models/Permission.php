@@ -35,12 +35,10 @@ class Permission extends PermissionBase
     /** @deprecated */
     const USE_MARKETPLACE = 'use marketplace';
 
-    const VIEW_HOME = 'view home';
     const VIEW_OVERVIEW = 'view overview';
     const VIEW_METRICS = 'view metrics';
     const VIEW_EVENTS = 'view events';
 
-    const VIEW_VULNERABILITY_SCANNER = 'view vulnerability scanner';
     const VIEW_ASSETS = 'view assets';
     const VIEW_VULNERABILITIES = 'view vulnerabilities';
     const VIEW_SERVICE_PROVIDER_DELEGATION = 'view service provider delegation';
@@ -52,7 +50,6 @@ class Permission extends PermissionBase
     const VIEW_ATTACKERS = 'view attackers';
     const VIEW_IP_BLACKLIST = 'view ip blacklist';
 
-    const VIEW_ISSP = 'view issp';
     const VIEW_HARDENING = 'view hardening';
     const VIEW_FRAMEWORKS = 'view frameworks';
     const VIEW_AI_WRITER = 'view ai writer';
@@ -64,7 +61,6 @@ class Permission extends PermissionBase
     const VIEW_CHUNKS = 'view chunks';
     const VIEW_PROMPTS = 'view prompts';
 
-    const VIEW_YUNOHOST = 'view yunohost';
     const VIEW_DESKTOP = 'view desktop';
     const VIEW_SERVERS = 'view servers';
     const VIEW_APPLICATIONS = 'view applications';
@@ -73,12 +69,10 @@ class Permission extends PermissionBase
     const VIEW_INTERDEPENDENCIES = 'view interdependencies';
     const VIEW_TRACES = 'view traces';
 
-    const VIEW_MARKETPLACE = 'view marketplace';
     const VIEW_PRODUCTS = 'view products';
     const VIEW_CART = 'view cart';
     const VIEW_ORDERS = 'view orders';
 
-    const VIEW_SETTINGS = 'view settings';
     const VIEW_USERS = 'view users';
     const VIEW_INVITATIONS = 'view invitations';
     const VIEW_PLANS = 'view plans';
