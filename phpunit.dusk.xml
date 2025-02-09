@@ -20,6 +20,7 @@
     </whitelist>
   </filter>
   <php>
+    <env name="APP_URL" value="http://127.0.0.1:8000"/>
     <env name="APP_ENV" value="testing"/>
     <env name="APP_KEY" value="base64:YZzRGIAPQgqSLZBJ7rILm7B05FfdvxSBaHVoQFzBuS0="/>
     <env name="ADMIN_EMAIL" value="qa@computablefacts.com"/>

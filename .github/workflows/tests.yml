@@ -46,8 +46,11 @@ jobs:
         env:
           DROP_SCAN_EVENTS_AFTER_X_MINUTES: 0.5
           DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES: 0.5
+      - name: Upgrade Chrome Driver
+        run: php artisan dusk:chrome-driver --detect
+      - name: Start Chrome Driver
+        run: ./vendor/laravel/dusk/bin/chromedriver-linux --port=9515 &
+      - name: Run Laravel Server
+        run: php artisan serve --port=8000 --no-reload &
       - name: Run Dusk Tests
-        run: php vendor/bin/phpunit -c phpunit.dusk.xml --testdox
-        env:
-          DROP_SCAN_EVENTS_AFTER_X_MINUTES: 0.5
-          DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES: 0.5
+        run: php artisan dusk
