@@ -3,9 +3,9 @@
 namespace CyberBuddy;
 
 use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
-use Tests\TestCase;
+use Tests\TestCaseNoDb;
 
-class CyberBuddyControllerTest extends TestCase
+class CyberBuddyControllerTest extends TestCaseNoDb
 {
     public function testItRemovesSourcesFromAnswer()
     {
@@ -18,7 +18,17 @@ class CyberBuddyControllerTest extends TestCase
 
     public function testItCreatesATooltipWhenASingleReferenceIsUsed()
     {
-        $tooltip = "La source est \n                  <div class=\"cb-tooltip\">\n                    <b style=\"color:#f8b500\">[36]</b>\n                    <span class=\"cb-tooltiptext cb-tooltip-top\">Source !</span>\n                  </div>\n                .";
+        $tooltip = 'La source est <b style="color:#F8B500">[36]</b>.<br><br><b>Sources :</b><ul style="padding:0">
+                  <li style="padding:0;margin-bottom:0.25rem">
+                    <b style="color:#F8B500">[36]</b>&nbsp;
+                    <div class="cb-tooltip-list">
+                      
+                      <span class="cb-tooltiptext cb-tooltip-list-top" style="background-color:#F8B500;color:#444;">
+                        Source !
+                      </span>
+                    </div>
+                  </li>
+                </ul>';
 
         $html = CyberBuddyController::enhanceAnswerWithSources(
             "La source est [[36]].",
@@ -41,7 +51,27 @@ class CyberBuddyControllerTest extends TestCase
 
     public function testItCreatesATooltipWhenMultipleReferencesAreUsed()
     {
-        $tooltip = "La source est \n                  <div class=\"cb-tooltip\">\n                    <b style=\"color:#f8b500\">[36]</b>\n                    <span class=\"cb-tooltiptext cb-tooltip-top\">Source n°1</span>\n                  </div>\n                ,\n                  <div class=\"cb-tooltip\">\n                    <b style=\"color:#f8b500\">[44]</b>\n                    <span class=\"cb-tooltiptext cb-tooltip-top\">Source n°2</span>\n                  </div>\n                .";
+        $tooltip = 'La source est <b style="color:#F8B500">[36]</b>,<b style="color:#F8B500">[44]</b>.<br><br><b>Sources :</b><ul style="padding:0">
+                  <li style="padding:0;margin-bottom:0.25rem">
+                    <b style="color:#F8B500">[36]</b>&nbsp;
+                    <div class="cb-tooltip-list">
+                      
+                      <span class="cb-tooltiptext cb-tooltip-list-top" style="background-color:#F8B500;color:#444;">
+                        Source n°1
+                      </span>
+                    </div>
+                  </li>
+                
+                  <li style="padding:0;margin-bottom:0.25rem">
+                    <b style="color:#F8B500">[44]</b>&nbsp;
+                    <div class="cb-tooltip-list">
+                      
+                      <span class="cb-tooltiptext cb-tooltip-list-top" style="background-color:#F8B500;color:#444;">
+                        Source n°2
+                      </span>
+                    </div>
+                  </li>
+                </ul>';
 
         $html = CyberBuddyController::enhanceAnswerWithSources(
             "La source est [[36],[44]].",
