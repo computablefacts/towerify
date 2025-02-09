@@ -81,11 +81,11 @@ class Messages
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VProcess $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "Le processus {$event->name} est lancé.";
                     return self::message($event, self::PROCESSES_AND_BACKGROUND_TASKS, self::PROCESSES, $msg);
                 }
-                if ($event->action === 'removed') {
+                if ($event->isRemoved()) {
                     $msg = "Le processus {$event->name} est arrêté.";
                     return self::message($event, self::PROCESSES_AND_BACKGROUND_TASKS, self::PROCESSES, $msg);
                 }
@@ -101,7 +101,7 @@ class Messages
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VShellHistory $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "L'utilisateur {$event->username} a lancé la commande {$event->command}.";
                     return self::message($event, self::SHELL_HISTORY_AND_ROOT_COMMANDS, self::SHELL_HISTORY, $msg);
                 }
@@ -117,11 +117,11 @@ class Messages
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VProcessWithBoundNetworkSockets $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "Le processus {$event->path} écoute à l'adresse {$event->local_address}:{$event->local_port}.";
                     return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_BOUND_NETWORK_SOCKETS, $msg);
                 }
-                if ($event->action === 'removed') {
+                if ($event->isRemoved()) {
                     $msg = "Le processus {$event->path} n'écoute plus à l'adresse {$event->local_address}:{$event->local_port}.";
                     return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_BOUND_NETWORK_SOCKETS, $msg);
                 }
@@ -133,12 +133,12 @@ class Messages
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VProcessWithOpenNetworkSockets $event) {
-                        if ($event->action === 'added') {
+                        if ($event->isAdded()) {
                             $process = empty($event->path) ? "{$event->pid}" : "{$event->path} ($event->pid)";
                             $msg = "Le processus {$process} a une connexion ouverte de {$event->local_address}:{$event->local_port} vers {$event->remote_address}:{$event->remote_port}.";
                             return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_OPEN_NETWORK_SOCKETS, $msg);
                         }
-                        if ($event->action === 'removed') {
+                        if ($event->isRemoved()) {
                             $process = empty($event->path) ? "{$event->pid}" : "{$event->path} ($event->pid)";
                             $msg = "Le processus {$process} n'a plus de connexion ouverte de {$event->local_address}:{$event->local_port} vers {$event->remote_address}:{$event->remote_port}.";
                             return self::message($event, self::CONNECTIONS_AND_SOCKET_EVENTS, self::PROCESSES_WITH_OPEN_NETWORK_SOCKETS, $msg);
@@ -157,11 +157,11 @@ class Messages
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VLoginAndLogout $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "L'utilisateur {$event->entry_username} s'est connecté au serveur.";
                     return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::LOGINS_AND_LOGOUTS, $msg);
                 }
-                if ($event->action === 'removed') {
+                if ($event->isRemoved()) {
                     $msg = "L'utilisateur {$event->entry_username} s'est déconnecté du serveur.";
                     return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::LOGINS_AND_LOGOUTS, $msg);
                 }
@@ -173,11 +173,11 @@ class Messages
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VAuthorizedKey $event) {
-                        if ($event->action === 'added') {
+                        if ($event->isAdded()) {
                             $msg = "Une clef SSH a été ajoutée au trousseau {$event->key_file}.";
                             return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::AUTHORIZED_KEYS, $msg);
                         }
-                        if ($event->action === 'removed') {
+                        if ($event->isRemoved()) {
                             $msg = "Une clef SSH a été supprimée du trousseau {$event->key_file}.";
                             return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::AUTHORIZED_KEYS, $msg);
                         }
@@ -190,11 +190,11 @@ class Messages
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VUserSshKey $event) {
-                        if ($event->action === 'added') {
+                        if ($event->isAdded()) {
                             $msg = "L'utilisateur {$event->username} a créé une clef SSH ({$event->ssh_key}).";
                             return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::SSH_KEYS_IN_THE_USERS_SSH_DIRECTORY, $msg);
                         }
-                        if ($event->action === 'removed') {
+                        if ($event->isRemoved()) {
                             $msg = "L'utilisateur {$event->username} a supprimé une clef SSH ({$event->ssh_key}).";
                             return self::message($event, self::AUTHENTICATION_AND_SSH_ACTIVITY, self::SSH_KEYS_IN_THE_USERS_SSH_DIRECTORY, $msg);
                         }
@@ -212,11 +212,11 @@ class Messages
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VEtcService $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "Le service {$event->name} ($event->comment) écoute sur le port {$event->port} ({$event->protocol}).";
                     return self::message($event, self::PORTS_AND_INTERFACES, self::ETC_SERVICES, $msg);
                 }
-                if ($event->action === 'removed') {
+                if ($event->isRemoved()) {
                     $msg = "Le service {$event->name} ($event->comment) n'écoute plus sur le port {$event->port} ({$event->protocol}).";
                     return self::message($event, self::PORTS_AND_INTERFACES, self::ETC_SERVICES, $msg);
                 }
@@ -228,11 +228,11 @@ class Messages
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VEtcHost $event) {
-                        if ($event->action === 'added') {
+                        if ($event->isAdded()) {
                             $msg = "L'hôte {$event->hostnames} redirige vers {$event->address}.";
                             return self::message($event, self::PORTS_AND_INTERFACES, self::ETC_HOSTS, $msg);
                         }
-                        if ($event->action === 'removed') {
+                        if ($event->isRemoved()) {
                             $msg = "L'hôte {$event->hostnames} ne redirige plus vers {$event->address}.";
                             return self::message($event, self::PORTS_AND_INTERFACES, self::ETC_HOSTS, $msg);
                         }
@@ -245,11 +245,11 @@ class Messages
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VNetworkInterface $event) {
-                        if ($event->action === 'added') {
+                        if ($event->isAdded()) {
                             $msg = "L'interface réseau {$event->interface} ({$event->address}) a été ajoutée.";
                             return self::message($event, self::PORTS_AND_INTERFACES, self::NETWORK_INTERFACES, $msg);
                         }
-                        if ($event->action === 'removed') {
+                        if ($event->isRemoved()) {
                             $msg = "L'interface réseau {$event->interface} ({$event->address}) a été supprimée.";
                             return self::message($event, self::PORTS_AND_INTERFACES, self::NETWORK_INTERFACES, $msg);
                         }
@@ -267,11 +267,11 @@ class Messages
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VService $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "Le service {$event->name} ({$event->type}) a été ajouté.";
                     return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SERVICES, $msg);
                 }
-                if ($event->action === 'removed') {
+                if ($event->isRemoved()) {
                     $msg = "Le service {$event->name} ({$event->type}) a été supprimé.";
                     return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SERVICES, $msg);
                 }
@@ -283,7 +283,7 @@ class Messages
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VScheduledTask $event) {
-                        if ($event->action === 'added') {
+                        if ($event->isAdded()) {
                             if ($event->cron === 'n/a') {
                                 $schedule = "last_run={$event->last_run_time}, next_run={$event->next_run_time}";
                             } else {
@@ -297,7 +297,7 @@ class Messages
                             $msg = "La tâche planifiée {$event->command} ({$schedule}) a été ajoutée{$file}.";
                             return self::message($event, self::SERVICES_AND_SCHEDULED_TASKS, self::SCHEDULED_TASKS, $msg);
                         }
-                        if ($event->action === 'removed') {
+                        if ($event->isRemoved()) {
                             if ($event->cron === 'n/a') {
                                 $schedule = "last_run={$event->last_run_time}, next_run={$event->next_run_time}";
                             } else {
@@ -325,12 +325,12 @@ class Messages
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VUserAccount $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $home = empty($event->home_directory) ? "" : " ({$event->home_directory})";
                     $msg = "L'utilisateur {$event->username}{$home} a été créé.";
                     return self::message($event, self::USERS_AND_GROUPS, self::USERS, $msg);
                 }
-                if ($event->action === 'removed') {
+                if ($event->isRemoved()) {
                     $home = empty($event->home_directory) ? "" : " ({$event->home_directory})";
                     $msg = "L'utilisateur {$event->username}{$home} a été supprimé.";
                     return self::message($event, self::USERS_AND_GROUPS, self::USERS, $msg);
@@ -343,11 +343,11 @@ class Messages
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VGroup $event) {
-                        if ($event->action === 'added') {
+                        if ($event->isAdded()) {
                             $msg = "Le groupe {$event->name} a été créé.";
                             return self::message($event, self::USERS_AND_GROUPS, self::GROUPS, $msg);
                         }
-                        if ($event->action === 'removed') {
+                        if ($event->isRemoved()) {
                             $msg = "Le groupe {$event->name} a été supprimé.";
                             return self::message($event, self::USERS_AND_GROUPS, self::GROUPS, $msg);
                         }
@@ -365,7 +365,7 @@ class Messages
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VPackage $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
 
                     $osInfo = YnhOsquery::osInfos(collect([$event->server->first()]))->first();
 
@@ -382,7 +382,7 @@ class Messages
                     $msg = "Le paquet {$event->package} {$event->version} ({$event->type}) a été installé. {$warning}";
                     return self::message($event, self::USERS_AND_GROUPS, self::USERS, $msg);
                 }
-                if ($event->action === 'removed') {
+                if ($event->isRemoved()) {
                     $msg = "Le paquet {$event->package} {$event->version} ({$event->type}) a été désinstallé.";
                     return self::message($event, self::USERS_AND_GROUPS, self::USERS, $msg);
                 }
@@ -398,9 +398,9 @@ class Messages
             ->where('name', 'suid_bin')
             ->get()
             ->map(function (YnhOsquery $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "Les privilèges du binaire {$event->columns['path']} ont été élevés.";
-                    return self::message($event, self::SUID_BIN, self::SUID_BIN, $msg);
+                    return self::messageEx($event->id, $event->calendar_time, $event->server()->name, $event->server()->ip_address, self::SUID_BIN, self::SUID_BIN, $msg);
                 }
                 return [];
             })
@@ -415,9 +415,9 @@ class Messages
             ->where('name', 'ld_preload')
             ->get()
             ->map(function (YnhOsquery $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "Le binaire {$event->columns['value']} a été ajouté à la variable d'environnement LD_PRELOAD.";
-                    return self::message($event, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
+                    return self::messageEx($event->id, $event->calendar_time, $event->server()->name, $event->server()->ip_address, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
                 }
                 return [];
             })
@@ -432,13 +432,13 @@ class Messages
             ->where('name', 'kernel_modules')
             ->get()
             ->map(function (YnhOsquery $event) {
-                if ($event->action === 'added') {
+                if ($event->isAdded()) {
                     $msg = "Le module {$event->columns['name']} a été ajouté au noyau.";
-                    return self::message($event, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
+                    return self::messageEx($event->id, $event->calendar_time, $event->server()->name, $event->server()->ip_address, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
                 }
-                if ($event->action === 'removed') {
+                if ($event->isRemoved()) {
                     $msg = "Le module {$event->columns['name']} a été enlevé du noyau.";
-                    return self::message($event, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
+                    return self::messageEx($event->id, $event->calendar_time, $event->server()->name, $event->server()->ip_address, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
                 }
                 return [];
             })

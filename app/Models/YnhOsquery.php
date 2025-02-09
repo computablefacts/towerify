@@ -1002,4 +1002,14 @@ EOT;
     {
         return $this->belongsTo(YnhServer::class, 'ynh_server_id', 'id');
     }
+
+    public function isAdded(): bool
+    {
+        return $this->action === 'added';
+    }
+
+    public function isRemoved(): bool
+    {
+        return $this->action === 'removed';
+    }
 }
