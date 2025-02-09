@@ -22,7 +22,7 @@ jobs:
           tools: composer:v2
       - name: Shutting down MySQL
         run: sudo service mysql stop
-      - name: Install MariaDb
+      - name: Installing MariaDb
         uses: YakkaDev/mariadb-actions@v1.1.0
         with:
           character: 'utf8mb4'
@@ -35,12 +35,12 @@ jobs:
       - name: Composer Install
         run: composer install --prefer-dist --no-progress --no-interaction
         env:
-          DB_CONNECTION: sqlite
+          DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
-          DB_DATABASE: ":memory:"
-          DB_PORT: 3000
-          DB_USERNAME: root
-          DB_PASSWORD: ""
+          DB_PORT: 3306
+          DB_DATABASE: 'tw_testdb'
+          DB_USERNAME: 'tw_testuser'
+          DB_PASSWORD: 'z0rglub'
       - name: Run Tests
         run: php vendor/bin/phpunit --testdox
         env:
