@@ -20,6 +20,16 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: mbstring, json, sqlite3
           tools: composer:v2
+      - name: Shutting down MySQL
+        run: sudo service mysql stop
+      - name: Install MariaDb
+        uses: YakkaDev/mariadb-actions@v1.1.0
+        with:
+          character: 'utf8mb4'
+          version: '10.6.18'
+          database: 'tw_testdb'
+          user: 'tw_testuser'
+          password: 'z0rglub'
       - name: Lock Laravel Version
         run: composer require "laravel/framework:${{ matrix.laravel }}.*" --no-update -v
       - name: Composer Install
@@ -31,16 +41,6 @@ jobs:
           DB_PORT: 3000
           DB_USERNAME: root
           DB_PASSWORD: ""
-      - name: Start MySQL
-        run: sudo /etc/init.d/mysql start
-      - name: Create TWR database
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "CREATE DATABASE tw_testdb DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-      - name: Check TWR database exists
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "SHOW DATABASES LIKE 'tw_testdb';"
-      - name: Create TWR database user
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "CREATE USER 'tw_testuser'@'localhost' IDENTIFIED BY 'z0rglub';"
-      - name: Grant TWR database user privileges
-        run: mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "GRANT ALL ON tw_testdb.* TO 'tw_testuser'@'localhost';"
       - name: Run Tests
         run: php vendor/bin/phpunit --testdox
         env:
