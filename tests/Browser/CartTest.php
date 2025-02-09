@@ -22,7 +22,7 @@ class CartTest extends DuskTestCase
     {
         parent::setUp();
 
-        $this->user = User::create([
+        $this->user = User::updateOrCreate(['email' => 'test@vanilo.com'], [
             'name' => 'User',
             'password' => bcrypt('password'),
             'email' => 'test@vanilo.com'
