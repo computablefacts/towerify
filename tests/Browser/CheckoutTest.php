@@ -24,13 +24,13 @@ class CheckoutTest extends DuskTestCase
 
         $this->artisan('db:seed', ['--class' => Countries::class]);
 
-        $this->user = User::updateOrCreate([
+        $this->user = User::updateOrCreate(['email' => 'awesome@vanilo.com'], [
             'name' => 'Awesome Web User',
             'password' => bcrypt('whatapassword'),
             'email' => 'awesome@vanilo.com'
         ]);
 
-        $this->product = Product::updateOrCreate([
+        $this->product = Product::create([
             'name' => 'BMW M3',
             'sku' => 'BMW-F31',
             'state' => ProductState::ACTIVE(),
