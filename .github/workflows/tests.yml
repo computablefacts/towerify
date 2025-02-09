@@ -41,8 +41,13 @@ jobs:
           DB_DATABASE: 'tw_testdb'
           DB_USERNAME: 'tw_testuser'
           DB_PASSWORD: 'z0rglub'
-      - name: Run Tests
-        run: php vendor/bin/phpunit --testdox
+      - name: Run Unit Tests
+        run: php vendor/bin/phpunit --testdox phpunit.xml
+        env:
+          DROP_SCAN_EVENTS_AFTER_X_MINUTES: 0.5
+          DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES: 0.5
+      - name: Run Dusk Tests
+        run: php vendor/bin/phpunit --testdox phpunit.dusk.xml
         env:
           DROP_SCAN_EVENTS_AFTER_X_MINUTES: 0.5
           DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES: 0.5

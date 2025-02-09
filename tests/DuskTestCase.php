@@ -2,15 +2,15 @@
 
 namespace Tests;
 
-use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTruncation;
+use Illuminate\Support\Facades\Log;
 use Laravel\Dusk\TestCase as BaseTestCase;
 
 abstract class DuskTestCase extends BaseTestCase
 {
-    use RefreshDatabase;
+    use DatabaseTruncation;
 
     public function setUp(): void
     {
@@ -30,29 +30,22 @@ abstract class DuskTestCase extends BaseTestCase
      * Prepare for Dusk test execution.
      *
      * @beforeClass
-     * @return void
      */
-    public static function prepare()
+    public static function prepare(): void
     {
+        Log::debug('Starting Chrome...');
         static::startChromeDriver();
+        Log::debug('Chrome started...');
     }
 
     /**
      * Create the RemoteWebDriver instance.
-     *
-     * @return \Facebook\WebDriver\Remote\RemoteWebDriver
      */
-    protected function driver()
+    protected function driver(): RemoteWebDriver
     {
-        $options = (new ChromeOptions)->addArguments([
-            '--disable-gpu',
-            '--headless'
-        ]);
-
+        Log::debug('Creating web driver...');
         return RemoteWebDriver::create(
-            'http://localhost:9515', DesiredCapabilities::chrome()->setCapability(
-            ChromeOptions::CAPABILITY, $options
-        )
+            'http://localhost:9515', DesiredCapabilities::chrome()
         );
     }
 }
