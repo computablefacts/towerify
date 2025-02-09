@@ -32,7 +32,9 @@ class ProductListPageTest extends TestCase
             'price' => 1500
         ]);
 
-        $user = \App\User::updateOrCreate(['email' => 'awesome@vanilo.com'], [
+        $user = \App\User::updateOrCreate([
+            'email' => 'awesome@vanilo.com'
+        ], [
             'name' => 'Awesome Web User',
             'password' => bcrypt('whatapassword'),
             'email' => 'awesome@vanilo.com'
@@ -67,7 +69,9 @@ class ProductListPageTest extends TestCase
             'price' => 22000
         ]);
 
-        $user = \App\User::updateOrCreate(['email' => 'awesome@vanilo.com'], [
+        $user = \App\User::updateOrCreate([
+            'email' => 'awesome@vanilo.com'
+        ], [
             'name' => 'Awesome Web User',
             'password' => bcrypt('whatapassword'),
             'email' => 'awesome@vanilo.com'

@@ -18,7 +18,9 @@ class ProductShowPageTest extends TestCase
             'price' => 11500
         ]);
 
-        $user = \App\User::updateOrCreate(['email' => 'awesome@vanilo.com'], [
+        $user = \App\User::updateOrCreate([
+            'email' => 'awesome@vanilo.com'
+        ], [
             'name' => 'Awesome Web User',
             'password' => bcrypt('whatapassword'),
             'email' => 'awesome@vanilo.com'

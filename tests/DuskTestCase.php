@@ -2,40 +2,24 @@
 
 namespace Tests;
 
+use Facebook\WebDriver\Chrome\ChromeOptions;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Illuminate\Foundation\Testing\DatabaseTruncation;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
 use Laravel\Dusk\TestCase as BaseTestCase;
+use PHPUnit\Framework\Attributes\BeforeClass;
 
 abstract class DuskTestCase extends BaseTestCase
 {
-    use DatabaseTruncation;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        if ('testing' !== app()->environment()) {
-            echo("The environment is not testing. I quit. This would likely destroy data.\n");
-            exit(1);
-        }
-
-        foreach (static::$browsers as $browser) {
-            $browser->driver->manage()->deleteAllCookies();
-        }
-    }
-
     /**
      * Prepare for Dusk test execution.
-     *
-     * @beforeClass
      */
+    #[BeforeClass]
     public static function prepare(): void
     {
-        Log::debug('Starting Chrome...');
-        static::startChromeDriver();
-        Log::debug('Chrome started...');
+        if (! static::runningInSail()) {
+            static::startChromeDriver(['--port=9515']);
+        }
     }
 
     /**
@@ -43,9 +27,21 @@ abstract class DuskTestCase extends BaseTestCase
      */
     protected function driver(): RemoteWebDriver
     {
-        Log::debug('Creating web driver...');
+        $options = (new ChromeOptions)->addArguments(collect([
+            $this->shouldStartMaximized() ? '--start-maximized' : '--window-size=1920,1080',
+            '--disable-search-engine-choice-screen',
+        ])->unless($this->hasHeadlessDisabled(), function (Collection $items) {
+            return $items->merge([
+                '--disable-gpu',
+                '--headless=new',
+            ]);
+        })->all());
+
         return RemoteWebDriver::create(
-            'http://localhost:9515', DesiredCapabilities::chrome()
+            $_ENV['DUSK_DRIVER_URL'] ?? env('DUSK_DRIVER_URL') ?? 'http://localhost:9515',
+            DesiredCapabilities::chrome()->setCapability(
+                ChromeOptions::CAPABILITY, $options
+            )
         );
     }
 }
