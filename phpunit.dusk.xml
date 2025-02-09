@@ -1,30 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit backupGlobals="false"
-         backupStaticAttributes="false"
-         bootstrap="vendor/autoload.php"
-         colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         processIsolation="false"
-         stopOnFailure="false"
-         testdox="true">
-    <testsuites>
-        <testsuite name="Browser Test Suite">
-            <directory suffix="Test.php">./tests/Browser</directory>
-        </testsuite>
-    </testsuites>
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./app</directory>
-        </whitelist>
-    </filter>
-    <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="CACHE_DRIVER" value="array"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="QUEUE_DRIVER" value="sync"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-    </php>
+  backupStaticAttributes="false"
+  bootstrap="vendor/autoload.php"
+  colors="true"
+  convertErrorsToExceptions="true"
+  convertNoticesToExceptions="true"
+  convertWarningsToExceptions="true"
+  processIsolation="false"
+  stopOnFailure="false"
+  testdox="true">
+  <testsuites>
+    <testsuite name="Browser Test Suite">
+      <directory suffix="Test.php">./tests/Browser</directory>
+    </testsuite>
+  </testsuites>
+  <filter>
+    <whitelist processUncoveredFilesFromWhitelist="true">
+      <directory suffix=".php">./app</directory>
+    </whitelist>
+  </filter>
+  <php>
+    <env name="APP_ENV" value="testing"/>
+    <env name="APP_KEY" value="base64:YZzRGIAPQgqSLZBJ7rILm7B05FfdvxSBaHVoQFzBuS0="/>
+    <env name="ADMIN_EMAIL" value="qa@computablefacts.com"/>
+    <env name="ADMIN_USERNAME" value="qa"/>
+    <env name="ADMIN_PASSWORD" value="whatapassword"/>
+    <env name="CACHE_DRIVER" value="array"/>
+    <env name="SESSION_DRIVER" value="array"/>
+    <env name="QUEUE_DRIVER" value="sync"/>
+    <env name="DB_CONNECTION" value="mysql"/>
+    <env name="DB_HOST" value="127.0.0.1"/>
+    <env name="DB_PORT" value="3306"/>
+    <env name="DB_DATABASE" value="tw_testdb"/>
+    <env name="DB_USERNAME" value="tw_testuser"/>
+    <env name="DB_PASSWORD" value="z0rglub"/>
+    <env name="USE_SCHEMA_DUMP" value="true"/>
+    <env name="DROP_SCAN_EVENTS_AFTER_X_MINUTES" value="1"/>
+    <env name="DROP_DISCOVERY_EVENTS_AFTER_X_MINUTES" value="1"/>
+    <env name="DAYS_BETWEEN_SCANS" value="5"/>
+  </php>
 </phpunit>

@@ -58,10 +58,10 @@ class Messages
 
     public static function get(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return self::shellHistoryAndRootCommands($servers, $cutOffTime)
+        return self::authenticationAndSshActivity($servers, $cutOffTime)
+            // ->concat(self::shellHistoryAndRootCommands($servers, $cutOffTime))
             // ->concat(self::connectionsAndSocketEvents($servers, $cutOffTime))
             // ->concat(self::processesAndBackgroundTasks($servers, $cutOffTime))
-            ->concat(self::authenticationAndSshActivity($servers, $cutOffTime))
             // ->concat(self::portsAndInterfaces($servers, $cutOffTime))
             ->concat(self::servicesAndScheduledTasks($servers, $cutOffTime))
             ->concat(self::usersAndGroups($servers, $cutOffTime))

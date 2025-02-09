@@ -13,7 +13,7 @@ class CreateViewScheduledTasks extends Migration
     public function up()
     {
         DB::statement("
-            CREATE VIEW v_scheduled_tasks AS
+            CREATE OR REPLACE VIEW v_scheduled_tasks AS
             SELECT DISTINCT
               ynh_servers.user_id,
               users.customer_id,

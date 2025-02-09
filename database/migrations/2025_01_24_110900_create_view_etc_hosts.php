@@ -13,7 +13,7 @@ class CreateViewEtcHosts extends Migration
     public function up()
     {
         DB::statement("
-            CREATE VIEW v_etc_hosts AS
+            CREATE OR REPLACE VIEW v_etc_hosts AS
             SELECT DISTINCT
               ynh_servers.user_id,
               users.customer_id,

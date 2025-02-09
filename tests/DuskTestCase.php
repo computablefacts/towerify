@@ -10,7 +10,7 @@ use Laravel\Dusk\TestCase as BaseTestCase;
 
 abstract class DuskTestCase extends BaseTestCase
 {
-    use CreatesApplication, RefreshDatabase;
+    use RefreshDatabase;
 
     public function setUp(): void
     {

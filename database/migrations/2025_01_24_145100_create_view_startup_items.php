@@ -13,7 +13,7 @@ class CreateViewStartupItems extends Migration
     public function up()
     {
         DB::statement("
-            CREATE VIEW v_startup_items AS
+            CREATE OR REPLACE VIEW v_startup_items AS
             SELECT DISTINCT
               ynh_servers.user_id,
               users.customer_id,

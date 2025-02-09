@@ -13,7 +13,7 @@ class CreateViewUserAccounts extends Migration
     public function up()
     {
         DB::statement("
-            CREATE VIEW v_user_accounts AS
+            CREATE OR REPLACE VIEW v_user_accounts AS
             SELECT DISTINCT
               ynh_servers.user_id,
               users.customer_id,

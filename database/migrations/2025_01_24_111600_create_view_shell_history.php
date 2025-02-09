@@ -13,7 +13,7 @@ class CreateViewShellHistory extends Migration
     public function up()
     {
         DB::statement("
-            CREATE VIEW v_shell_history AS
+            CREATE OR REPLACE VIEW v_shell_history AS
             SELECT DISTINCT
               ynh_servers.user_id,
               users.customer_id,
