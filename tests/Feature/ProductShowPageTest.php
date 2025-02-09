@@ -11,14 +11,14 @@ class ProductShowPageTest extends TestCase
     /** @test */
     public function it_can_show_active_product()
     {
-        $product = Product::create([
+        $product = Product::updateOrCreate([
             'name' => 'Dacia Logan',
             'sku' => 'DCA-LOGAN',
             'state' => ProductState::ACTIVE(),
             'price' => 11500
         ]);
 
-        $user = \App\User::create([
+        $user = \App\User::updateOrCreate([
             'name' => 'Awesome Web User',
             'password' => bcrypt('whatapassword'),
             'email' => 'awesome@vanilo.com'

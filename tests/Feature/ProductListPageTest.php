@@ -11,28 +11,28 @@ class ProductListPageTest extends TestCase
     /** @test */
     public function it_can_list_active_products()
     {
-        $productA = Product::create([
+        $productA = Product::updateOrCreate([
             'name' => 'Audi A4',
             'sku' => 'AUD-A4',
             'state' => ProductState::ACTIVE(),
             'price' => 11500
         ]);
 
-        $productB = Product::create([
+        $productB = Product::updateOrCreate([
             'name' => 'BMW M3',
             'sku' => 'BMW-F31',
             'state' => ProductState::ACTIVE(),
             'price' => 14500
         ]);
 
-        $productC = Product::create([
+        $productC = Product::updateOrCreate([
             'name' => 'Daewoo Tico',
             'sku' => 'DWO-TICO',
             'state' => ProductState::ACTIVE(),
             'price' => 1500
         ]);
 
-        $user = \App\User::create([
+        $user = \App\User::updateOrCreate([
             'name' => 'Awesome Web User',
             'password' => bcrypt('whatapassword'),
             'email' => 'awesome@vanilo.com'
@@ -54,20 +54,20 @@ class ProductListPageTest extends TestCase
     /** @test */
     public function it_can_list_only_active_products()
     {
-        Product::create([
+        Product::updateOrCreate([
             'name' => 'Audi A3',
             'sku' => 'AUD-A3',
             'state' => ProductState::ACTIVE(),
             'price' => 15500
         ]);
 
-        Product::create([
+        Product::updateOrCreate([
             'name' => 'BMW x6',
             'sku' => 'BMW-F31',
             'price' => 22000
         ]);
 
-        $user = \App\User::create([
+        $user = \App\User::updateOrCreate([
             'name' => 'Awesome Web User',
             'password' => bcrypt('whatapassword'),
             'email' => 'awesome@vanilo.com'
