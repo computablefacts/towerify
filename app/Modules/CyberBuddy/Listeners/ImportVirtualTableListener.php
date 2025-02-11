@@ -5,6 +5,7 @@ namespace App\Modules\CyberBuddy\Listeners;
 use App\Listeners\AbstractListener;
 use App\Modules\CyberBuddy\Events\ImportVirtualTable;
 use App\Modules\CyberBuddy\Helpers\ClickhouseClient;
+use App\Modules\CyberBuddy\Helpers\ClickhouseUtils;
 use App\Modules\CyberBuddy\Models\Table;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +27,8 @@ class ImportVirtualTableListener extends AbstractListener
 
         Auth::login($user); // otherwise the tenant will not be properly set
 
-        $tableName = Str::replace(['-', ' '], '_', Str::lower(Str::beforeLast(Str::afterLast($table, '/'), '.')));
+        $tableName = ClickhouseUtils::normalizeTableName($table);
+        /** @var Table $tbl */
         $tbl = Table::updateOrCreate([
             'name' => $tableName,
             'created_by' => $user->id,
@@ -39,6 +41,7 @@ class ImportVirtualTableListener extends AbstractListener
             'started_at' => Carbon::now(),
             'finished_at' => null,
             'created_by' => $user->id,
+            'query' => $query
         ]);
 
         try {
@@ -48,7 +51,7 @@ class ImportVirtualTableListener extends AbstractListener
             $uid = Str::random(10);
 
             // Create the table in clickhouse server
-            $query = "CREATE TABLE {$tableName}_{$uid} AS {$query}";
+            $query = "CREATE TABLE {$tableName}_{$uid} ENGINE = MergeTree() ORDER BY tuple() AS {$query}";
             $output = ClickhouseClient::executeQuery($query);
 
             if (!$output) {
@@ -77,6 +80,8 @@ class ImportVirtualTableListener extends AbstractListener
 
             $tbl->last_error = null;
             $tbl->finished_at = Carbon::now();
+            $tbl->schema = ClickhouseClient::describeTable($tableName);
+            $tbl->nb_rows = ClickhouseClient::numberOfRows($tableName) ?? 0;
             $tbl->save();
 
             // TODO : create tmp_* view in clickhouse server for backward compatibility

@@ -2,8 +2,10 @@
 
 namespace App\Modules\CyberBuddy\Models;
 
+use App\Hashing\TwHasher;
 use App\Modules\CyberBuddy\Traits\HasTenant;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,8 +15,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property Carbon updated_at
  * @property string name
  * @property string description
+ * @property string query
  * @property boolean copied
  * @property boolean deduplicated
+ * @property boolean updatable
+ * @property array credentials
+ * @property array schema
+ * @property int nb_rows
  * @property string last_error
  * @property int created_by
  * @property Carbon started_at
@@ -35,14 +42,32 @@ class Table extends Model
         'last_error',
         'started_at',
         'finished_at',
+        'updatable',
+        'schema',
+        'credentials',
+        'nb_rows',
+        'query',
     ];
 
     protected $casts = [
         'copied' => 'boolean',
         'deduplicated' => 'boolean',
+        'updatable' => 'boolean',
+        'schema' => 'array',
+        'nb_rows' => 'integer',
         'started_at' => 'datetime',
         'finished_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected $hidden = ['credentials'];
+
+    protected function credentials(): Attribute
+    {
+        return Attribute::make(
+            get: fn(string $value) => json_decode(TwHasher::unhash($value), true),
+            set: fn(array $value) => TwHasher::hash(json_encode($value))
+        );
+    }
 }

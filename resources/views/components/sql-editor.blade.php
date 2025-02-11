@@ -26,6 +26,8 @@
       <thead>
       <tr>
         <th>{{ __('Table') }}</th>
+        <th class="text-end">{{ __('Number of Rows') }}</th>
+        <th class="text-end">{{ __('Number of Columns') }}</th>
         <th>{{ __('Description') }}</th>
         <th>{{ __('Last Update') }}</th>
         <th>{{ __('Last Error') }}</th>
@@ -45,18 +47,22 @@
   editor.session.setMode("ace/mode/sql");
 
   const elDatabasesAndTables = document.getElementById('databases-and-tables');
-  elDatabasesAndTables.innerHTML = "<tr><td colspan='4'>{{ __('Loading...') }}</td></tr>";
+  elDatabasesAndTables.innerHTML = "<tr><td colspan='6'>{{ __('Loading...') }}</td></tr>";
 
   document.addEventListener('DOMContentLoaded', function () {
     axios.get(`/cb/web/aws/tables/available`).then(response => {
       if (response.data.success) {
         if (!response.data.tables || response.data.tables.length === 0) {
-          elDatabasesAndTables.innerHTML = "<tr><td colspan='4'>{{ __('No tables found.') }}</td></tr>";
+          elDatabasesAndTables.innerHTML = "<tr><td colspan='6'>{{ __('No tables found.') }}</td></tr>";
         } else {
           const rows = response.data.tables.map(table => {
             return `
                 <tr>
-                  <td>${table.name}</td>
+                  <td>
+                    <span class="lozenge new">${table.name}</span>
+                  </td>
+                  <td class="text-end">${table.nb_rows}</td>
+                  <td class="text-end">${table.nb_columns}</td>
                   <td>${table.description}</td>
                   <td>${table.last_update}</td>
                   <td>${table.last_error}</td>
@@ -93,9 +99,13 @@
         elTableHead.innerHTML = `
           <tr>${response.data.result[0].map(column => `<th>${column}</th>`).join('')}</tr>
         `;
-        elTableBody.innerHTML = response.data.result.slice(1)
-        .map(row => `<tr>${row.map(column => `<td>${column}</td>`).join('')}</tr>`)
-        .join('');
+        if (response.data.result.length === 1) {
+          elTableBody.innerHTML = `<tr><td colspan='${response.data.result[0].length}'>{{ __('No results found.') }}</td></tr>`;
+        }else {
+          elTableBody.innerHTML = response.data.result.slice(1)
+          .map(row => `<tr>${row.map(column => `<td>${column}</td>`).join('')}</tr>`)
+          .join('');
+        }
       } else if (response.data.error) {
         toaster.toastError(response.data.error);
       } else {

@@ -195,6 +195,12 @@
       </div>
       <div class="row mt-2">
         <div class="col">
+          <input type="checkbox" id="toggle-updatable"/>
+          <label for="toggle-updatable">{{ __('Update Automatically') }}</label>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
           <table class="table">
             <thead>
             <tr>
@@ -222,7 +228,7 @@
   <div class="card step-content">
     <div class="card-body">
       <h5 class="card-title">
-        {{ __('5. Input the SQL query to generate the new virtual table.') }}
+        {{ __('5. Input the SQL query to generate a new virtual table.') }}
       </h5>
       <div class="row mt-2">
         <div class="col">
@@ -329,10 +335,10 @@
   };
 
   const PHYSICAL_TABLE = {
-    label: 'Physical', value: 'physical'
+    label: "{{ __('Physical') }}", value: 'physical'
   };
   const VIRTUAL_TABLE = {
-    label: 'Virtual', value: 'virtual'
+    label: "{{ __('Virtual') }}", value: 'virtual'
   };
 
   const elTableType = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
@@ -364,7 +370,9 @@
   });
 
   const elAwsVirtualTableName = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-    type: 'TextInput', container: 'aws-vtable-name', placeholder: 'The virtual table name such as active_users'
+    type: 'TextInput',
+    container: 'aws-vtable-name',
+    placeholder: "{{ __('The virtual table name such as active_users') }}"
   });
 
   const listAwsTables = () => {
@@ -474,6 +482,7 @@
       return false;
     }
 
+    const updatable = document.getElementById('toggle-updatable').checked === true;
     const copy = document.getElementById('toggle-copy').checked === true;
     const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
 
@@ -484,6 +493,7 @@
       input_folder: elAwsInputFolder.el.value,
       output_folder: elAwsOutputFolder.el.value,
       tables: tables,
+      updatable: updatable,
       copy: copy,
       deduplicate: deduplicate,
       description: description,

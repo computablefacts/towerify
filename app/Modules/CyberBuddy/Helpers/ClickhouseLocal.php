@@ -3,11 +3,12 @@
 namespace App\Modules\CyberBuddy\Helpers;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
 class ClickhouseLocal
 {
-    public function __construct()
+    private function __construct()
     {
         //
     }
@@ -27,8 +28,26 @@ class ClickhouseLocal
         return null;
     }
 
-    public static function describeTable(string $table): ?string
+    public static function describeTable(string $table): array
     {
-        return self::executeQuery("DESCRIBE TABLE {$table}");
+        $result = self::executeQuery("DESCRIBE TABLE {$table}");
+        return $result ? collect(explode("\n", $result))
+            ->map(function (string $line) {
+                $line = trim($line);
+                return [
+                    'old_name' => Str::beforeLast($line, "\t"),
+                    'new_name' => ClickhouseUtils::normalizeColumnName(Str::beforeLast($line, "\t")),
+                    'type' => Str::replace("\'", "'", Str::afterLast($line, "\t")),
+                ];
+            })
+            ->filter(fn(array $column) => $column['old_name'] !== '')
+            ->sortBy('old_name')
+            ->values()
+            ->toArray() : [];
+    }
+
+    public static function numberOfRows(string $table): ?string
+    {
+        return self::executeQuery("SELECT COUNT(*) FROM {$table}");
     }
 }

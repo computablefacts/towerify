@@ -3,12 +3,12 @@
 namespace App\Modules\CyberBuddy\Helpers;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
 class ClickhouseClient
 {
-
-    public function __construct()
+    private function __construct()
     {
         //
     }
@@ -33,9 +33,22 @@ class ClickhouseClient
         return self::executeQuery("SHOW TABLES");
     }
 
-    public static function describeTable(string $table): ?string
+    public static function describeTable(string $table): array
     {
-        return self::executeQuery("DESCRIBE TABLE {$table}");
+        $result = self::executeQuery("DESCRIBE TABLE {$table}");
+        return $result ? collect(explode("\n", $result))
+            ->map(function (string $line) {
+                $line = trim($line);
+                return [
+                    'old_name' => Str::beforeLast($line, "\t"),
+                    'new_name' => ClickhouseUtils::normalizeColumnName(Str::beforeLast($line, "\t")),
+                    'type' => Str::replace("\'", "'", Str::afterLast($line, "\t")),
+                ];
+            })
+            ->filter(fn(array $column) => $column['old_name'] !== '')
+            ->sortBy('old_name')
+            ->values()
+            ->toArray() : [];
     }
 
     public static function dropTableIfExists(string $table): ?string
@@ -51,6 +64,11 @@ class ClickhouseClient
     public static function renameTable(string $oldName, string $newName): ?string
     {
         return self::executeQuery("RENAME TABLE {$oldName} TO {$newName}");
+    }
+
+    public static function numberOfRows(string $table): ?string
+    {
+        return self::executeQuery("SELECT COUNT(*) FROM {$table}");
     }
 
     private static function cmd(string $query): string

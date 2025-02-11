@@ -12,6 +12,7 @@ use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Helpers\ClickhouseClient;
 use App\Modules\CyberBuddy\Helpers\ClickhouseLocal;
+use App\Modules\CyberBuddy\Helpers\ClickhouseUtils;
 use App\Modules\CyberBuddy\Http\Requests\DownloadOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
@@ -711,28 +712,10 @@ class CyberBuddyController extends Controller
 
             $bucket = explode('/', $inputFolder, 2)[0];
             $s3 = "s3('https://s3.{$region}.amazonaws.com/{$bucket}/{$table}', '{$accessKeyId}', '{$secretAccessKey}', 'TabSeparatedWithNames')";
-            $output = ClickhouseLocal::describeTable($s3);
 
-            if (!$output) {
-                return [
-                    'table' => $table,
-                    'columns' => [],
-                ];
-            }
             return [
                 'table' => $table,
-                'columns' => collect(explode("\n", $output))
-                    ->map(function (string $line) {
-                        $line = trim($line);
-                        return [
-                            'old_name' => Str::beforeLast($line, "\t"),
-                            'new_name' => Str::upper(Str::replace([' '], '_', Str::beforeLast($line, "\t"))),
-                            'type' => Str::replace("\'", "'", Str::afterLast($line, "\t")),
-                        ];
-                    })
-                    ->filter(fn(array $column) => $column['old_name'] !== '')
-                    ->sortBy('old_name')
-                    ->values(),
+                'columns' => ClickhouseLocal::describeTable($s3),
             ];
         });
         return response()->json([
@@ -754,6 +737,7 @@ class CyberBuddyController extends Controller
             'tables.*.old_name' => 'required|string|min:1|max:100',
             'tables.*.new_name' => 'required|string|min:1|max:100',
             'tables.*.type' => 'required|string|min:1|max:50',
+            'updatable' => 'required|boolean',
             'copy' => 'required|boolean',
             'deduplicate' => 'required|boolean',
             'description' => 'required|string|min:1',
@@ -768,11 +752,12 @@ class CyberBuddyController extends Controller
         $outputFolder = $request->input('output_folder', '');
         $tables = collect($request->input('tables', []))->groupBy('table');
         $copy = $request->boolean('copy', false);
+        $updatable = $request->boolean('updatable', false);
         $deduplicate = $request->boolean('deduplicate', true);
         $description = $request->input('description', '');
 
         foreach ($tables as $table => $columns) {
-            ImportTable::dispatch($user, $region, $accessKeyId, $secretAccessKey, $inputFolder, $outputFolder, $copy, $deduplicate, $table, $columns->toArray(), $description);
+            ImportTable::dispatch($user, $region, $accessKeyId, $secretAccessKey, $inputFolder, $outputFolder, $copy, $deduplicate, $updatable, $table, $columns->toArray(), $description);
         }
         return response()->json([
             'success' => "{$tables->count()} table will be imported soon.",
@@ -788,6 +773,8 @@ class CyberBuddyController extends Controller
                 ->get()
                 ->map(fn(Table $table) => [
                     'name' => $table->name,
+                    'nb_rows' => $table->nb_rows,
+                    'nb_columns' => count($table->schema),
                     'description' => $table->description,
                     'last_update' => $table->finished_at ? $table->finished_at->format('Y-m-d H:i') : '',
                     'last_error' => $table->last_error ?? '',
@@ -818,7 +805,8 @@ class CyberBuddyController extends Controller
                 ]);
             }
 
-            $tableName = Str::replace(['-', ' '], '_', Str::lower(Str::beforeLast(Str::afterLast($name, '/'), '.')));
+            $tableName = ClickhouseUtils::normalizeTableName($name);
+            /** @var Table $tbl */
             $tbl = Table::updateOrCreate([
                 'name' => $tableName,
                 'created_by' => $user->id,
@@ -831,6 +819,7 @@ class CyberBuddyController extends Controller
                 'started_at' => Carbon::now(),
                 'finished_at' => null,
                 'created_by' => $user->id,
+                'query' => $query,
             ]);
 
             $output = ClickhouseClient::dropViewIfExists($tableName);
@@ -852,6 +841,8 @@ class CyberBuddyController extends Controller
 
             $tbl->last_error = null;
             $tbl->finished_at = Carbon::now();
+            $tbl->schema = ClickhouseClient::describeTable($tableName);
+            $tbl->nb_rows = ClickhouseClient::numberOfRows($tableName) ?? 0;
             $tbl->save();
 
             $query = "SELECT * FROM {$tableName} LIMIT 10 FORMAT TabSeparatedWithNames";

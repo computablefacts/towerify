@@ -6,6 +6,7 @@ use App\Listeners\AbstractListener;
 use App\Modules\CyberBuddy\Events\ImportTable;
 use App\Modules\CyberBuddy\Helpers\ClickhouseClient;
 use App\Modules\CyberBuddy\Helpers\ClickhouseLocal;
+use App\Modules\CyberBuddy\Helpers\ClickhouseUtils;
 use App\Modules\CyberBuddy\Models\Table;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,7 @@ class ImportTableListener extends AbstractListener
         $secretAccessKey = $event->secretAccessKey;
         $inputFolder = $event->inputFolder;
         $outputFolder = $event->outputFolder;
+        $updatable = $event->updatable;
         $copy = $event->copy;
         $deduplicate = $event->deduplicate;
         $table = $event->table;
@@ -39,7 +41,7 @@ class ImportTableListener extends AbstractListener
         $clickhouseUsername = config('towerify.clickhouse.username');
         $clickhousePassword = config('towerify.clickhouse.password');
         $clickhouseDatabase = config('towerify.clickhouse.database');
-        $tableName = Str::replace(['-', ' '], '_', Str::lower(Str::beforeLast(Str::afterLast($table, '/'), '.')));
+        $tableName = ClickhouseUtils::normalizeTableName($table);
         $bucket = explode('/', $inputFolder, 2)[0];
         $s3In = "s3('https://s3.{$region}.amazonaws.com/{$bucket}/{$table}', '{$accessKeyId}', '{$secretAccessKey}', 'TabSeparatedWithNames')";
         $s3Out = "s3('https://s3.{$region}.amazonaws.com/{$outputFolder}{$tableName}.parquet', '{$accessKeyId}', '{$secretAccessKey}', 'Parquet')";
@@ -51,6 +53,7 @@ class ImportTableListener extends AbstractListener
         Log::debug("Output file: {$s3Out}");
 
         // Reference the table
+        /** @var Table $tbl */
         $tbl = Table::updateOrCreate([
             'name' => $tableName,
             'created_by' => $user->id,
@@ -63,6 +66,16 @@ class ImportTableListener extends AbstractListener
             'started_at' => Carbon::now(),
             'finished_at' => null,
             'created_by' => $user->id,
+            'schema' => $columns,
+            'updatable' => $updatable,
+            'credentials' => [
+                'storage' => 's3',
+                'region' => $region,
+                'access_key_id' => $accessKeyId,
+                'secret_access_key' => $secretAccessKey,
+                'input_folder' => $inputFolder,
+                'output_folder' => $outputFolder,
+            ],
         ]);
 
         try {
@@ -152,6 +165,7 @@ class ImportTableListener extends AbstractListener
 
             $tbl->last_error = null;
             $tbl->finished_at = Carbon::now();
+            $tbl->nb_rows = ClickhouseClient::numberOfRows($tableName) ?? 0;
             $tbl->save();
 
             // TODO : create tmp_* view in clickhouse server for backward compatibility
