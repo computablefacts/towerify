@@ -12,9 +12,11 @@
 */
 
 use App\Enums\OsqueryPlatformEnum;
+use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
 use App\Http\Middleware\Subscribed;
+use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Http\JsonResponse;
@@ -411,9 +413,11 @@ Route::get('/dispatch/{job}', function (string $job) {
     if (Str::startsWith($user->email, $usernames) && Str::endsWith($user->email, $domains)) {
         try {
             if ($job === 'dl_debian_security_bug_tracker') {
-                \App\Jobs\DownloadDebianSecurityBugTracker::dispatch();
+                DownloadDebianSecurityBugTracker::dispatch();
             } elseif ($job === 'rebuild_packages_list') {
                 RebuildPackagesList::sink();
+            } elseif ($job === 'rebuild_latest_events_cache') {
+                RebuildLatestEventsCache::sink();
             }
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
