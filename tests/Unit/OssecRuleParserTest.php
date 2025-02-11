@@ -119,6 +119,29 @@ class OssecRuleParserTest extends TestCaseNoDb
         ], $rule);
     }
 
+    public function testMatchNegatedRegistry()
+    {
+        $rule = OssecRulesParser::parse("
+            [Ensure 'Accounts: Limit local account use of blank passwords to console logon only' is set to 'Enabled'.] [any] []
+            not r:HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Lsa -> LimitBlankPasswordUse;
+        ");
+
+        $this->assertEquals([
+            'rule_name' => "Ensure 'Accounts: Limit local account use of blank passwords to console logon only' is set to 'Enabled'.",
+            'match_type' => 'any',
+            'references' => [],
+            'rules' => [
+                [
+                    'type' => 'registry',
+                    'entry' => 'HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Lsa',
+                    'key' => 'LimitBlankPasswordUse',
+                    'expr' => null,
+                    'negate' => true,
+                ],
+            ],
+        ], $rule);
+    }
+
     public function testMatchCommand1()
     {
         $rule = OssecRulesParser::parse("
@@ -413,5 +436,46 @@ class OssecRuleParserTest extends TestCaseNoDb
         ");
 
         $this->assertTrue(OssecRulesParser::evaluate($ctx, $rule));
+    }
+
+    public function testEvaluateCheckNegatedRegistryEntries()
+    {
+        $rule = OssecRulesParser::parse("
+            [Ensure 'Accounts: Limit local account use of blank passwords to console logon only' is set to 'Enabled'.] [any] []
+            not r:HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Lsa -> LimitBlankPasswordUse;
+        ");
+
+        $ctx = [
+            'registry_entry_exists' => function (string $entry) {
+                return false;
+            },
+            'fetch_registry_keys' => function (string $entry) {
+                return [];
+            },
+        ];
+        $this->assertTrue(OssecRulesParser::evaluate($ctx, $rule));
+
+        $ctx = [
+            'registry_entry_exists' => function (string $entry) {
+                return $entry === 'HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Lsa';
+            },
+            'fetch_registry_keys' => function (string $entry) {
+                return [];
+            },
+        ];
+        $this->assertTrue(OssecRulesParser::evaluate($ctx, $rule));
+
+        $ctx = [
+            'registry_entry_exists' => function (string $entry) {
+                return $entry === 'HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Lsa';
+            },
+            'fetch_registry_keys' => function (string $entry) {
+                return ['LimitBlankPasswordUse'];
+            },
+            'fetch_registry_value' => function (string $entry, string $key) {
+                return null;
+            },
+        ];
+        $this->assertFalse(OssecRulesParser::evaluate($ctx, $rule));
     }
 }

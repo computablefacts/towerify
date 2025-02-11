@@ -64,7 +64,7 @@ class OssecRulesParser
                 return true;
             }
         }
-        return true;
+        return $matchType === 'all' || $matchType === 'none';
     }
 
     public static function parse(string $text): array
@@ -270,7 +270,7 @@ class OssecRulesParser
                 })
                 ->isNotEmpty(),
 
-            default => [],
+            default => throw new \Exception("Invalid rule type: {$rule['type']}"),
         };
     }
 
