@@ -14,7 +14,7 @@ class ExampleTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/tcb/web/the-cyber-brief?lang=fr')
-                ->assertSee('FR');
+            ->assertSee('All clear—no briefs today!');
         });
     }
 }
