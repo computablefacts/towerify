@@ -865,6 +865,25 @@ class CyberBuddyController extends Controller
         ]);
     }
 
+    public function promptToAwsTablesQuery(Request $request)
+    {
+        $this->validate($request, [
+            'prompt' => 'required|string|min:1|max:5000',
+        ]);
+
+        $user = Auth::user();
+        $prompt = $request->input('prompt');
+        $query = ClickhouseUtils::promptToQuery(Table::where('created_by', $user->id)->get(), $prompt);
+
+        if (empty($query)) {
+            return response()->json(['error' => 'The query generation has failed.']);
+        }
+        return response()->json([
+            'success' => 'The query generation has succeeded.',
+            'result' => $query,
+        ]);
+    }
+
     public function handle(): void
     {
         $botman = app('botman');

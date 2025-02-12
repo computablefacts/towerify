@@ -2,6 +2,9 @@
 
 namespace App\Modules\CyberBuddy\Helpers;
 
+use App\Modules\CyberBuddy\Models\Table;
+use App\Modules\TheCyberBrief\Helpers\OpenAi;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class ClickhouseUtils
@@ -19,5 +22,26 @@ class ClickhouseUtils
     public static function normalizeColumnName(string $name): string
     {
         return Str::upper(Str::replace([' '], '_', $name));
+    }
+
+    public static function promptToQuery(Collection $tables, string $question): string
+    {
+        $schema = $tables->map(function (Table $table) {
+            $columns = collect($table->schema)->map(function ($column) {
+                return "- {$column['new_name']} ({$column['type']})";
+            })->join("\n");
+            return "Table: {$table->name}\nDescription: {$table->description}\nColonnes:\n{$columns}";
+        })->join("\n\n");
+
+        $prompt = "En utilisant le schéma de base de données suivant:
+            
+            {$schema}
+            
+            Génère une requête SQL ClickHouse pour répondre à la demande suivante: \"{$question}\".
+            Retourne uniquement la requête SQL, sans markdown et sans explications.
+        ";
+
+        $response = OpenAi::summarize($prompt);
+        return $response['choices'][0]['message']['content'] ?? '';
     }
 }

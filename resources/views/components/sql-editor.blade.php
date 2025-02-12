@@ -1,5 +1,18 @@
 <div class="row mt-2">
   <div class="col">
+    <textarea id="prompt"
+              class="form-control mt-2"
+              rows="4"
+              placeholder="{{ __('Please provide a detailed prompt to generate a draft SQL query.') }}"></textarea>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col text-center">
+    <button id="prompt-to-query" class="btn btn-primary">{{ __('Generate!') }}</button>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col">
     <div id="editor" style="height:300px;width:100%;"></div>
   </div>
 </div>
@@ -80,6 +93,24 @@
     .catch(error => toaster.toastAxiosError(error));
   });
 
+  const elPromptToQuery = document.getElementById('prompt-to-query');
+  elPromptToQuery.addEventListener('click', (event) => {
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const prompt = document.getElementById('prompt').value;
+
+    axios.post(`/cb/web/aws/tables/prompt-to-query`, {prompt: prompt}).then(response => {
+      if (response.data.success && response.data.result) {
+        editor.setValue(response.data.result);
+      } else {
+        console.log(response.data);
+      }
+    })
+    .catch(error => toaster.toastAxiosError(error));
+  });
+
   const elExecuteSqlQuery = document.getElementById('execute-sql-query');
   elExecuteSqlQuery.addEventListener('click', (event) => {
 
@@ -101,7 +132,7 @@
         `;
         if (response.data.result.length === 1) {
           elTableBody.innerHTML = `<tr><td colspan='${response.data.result[0].length}'>{{ __('No results found.') }}</td></tr>`;
-        }else {
+        } else {
           elTableBody.innerHTML = response.data.result.slice(1)
           .map(row => `<tr>${row.map(column => `<td>${column}</td>`).join('')}</tr>`)
           .join('');

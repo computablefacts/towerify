@@ -205,6 +205,7 @@
   "Please confirm your password before continuing.": "Veuillez confirmer votre mot de passe avant de continuer.",
   "Please, only use uppercase/lowercase letters and digits for your password.": "Merci de n'utiliser que des lettres majuscules/minuscules et chiffres pour votre mot de passe.",
   "Please provide a detailed description of the table and explain the significance of the key columns. The more information you include, the better.": "Veuillez fournir une description détaillée de la table et expliquer la signification des colonnes principales. Plus vous incluez d'informations, mieux ce sera.",
+  "Please provide a detailed prompt to generate a draft SQL query.": "Veuillez fournir des instructions détaillées pour générer un brouillon de requête SQL.",
   "Policies": "Politiques",
   "Previous": "Page précédente",
   "Price": "Prix",

@@ -58,4 +58,5 @@ Route::group([
     Route::post('/import', 'CyberBuddyController@importAwsTables')->name('import-aws-tables');
     Route::get('/available', 'CyberBuddyController@availableAwsTables')->name('available-aws-tables');
     Route::post('/query', 'CyberBuddyController@queryAwsTables')->name('query-aws-tables');
+    Route::post('/prompt-to-query', 'CyberBuddyController@promptToAwsTablesQuery')->name('prompt-to-aws-tables-query');
 })->middleware(['auth']);
