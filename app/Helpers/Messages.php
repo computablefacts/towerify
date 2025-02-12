@@ -400,7 +400,7 @@ class Messages
             ->map(function (YnhOsquery $event) {
                 if ($event->isAdded()) {
                     $msg = "Les privilèges du binaire {$event->columns['path']} ont été élevés.";
-                    return self::messageEx($event->id, $event->calendar_time, $event->server()->name, $event->server()->ip_address, self::SUID_BIN, self::SUID_BIN, $msg);
+                    return self::messageEx($event->id, $event->calendar_time, $event->server()->first()->name, $event->server()->first()->ip_address, self::SUID_BIN, self::SUID_BIN, $msg);
                 }
                 return [];
             })
@@ -417,7 +417,7 @@ class Messages
             ->map(function (YnhOsquery $event) {
                 if ($event->isAdded()) {
                     $msg = "Le binaire {$event->columns['value']} a été ajouté à la variable d'environnement LD_PRELOAD.";
-                    return self::messageEx($event->id, $event->calendar_time, $event->server()->name, $event->server()->ip_address, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
+                    return self::messageEx($event->id, $event->calendar_time, $event->server()->first()->name, $event->server()->first()->ip_address, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
                 }
                 return [];
             })
@@ -434,11 +434,11 @@ class Messages
             ->map(function (YnhOsquery $event) {
                 if ($event->isAdded()) {
                     $msg = "Le module {$event->columns['name']} a été ajouté au noyau.";
-                    return self::messageEx($event->id, $event->calendar_time, $event->server()->name, $event->server()->ip_address, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
+                    return self::messageEx($event->id, $event->calendar_time, $event->server()->first()->name, $event->server()->first()->ip_address, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
                 }
                 if ($event->isRemoved()) {
                     $msg = "Le module {$event->columns['name']} a été enlevé du noyau.";
-                    return self::messageEx($event->id, $event->calendar_time, $event->server()->name, $event->server()->ip_address, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
+                    return self::messageEx($event->id, $event->calendar_time, $event->server()->first()->name, $event->server()->first()->ip_address, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
                 }
                 return [];
             })
