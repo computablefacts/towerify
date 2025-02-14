@@ -477,145 +477,145 @@ class DatabaseSeeder extends Seeder
 
     private function cisWin10(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win10_enterprise.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/windows/cis_win10_enterprise.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisWin11(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win11_enterprise.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/windows/cis_win11_enterprise.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisWin2016(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win2016.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/windows/cis_win2016.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisWin2019(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win2019.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/windows/cis_win2019.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisWin2022(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/windows/cis_win2022.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/windows/cis_win2022.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisDebian7(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian7.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/debian/cis_debian7.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisDebian8(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian8.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/debian/cis_debian8.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisDebian9(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian9.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/debian/cis_debian9.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisDebian10(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian10.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/debian/cis_debian10.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisDebian11(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian11.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/debian/cis_debian11.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisDebian12(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/debian/cis_debian12.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/debian/cis_debian12.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisUbuntu1404(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu14_04.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/ubuntu/cis_ubuntu14_04.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisUbuntu1604(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu16_04.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/ubuntu/cis_ubuntu16_04.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisUbuntu1804(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu18_04.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/ubuntu/cis_ubuntu18_04.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisUbuntu2004(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu20_04.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/ubuntu/cis_ubuntu20_04.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisUbuntu2204(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/ubuntu/cis_ubuntu22_04.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/ubuntu/cis_ubuntu22_04.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisCentOs6(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/centos/6/cis_centos6_linux.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/centos/6/cis_centos6_linux.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisCentOs7(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/centos/7/cis_centos7_linux.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/centos/7/cis_centos7_linux.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisCentOs8(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/centos/8/cis_centos8_linux.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/centos/8/cis_centos8_linux.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisUnixAudit(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/generic/sca_unix_audit.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/generic/sca_unix_audit.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisNginx(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/nginx/cis_nginx_1.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/nginx/cis_nginx_1.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisApache(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/applications/cis_apache_24.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/applications/cis_apache_24.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisIis(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/applications/cis_iis_10.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/applications/cis_iis_10.yml');
         return Yaml::parse($yaml);
     }
 
     private function cisWeb(): array
     {
-        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/master/etc/ruleset/sca/applications/web_vulnerabilities.yml');
+        $yaml = file_get_contents('https://raw.githubusercontent.com/wazuh/wazuh-agent/refs/heads/main/etc/ruleset/sca/applications/web_vulnerabilities.yml');
         return Yaml::parse($yaml);
     }
 }
