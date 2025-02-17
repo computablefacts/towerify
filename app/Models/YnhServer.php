@@ -767,6 +767,7 @@ EOT;
                     'ynh_server_id' => $this->id,
                     'name' => $event['name'],
                     'host_identifier' => $event['hostIdentifier'],
+                    'calendar_time' => $calendarTime,
                     'unix_time' => $event['unixTime'],
                     'epoch' => $event['epoch'],
                     'counter' => $event['counter'],
