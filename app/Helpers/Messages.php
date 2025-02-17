@@ -6,6 +6,7 @@ use App\Models\VAuthorizedKey;
 use App\Models\VEtcHost;
 use App\Models\VEtcService;
 use App\Models\VGroup;
+use App\Models\VLdPreload;
 use App\Models\VLoginAndLogout;
 use App\Models\VNetworkInterface;
 use App\Models\VPackage;
@@ -410,19 +411,22 @@ class Messages
 
     public static function ldPreload(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return YnhOsquery::where('calendar_time', '>=', $cutOffTime)
-            ->whereIn('ynh_server_id', $servers->pluck('id'))
-            ->where('name', 'ld_preload')
+        return VLdPreload::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
             ->get()
-            ->map(function (YnhOsquery $event) {
+            ->map(function (VLdPreload $event) {
                 if ($event->isAdded()) {
-                    $msg = "Le binaire {$event->columns['value']} a été ajouté à la variable d'environnement LD_PRELOAD.";
-                    return self::messageEx($event->id, $event->calendar_time, $event->server()->first()->name, $event->server()->first()->ip_address, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
+                    $msg = "Le binaire {$event->program} a été ajouté à la variable d'environnement LD_PRELOAD.";
+                    return self::message($event, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
+                }
+                if ($event->isRemoved()) {
+                    $msg = "Le binaire {$event->program} a été enlevé de la variable d'environnement LD_PRELOAD.";
+                    return self::message($event, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
                 }
                 return [];
             })
-            ->filter(fn(array $event) => count($event) >= 1)
-            ->sortByDesc('timestamp');
+            ->filter(fn(array $event) => count($event) >= 1);
     }
 
     public static function kernelModules(Collection $servers, Carbon $cutOffTime): Collection
