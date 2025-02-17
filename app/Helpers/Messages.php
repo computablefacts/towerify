@@ -59,20 +59,38 @@ class Messages
     const string USERS = 'Users';
     const string GROUPS = 'Groups';
 
-    public static function get(Collection $servers, Carbon $cutOffTime): Collection
+    public static function get(Collection $servers, Carbon $cutOffTime, array $categories = [
+        self::PROCESSES_AND_BACKGROUND_TASKS,
+        self::SHELL_HISTORY_AND_ROOT_COMMANDS,
+        self::CONNECTIONS_AND_SOCKET_EVENTS,
+        self::AUTHENTICATION_AND_SSH_ACTIVITY,
+        self::PORTS_AND_INTERFACES,
+        self::SERVICES_AND_SCHEDULED_TASKS,
+        self::USERS_AND_GROUPS,
+        self::PACKAGES,
+        self::SUID_BIN,
+        self::LD_PRELOAD,
+        self::KERNEL_MODULES,
+    ]): Collection
     {
-        return self::authenticationAndSshActivity($servers, $cutOffTime)
-            // ->concat(self::shellHistoryAndRootCommands($servers, $cutOffTime))
-            // ->concat(self::connectionsAndSocketEvents($servers, $cutOffTime))
-            // ->concat(self::processesAndBackgroundTasks($servers, $cutOffTime))
-            // ->concat(self::portsAndInterfaces($servers, $cutOffTime))
-            ->concat(self::servicesAndScheduledTasks($servers, $cutOffTime))
-            ->concat(self::usersAndGroups($servers, $cutOffTime))
-            ->concat(self::packages($servers, $cutOffTime))
-            ->concat(self::suidBin($servers, $cutOffTime))
-            ->concat(self::ldPreload($servers, $cutOffTime))
-            ->concat(self::kernelModules($servers, $cutOffTime))
-            ->filter(fn(array $event) => count($event) >= 1)
+        $messages = collect();
+        foreach ($categories as $category) {
+            match ($category) {
+                self::PROCESSES_AND_BACKGROUND_TASKS => $messages = $messages->concat(self::processesAndBackgroundTasks($servers, $cutOffTime)),
+                self::SHELL_HISTORY_AND_ROOT_COMMANDS => $messages = $messages->concat(self::shellHistoryAndRootCommands($servers, $cutOffTime)),
+                self::CONNECTIONS_AND_SOCKET_EVENTS => $messages = $messages->concat(self::connectionsAndSocketEvents($servers, $cutOffTime)),
+                self::AUTHENTICATION_AND_SSH_ACTIVITY => $messages = $messages->concat(self::authenticationAndSshActivity($servers, $cutOffTime)),
+                self::PORTS_AND_INTERFACES => $messages = $messages->concat(self::portsAndInterfaces($servers, $cutOffTime)),
+                self::SERVICES_AND_SCHEDULED_TASKS => $messages = $messages->concat(self::servicesAndScheduledTasks($servers, $cutOffTime)),
+                self::USERS_AND_GROUPS => $messages = $messages->concat(self::usersAndGroups($servers, $cutOffTime)),
+                self::PACKAGES => $messages = $messages->concat(self::packages($servers, $cutOffTime)),
+                self::SUID_BIN => $messages = $messages->concat(self::suidBin($servers, $cutOffTime)),
+                self::LD_PRELOAD => $messages = $messages->concat(self::ldPreload($servers, $cutOffTime)),
+                self::KERNEL_MODULES => $messages = $messages->concat(self::kernelModules($servers, $cutOffTime)),
+                default => throw new \Exception("Unknown category: $category"),
+            };
+        }
+        return $messages->filter(fn(array $event) => count($event) >= 1)
             ->sortByDesc('timestamp')
             ->values();
     }
