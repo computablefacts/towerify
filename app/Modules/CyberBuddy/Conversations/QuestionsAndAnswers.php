@@ -42,6 +42,7 @@ class QuestionsAndAnswers extends Conversation
 
     private function answerQuestion(string $question): void
     {
+        $question = htmlspecialchars($question, ENT_QUOTES, 'UTF-8');
         $response = ApiUtils::chat_manual_demo($this->historyKey, null, $question);
         if ($response['error']) {
             $this->say('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');

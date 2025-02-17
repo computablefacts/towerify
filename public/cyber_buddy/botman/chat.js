@@ -1525,6 +1525,13 @@
       var e = t.message, n = e.attachment, o = {
         __html: e.text
       };
+      // ========== HACK : FIX XSS / BEGIN ==========
+      if (e && e.from === 'visitor' && e.type === 'text' && e.visible === true) {
+        const elDivTmp = document.createElement("div");
+        elDivTmp.innerText = e.text;
+        o.__html = elDivTmp.innerHTML;
+      }
+      // ========== HACK : FIX XSS / END ==========
       return Object(r.b)("div", null, Object(r.b)("p", {
         dangerouslySetInnerHTML: o
       }), n && "image" === n.type ? Object(r.b)("img", {
