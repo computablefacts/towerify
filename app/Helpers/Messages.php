@@ -17,6 +17,7 @@ use App\Models\VProcessWithOpenNetworkSockets;
 use App\Models\VScheduledTask;
 use App\Models\VService;
 use App\Models\VShellHistory;
+use App\Models\VSuidBinary;
 use App\Models\VUserAccount;
 use App\Models\VUserSshKey;
 use App\Models\YnhCve;
@@ -395,19 +396,22 @@ class Messages
 
     public static function suidBin(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return YnhOsquery::where('calendar_time', '>=', $cutOffTime)
-            ->whereIn('ynh_server_id', $servers->pluck('id'))
-            ->where('name', 'suid_bin')
+        return VSuidBinary::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
             ->get()
-            ->map(function (YnhOsquery $event) {
+            ->map(function (VSuidBinary $event) {
                 if ($event->isAdded()) {
-                    $msg = "Les privilèges du binaire {$event->columns['path']} ont été élevés.";
-                    return self::messageEx($event->id, $event->calendar_time, $event->server()->first()->name, $event->server()->first()->ip_address, self::SUID_BIN, self::SUID_BIN, $msg);
+                    $msg = "Les privilèges du binaire {$event->program} ont été élevés.";
+                    return self::message($event, self::SUID_BIN, self::SUID_BIN, $msg);
+                }
+                if ($event->isRemoved()) {
+                    $msg = "Les privilèges du binaire {$event->program} ont été abaissés.";
+                    return self::message($event, self::SUID_BIN, self::SUID_BIN, $msg);
                 }
                 return [];
             })
-            ->filter(fn(array $event) => count($event) >= 1)
-            ->sortByDesc('timestamp');
+            ->filter(fn(array $event) => count($event) >= 1);
     }
 
     public static function ldPreload(Collection $servers, Carbon $cutOffTime): Collection
