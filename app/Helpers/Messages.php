@@ -6,6 +6,7 @@ use App\Models\VAuthorizedKey;
 use App\Models\VEtcHost;
 use App\Models\VEtcService;
 use App\Models\VGroup;
+use App\Models\VKernelModule;
 use App\Models\VLdPreload;
 use App\Models\VLoginAndLogout;
 use App\Models\VNetworkInterface;
@@ -431,23 +432,22 @@ class Messages
 
     public static function kernelModules(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return YnhOsquery::where('calendar_time', '>=', $cutOffTime)
-            ->whereIn('ynh_server_id', $servers->pluck('id'))
-            ->where('name', 'kernel_modules')
+        return VKernelModule::where('timestamp', '>=', $cutOffTime)
+            ->whereIn('server_id', $servers->pluck('id'))
+            ->orderBy('timestamp', 'desc')
             ->get()
-            ->map(function (YnhOsquery $event) {
+            ->map(function (VKernelModule $event) {
                 if ($event->isAdded()) {
-                    $msg = "Le module {$event->columns['name']} a été ajouté au noyau.";
-                    return self::messageEx($event->id, $event->calendar_time, $event->server()->first()->name, $event->server()->first()->ip_address, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
+                    $msg = "Le module {$event->name} a été ajouté au noyau.";
+                    return self::message($event, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
                 }
                 if ($event->isRemoved()) {
-                    $msg = "Le module {$event->columns['name']} a été enlevé du noyau.";
-                    return self::messageEx($event->id, $event->calendar_time, $event->server()->first()->name, $event->server()->first()->ip_address, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
+                    $msg = "Le module {$event->name} a été enlevé du noyau.";
+                    return self::message($event, self::KERNEL_MODULES, self::KERNEL_MODULES, $msg);
                 }
                 return [];
             })
-            ->filter(fn(array $event) => count($event) >= 1)
-            ->sortByDesc('timestamp');
+            ->filter(fn(array $event) => count($event) >= 1);
     }
 
     private static function message(Model $event, string $category, string $subcategory, string $message): array
