@@ -113,8 +113,15 @@ class YnhOssecCheck extends Model
     public function getTestOssecRuleWindowsScript(): string
     {
         return OssecRuleWindowsTestScript::begin() . "\n" .
-            json_encode($this->requirements) . "\n" .
+            json_encode(array_merge($this->requirements, ['cywise_link' => $this->getCywiseLink()])) . "\n" .
             OssecRuleWindowsTestScript::end();
+    }
+
+    public function getCywiseLink(): string
+    {
+        return app_url() . "/home?tab=sca"
+            . "&policy=" . $this->policy->uid
+            . "&check=" . $this->uid;
     }
 
 }

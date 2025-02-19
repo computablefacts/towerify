@@ -8,6 +8,13 @@ class OssecRuleWindowsTestScript
     public static function begin(): string
     {
         return <<<EOF
+if (\$PSVersionTable.PSVersion.Major -lt 6) {
+    Write-Host "Ce script doit être exécuté avec PowerShell 6 ou supérieur." -ForegroundColor Yellow
+    Write-Host "Suivez ce lien vers la documentation officielle pour installer la dernière version de PowerShell :"
+    Write-Host "  https://learn.microsoft.com/fr-fr/powershell/scripting/install/installing-powershell-on-windows#msi"
+    exit 1
+}
+ 
 function DirectoryExists {
   param (
     [string]\$directoryPath
@@ -50,7 +57,7 @@ function FetchFile {
   }
 }
 
-function Invoke-Command {
+function InvokeRuleCommand {
   param(
       [string]\$command
   )
@@ -59,12 +66,38 @@ function Invoke-Command {
   return \$output -split "`n"
 }
 
+function Convert-RegistryKey {
+  param (
+      [string]\$Key
+  )
+
+  # Dictionnaire des remplacements
+  \$replacements = @{
+      "HKEY_LOCAL_MACHINE\" = "HKLM:\"
+      "HKEY_CURRENT_USER\" = "HKCU:\"
+      "HKEY_CLASSES_ROOT\" = "HKCR:\"
+      "HKEY_USERS\" = "HKU:\"
+      "HKEY_CURRENT_CONFIG\" = "HKCC:\"
+  }
+
+  foreach (\$fullKey in \$replacements.Keys) {
+      if (\$Key -like "\$fullKey*") {
+          return \$Key -replace [regex]::Escape(\$fullKey), \$replacements[\$fullKey]
+      }
+  }
+
+  # Retourner la clé inchangée si aucun remplacement n'est trouvé
+  return \$Key
+}
+
 function RegistryEntryExists {
   param (
     [string]\$registryPath
   )
 
-  return Test-Path -Path \$registryPath
+  \$convertedPath = Convert-RegistryKey -Key \$registryPath
+
+  return Test-Path -Path \$convertedPath
 }
 
 function FetchRegistryKeys {
@@ -95,24 +128,46 @@ function FetchRegistryValue {
   }
 }
 
-# Déclaration des constantes de couleur ANSI en lecture seule
-Set-Variable -Name "ANSI_BLACK" -Value "`e[30m" -Option ReadOnly
-Set-Variable -Name "ANSI_RED" -Value "`e[31m" -Option ReadOnly
-Set-Variable -Name "ANSI_GREEN" -Value "`e[32m" -Option ReadOnly
-Set-Variable -Name "ANSI_YELLOW" -Value "`e[33m" -Option ReadOnly
-Set-Variable -Name "ANSI_BLUE" -Value "`e[34m" -Option ReadOnly
-Set-Variable -Name "ANSI_MAGENTA" -Value "`e[35m" -Option ReadOnly
-Set-Variable -Name "ANSI_CYAN" -Value "`e[36m" -Option ReadOnly
-Set-Variable -Name "ANSI_WHITE" -Value "`e[37m" -Option ReadOnly
-Set-Variable -Name "ANSI_BRIGHT_BLACK" -Value "`e[90m" -Option ReadOnly
-Set-Variable -Name "ANSI_BRIGHT_RED" -Value "`e[91m" -Option ReadOnly
-Set-Variable -Name "ANSI_BRIGHT_GREEN" -Value "`e[92m" -Option ReadOnly
-Set-Variable -Name "ANSI_BRIGHT_YELLOW" -Value "`e[93m" -Option ReadOnly
-Set-Variable -Name "ANSI_BRIGHT_BLUE" -Value "`e[94m" -Option ReadOnly
-Set-Variable -Name "ANSI_BRIGHT_MAGENTA" -Value "`e[95m" -Option ReadOnly
-Set-Variable -Name "ANSI_BRIGHT_CYAN" -Value "`e[96m" -Option ReadOnly
-Set-Variable -Name "ANSI_BRIGHT_WHITE" -Value "`e[97m" -Option ReadOnly
-Set-Variable -Name "ANSI_RESET" -Value "`e[0m" -Option ReadOnly
+# Définition des constantes de couleur ANSI
+\$ansiVariables = @(
+  @{ Name = "ANSI_BLACK"; Value = "`e[30m" },
+  @{ Name = "ANSI_RED"; Value = "`e[31m" },
+  @{ Name = "ANSI_GREEN"; Value = "`e[32m" },
+  @{ Name = "ANSI_YELLOW"; Value = "`e[33m" },
+  @{ Name = "ANSI_BLUE"; Value = "`e[34m" },
+  @{ Name = "ANSI_MAGENTA"; Value = "`e[35m" },
+  @{ Name = "ANSI_CYAN"; Value = "`e[36m" },
+  @{ Name = "ANSI_WHITE"; Value = "`e[37m" },
+  @{ Name = "ANSI_BRIGHT_BLACK"; Value = "`e[90m" },
+  @{ Name = "ANSI_BRIGHT_RED"; Value = "`e[91m" },
+  @{ Name = "ANSI_BRIGHT_GREEN"; Value = "`e[92m" },
+  @{ Name = "ANSI_BRIGHT_YELLOW"; Value = "`e[93m" },
+  @{ Name = "ANSI_BRIGHT_BLUE"; Value = "`e[94m" },
+  @{ Name = "ANSI_BRIGHT_MAGENTA"; Value = "`e[95m" },
+  @{ Name = "ANSI_BRIGHT_CYAN"; Value = "`e[96m" },
+  @{ Name = "ANSI_BRIGHT_WHITE"; Value = "`e[97m" },
+  @{ Name = "ANSI_RESET"; Value = "`e[0m" }
+)
+
+# Fonction pour réinitialiser les variables ANSI
+function New-AnsiColorConstants {
+  param (
+    [Array]\$Variables
+  )
+
+  foreach (\$var in \$Variables) {
+    # Supprime la variable
+    if (Get-Variable -Name \$var.Name -ErrorAction SilentlyContinue | Out-Null) {
+      Remove-Variable -Name \$var.Name -Force
+    }
+
+    # Crée la variable avec l'option ReadOnly
+    Set-Variable -Name \$var.Name -Value \$var.Value -Option ReadOnly
+  }
+}
+
+# Appel de la fonction pour créer les constantes ANSI
+New-AnsiColorConstants -Variables \$ansiVariables
 
 function Show-RuleResult {
   param (
@@ -125,6 +180,10 @@ function Show-RuleResult {
   }
   else {
     Write-Output "\${ANSI_BRIGHT_RED}✘ \$(\$rule['rule_name'])\${ANSI_RESET}"
+  }
+
+  if (\$rule.ContainsKey('cywise_link')) {
+    Write-Output "  Plus d'information : \$(\$rule['cywise_link'])"
   }
 }
 
@@ -184,7 +243,7 @@ function Evaluate {
       return \$true
     }
   }
-  return \$true
+  return (\$matchType -eq 'all') -or (\$matchType -eq 'none')
 }
 
 function Match {
@@ -196,41 +255,42 @@ function Match {
   switch (\$rule['type']) {
     'file' {
       return (\$rule['files'] | Where-Object { \$ctx['file_exists'].Invoke(\$_) } | Where-Object {
-          if (-not (\$rule.ContainsKey('expr') -and \$null -ne \$rule['expr'])) {
-            return \$true
+          if (-not (\$rule.ContainsKey('expr') -and \$null -ne \$rule['expr'])) { 
+            return \$true 
           }
         (\$ctx['fetch_file'].Invoke(\$_) | Where-Object { MatchExpression \$_ \$rule['expr'] } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
         } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
     }
     'directory' {
       return (\$rule['directories'] | Where-Object { \$ctx['directory_exists'].Invoke(\$_) } | Where-Object {
-          if (-not (\$rule.ContainsKey('files') -and \$null -ne \$rule['files'])) {
-            return \$true
+          if (-not (\$rule.ContainsKey('files') -and \$null -ne \$rule['files'])) { 
+            return \$true 
           }
         (\$ctx['list_files'].Invoke(\$_) | Where-Object { MatchPattern \$_ \$rule['files'] } | Where-Object {
-            if (-not (\$rule.ContainsKey('expr') -and \$null -ne \$rule['expr'])) {
-              return \$true
-            }
+            if (-not (\$rule.ContainsKey('expr') -and \$null -ne \$rule['expr'])) { 
+              return \$true 
+            }  
           (\$ctx['fetch_file'].Invoke(\$_) | Where-Object { MatchExpression \$_ \$rule['expr'] } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
           } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
         } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
     }
     'registry' {
       return (@(\$rule['entry']) | Where-Object { \$ctx['registry_entry_exists'].Invoke(\$_) } | Where-Object {
-          if (-not (\$rule.ContainsKey('key') -and \$null -ne \$rule['key'])) {
-            return \$true
+          \$entry = \$_
+          if (-not \$rule.ContainsKey('key') -or \$null -eq \$rule['key']) { 
+            return \$true 
           }
         (\$ctx['fetch_registry_keys'].Invoke(\$_) | Where-Object { MatchPattern \$_ \$rule['key'] } | Where-Object {
-            if (-not (\$rule.ContainsKey('expr') -and \$null -ne \$rule['expr'])) {
-              return \$true
+            if (-not \$rule.ContainsKey('expr') -or \$null -eq \$rule['expr']) { 
+              return \$true 
             }
-          (\$ctx['fetch_registry_value'].Invoke(\$_, \$_) | Where-Object { MatchExpression \$_ \$rule['expr'] } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
+          (\$ctx['fetch_registry_value'].Invoke(\$entry, \$_) | Where-Object { MatchExpression \$_ \$rule['expr'] } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
           } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
         } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
     }
     'command' {
-      return (@(\$rule['entry']) | Where-Object {
-          if (-not (\$rule.ContainsKey('expr') -and \$null -ne \$rule['expr'])) {
+      return (@(\$rule['cmd']) | Where-Object {
+          if (-not \$rule.ContainsKey('expr') -or \$null -eq \$rule['expr']) { 
             return \$true
           }
         (\$ctx['execute'].Invoke(\$_) | Where-Object { MatchExpression \$_ \$rule['expr'] } | Measure-Object | Select-Object -ExpandProperty Count) -gt 0
@@ -280,36 +340,43 @@ function MatchPattern {
     return [regex]::IsMatch(\$value, \$pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
   }
 
+
+  # TODO: Add tests for these 3 operators
   # Simple comparisons
-  if (\$pattern.StartsWith('<:')) {
-    \$pattern = \$pattern.Substring(2)
-    return if (\$negate) { \$pattern -ge \$value } else { \$pattern -lt \$value }
-  }
-  if (\$pattern.StartsWith('>:')) {
-    \$pattern = \$pattern.Substring(2)
-    return if (\$negate) { \$pattern -le \$value } else { \$pattern -gt \$value }
-  }
-  if (\$pattern.StartsWith('=:')) {
-    \$pattern = \$pattern.Substring(2)
-    return if (\$negate) { \$pattern -ne \$value } else { \$pattern -eq \$value }
-  }
+  # Values can be preceded by:
+  #  - =: (for equal) - default
+  #  - >: (for strcmp greater)
+  #  - <: (for strcmp  lower)
+  # if (\$pattern.StartsWith('<:')) {
+  #   \$pattern = \$pattern.Substring(2)
+  #   return if (\$negate) { \$pattern -ge \$value } else { \$pattern -lt \$value }
+  # }
+  # if (\$pattern.StartsWith('>:')) {
+  #   \$pattern = \$pattern.Substring(2)
+  #   return if (\$negate) { \$pattern -le \$value } else { \$pattern -gt \$value }
+  # }
+  # if (\$pattern.StartsWith('=:')) {
+  #   \$pattern = \$pattern.Substring(2)
+  #   return if (\$negate) { \$pattern -ne \$value } else { \$pattern -eq \$value }
+  # }
 
   # Extract a specific sequence from the input string then compare this sequence against a given value
-  \$match_result = [regex]::Match(\$pattern, '^n:(.*)\s+compare\s+([><=]+)\s*(.*)\$', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+  \$match_result = [regex]::Match(\$pattern, '^n:(.*)\s+compare\s+([><=!]+)\s*(.*)\$', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
   if (\$match_result.Success) {
     \$pattern = \$match_result.Groups[1].Value.Trim()
     \$operator = \$match_result.Groups[2].Value.Trim()
-    \$compareValue = \$match_result.Groups[3].Value.Trim()
+    \$compareValue = [int]\$match_result.Groups[3].Value.Trim()
     \$match = [regex]::Match(\$value, \$pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     if (-not \$match.Success) {
       \$isOk = \$negate
     }
     else {
-      \$matchedValue = \$match.Groups[1].Value
+      \$matchedValue = [int]\$match.Groups[1].Value
       switch (\$operator) {
         '>' { \$isOk = if (\$negate) { \$matchedValue -le \$compareValue } else { \$matchedValue -gt \$compareValue } }
         '<' { \$isOk = if (\$negate) { \$matchedValue -ge \$compareValue } else { \$matchedValue -lt \$compareValue } }
         '=' { \$isOk = if (\$negate) { \$matchedValue -ne \$compareValue } else { \$matchedValue -eq \$compareValue } }
+        '==' { \$isOk = if (\$negate) { \$matchedValue -ne \$compareValue } else { \$matchedValue -eq \$compareValue } }
         '>=' { \$isOk = if (\$negate) { \$matchedValue -lt \$compareValue } else { \$matchedValue -ge \$compareValue } }
         '<=' { \$isOk = if (\$negate) { \$matchedValue -gt \$compareValue } else { \$matchedValue -le \$compareValue } }
         '!=' { \$isOk = if (\$negate) { \$matchedValue -eq \$compareValue } else { \$matchedValue -ne \$compareValue } }
@@ -323,7 +390,12 @@ function MatchPattern {
     return \$isOk
   }
 
-  return { if (\$negate) { \$value -ne \$pattern } else { \$value -eq \$pattern } }
+  if (\$negate) { 
+    return \$value -ne \$pattern 
+  }
+  else { 
+    return \$value -eq \$pattern 
+  } 
 }
 
 
@@ -333,16 +405,16 @@ function Test-RulesList {
     )
 
     \$ctx = @{
-        'file_exists'           = { FileExists }
-        'directory_exists'      = { DirectoryExists }
-        'registry_entry_exists' = { RegistryEntryExists }
-        'fetch_file'            = { FetchFile }
-        'list_files'            = { ListFiles }
-        'fetch_registry_keys'   = { FetchRegistryKeys }
-        'fetch_registry_value'  = { FetchRegistryValue }
-        'execute'               = { Execute }
+        'file_exists'           = { FileExists -filePath \$args[0] }
+        'directory_exists'      = { DirectoryExists -directoryPath \$args[0] }
+        'registry_entry_exists' = { RegistryEntryExists -registryPath \$args[0] }
+        'fetch_file'            = { FetchFile -file \$args[0] }
+        'list_files'            = { ListFiles -Path \$args[0] }
+        'fetch_registry_keys'   = { FetchRegistryKeys -entry \$args[0] }
+        'fetch_registry_value'  = { FetchRegistryValue -entry \$args[0] -propertyName \$args[1] }
+        'execute'               = { InvokeRuleCommand -command \$args[0] }
     }
-
+    
     \$failedCount = 0
     \$passedCount = 0
     foreach (\$rule in \$rulesList) {
