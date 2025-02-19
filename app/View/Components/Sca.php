@@ -53,9 +53,8 @@ class Sca extends Component
             ->filter(fn(YnhOssecCheck $check) => !$this->framework || in_array($framework, $check->frameworks()))
             ->sort(fn(YnhOssecCheck $check1, YnhOssecCheck $check2) => strcmp($check1->title, $check2->title));
 
-        // TODO: when a check fails, display a link to the check infos /home?tab=sca&policy=<policy.uid>&rule=<check.uid>
         $this->allChecksWindowsTestScript = OssecRuleWindowsTestScript::begin() . "\n" .
-            $this->checks->map(fn(YnhOssecCheck $check) => json_encode(array_merge($check->requirements, ['cywise_link' => $check->getCywiseLink()])) . "\n")->join("\n") .
+            $this->checks->map(fn(YnhOssecCheck $check) => json_encode(array_merge($check->requirements, ['cywise_link' => $check->getCywiseLink()])))->join("\n") . "\n" .
             OssecRuleWindowsTestScript::end();
     }
 

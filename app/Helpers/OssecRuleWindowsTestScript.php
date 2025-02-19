@@ -92,10 +92,10 @@ function Convert-RegistryKey {
 
 function RegistryEntryExists {
   param (
-    [string]\$registryPath
+    [string]\$entry
   )
 
-  \$convertedPath = Convert-RegistryKey -Key \$registryPath
+  \$convertedPath = Convert-RegistryKey -Key \$entry
 
   return Test-Path -Path \$convertedPath
 }
@@ -106,7 +106,8 @@ function FetchRegistryKeys {
   )
 
   try {
-    \$keys = (Get-Item -Path \$entry -ErrorAction Stop).Property
+    \$convertedPath = Convert-RegistryKey -Key \$entry
+    \$keys = (Get-Item -Path \$convertedPath -ErrorAction Stop).Property
     return \$keys
   }
   catch {
@@ -121,7 +122,8 @@ function FetchRegistryValue {
   )
   
   try {
-    Get-ItemPropertyValue -Path \$entry -Name \$propertyName -ErrorAction Stop
+    \$convertedPath = Convert-RegistryKey -Key \$entry
+    Get-ItemPropertyValue -Path \$convertedPath -Name \$propertyName -ErrorAction Stop
   }
   catch {
     throw \$_
@@ -129,45 +131,23 @@ function FetchRegistryValue {
 }
 
 # Définition des constantes de couleur ANSI
-\$ansiVariables = @(
-  @{ Name = "ANSI_BLACK"; Value = "`e[30m" },
-  @{ Name = "ANSI_RED"; Value = "`e[31m" },
-  @{ Name = "ANSI_GREEN"; Value = "`e[32m" },
-  @{ Name = "ANSI_YELLOW"; Value = "`e[33m" },
-  @{ Name = "ANSI_BLUE"; Value = "`e[34m" },
-  @{ Name = "ANSI_MAGENTA"; Value = "`e[35m" },
-  @{ Name = "ANSI_CYAN"; Value = "`e[36m" },
-  @{ Name = "ANSI_WHITE"; Value = "`e[37m" },
-  @{ Name = "ANSI_BRIGHT_BLACK"; Value = "`e[90m" },
-  @{ Name = "ANSI_BRIGHT_RED"; Value = "`e[91m" },
-  @{ Name = "ANSI_BRIGHT_GREEN"; Value = "`e[92m" },
-  @{ Name = "ANSI_BRIGHT_YELLOW"; Value = "`e[93m" },
-  @{ Name = "ANSI_BRIGHT_BLUE"; Value = "`e[94m" },
-  @{ Name = "ANSI_BRIGHT_MAGENTA"; Value = "`e[95m" },
-  @{ Name = "ANSI_BRIGHT_CYAN"; Value = "`e[96m" },
-  @{ Name = "ANSI_BRIGHT_WHITE"; Value = "`e[97m" },
-  @{ Name = "ANSI_RESET"; Value = "`e[0m" }
-)
-
-# Fonction pour réinitialiser les variables ANSI
-function New-AnsiColorConstants {
-  param (
-    [Array]\$Variables
-  )
-
-  foreach (\$var in \$Variables) {
-    # Supprime la variable
-    if (Get-Variable -Name \$var.Name -ErrorAction SilentlyContinue | Out-Null) {
-      Remove-Variable -Name \$var.Name -Force
-    }
-
-    # Crée la variable avec l'option ReadOnly
-    Set-Variable -Name \$var.Name -Value \$var.Value -Option ReadOnly
-  }
-}
-
-# Appel de la fonction pour créer les constantes ANSI
-New-AnsiColorConstants -Variables \$ansiVariables
+#\$ANSI_BLACK = "`e[30m"
+#\$ANSI_RED = "`e[31m"
+\$ANSI_GREEN = "`e[32m"
+\$ANSI_YELLOW = "`e[33m"
+#\$ANSI_BLUE = "`e[34m"
+#\$ANSI_MAGENTA = "`e[35m"
+#\$ANSI_CYAN = "`e[36m"
+#\$ANSI_WHITE = "`e[37m"
+#\$ANSI_BRIGHT_BLACK = "`e[90m"
+\$ANSI_BRIGHT_RED = "`e[91m"
+\$ANSI_BRIGHT_GREEN = "`e[92m"
+\$ANSI_BRIGHT_YELLOW = "`e[93m"
+#\$ANSI_BRIGHT_BLUE = "`e[94m"
+\$ANSI_BRIGHT_MAGENTA = "`e[95m"
+#\$ANSI_BRIGHT_CYAN = "`e[96m"
+#\$ANSI_BRIGHT_WHITE = "`e[97m"
+\$ANSI_RESET = "`e[0m"
 
 function Show-RuleResult {
   param (
@@ -407,7 +387,7 @@ function Test-RulesList {
     \$ctx = @{
         'file_exists'           = { FileExists -filePath \$args[0] }
         'directory_exists'      = { DirectoryExists -directoryPath \$args[0] }
-        'registry_entry_exists' = { RegistryEntryExists -registryPath \$args[0] }
+        'registry_entry_exists' = { RegistryEntryExists -entry \$args[0] }
         'fetch_file'            = { FetchFile -file \$args[0] }
         'list_files'            = { ListFiles -Path \$args[0] }
         'fetch_registry_keys'   = { FetchRegistryKeys -entry \$args[0] }
