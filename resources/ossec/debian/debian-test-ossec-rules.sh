@@ -44,7 +44,7 @@ function install_powershell {
 # See: https://learn.microsoft.com/en-us/powershell/scripting/install/install-debian?view=powershell-7.5#uninstall-powershell
 ###################################
 function uninstall_powershell {
-  sudo apt-get remove powershell
+  sudo apt-get remove -y powershell
 }
 
 # Check if pwsh is already installed
