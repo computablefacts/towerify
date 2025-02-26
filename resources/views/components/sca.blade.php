@@ -6,6 +6,20 @@
     background-color: #fff3cd;
   }
 
+  /* Style the tooltip */
+  a[tooltip]:hover:after {
+      content: attr(tooltip);
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      white-space: nowrap;
+  }
+
 </style>
 <div class="card">
   <div class="card-body">
@@ -29,22 +43,69 @@
     </div>
   </div>
 </div>
-@if($checks->isNotEmpty() && $policies->filter(fn($p) => $p->uid === $policy && $p->isWindows())->first())
-<div class="row mt-3">
-  <div class="col text-end">
-    <a href="data:text/plain;charset=utf-8,{{ rawurlencode($allChecksWindowsTestScript) }}"
-       download="Test-OssecRules.ps1">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-        <path
-          d="M17.8 20l-12 -1.5c-1 -.1 -1.8 -.9 -1.8 -1.9v-9.2c0 -1 .8 -1.8 1.8 -1.9l12 -1.5c1.2 -.1 2.2 .8 2.2 1.9v12.1c0 1.2 -1.1 2.1 -2.2 1.9z"/>
-        <path d="M12 5l0 14"/>
-        <path d="M4 12l16 0"/>
-      </svg>
-    </a>
+@if(\App\Helpers\OssecCheckScript::hasScript($checks))
+  <div class="row mt-3">
+    <div class="col text-end">
+      <b>{{ __('Script') }}</b>
+      @if(\App\Helpers\OssecCheckScript::hasScript($checks, \App\Helpers\OssecCheckScript::OS_WINDOWS))
+        <a href="data:text/plain;charset=utf-8,{{ rawurlencode(\App\Helpers\OssecCheckScript::generateScript($checks, \App\Helpers\OssecCheckScript::OS_WINDOWS)) }}"
+           download="{{\App\Helpers\OssecCheckScript::scriptName($checks, \App\Helpers\OssecCheckScript::OS_WINDOWS)}}"
+           tooltip="Windows">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path
+                d="M17.8 20l-12 -1.5c-1 -.1 -1.8 -.9 -1.8 -1.9v-9.2c0 -1 .8 -1.8 1.8 -1.9l12 -1.5c1.2 -.1 2.2 .8 2.2 1.9v12.1c0 1.2 -1.1 2.1 -2.2 1.9z"/>
+            <path d="M12 5l0 14"/>
+            <path d="M4 12l16 0"/>
+          </svg>
+        </a>
+      @endif
+      @if(\App\Helpers\OssecCheckScript::hasScript($checks, \App\Helpers\OssecCheckScript::OS_DEBIAN))
+        <a href="data:text/plain;charset=utf-8,{{ rawurlencode(\App\Helpers\OssecCheckScript::generateScript($checks, \App\Helpers\OssecCheckScript::OS_DEBIAN)) }}"
+           download="{{\App\Helpers\OssecCheckScript::scriptName($checks, \App\Helpers\OssecCheckScript::OS_DEBIAN)}}"
+           tooltip="Debian">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="icon icon-tabler icons-tabler-outline icon-tabler-brand-debian">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path
+                d="M12 17c-2.397 -.943 -4 -3.153 -4 -5.635c0 -2.19 1.039 -3.14 1.604 -3.595c2.646 -2.133 6.396 -.27 6.396 3.23c0 2.5 -2.905 2.121 -3.5 1.5c-.595 -.621 -1 -1.5 -.5 -2.5"/>
+            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+          </svg>
+        </a>
+      @endif
+      @if(\App\Helpers\OssecCheckScript::hasScript($checks, \App\Helpers\OssecCheckScript::OS_UBUNTU))
+        <a href="data:text/plain;charset=utf-8,{{ rawurlencode(\App\Helpers\OssecCheckScript::generateScript($checks, \App\Helpers\OssecCheckScript::OS_UBUNTU)) }}"
+           download="{{\App\Helpers\OssecCheckScript::scriptName($checks, \App\Helpers\OssecCheckScript::OS_UBUNTU)}}"
+           tooltip="Debian">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="icon icon-tabler icons-tabler-outline icon-tabler-brand-ubuntu">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M12 5m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+            <path
+                d="M17.723 7.41a7.992 7.992 0 0 0 -3.74 -2.162m-3.971 0a7.993 7.993 0 0 0 -3.789 2.216m-1.881 3.215a8 8 0 0 0 -.342 2.32c0 .738 .1 1.453 .287 2.132m1.96 3.428a7.993 7.993 0 0 0 3.759 2.19m4 0a7.993 7.993 0 0 0 3.747 -2.186m1.962 -3.43a8.008 8.008 0 0 0 .287 -2.131c0 -.764 -.107 -1.503 -.307 -2.203"/>
+            <path d="M5 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+            <path d="M19 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+          </svg>
+        </a>
+      @endif
+      @if(\App\Helpers\OssecCheckScript::hasScript($checks, \App\Helpers\OssecCheckScript::OS_CENTOS))
+        <a href="data:text/plain;charset=utf-8,{{ rawurlencode(\App\Helpers\OssecCheckScript::generateScript($checks, \App\Helpers\OssecCheckScript::OS_CENTOS)) }}"
+           download="{{\App\Helpers\OssecCheckScript::scriptName($checks, \App\Helpers\OssecCheckScript::OS_CENTOS)}}"
+           tooltip="Debian">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="icon icon-tabler icons-tabler-outline icon-tabler-script">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path
+                d="M17 20h-11a3 3 0 0 1 0 -6h11a3 3 0 0 0 0 6h1a3 3 0 0 0 3 -3v-11a2 2 0 0 0 -2 -2h-10a2 2 0 0 0 -2 2v8"/>
+          </svg>
+        </a>
+      @endif
+    </div>
   </div>
-</div>
 @endif
 @foreach($checks as $check)
 <div class="card mt-3">
@@ -158,26 +219,75 @@
         </div>
       </div>
     </div>
-    @if($check->policy->isWindows())
-    <div class="row mt-2">
-      <div class="col col-2 text-end">
-        <b>{{ __('Script') }}</b>
+    @if(\App\Helpers\OssecCheckScript::hasScript($check))
+      <div class="row mt-2">
+        <div class="col col-2 text-end">
+          <b>{{ __('Script') }}</b>
+        </div>
+        <div class="col">
+          @if(\App\Helpers\OssecCheckScript::hasScript($check, \App\Helpers\OssecCheckScript::OS_WINDOWS))
+            <a
+                href="data:text/plain;charset=utf-8,{{ rawurlencode(\App\Helpers\OssecCheckScript::generateScript($check, \App\Helpers\OssecCheckScript::OS_WINDOWS)) }}"
+                download="{{\App\Helpers\OssecCheckScript::scriptName($check, \App\Helpers\OssecCheckScript::OS_WINDOWS)}}"
+                tooltip="Windows">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path
+                    d="M17.8 20l-12 -1.5c-1 -.1 -1.8 -.9 -1.8 -1.9v-9.2c0 -1 .8 -1.8 1.8 -1.9l12 -1.5c1.2 -.1 2.2 .8 2.2 1.9v12.1c0 1.2 -1.1 2.1 -2.2 1.9z"/>
+                <path d="M12 5l0 14"/>
+                <path d="M4 12l16 0"/>
+              </svg>
+            </a>
+          @endif
+          @if(\App\Helpers\OssecCheckScript::hasScript($check, \App\Helpers\OssecCheckScript::OS_DEBIAN))
+            <a
+                href="data:text/plain;charset=utf-8,{{ rawurlencode(\App\Helpers\OssecCheckScript::generateScript($check, \App\Helpers\OssecCheckScript::OS_DEBIAN)) }}"
+                download="{{\App\Helpers\OssecCheckScript::scriptName($check, \App\Helpers\OssecCheckScript::OS_DEBIAN)}}"
+                tooltip="Debian">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   class="icon icon-tabler icons-tabler-outline icon-tabler-brand-debian">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path
+                    d="M12 17c-2.397 -.943 -4 -3.153 -4 -5.635c0 -2.19 1.039 -3.14 1.604 -3.595c2.646 -2.133 6.396 -.27 6.396 3.23c0 2.5 -2.905 2.121 -3.5 1.5c-.595 -.621 -1 -1.5 -.5 -2.5"/>
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+              </svg>
+            </a>
+          @endif
+          @if(\App\Helpers\OssecCheckScript::hasScript($check, \App\Helpers\OssecCheckScript::OS_UBUNTU))
+            <a
+                href="data:text/plain;charset=utf-8,{{ rawurlencode(\App\Helpers\OssecCheckScript::generateScript($check, \App\Helpers\OssecCheckScript::OS_UBUNTU)) }}"
+                download="{{\App\Helpers\OssecCheckScript::scriptName($check, \App\Helpers\OssecCheckScript::OS_UBUNTU)}}"
+                tooltip="Ubuntu">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   class="icon icon-tabler icons-tabler-outline icon-tabler-brand-ubuntu">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 5m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path
+                    d="M17.723 7.41a7.992 7.992 0 0 0 -3.74 -2.162m-3.971 0a7.993 7.993 0 0 0 -3.789 2.216m-1.881 3.215a8 8 0 0 0 -.342 2.32c0 .738 .1 1.453 .287 2.132m1.96 3.428a7.993 7.993 0 0 0 3.759 2.19m4 0a7.993 7.993 0 0 0 3.747 -2.186m1.962 -3.43a8.008 8.008 0 0 0 .287 -2.131c0 -.764 -.107 -1.503 -.307 -2.203"/>
+                <path d="M5 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+                <path d="M19 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/>
+              </svg>
+            </a>
+          @endif
+          @if(\App\Helpers\OssecCheckScript::hasScript($check, \App\Helpers\OssecCheckScript::OS_CENTOS))
+            <a
+                href="data:text/plain;charset=utf-8,{{ rawurlencode(\App\Helpers\OssecCheckScript::generateScript($check, \App\Helpers\OssecCheckScript::OS_CENTOS)) }}"
+                download="{{\App\Helpers\OssecCheckScript::scriptName($check, \App\Helpers\OssecCheckScript::OS_CENTOS)}}"
+                tooltip="CentOS">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   class="icon icon-tabler icons-tabler-outline icon-tabler-script">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path
+                    d="M17 20h-11a3 3 0 0 1 0 -6h11a3 3 0 0 0 0 6h1a3 3 0 0 0 3 -3v-11a2 2 0 0 0 -2 -2h-10a2 2 0 0 0 -2 2v8"/>
+              </svg>
+            </a>
+          @endif
+        </div>
       </div>
-      <div class="col">
-        <a
-          href="data:text/plain;charset=utf-8,{{ rawurlencode($check->getTestOssecRuleWindowsScript()) }}"
-          download="Test-OssecRule-{{ $check->id }}.ps1">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-            <path
-              d="M17.8 20l-12 -1.5c-1 -.1 -1.8 -.9 -1.8 -1.9v-9.2c0 -1 .8 -1.8 1.8 -1.9l12 -1.5c1.2 -.1 2.2 .8 2.2 1.9v12.1c0 1.2 -1.1 2.1 -2.2 1.9z"/>
-            <path d="M12 5l0 14"/>
-            <path d="M4 12l16 0"/>
-          </svg>
-        </a>
-      </div>
-    </div>
     @endif
   </div>
 </div>

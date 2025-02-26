@@ -2,7 +2,7 @@
 
 namespace App\View\Components;
 
-use App\Helpers\OssecRuleWindowsTestScript;
+use App\Helpers\OssecCheckScript;
 use App\Models\YnhOssecCheck;
 use App\Models\YnhOssecPolicy;
 use Closure;
@@ -19,7 +19,6 @@ class Sca extends Component
     public ?string $policy;
     public ?string $framework;
     public ?string $search;
-    public ?string $allChecksWindowsTestScript;
     public Collection $policies;
     public Collection $frameworks;
     public Collection $checks;
@@ -31,7 +30,7 @@ class Sca extends Component
         $this->framework = empty($framework) || $framework === 'null' ? null : $framework;
         $this->search = empty($search) || $search === 'null' ? null : $search;
         $this->policies = YnhOssecPolicy::select('id', 'uid', 'name')->orderBy('name')->get();
-        $checks = YnhOssecCheck::query();
+        $checks = YnhOssecCheck::query()->with('policy');
 
         if ($this->policy) {
             $checks = $checks->whereIn('ynh_ossec_policy_id', $this->policies->filter(fn(YnhOssecPolicy $p) => $p->uid === $this->policy)->pluck('id'));
@@ -52,10 +51,6 @@ class Sca extends Component
             ->get()
             ->filter(fn(YnhOssecCheck $check) => !$this->framework || in_array($framework, $check->frameworks()))
             ->sort(fn(YnhOssecCheck $check1, YnhOssecCheck $check2) => strcmp($check1->title, $check2->title));
-
-        $this->allChecksWindowsTestScript = OssecRuleWindowsTestScript::begin() . "\n" .
-            $this->checks->map(fn(YnhOssecCheck $check) => json_encode(array_merge($check->requirements, ['cywise_link' => $check->getCywiseLink()])))->join("\n") . "\n" .
-            OssecRuleWindowsTestScript::end();
     }
 
     public function render(): View|Closure|string

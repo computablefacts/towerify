@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Helpers\OssecRuleWindowsTestScript;
+use App\Helpers\OssecCheckScript;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -110,13 +110,6 @@ class YnhOssecCheck extends Model
             ->toArray();
     }
 
-    public function getTestOssecRuleWindowsScript(): string
-    {
-        return OssecRuleWindowsTestScript::begin() . "\n" .
-            json_encode(array_merge($this->requirements, ['cywise_link' => $this->getCywiseLink()])) . "\n" .
-            OssecRuleWindowsTestScript::end();
-    }
-
     public function getCywiseLink(): string
     {
         return app_url() . "/home?tab=sca"
@@ -124,4 +117,13 @@ class YnhOssecCheck extends Model
             . "&check=" . $this->uid;
     }
 
+    public function requirementsWithCywiseLink(): array
+    {
+        return array_merge($this->requirements, ['cywise_link' => $this->getCywiseLink()]);
+    }
+
+    public function requirementsWithCywiseLinkJson(): string
+    {
+        return json_encode($this->requirementsWithCywiseLink());
+    }
 }
