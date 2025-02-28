@@ -20,7 +20,7 @@ function ListFiles {
   )
 
   try {
-    Get-ChildItem -Path $Path -ErrorAction Stop | Select-Object -ExpandProperty Name
+    Get-ChildItem -Path $Path -ErrorAction Stop | Select-Object -ExpandProperty FullName
   }
   catch {
     throw $_

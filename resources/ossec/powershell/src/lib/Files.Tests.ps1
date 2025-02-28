@@ -69,11 +69,12 @@ Describe 'Files library' {
       It 'Should return the list of files in the directory' {
         # Arrange
         $testPath = 'TestDrive:\ThreeFilesDirectory'
-        New-Item -ItemType Directory -Path $testPath -Force
-        $expectedFiles = @('file1.txt', 'file2.txt', 'file3.txt')
-        $expectedFiles | ForEach-Object { 
+        $directory = New-Item -ItemType Directory -Path $testPath -Force
+        $files = @('file1.txt', 'file2.txt', 'file3.txt')
+        $files | ForEach-Object { 
           Set-Content -Path "$testPath\$_" -Value 'dummy'
         }
+        $expectedFiles = ($files | ForEach-Object { "$directory/$_" })
   
         # Act
         $result = ListFiles -Path $testPath

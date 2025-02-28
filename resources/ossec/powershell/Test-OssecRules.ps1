@@ -27,7 +27,7 @@ function ListFiles {
   )
 
   try {
-    Get-ChildItem -Path $Path -ErrorAction Stop | Select-Object -ExpandProperty Name
+    Get-ChildItem -Path $Path -ErrorAction Stop | Select-Object -ExpandProperty FullName
   }
   catch {
     throw $_
@@ -52,7 +52,7 @@ function InvokeRuleCommand {
       [string]$command
   )
   
-  $output = Invoke-Expression -Command $command
+  $output = Invoke-Expression -Command "$command 2>&1"
   return $output -split "`n"
 }
 
@@ -408,9 +408,9 @@ function Test-OssecRules {
     )
 
     # Déclaration de la variable $rules par défaut
-    $rules = @"
+    $rules = @'
 __PUT_RULES_HERE__
-"@
+'@
     
     if ($RulesFile) {
         $rulesList = Get-Content $RulesFile | Where-Object { $_ -match '\S' }
