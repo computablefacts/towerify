@@ -11,7 +11,7 @@ $ANSI_YELLOW = "`e[33m"
 $ANSI_BRIGHT_RED = "`e[91m"
 $ANSI_BRIGHT_GREEN = "`e[92m"
 $ANSI_BRIGHT_YELLOW = "`e[93m"
-#$ANSI_BRIGHT_BLUE = "`e[94m"
+$ANSI_BRIGHT_BLUE = "`e[94m"
 $ANSI_BRIGHT_MAGENTA = "`e[95m"
 #$ANSI_BRIGHT_CYAN = "`e[96m"
 #$ANSI_BRIGHT_WHITE = "`e[97m"
@@ -20,14 +20,24 @@ $ANSI_RESET = "`e[0m"
 function Show-RuleResult {
   param (
     [bool]$testResult,
-    [hashtable]$rule
+    [hashtable]$rule,
+    [array]$exceptions = @()
   )
 
-  if ($testResult) {
-    Write-Output "${ANSI_GREEN}✔ $($rule['rule_name'])${ANSI_RESET}"
+  if ($exceptions.Count -gt 0) {
+    Write-Output "${ANSI_BRIGHT_YELLOW}✘ $($rule['rule_name'])${ANSI_RESET}"
+    foreach ($exception in $exceptions) {
+      Write-Output "${ANSI_BRIGHT_YELLOW}$($exception.Message)${ANSI_RESET}"
+      Write-Output "$($exception.Exception.Message)"
+    }
   }
   else {
-    Write-Output "${ANSI_BRIGHT_RED}✘ $($rule['rule_name'])${ANSI_RESET}"
+    if ($testResult) {
+      Write-Output "${ANSI_GREEN}✔ $($rule['rule_name'])${ANSI_RESET}"
+    }
+    else {
+      Write-Output "${ANSI_BRIGHT_RED}✘ $($rule['rule_name'])${ANSI_RESET}"
+    }
   }
 
   if ($rule.ContainsKey('cywise_link')) {
@@ -38,12 +48,13 @@ function Show-RuleResult {
 function Show-TestResult {
   param(
     [int]$PassedCount,
-    [int]$FailedCount
+    [int]$FailedCount,
+    [int]$ErrorCount = 0
   )
 
-  $TotalCount = $PassedCount + $FailedCount
+  $TotalCount = $PassedCount + $FailedCount + $ErrorCount
   if ($TotalCount -eq 0) {
-    Write-Output "${ANSI_YELLOW}No tests were run.${ANSI_RESET}"
+    Write-Output "${ANSI_YELLOW}Aucun test lancé.${ANSI_RESET}"
     return
   }
 
@@ -70,6 +81,6 @@ function Show-TestResult {
     $Color = $ANSI_BRIGHT_GREEN
   }
 
-  Write-Output "Tests Passed: $PassedCount, Failed: $FailedCount"
+  Write-Output "Tests ${ANSI_GREEN}réussis: $PassedCount, ${ANSI_BRIGHT_RED}échoués: $FailedCount, ${ANSI_BRIGHT_YELLOW}erreurs: $ErrorCount${ANSI_RESET}"
   Write-Output "${Color}Score: $Percentage/100 (${Level})${ANSI_RESET}"
 }

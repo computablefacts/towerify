@@ -1,5 +1,7 @@
 BeforeAll {
   . "$PSScriptRoot/Process.ps1"
+  . "$PSScriptRoot/ExceptionList.ps1"
+  . "$PSScriptRoot/../Display.ps1"
 }
 
 Describe 'Process library' {
@@ -27,6 +29,23 @@ Describe 'Process library' {
       $command = "Get-Process | Select-Object -First 1 | Format-Table -HideTableHeaders"
       $result = InvokeRuleCommand -command $command
       $result.Length | Should -BeGreaterThan 0
+    }
+
+    It "Should add exception to list for unknown command" {
+      $command = "UnknowCommand"
+      $result = InvokeRuleCommand -command $command
+
+      $exceptions = Get-ExceptionList
+      $exceptions.Count | Should -Be 1
+      $exceptions[0].Message | Should -BeLike '*Erreur*'
+      $exceptions[0].Message | Should -BeLike '*exécution de la commande*'
+      $exceptions[0].Message | Should -BeLike "*$command*"
+      $exceptions[0].Exception | Should -Not -BeNullOrEmpty
+    }
+
+    It "Should not throw exception for unknown command" {
+      $command = "UnknowCommand"
+      { InvokeRuleCommand -command $command } | Should -Not -Throw
     }
   }
 }

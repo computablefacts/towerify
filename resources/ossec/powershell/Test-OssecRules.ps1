@@ -5,6 +5,33 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
     exit 1
 }
  
+# Define a global variable to store the exceptions list
+$global:ExceptionList = @()
+
+# Function to add an exception and a message in the list
+function Add-Exception {
+  param (
+    [Parameter(Mandatory = $true)]
+    [System.Exception]$Exception,
+    [Parameter(Mandatory = $true)]
+    [string]$Message
+  )
+  $global:ExceptionList += [PSCustomObject]@{
+    Exception = $Exception
+    Message   = $Message
+  }
+}
+
+# Function to get the exceptions list
+function Get-ExceptionList {
+  return $global:ExceptionList
+}
+
+# Function to remove all exceptions from the list
+function Clear-ExceptionList {
+  $global:ExceptionList = @()
+}
+
 function DirectoryExists {
   param (
     [string]$directoryPath
@@ -49,11 +76,19 @@ function FetchFile {
 
 function InvokeRuleCommand {
   param(
-      [string]$command
+    [string]$command
   )
   
-  $output = Invoke-Expression -Command "$command 2>&1"
-  return $output -split "`n"
+  try {
+    $output = Invoke-Expression -Command "$command 2>&1"
+    return $output -split "`n"
+  }
+  catch {
+    Add-Exception `
+      -Message "Erreur lors de l'exécution de la commande '$command'." `
+      -Exception $_.Exception
+    return $null
+  }
 }
 
 function Convert-RegistryKey {
@@ -133,7 +168,7 @@ $ANSI_YELLOW = "`e[33m"
 $ANSI_BRIGHT_RED = "`e[91m"
 $ANSI_BRIGHT_GREEN = "`e[92m"
 $ANSI_BRIGHT_YELLOW = "`e[93m"
-#$ANSI_BRIGHT_BLUE = "`e[94m"
+$ANSI_BRIGHT_BLUE = "`e[94m"
 $ANSI_BRIGHT_MAGENTA = "`e[95m"
 #$ANSI_BRIGHT_CYAN = "`e[96m"
 #$ANSI_BRIGHT_WHITE = "`e[97m"
@@ -142,14 +177,24 @@ $ANSI_RESET = "`e[0m"
 function Show-RuleResult {
   param (
     [bool]$testResult,
-    [hashtable]$rule
+    [hashtable]$rule,
+    [array]$exceptions = @()
   )
 
-  if ($testResult) {
-    Write-Output "${ANSI_GREEN}✔ $($rule['rule_name'])${ANSI_RESET}"
+  if ($exceptions.Count -gt 0) {
+    Write-Output "${ANSI_BRIGHT_YELLOW}✘ $($rule['rule_name'])${ANSI_RESET}"
+    foreach ($exception in $exceptions) {
+      Write-Output "${ANSI_BRIGHT_YELLOW}$($exception.Message)${ANSI_RESET}"
+      Write-Output "$($exception.Exception.Message)"
+    }
   }
   else {
-    Write-Output "${ANSI_BRIGHT_RED}✘ $($rule['rule_name'])${ANSI_RESET}"
+    if ($testResult) {
+      Write-Output "${ANSI_GREEN}✔ $($rule['rule_name'])${ANSI_RESET}"
+    }
+    else {
+      Write-Output "${ANSI_BRIGHT_RED}✘ $($rule['rule_name'])${ANSI_RESET}"
+    }
   }
 
   if ($rule.ContainsKey('cywise_link')) {
@@ -160,12 +205,13 @@ function Show-RuleResult {
 function Show-TestResult {
   param(
     [int]$PassedCount,
-    [int]$FailedCount
+    [int]$FailedCount,
+    [int]$ErrorCount = 0
   )
 
-  $TotalCount = $PassedCount + $FailedCount
+  $TotalCount = $PassedCount + $FailedCount + $ErrorCount
   if ($TotalCount -eq 0) {
-    Write-Output "${ANSI_YELLOW}No tests were run.${ANSI_RESET}"
+    Write-Output "${ANSI_YELLOW}Aucun test lancé.${ANSI_RESET}"
     return
   }
 
@@ -192,7 +238,7 @@ function Show-TestResult {
     $Color = $ANSI_BRIGHT_GREEN
   }
 
-  Write-Output "Tests Passed: $PassedCount, Failed: $FailedCount"
+  Write-Output "Tests ${ANSI_GREEN}réussis: $PassedCount, ${ANSI_BRIGHT_RED}échoués: $FailedCount, ${ANSI_BRIGHT_YELLOW}erreurs: $ErrorCount${ANSI_RESET}"
   Write-Output "${Color}Score: $Percentage/100 (${Level})${ANSI_RESET}"
 }
 
@@ -304,10 +350,19 @@ function MatchPattern {
   # Simple regex match: either it matches or it doesn't!
   if ($pattern.StartsWith('r:')) {
     $pattern = $pattern.Substring(2)
-    if ($negate) {
-      return -not [regex]::IsMatch($value, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    try {
+      $result = [regex]::IsMatch($value, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     }
-    return [regex]::IsMatch($value, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    catch {
+      Add-Exception `
+        -Message "Erreur: expression régulière invalide '$pattern'." `
+        -Exception $_.Exception
+      $result = $false
+    }
+    if ($negate) {
+      return -not $result
+    }
+    return $result
   }
 
 
@@ -387,18 +442,26 @@ function Test-RulesList {
     
     $failedCount = 0
     $passedCount = 0
+    $errorCount = 0
     foreach ($rule in $rulesList) {
         $ruleObject = $rule | ConvertFrom-Json -AsHashtable
+        Clear-ExceptionList
         $result = Evaluate $ctx $ruleObject
-        if ($result) {
-            $passedCount++
+        $exceptions = Get-ExceptionList
+        if ($exceptions.Count -gt 0) {
+            $errorCount++
         }
         else {
-            $failedCount++
+            if ($result) {
+                $passedCount++
+            }
+            else {
+                $failedCount++
+            }
         }
-        Show-RuleResult $result $ruleObject
+        Show-RuleResult $result $ruleObject $exceptions
     }
-    Show-TestResult $passedCount $failedCount
+    Show-TestResult $passedCount $failedCount $errorCount
 
 }
 

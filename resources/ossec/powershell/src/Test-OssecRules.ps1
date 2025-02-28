@@ -5,6 +5,7 @@
     exit 1
 }
  
+. "$PSScriptRoot/lib/ExceptionList.ps1"
 . "$PSScriptRoot/lib/Files.ps1"
 . "$PSScriptRoot/lib/Process.ps1"
 . "$PSScriptRoot/lib/Registry.ps1"
@@ -29,18 +30,26 @@ function Test-RulesList {
     
     $failedCount = 0
     $passedCount = 0
+    $errorCount = 0
     foreach ($rule in $rulesList) {
         $ruleObject = $rule | ConvertFrom-Json -AsHashtable
+        Clear-ExceptionList
         $result = Evaluate $ctx $ruleObject
-        if ($result) {
-            $passedCount++
+        $exceptions = Get-ExceptionList
+        if ($exceptions.Count -gt 0) {
+            $errorCount++
         }
         else {
-            $failedCount++
+            if ($result) {
+                $passedCount++
+            }
+            else {
+                $failedCount++
+            }
         }
-        Show-RuleResult $result $ruleObject
+        Show-RuleResult $result $ruleObject $exceptions
     }
-    Show-TestResult $passedCount $failedCount
+    Show-TestResult $passedCount $failedCount $errorCount
 
 }
 

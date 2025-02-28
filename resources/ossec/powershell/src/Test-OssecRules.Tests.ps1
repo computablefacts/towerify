@@ -18,8 +18,8 @@ Describe 'Test-OssecRules function' {
 
     # Assert
     # Line 3: Tests Passed: 2, Failed: 0
-    $result[2] | Should -Match 'Passed: 2'
-    $result[2] | Should -Match 'Failed: 0'
+    $result[2] | Should -Match 'réussis: 2'
+    $result[2] | Should -Match 'échoués: 0'
   }
 
   It 'Should load the rules from the file when -RulesFile is specified' {
@@ -35,8 +35,8 @@ Describe 'Test-OssecRules function' {
 
     # Assert
     # Line 3: Tests Passed: 0, Failed: 2
-    $result[2] | Should -Match 'Passed: 0'
-    $result[2] | Should -Match 'Failed: 2'
+    $result[2] | Should -Match 'réussis: 0'
+    $result[2] | Should -Match 'échoués: 2'
 
     # Cleanup
     Remove-Item $testFile

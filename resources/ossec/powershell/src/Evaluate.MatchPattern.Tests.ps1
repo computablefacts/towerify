@@ -1,5 +1,6 @@
 BeforeAll {
   . "$PSScriptRoot/Evaluate.ps1"
+  . "$PSScriptRoot/lib/ExceptionList.ps1"
 }
 
 Describe 'MatchPattern function' {
@@ -138,6 +139,32 @@ Describe 'MatchPattern function' {
       MatchPattern '2' 'r:^0$|^1$' | Should -Be $false
       MatchPattern 'RSYNC_ENABLE=true' '!r:^#' | Should -Be $true
       MatchPattern 'RSYNC_ENABLE=true' 'r:RSYNC_ENABLE\s*\t*=\s*\t*false' | Should -Be $false
+    }
+
+    It 'should add exception to list for invalid pattern' {
+      # Arrange
+      $text = 'dummy'
+      $pattern = 'r:\.*ACCEPT\.*all\.*lo\.**\.*::/0\.*::/0'
+      Clear-ExceptionList
+
+      # Act
+      MatchPattern $text $pattern
+
+      # Assert
+      $exceptions = Get-ExceptionList
+      $exceptions.Count | Should -Be 1
+      $exceptions[0].Message | Should -BeLike '*Erreur*'
+      $exceptions[0].Message | Should -BeLike '*expression régulière invalide*'
+      $exceptions[0].Exception | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Should not throw exception for invalid pattern' {
+      # Arrange
+      $text = 'dummy'
+      $pattern = 'r:\.*ACCEPT\.*all\.*lo\.**\.*0.0.0.0/0\.*0.0.0.0/0'
+
+      # Act and assert
+      { MatchPattern $text $pattern } | Should -Not -Throw
     }
   }
 

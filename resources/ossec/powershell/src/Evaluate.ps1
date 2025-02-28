@@ -106,10 +106,19 @@ function MatchPattern {
   # Simple regex match: either it matches or it doesn't!
   if ($pattern.StartsWith('r:')) {
     $pattern = $pattern.Substring(2)
-    if ($negate) {
-      return -not [regex]::IsMatch($value, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    try {
+      $result = [regex]::IsMatch($value, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     }
-    return [regex]::IsMatch($value, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    catch {
+      Add-Exception `
+        -Message "Erreur: expression régulière invalide '$pattern'." `
+        -Exception $_.Exception
+      $result = $false
+    }
+    if ($negate) {
+      return -not $result
+    }
+    return $result
   }
 
 
