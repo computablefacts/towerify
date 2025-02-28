@@ -13,7 +13,7 @@ $sourceScript -split "`n" | ForEach-Object {
 
 $outputPathWithoutRules = '.\Test-OssecRules.ps1'
 $script = (Get-Content -Path $outputPath | Out-String)
-$startIndex = $script.IndexOf("@`"") + 3
-$endIndex = $script.IndexOf("`"@") - 1
+$startIndex = $script.IndexOf("@'") + 3
+$endIndex = $script.IndexOf("'@") - 1
 $script = $script.Substring(0, $startIndex) + "__PUT_RULES_HERE__" + $script.Substring($endIndex)
 Set-Content -Path $outputPathWithoutRules -Value $script

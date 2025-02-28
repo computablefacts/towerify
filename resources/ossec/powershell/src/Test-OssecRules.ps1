@@ -50,10 +50,10 @@ function Test-OssecRules {
     )
 
     # Déclaration de la variable $rules par défaut
-    $rules = @"
+    $rules = @'
 {"rule_name":"Ensure 'Account lockout threshold' is set to '5 or fewer invalid logon attempt(s), but not 0'.","match_type":"all","references":["https:\/\/www.cisecurity.org\/white-papers\/cis-password-policy-guide\/"],"rules":[{"type":"command","cmd":"net.exe accounts","expr":["n:Lockout threshold:\\s+(\\d+) compare > 0"],"negate":false},{"type":"command","cmd":"net.exe accounts","expr":["n:Lockout threshold:\\s+(\\d+) compare <= 5"],"negate":false}]}
 {"rule_name":"Ensure 'Audit Logon' is set to 'Success and Failure'.","match_type":"all","references":[],"rules":[{"type":"command","cmd":"auditpol.exe \/get \/subcategory:\"Logon\"","expr":["r:Success and Failure"],"negate":false}]}
-"@
+'@
     
     if ($RulesFile) {
         $rulesList = Get-Content $RulesFile | Where-Object { $_ -match '\S' }
