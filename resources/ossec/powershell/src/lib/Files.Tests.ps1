@@ -74,7 +74,8 @@ Describe 'Files library' {
         $files | ForEach-Object { 
           Set-Content -Path "$testPath\$_" -Value 'dummy'
         }
-        $expectedFiles = ($files | ForEach-Object { "$directory/$_" })
+        $separator = [System.IO.Path]::DirectorySeparatorChar
+        $expectedFiles = ($files | ForEach-Object { "$directory$separator$_" })
   
         # Act
         $result = ListFiles -Path $testPath
