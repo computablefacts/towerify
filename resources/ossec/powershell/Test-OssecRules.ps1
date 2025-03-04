@@ -198,7 +198,7 @@ function Show-RuleResult {
   }
 
   if ($rule.ContainsKey('cywise_link')) {
-    Write-Output "  Plus d'information : $($rule['cywise_link'])"
+    Write-Output "  -> $($rule['cywise_link'])"
   }
 }
 

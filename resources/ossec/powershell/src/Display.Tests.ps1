@@ -42,7 +42,7 @@ Describe 'Display library' {
       $output = Show-RuleResult -testResult $testResult -rule $rule
   
       # Assert
-      $output | Should -Contain "  Plus d'information : https://cywise_link/"
+      $output | Should -Contain "  -> https://cywise_link/"
     }  
 
     It 'Should display the link to Cywise if exist with an error' {
@@ -65,7 +65,7 @@ Describe 'Display library' {
       $output = Show-RuleResult -testResult $testResult -rule $rule -exceptions $exceptions
   
       # Assert
-      $output | Should -Contain "  Plus d'information : https://cywise_link/"
+      $output | Should -Contain "  -> https://cywise_link/"
     }  
 
     It 'Should display exceptions if they exist' {
