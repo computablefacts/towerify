@@ -16,7 +16,7 @@
         "erusev/parsedown": "^1.7",
         "guzzlehttp/guzzle": "^7.5",
         "laravel/cashier": "^15.4",
-        "laravel/framework": "^11.31",
+        "laravel/framework": "^11.44",
         "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.0",
