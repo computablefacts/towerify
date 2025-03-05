@@ -12,10 +12,10 @@
     <table class="table table-hover no-bottom-margin">
       <thead>
       <tr>
-        <!-- <th>{{ __('IOC') }}</th> -->
-        <!-- <th class="text-end">{{ __('Weight') }}</th> -->
         <th>{{ __('Name') }}</th>
-        <th>{{ __('Version') }}</th>
+        <th>{{ __('IOC') }}</th>
+        <th class="text-end">{{ __('Weight') }}</th>
+        <!-- <th>{{ __('Version') }}</th> -->
         <th>{{ __('Interval') }}</th>
         <th>{{ __('Platform') }}</th>
       </tr>
@@ -23,22 +23,16 @@
       <tbody>
       @foreach($rules as $rule)
       <tr>
-        <!-- <td>
-          @if($rule->is_ioc)
-          <span class="lozenge error">yes</span>
-          @else
-          <span class="lozenge success">no</span>
-          @endif
-        </td> -->
-        <!-- <td class="text-end">
-          <span class="lozenge information">{{ $rule->score }}</span>
-        </td> -->
         <td>
           <span class="font-lg mb-3 fw-bold">
             {{ $rule->name }}&nbsp;{!! $rule->category ? '<span style="color:#ff9704">/</span>&nbsp;' . $rule->category : '' !!}
           </span>
           <div class="text-muted">
+            @if(\Illuminate\Support\Str::startsWith($rule->comments, 'Needs further work on the collected data to be useful'))
             {{ $rule->description }}
+            @else
+            {{ $rule->comments }}
+            @endif
           </div>
           @if($rule->attck)
           <div class="text-muted">
@@ -62,8 +56,18 @@
           @endif
         </td>
         <td>
-          {{ $rule->version ? $rule->version : '-' }}
+          @if($rule->is_ioc)
+          <span class="lozenge error">yes</span>
+          @else
+          <span class="lozenge success">no</span>
+          @endif
         </td>
+        <td class="text-end">
+          <span class="lozenge information">{{ $rule->score }}</span>
+        </td>
+        <!-- <td>
+          {{ $rule->version ? $rule->version : '-' }}
+        </td> -->
         <td>
           {{ \Carbon\CarbonInterval::seconds($rule->interval)->cascade()->forHumans(); }}
         </td>

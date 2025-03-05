@@ -17,7 +17,6 @@ use Illuminate\Support\Collection;
  * @property string query
  * @property ?string version
  * @property int interval
- * @property bool removed
  * @property bool snapshot
  * @property OsqueryPlatformEnum platform
  * @property ?string category
@@ -25,6 +24,7 @@ use Illuminate\Support\Collection;
  * @property ?string attck
  * @property bool is_ioc
  * @property double score
+ * @property ?string comments
  */
 class YnhOsqueryRule extends Model
 {
@@ -38,7 +38,6 @@ class YnhOsqueryRule extends Model
         'version',
         'query',
         'interval',
-        'removed',
         'snapshot',
         'platform',
         'category',
@@ -46,11 +45,11 @@ class YnhOsqueryRule extends Model
         'attck',
         'is_ioc',
         'score',
+        'comments',
     ];
 
     protected $casts = [
         'enabled' => 'boolean',
-        'removed' => 'boolean',
         'snapshot' => 'boolean',
         'is_ioc' => 'boolean',
         'score' => 'float',

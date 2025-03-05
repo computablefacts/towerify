@@ -406,6 +406,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $rules = $this->osquery();
+        \App\Models\YnhOsqueryRule::query()->update(['enabled' => false]);
 
         foreach ($rules as $rule) {
             \App\Models\YnhOsqueryRule::updateOrCreate(['name' => $rule['name']], $rule);
