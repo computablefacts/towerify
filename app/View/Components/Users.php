@@ -17,23 +17,18 @@ class Users extends Component
 
     public function __construct(?YnhServer $server = null)
     {
-        if (isset($server->id)) {
-            $this->users = $server->users;
-            $this->server = $server;
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user->tenant_id) {
+            $this->users = User::where('is_active', true)->get()->sortBy('fullname', SORT_NATURAL | SORT_FLAG_CASE);
         } else {
-            /** @var User $user */
-            $user = Auth::user();
-            if (!$user->tenant_id) {
-                $this->users = User::where('is_active', true)->get()->sortBy('fullname', SORT_NATURAL | SORT_FLAG_CASE);
-            } else {
-                $users = User::where('is_active', true)->where('tenant_id', $user->tenant_id);
-                if ($user->customer_id) {
-                    $users = $users->where('customer_id', $user->customer_id);
-                }
-                $this->users = $users->get()->sortBy('fullname', SORT_NATURAL | SORT_FLAG_CASE);
+            $users = User::where('is_active', true)->where('tenant_id', $user->tenant_id);
+            if ($user->customer_id) {
+                $users = $users->where('customer_id', $user->customer_id);
             }
-            $this->server = null;
+            $this->users = $users->get()->sortBy('fullname', SORT_NATURAL | SORT_FLAG_CASE);
         }
+        $this->server = null;
     }
 
     public function render(): View|Closure|string
