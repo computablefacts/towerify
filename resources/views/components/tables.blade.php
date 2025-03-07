@@ -381,8 +381,14 @@
     elAwsTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
     if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
-      axios.get(
-        `/cb/web/aws/tables/?region=${elAwsRegion.el.value}&access_key_id=${elAwsAccessKeyId.el.value}&secret_access_key=${elAwsSecretAccessKey.el.value}&input_folder=${elAwsInputFolder.el.value}&output_folder=${elAwsOutputFolder.el.value}`).then(
+        const encodedUrl = '/cb/web/aws/tables/' +
+            '?region=' + encodeURIComponent(elAwsRegion.el.value) +
+            '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) +
+            '&secret_access_key=' + encodeURIComponent(elAwsSecretAccessKey.el.value) +
+            '&input_folder=' + encodeURIComponent(elAwsInputFolder.el.value) +
+            '&output_folder=' + encodeURIComponent(elAwsOutputFolder.el.value);
+        axios.get(
+        encodedUrl).then(
         response => {
           if (response.data.success) {
             if (!response.data.tables || response.data.tables.length === 0) {
