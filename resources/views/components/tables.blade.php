@@ -362,11 +362,11 @@
   });
 
   const elAwsInputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-    type: 'TextInput', container: 'aws-input-folder', placeholder: 'ex. in/',
+    type: 'TextInput', container: 'aws-input-folder', placeholder: 'ex. my_s3_bucket/in/',
   });
 
   const elAwsOutputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-    type: 'TextInput', container: 'aws-output-folder', placeholder: 'ex. out/',
+    type: 'TextInput', container: 'aws-output-folder', placeholder: 'ex. my_s3_bucket/out/',
   });
 
   const elAwsVirtualTableName = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
