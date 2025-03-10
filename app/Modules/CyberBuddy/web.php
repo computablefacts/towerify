@@ -51,12 +51,12 @@ Route::get('/cyber-buddy/chat', 'CyberBuddyController@showChat');
 Route::match(['get', 'post'], 'botman', 'CyberBuddyController@handle');
 
 Route::group([
-    'prefix' => 'aws/tables',
+    'prefix' => 'tables',
 ], function () {
-    Route::get('/', 'CyberBuddyController@listAwsTables')->name('list-aws-tables');
-    Route::post('/columns', 'CyberBuddyController@listAwsTablesColumns')->name('list-aws-tables-columns');
-    Route::post('/import', 'CyberBuddyController@importAwsTables')->name('import-aws-tables');
-    Route::get('/available', 'CyberBuddyController@availableAwsTables')->name('available-aws-tables');
-    Route::post('/query', 'CyberBuddyController@queryAwsTables')->name('query-aws-tables');
-    Route::post('/prompt-to-query', 'CyberBuddyController@promptToAwsTablesQuery')->name('prompt-to-aws-tables-query');
+    Route::get('/', 'CyberBuddyController@listTables')->name('list-tables');
+    Route::post('/columns', 'CyberBuddyController@listTablesColumns')->name('list-tables-columns');
+    Route::post('/import', 'CyberBuddyController@importTables')->name('import-tables');
+    Route::get('/available', 'CyberBuddyController@availableTables')->name('available-tables');
+    Route::post('/query', 'CyberBuddyController@queryTables')->name('query-tables');
+    Route::post('/prompt-to-query', 'CyberBuddyController@promptToTablesQuery')->name('prompt-to-tables-query');
 })->middleware(['auth']);

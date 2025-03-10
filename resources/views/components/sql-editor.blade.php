@@ -63,7 +63,7 @@
   elDatabasesAndTables.innerHTML = "<tr><td colspan='6'>{{ __('Loading...') }}</td></tr>";
 
   document.addEventListener('DOMContentLoaded', function () {
-    axios.get(`/cb/web/aws/tables/available`).then(response => {
+    axios.get(`/cb/web/tables/available`).then(response => {
       if (response.data.success) {
         if (!response.data.tables || response.data.tables.length === 0) {
           elDatabasesAndTables.innerHTML = "<tr><td colspan='6'>{{ __('No tables found.') }}</td></tr>";
@@ -101,7 +101,7 @@
 
     const prompt = document.getElementById('prompt').value;
 
-    axios.post(`/cb/web/aws/tables/prompt-to-query`, {prompt: prompt}).then(response => {
+    axios.post(`/cb/web/tables/prompt-to-query`, {prompt: prompt}).then(response => {
       if (response.data.success && response.data.result) {
         editor.setValue(response.data.result);
       } else {
@@ -125,7 +125,7 @@
     elTableBody.innerHTML = "<tr><td>{{ __('Loading...') }}</td></tr>";
 
     const sql = editor.getValue();
-    axios.post(`/cb/web/aws/tables/query`, {query: sql, store: false}).then(response => {
+    axios.post(`/cb/web/tables/query`, {query: sql, store: false}).then(response => {
       if (response.data.success) {
         elTableHead.innerHTML = `
           <tr>${response.data.result[0].map(column => `<th>${column}</th>`).join('')}</tr>

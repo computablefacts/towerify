@@ -640,7 +640,7 @@ class CyberBuddyController extends Controller
         ]);
     }
 
-    public function listAwsTables(Request $request)
+    public function listTables(Request $request)
     {
         $this->validate($request, [
             'region' => 'required|string|min:0|max:100',
@@ -691,7 +691,7 @@ class CyberBuddyController extends Controller
         }
     }
 
-    public function listAwsTablesColumns(Request $request)
+    public function listTablesColumns(Request $request)
     {
         $this->validate($request, [
             'region' => 'required|string|min:0|max:100',
@@ -724,7 +724,7 @@ class CyberBuddyController extends Controller
         ]);
     }
 
-    public function importAwsTables(Request $request)
+    public function importTables(Request $request)
     {
         $this->validate($request, [
             'region' => 'required|string|min:0|max:100',
@@ -764,7 +764,7 @@ class CyberBuddyController extends Controller
         ]);
     }
 
-    public function availableAwsTables(Request $request)
+    public function availableTables(Request $request)
     {
         return response()->json([
             'success' => 'The tables have been listed.',
@@ -782,7 +782,7 @@ class CyberBuddyController extends Controller
         ]);
     }
 
-    public function queryAwsTables(Request $request)
+    public function queryTables(Request $request)
     {
         $this->validate($request, [
             'query' => 'required|string|min:1|max:5000',
@@ -865,7 +865,7 @@ class CyberBuddyController extends Controller
         ]);
     }
 
-    public function promptToAwsTablesQuery(Request $request)
+    public function promptToTablesQuery(Request $request)
     {
         $this->validate($request, [
             'prompt' => 'required|string|min:1|max:5000',

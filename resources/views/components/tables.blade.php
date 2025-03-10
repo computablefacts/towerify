@@ -381,7 +381,7 @@
     elAwsTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
     if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
-        const encodedUrl = '/cb/web/aws/tables/' +
+        const encodedUrl = '/cb/web/tables/' +
             '?region=' + encodeURIComponent(elAwsRegion.el.value) +
             '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) +
             '&secret_access_key=' + encodeURIComponent(elAwsSecretAccessKey.el.value) +
@@ -433,7 +433,7 @@
     const elAwsTablesColumns = document.getElementById('aws-tables-columns');
     elAwsTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
-    axios.post('/cb/web/aws/tables/columns', {
+    axios.post('/cb/web/tables/columns', {
       region: elAwsRegion.el.value,
       access_key_id: elAwsAccessKeyId.el.value,
       secret_access_key: elAwsSecretAccessKey.el.value,
@@ -492,7 +492,7 @@
     const copy = document.getElementById('toggle-copy').checked === true;
     const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
 
-    axios.post('/cb/web/aws/tables/import', {
+    axios.post('/cb/web/tables/import', {
       region: elAwsRegion.el.value,
       access_key_id: elAwsAccessKeyId.el.value,
       secret_access_key: elAwsSecretAccessKey.el.value,
@@ -536,7 +536,7 @@
       return false;
     }
 
-    axios.post(`/cb/web/aws/tables/query`,
+    axios.post(`/cb/web/tables/query`,
       {query: sql, store: true, name: name, materialize: materialize, description: description}).then(response => {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
