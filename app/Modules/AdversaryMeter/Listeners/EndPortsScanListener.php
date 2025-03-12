@@ -27,6 +27,7 @@ class EndPortsScanListener extends AbstractListener
         $scan = $event->scan();
         $asset = $event->asset();
         $dropEvent = $event->drop();
+        $taskResult = $event->taskResult;
 
         if (!$scan) {
             Log::warning("Ports scan has been removed : {$event->scanId}");
@@ -36,36 +37,40 @@ class EndPortsScanListener extends AbstractListener
             Log::warning("Asset has been removed : {$event->assetId}");
             return;
         }
-        if ($dropEvent) {
-            Log::error("Ports scan event is too old : {$event->scanId}");
-            $scan->markAsFailed();
-            return;
-        }
-        if (!$scan->portsScanIsRunning()) {
-            Log::warning("Ports scan is not running anymore : {$event->scanId}");
-            $scan->markAsFailed();
-            return;
-        }
+        if (count($taskResult) > 0) {
+            $ports = collect($taskResult);
+        } else {
+            if ($dropEvent) {
+                Log::error("Ports scan event is too old : {$event->scanId}");
+                $scan->markAsFailed();
+                return;
+            }
+            if (!$scan->portsScanIsRunning()) {
+                Log::warning("Ports scan is not running anymore : {$event->scanId}");
+                $scan->markAsFailed();
+                return;
+            }
 
-        $taskId = $scan->ports_scan_id;
-        $task = $this->taskStatus($taskId);
-        $taskStatus = $task['task_status'] ?? null;
+            $taskId = $scan->ports_scan_id;
+            $task = $this->taskStatus($taskId);
+            $taskStatus = $task['task_status'] ?? null;
 
-        // The task is running: try again later
-        if (!$taskStatus || $taskStatus === 'STARTED' || $taskStatus === 'PENDING') {
-            $event->sink();
-            return;
+            // The task is running: try again later
+            if (!$taskStatus || $taskStatus === 'STARTED' || $taskStatus === 'PENDING') {
+                $event->sink();
+                return;
+            }
+
+            // The task ended with an error
+            if ($taskStatus !== 'SUCCESS') {
+                Log::error('Ports scan failed : ' . json_encode($task));
+                $scan->markAsFailed();
+                return;
+            }
+
+            $taskOutput = $this->taskOutput($taskId);
+            $ports = collect($taskOutput['task_result'] ?? []);
         }
-
-        // The task ended with an error
-        if ($taskStatus !== 'SUCCESS') {
-            Log::error('Ports scan failed : ' . json_encode($task));
-            $scan->markAsFailed();
-            return;
-        }
-
-        $taskOutput = $this->taskOutput($taskId);
-        $ports = collect($taskOutput['task_result'] ?? []);
         if ($ports->isEmpty()) {
 
             // Legacy stuff: if no port is open, create a dummy one that will be marked as closed by the vulns scanner

@@ -14,11 +14,13 @@ class EndVulnsScan
 
     public Carbon $start;
     public int $scanId;
+    public array $taskResult;
 
-    public function __construct(Carbon $start, Scan $scan)
+    public function __construct(Carbon $start, Scan $scan, array $taskResult = [])
     {
         $this->start = $start;
         $this->scanId = $scan->id;
+        $this->taskResult = $taskResult;
     }
 
     public function scan(): ?Scan

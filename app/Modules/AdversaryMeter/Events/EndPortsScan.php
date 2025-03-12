@@ -16,12 +16,14 @@ class EndPortsScan
     public Carbon $start;
     public int $assetId;
     public int $scanId;
+    public array $taskResult;
 
-    public function __construct(Carbon $start, Asset $asset, Scan $scan)
+    public function __construct(Carbon $start, Asset $asset, Scan $scan, array $taskResult = [])
     {
         $this->start = $start;
         $this->assetId = $asset->id;
         $this->scanId = $scan->id;
+        $this->taskResult = $taskResult;
     }
 
     public function asset(): ?Asset

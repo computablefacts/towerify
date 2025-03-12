@@ -29,24 +29,30 @@ class EndVulnsScanListener extends AbstractListener
 
         $scan = $event->scan();
         $dropEvent = $event->drop();
+        $taskResult = $event->taskResult;
 
         if (!$scan) {
             Log::warning("Vulns scan has been removed : {$event->scanId}");
             return;
         }
-        if ($dropEvent) {
-            Log::error("Vulns scan event is too old : {$event->scanId}");
-            $scan->markAsFailed();
-            return;
-        }
-        if (!$scan->vulnsScanIsRunning()) {
-            Log::warning("Vulns scan is not running anymore : {$event->scanId}");
-            $scan->markAsFailed();
-            return;
+        if (count($taskResult) > 0) {
+            $task = $taskResult;
+        } else {
+            if ($dropEvent) {
+                Log::error("Vulns scan event is too old : {$event->scanId}");
+                $scan->markAsFailed();
+                return;
+            }
+            if (!$scan->vulnsScanIsRunning()) {
+                Log::warning("Vulns scan is not running anymore : {$event->scanId}");
+                $scan->markAsFailed();
+                return;
+            }
+
+            $taskId = $scan->vulns_scan_id;
+            $task = $this->taskOutput($taskId);
         }
 
-        $taskId = $scan->vulns_scan_id;
-        $task = $this->taskOutput($taskId);
         $currentTaskName = $task['current_task'] ?? null;
         $currentTaskStatus = $task['current_task_status'] ?? null;
 

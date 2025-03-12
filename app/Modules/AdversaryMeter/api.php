@@ -1,6 +1,10 @@
 <?php
 
+use App\Modules\AdversaryMeter\Events\EndPortsScan;
+use App\Modules\AdversaryMeter\Events\EndVulnsScan;
+use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Honeypot;
+use App\Modules\AdversaryMeter\Models\Scan;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 
@@ -45,7 +49,55 @@ Route::group([
         return response("ok ({$events->count()} events in file)", 200)
             ->header('Content-Type', 'text/plain');
     });
-})->middleware(['auth', 'throttle:60,1']);
+    Route::post('ports-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
+
+        if (!$request->has('task_result')) {
+            return response('Missing task result', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        /** @var Scan $scan */
+        $scan = Scan::where('ports_scan_id', $uuid)->first();
+
+        if (!$scan) {
+            return response('Unknown scan', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        /** @var Asset $asset */
+        $asset = $scan->asset()->first();
+
+        if (!$asset) {
+            return response('Unknown asset', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        EndPortsScan::dispatch(Carbon::now(), $asset, $scan, $request->get('task_result', []));
+
+        return response("ok", 200)
+            ->header('Content-Type', 'text/plain');
+    });
+    Route::post('vulns-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
+
+        if (!$request->has('task_result')) {
+            return response('Missing task result', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        /** @var Scan $scan */
+        $scan = Scan::where('vulns_scan_id', $uuid)->first();
+
+        if (!$scan) {
+            return response('Unknown scan', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
+        EndVulnsScan::dispatch(Carbon::now(), $scan, $request->get('task_result', []));
+
+        return response("ok", 200)
+            ->header('Content-Type', 'text/plain');
+    });
+})->middleware(['auth', 'throttle:120,1']);
 
 Route::group([
     'prefix' => 'inventory',
