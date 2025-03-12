@@ -191,7 +191,7 @@
               <th class="text-end">{{ __('Last Modified') }}</th>
             </tr>
             </thead>
-            <tbody id="aws-tables">
+            <tbody id="list-tables">
             <!-- FILLED DYNAMICALLY -->
             </tbody>
           </table>
@@ -212,7 +212,7 @@
       </h5>
       <div class="row mt-2">
         <div class="col">
-          <textarea id="aws-table-description"
+          <textarea id="table-description"
                     class="form-control mt-2"
                     rows="4"
                     placeholder="{{ __('Please provide a detailed description of the table and explain the significance of the key columns. The more information you include, the better.') }}"></textarea>
@@ -254,7 +254,7 @@
               <th>{{ __('Column Type') }}</th>
             </tr>
             </thead>
-            <tbody id="aws-tables-columns">
+            <tbody id="tables-columns">
             <!-- FILLED DYNAMICALLY -->
             </tbody>
           </table>
@@ -275,12 +275,12 @@
       </h5>
       <div class="row mt-2">
         <div class="col">
-          <div id="aws-vtable-name"></div>
+          <div id="vtable-name"></div>
         </div>
       </div>
       <div class="row mt-2">
         <div class="col">
-          <textarea id="aws-vtable-description"
+          <textarea id="vtable-description"
                     class="form-control mt-2"
                     rows="4"
                     placeholder="{{ __('Please provide a detailed description of the table and explain the significance of the key columns. The more information you include, the better.') }}"></textarea>
@@ -332,7 +332,7 @@
   const toggleColumnsSelection = document.getElementById('toggle-columns-selection');
 
   toggleColumnsSelection.onchange = () => {
-    const checkboxes = document.querySelectorAll('#aws-tables-columns input[type="checkbox"]');
+    const checkboxes = document.querySelectorAll('#tables-columns input[type="checkbox"]');
     checkboxes.forEach(checkbox => checkbox.checked = !checkbox.checked);
   };
 
@@ -343,15 +343,15 @@
       if (event.target && event.target.id === 'get-columns') {
         event.preventDefault();
         event.stopPropagation();
-        moveToNextStep = getAwsTablesColumns();
+        moveToNextStep = getTablesColumns();
       } else if (event.target && event.target.id === 'import-tables') {
         event.preventDefault();
         event.stopPropagation();
-        moveToNextStep = importAwsTables();
+        moveToNextStep = importTables();
       } else if (event.target && event.target.id === 'create-vtable') {
         event.preventDefault();
         event.stopPropagation();
-        moveToNextStep = createAwsVirtualTables();
+        moveToNextStep = createVirtualTables();
       }
       if (moveToNextStep) {
         goToStep(currentStep);
@@ -373,7 +373,7 @@
     steps.forEach((step, index) => step.classList.toggle('active', index === stepIndex));
     stepContents.forEach((content, index) => content.classList.toggle('active', index === stepIndex));
     if (stepIndex === 2 /* 0-based */) {
-      listAwsTables();
+      listTables();
     }
   };
 
@@ -439,16 +439,16 @@
       type: 'TextInput', container: 'azure-output-folder', placeholder: 'ex. my_container/out/',
   });
 
-  const elAwsVirtualTableName = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+  const elVirtualTableName = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
     type: 'TextInput',
-    container: 'aws-vtable-name',
+    container: 'vtable-name',
     placeholder: "{{ __('The virtual table name such as active_users') }}"
   });
 
-  const listAwsTables = () => {
+  const listTables = () => {
 
-    const elAwsTables = document.getElementById('aws-tables');
-    elAwsTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
+    const elListTables = document.getElementById('list-tables');
+    elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
       let encodedUrl;
       if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
@@ -474,7 +474,7 @@
         response => {
           if (response.data.success) {
             if (!response.data.tables || response.data.tables.length === 0) {
-              elAwsTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('No files found.') }}</td></tr>";
+              elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('No files found.') }}</td></tr>";
             } else {
               const rows = response.data.tables.map(table => {
                 return `
@@ -486,7 +486,7 @@
                 </tr>
               `;
               });
-              elAwsTables.innerHTML = rows.join('');
+              elListTables.innerHTML = rows.join('');
             }
           } else if (response.data.error) {
             toaster.toastError(response.data.error);
@@ -502,9 +502,9 @@
     }
   };
 
-  const getAwsTablesColumns = () => {
+  const getTablesColumns = () => {
 
-    const checkboxes = Array.from(document.querySelectorAll('#aws-tables input[type="checkbox"]:checked'));
+    const checkboxes = Array.from(document.querySelectorAll('#list-tables input[type="checkbox"]:checked'));
     const tables = checkboxes.map(checkbox => checkbox.getAttribute('data-file'));
 
     if (tables.length !== 1) {
@@ -512,8 +512,8 @@
       return false;
     }
 
-    const elAwsTablesColumns = document.getElementById('aws-tables-columns');
-    elAwsTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
+    const elTablesColumns = document.getElementById('tables-columns');
+    elTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
       let postProperties;
       if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
@@ -541,7 +541,7 @@
       axios.post('/cb/web/tables/columns', postProperties).then(response => {
       if (response.data.success) {
         if (!response.data.tables || response.data.tables.length === 0) {
-          elAwsTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('No columns found.') }}</td></tr>";
+          elTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('No columns found.') }}</td></tr>";
         } else {
           const rows = response.data.tables.flatMap(table => {
             return table.columns.map(column => {
@@ -557,7 +557,7 @@
               `;
             });
           });
-          elAwsTablesColumns.innerHTML = rows.join('');
+          elTablesColumns.innerHTML = rows.join('');
         }
       } else if (response.data.error) {
         toaster.toastError(response.data.error);
@@ -570,10 +570,10 @@
     return true;
   };
 
-  const importAwsTables = () => {
+  const importTables = () => {
 
-    const description = document.getElementById('aws-table-description').value;
-    const checkboxes = Array.from(document.querySelectorAll('#aws-tables-columns input[type="checkbox"]:checked'));
+    const description = document.getElementById('table-description').value;
+    const checkboxes = Array.from(document.querySelectorAll('#tables-columns input[type="checkbox"]:checked'));
     const tables = checkboxes.map(
       checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
 
@@ -634,10 +634,10 @@
     return true;
   };
 
-  const createAwsVirtualTables = () => {
+  const createVirtualTables = () => {
 
-    const description = document.getElementById('aws-vtable-description').value;
-    const name = elAwsVirtualTableName.el.value;
+    const description = document.getElementById('vtable-description').value;
+    const name = elVirtualTableName.el.value;
     const sql = editor.getValue(); // from x-sql-editor
     const materialize = document.getElementById('toggle-materialize').checked === true;
 
