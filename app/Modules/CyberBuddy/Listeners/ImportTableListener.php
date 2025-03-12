@@ -7,6 +7,7 @@ use App\Modules\CyberBuddy\Events\ImportTable;
 use App\Modules\CyberBuddy\Helpers\ClickhouseClient;
 use App\Modules\CyberBuddy\Helpers\ClickhouseLocal;
 use App\Modules\CyberBuddy\Helpers\ClickhouseUtils;
+use App\Modules\CyberBuddy\Helpers\TableStorage;
 use App\Modules\CyberBuddy\Models\Table;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -22,11 +23,7 @@ class ImportTableListener extends AbstractListener
         }
 
         $user = $event->user;
-        $region = $event->region;
-        $accessKeyId = $event->accessKeyId;
-        $secretAccessKey = $event->secretAccessKey;
-        $inputFolder = $event->inputFolder;
-        $outputFolder = $event->outputFolder;
+        $credentials = $event->credentials;
         $updatable = $event->updatable;
         $copy = $event->copy;
         $deduplicate = $event->deduplicate;
@@ -41,24 +38,25 @@ class ImportTableListener extends AbstractListener
         $clickhouseUsername = config('towerify.clickhouse.username');
         $clickhousePassword = config('towerify.clickhouse.password');
         $clickhouseDatabase = config('towerify.clickhouse.database');
-        $tableName = ClickhouseUtils::normalizeTableName($table);
-        $bucket = explode('/', $inputFolder, 2)[0];
-        $s3In = "s3('https://s3.{$region}.amazonaws.com/{$bucket}/{$table}', '{$accessKeyId}', '{$secretAccessKey}', 'TabSeparatedWithNames')";
-        $s3Out = "s3('https://s3.{$region}.amazonaws.com/{$outputFolder}{$tableName}.parquet', '{$accessKeyId}', '{$secretAccessKey}', 'Parquet')";
+        $normalizedTableName = ClickhouseUtils::normalizeTableName($table);
+        $tableIn = TableStorage::inClickhouseTableFunction($credentials, $table);
+        $uidSuffix = '_' . Str::random(10);
+        $tableOut = TableStorage::outClickhouseTableFunction($credentials, $normalizedTableName, $uidSuffix);
         $colNames = collect($columns)->map(fn(array $column) => "{$column['old_name']} AS {$column['new_name']}")->join(",");
         $distinct = $deduplicate ? "DISTINCT" : "";
 
         Log::debug("Importing table {$table} from S3 to clickhouse server");
-        Log::debug("Input file: {$s3In}");
-        Log::debug("Output file: {$s3Out}");
+        Log::debug("Column names: {$colNames}");
+        Log::debug("Input file: {$tableIn}");
+        Log::debug("Output file: {$tableOut}");
 
         // Reference the table
         /** @var Table $tbl */
         $tbl = Table::updateOrCreate([
-            'name' => $tableName,
+            'name' => $normalizedTableName,
             'created_by' => $user->id,
         ], [
-            'name' => $tableName,
+            'name' => $normalizedTableName,
             'description' => $description,
             'copied' => $copy,
             'deduplicated' => $deduplicate,
@@ -68,20 +66,13 @@ class ImportTableListener extends AbstractListener
             'created_by' => $user->id,
             'schema' => $columns,
             'updatable' => $updatable,
-            'credentials' => [
-                'storage' => 's3',
-                'region' => $region,
-                'access_key_id' => $accessKeyId,
-                'secret_access_key' => $secretAccessKey,
-                'input_folder' => $inputFolder,
-                'output_folder' => $outputFolder,
-            ],
+            'credentials' => $credentials,
         ]);
 
         try {
 
             // Transform the TSV file to a Parquet file and write it to the user-defined output directory
-            $query = "INSERT INTO FUNCTION {$s3Out} SELECT {$distinct} {$colNames} FROM {$s3In} SETTINGS s3_create_new_file_on_insert=1";
+            $query = "INSERT INTO FUNCTION {$tableOut} SELECT {$distinct} {$colNames} FROM {$tableIn}";
             $output = ClickhouseLocal::executeQuery($query);
 
             if (!$output) {
@@ -91,7 +82,7 @@ class ImportTableListener extends AbstractListener
             }
 
             // Get the table schema from the parquet file
-            $query = "DESCRIBE TABLE {$s3Out}";
+            $query = "DESCRIBE TABLE {$tableOut}";
             $output = ClickhouseLocal::executeQuery($query);
 
             if (!$output) {
@@ -106,10 +97,9 @@ class ImportTableListener extends AbstractListener
 
                 // Instead of dropping the existing table, create a temporary table and fill it
                 // Then, drop the existing table and rename the temporary table
-                $uid = Str::random(10);
 
                 // Create the table structure in clickhouse server
-                $query = "CREATE TABLE IF NOT EXISTS {$tableName}_{$uid} ({$schema}) ENGINE = MergeTree() ORDER BY tuple() SETTINGS index_granularity = 8192";
+                $query = "CREATE TABLE IF NOT EXISTS {$normalizedTableName}{$uidSuffix} ({$schema}) ENGINE = MergeTree() ORDER BY tuple() SETTINGS index_granularity = 8192";
                 $output = ClickhouseClient::executeQuery($query);
 
                 if (!$output) {
@@ -120,7 +110,7 @@ class ImportTableListener extends AbstractListener
 
                 // Load the data in clickhouse server
                 // https://clickhouse.com/docs/en/integrations/s3#remote-insert-using-clickhouse-local
-                $query = "INSERT INTO TABLE FUNCTION remoteSecure('{$clickhouseHost}', '{$clickhouseDatabase}.{$tableName}_{$uid}', '{$clickhouseUsername}', '{$clickhousePassword}') (*) SELECT * FROM {$s3Out}";
+                $query = "INSERT INTO TABLE FUNCTION remoteSecure('{$clickhouseHost}', '{$clickhouseDatabase}.{$normalizedTableName}{$uidSuffix}', '{$clickhouseUsername}', '{$clickhousePassword}') (*) SELECT * FROM {$tableOut}";
                 $output = ClickhouseLocal::executeQuery($query);
 
                 if (!$output) {
@@ -130,7 +120,7 @@ class ImportTableListener extends AbstractListener
                 }
 
                 // Drop any existing table from clickhouse server
-                $output = ClickhouseClient::dropTableIfExists($tableName);
+                $output = ClickhouseClient::dropTableIfExists($normalizedTableName);
 
                 if (!$output) {
                     $tbl->last_error = 'Error #5';
@@ -139,12 +129,12 @@ class ImportTableListener extends AbstractListener
                 }
 
                 // Rename the newly created table with the old name
-                $output = ClickhouseClient::renameTable("{$tableName}_{$uid}", $tableName);
+                $output = ClickhouseClient::renameTable("{$normalizedTableName}{$uidSuffix}", $normalizedTableName);
 
             } else {
 
                 // Drop any existing table from clickhouse server
-                $output = ClickhouseClient::dropTableIfExists($tableName);
+                $output = ClickhouseClient::dropTableIfExists($normalizedTableName);
 
                 if (!$output) {
                     $tbl->last_error = 'Error #6';
@@ -153,8 +143,8 @@ class ImportTableListener extends AbstractListener
                 }
 
                 // Create a view over the Parquet file in clickhouse server
-                $s3Engine = Str::replace('s3(', 'S3(', $s3Out);
-                $query = "CREATE TABLE IF NOT EXISTS {$tableName} ({$schema}) ENGINE = {$s3Engine}";
+                $engineOut = TableStorage::outClickhouseTableEngine($credentials, $normalizedTableName, $uidSuffix);
+                $query = "CREATE TABLE IF NOT EXISTS {$normalizedTableName} ({$schema}) ENGINE = {$engineOut}";
                 $output = ClickhouseClient::executeQuery($query);
             }
             if (!$output) {
@@ -165,8 +155,10 @@ class ImportTableListener extends AbstractListener
 
             $tbl->last_error = null;
             $tbl->finished_at = Carbon::now();
-            $tbl->nb_rows = ClickhouseClient::numberOfRows($tableName) ?? 0;
+            $tbl->nb_rows = ClickhouseClient::numberOfRows($normalizedTableName) ?? 0;
             $tbl->save();
+
+            TableStorage::deleteOldOutFiles($credentials, $normalizedTableName);
 
             // TODO : create tmp_* view in clickhouse server for backward compatibility
 

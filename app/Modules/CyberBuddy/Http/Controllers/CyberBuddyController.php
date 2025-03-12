@@ -6,13 +6,14 @@ use App\Models\YnhFramework;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Conversations\QuestionsAndAnswers;
-use App\Modules\CyberBuddy\Events\ImportTable;
 use App\Modules\CyberBuddy\Events\ImportVirtualTable;
 use App\Modules\CyberBuddy\Events\IngestFile;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Helpers\ClickhouseClient;
 use App\Modules\CyberBuddy\Helpers\ClickhouseLocal;
 use App\Modules\CyberBuddy\Helpers\ClickhouseUtils;
+use App\Modules\CyberBuddy\Helpers\StorageType;
+use App\Modules\CyberBuddy\Helpers\TableStorage;
 use App\Modules\CyberBuddy\Http\Requests\DownloadOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\StreamOneFileRequest;
 use App\Modules\CyberBuddy\Http\Requests\UploadManyFilesRequest;
@@ -34,6 +35,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use League\Flysystem\UnableToListContents;
+use League\Flysystem\UnableToRetrieveMetadata;
 use Symfony\Component\Process\Process;
 
 class CyberBuddyController extends Controller
@@ -642,80 +646,62 @@ class CyberBuddyController extends Controller
 
     public function listTables(Request $request)
     {
-        $this->validate($request, [
-            'region' => 'required|string|min:0|max:100',
-            'access_key_id' => 'required|string|min:0|max:100',
-            'secret_access_key' => 'required|string|min:0|max:100',
-            'input_folder' => 'string|min:0|max:100',
-            'output_folder' => 'string|min:0|max:100',
-        ]);
-        $region = $request->input('region');
-        $accessKeyId = $request->input('access_key_id');
-        $secretAccessKey = $request->input('secret_access_key');
-        $inputFolder = $request->input('input_folder', '');
-        $outputFolder = $request->input('output_folder', '');
-        $s3Client = new \Aws\S3\S3Client([
-            'region' => $region,
-            'version' => 'latest',
-            'credentials' => [
-                'key' => $accessKeyId,
-                'secret' => $secretAccessKey,
-            ],
+        $validated = $this->validate($request, [
+            'storage' => ['required', Rule::enum(StorageType::class)],
+            'region' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'access_key_id' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'secret_access_key' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'connection_string' => 'required_if:storage,' . StorageType::AZURE_BLOB_STORAGE->value . '|string|min:0|max:200',
+            'input_folder' => 'required|string|min:0|max:100',
+            'output_folder' => 'required|string|min:0|max:100',
         ]);
         try {
-            $bucket = explode('/', $inputFolder, 2)[0];
-            $prefix = isset(explode('/', $inputFolder, 2)[1]) ? explode('/', $inputFolder, 2)[1] : '';
-            $objects = $s3Client->listObjectsV2([
-                'Bucket' => $bucket,
-                'Prefix' => $prefix,
-            ]);
+            $credentials = TableStorage::credentialsFromOptions($validated);
+            $disk = TableStorage::inDisk($credentials);
+            $diskFiles = $disk->files();
             $files = [];
-            if (isset($objects['Contents'])) {
-                foreach ($objects['Contents'] as $object) {
-                    $extension = pathinfo($object['Key'], PATHINFO_EXTENSION);
-                    if (in_array(strtolower($extension), ['tsv'])) { // only TSV files are allowed
-                        $files[] = [
-                            'object' => $object['Key'],
-                            'size' => \Illuminate\Support\Number::format($object['Size'], locale: 'sv'),
-                            'last_modified' => $object['LastModified']->format('Y-m-d H:i') . ' UTC',
-                        ];
-                    }
+            foreach ($diskFiles as $diskFile) {
+                $extension = pathinfo($diskFile, PATHINFO_EXTENSION);
+                if (in_array(strtolower($extension), ['tsv'])) { // only TSV files are allowed
+                    $files[] = [
+                        'object' => $diskFile,
+                        'size' => \Illuminate\Support\Number::format($disk->size($diskFile), locale: 'sv'),
+                        'last_modified' => Carbon::createFromTimestamp($disk->lastModified($diskFile))->format('Y-m-d H:i') . ' UTC',
+                    ];
                 }
             }
             return response()->json([
                 'success' => 'The tables have been listed.',
                 'tables' => collect($files)->sortBy('object')->values()->all(),
             ]);
-        } catch (\Aws\S3\Exception\S3Exception $e) {
+        } catch (UnableToListContents|UnableToRetrieveMetadata $e) {
             return response()->json(['error' => __('Unable to list files: ') . $e->getMessage(),]);
         }
     }
 
     public function listTablesColumns(Request $request)
     {
-        $this->validate($request, [
-            'region' => 'required|string|min:0|max:100',
-            'access_key_id' => 'required|string|min:0|max:100',
-            'secret_access_key' => 'required|string|min:0|max:100',
+        $validated = $this->validate($request, [
+            'storage' => ['required', Rule::enum(StorageType::class)],
+            'region' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'access_key_id' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'secret_access_key' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'connection_string' => 'required_if:storage,' . StorageType::AZURE_BLOB_STORAGE->value . '|string|min:0|max:200',
             'input_folder' => 'string|min:0|max:100',
             'output_folder' => 'string|min:0|max:100',
             'tables' => 'required|array|min:1|max:1',
             'tables.*' => 'required|string|min:0|max:250',
         ]);
-        $region = $request->input('region');
-        $accessKeyId = $request->input('access_key_id');
-        $secretAccessKey = $request->input('secret_access_key');
-        $inputFolder = $request->input('input_folder', '');
-        $outputFolder = $request->input('output_folder', '');
-        $tables = collect($request->input('tables', []));
-        $columns = $tables->map(function (string $table) use ($region, $accessKeyId, $secretAccessKey, $inputFolder) {
+        $credentials = TableStorage::credentialsFromOptions($validated);
 
-            $bucket = explode('/', $inputFolder, 2)[0];
-            $s3 = "s3('https://s3.{$region}.amazonaws.com/{$bucket}/{$table}', '{$accessKeyId}', '{$secretAccessKey}', 'TabSeparatedWithNames')";
+        $tables = collect($validated['tables']);
+        $columns = $tables->map(function (string $table) use ($credentials) {
+
+            $clickhouseTable = TableStorage::inClickhouseTableFunction($credentials, $table);
 
             return [
                 'table' => $table,
-                'columns' => ClickhouseLocal::describeTable($s3),
+                'columns' => ClickhouseLocal::describeTable($clickhouseTable),
             ];
         });
         return response()->json([
@@ -726,10 +712,12 @@ class CyberBuddyController extends Controller
 
     public function importTables(Request $request)
     {
-        $this->validate($request, [
-            'region' => 'required|string|min:0|max:100',
-            'access_key_id' => 'required|string|min:0|max:100',
-            'secret_access_key' => 'required|string|min:0|max:100',
+        $validated = $this->validate($request, [
+            'storage' => ['required', Rule::enum(StorageType::class)],
+            'region' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'access_key_id' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'secret_access_key' => 'required_if:storage,' . StorageType::AWS_S3->value . '|string|min:0|max:100',
+            'connection_string' => 'required_if:storage,' . StorageType::AZURE_BLOB_STORAGE->value . '|string|min:0|max:200',
             'input_folder' => 'string|min:0|max:100',
             'output_folder' => 'string|min:0|max:100',
             'tables' => 'required|array|min:1|max:500',
@@ -745,22 +733,10 @@ class CyberBuddyController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        $region = $request->input('region');
-        $accessKeyId = $request->input('access_key_id');
-        $secretAccessKey = $request->input('secret_access_key');
-        $inputFolder = $request->input('input_folder', '');
-        $outputFolder = $request->input('output_folder', '');
-        $tables = collect($request->input('tables', []))->groupBy('table');
-        $copy = $request->boolean('copy', false);
-        $updatable = $request->boolean('updatable', false);
-        $deduplicate = $request->boolean('deduplicate', true);
-        $description = $request->input('description', '');
 
-        foreach ($tables as $table => $columns) {
-            ImportTable::dispatch($user, $region, $accessKeyId, $secretAccessKey, $inputFolder, $outputFolder, $copy, $deduplicate, $updatable, $table, $columns->toArray(), $description);
-        }
+        $count = TableStorage::dispatchImportTable($validated, $user);
         return response()->json([
-            'success' => "{$tables->count()} table will be imported soon.",
+            'success' => "{$count} table will be imported soon.",
         ]);
     }
 

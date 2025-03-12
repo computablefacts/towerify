@@ -82,8 +82,20 @@
   <div class="card step-content">
     <div class="card-body">
       <h5 class="card-title">
-        {{ __('2. What are the credentials for your AWS bucket?') }}
+        {{ __('2.1 Where are the files you want to import?') }}
       </h5>
+      <div class="row mt-2">
+        <div class="col">
+          <div id="storage-kinds-container"></div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
+          <h5>
+            {{ __('2.2 What are the credentials for your AWS S3 Bucket?') }}
+          </h5>
+        </div>
+      </div>
       <div class="row mt-2">
         <div class="col col-2 align-content-center text-end">
           <b>{{ __('Region') }}</b>
@@ -122,6 +134,37 @@
         </div>
         <div class="col">
           <div id="aws-output-folder"></div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col">
+          <h5 class="card-title">
+            {{ __('2.2 What are the credentials for your Azure Blob Storage?') }}
+          </h5>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col col-2 align-content-center text-end">
+          <b>{{ __('Connection String') }}</b>
+        </div>
+        <div class="col">
+          <div id="azure-connection-string"></div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col col-2 align-content-center text-end">
+          <b>{{ __('Input Folder') }}</b>
+        </div>
+        <div class="col">
+          <div id="azure-input-folder"></div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col col-2 align-content-center text-end">
+          <b>{{ __('Output Folder') }}</b>
+        </div>
+        <div class="col">
+          <div id="azure-output-folder"></div>
         </div>
       </div>
       <div class="row mt-2">
@@ -349,6 +392,21 @@
     selected_item: PHYSICAL_TABLE.value,
   });
 
+  const AWS_STORAGE = {
+      label: "{{ __('AWS S3 Bucket') }}", value: 's3'
+  };
+  const AZURE_STORAGE = {
+      label: "{{ __('Azure Blob Storage') }}", value: 'azure'
+  };
+
+  const elStorageType = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'RadioGroup',
+      container: 'storage-kinds-container',
+      inline: false,
+      items: [AWS_STORAGE, AZURE_STORAGE],
+      selected_item: AWS_STORAGE.value,
+  });
+
   const elAwsRegion = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
     type: 'TextInput', container: 'aws-region', placeholder: 'ex. eu-west-3'
   });
@@ -369,6 +427,18 @@
     type: 'TextInput', container: 'aws-output-folder', placeholder: 'ex. my_s3_bucket/out/',
   });
 
+  const elAzureConnectionString = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'TextInput', container: 'azure-connection-string', placeholder: 'ex. DefaultEndpointsProtocol=https;AccountName=my_storage_account;AccountKey=my_account_key;EndpointSuffix=core.windows.net',
+  });
+
+  const elAzureInputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'TextInput', container: 'azure-input-folder', placeholder: 'ex. my_container/in/',
+  });
+
+  const elAzureOutputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'TextInput', container: 'azure-output-folder', placeholder: 'ex. my_container/out/',
+  });
+
   const elAwsVirtualTableName = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
     type: 'TextInput',
     container: 'aws-vtable-name',
@@ -380,15 +450,27 @@
     const elAwsTables = document.getElementById('aws-tables');
     elAwsTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
-    if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
-        const encodedUrl = '/cb/web/tables/' +
-            '?region=' + encodeURIComponent(elAwsRegion.el.value) +
-            '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) +
-            '&secret_access_key=' + encodeURIComponent(elAwsSecretAccessKey.el.value) +
-            '&input_folder=' + encodeURIComponent(elAwsInputFolder.el.value) +
-            '&output_folder=' + encodeURIComponent(elAwsOutputFolder.el.value);
-        axios.get(
-        encodedUrl).then(
+      let encodedUrl;
+      if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+          encodedUrl = '/cb/web/tables/' +
+              '?storage=s3' +
+              '&region=' + encodeURIComponent(elAwsRegion.el.value) +
+              '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) +
+              '&secret_access_key=' + encodeURIComponent(elAwsSecretAccessKey.el.value) +
+              '&input_folder=' + encodeURIComponent(elAwsInputFolder.el.value) +
+              '&output_folder=' + encodeURIComponent(elAwsOutputFolder.el.value);
+      }
+
+      if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+          encodedUrl = '/cb/web/tables/' +
+              '?storage=azure' +
+              '&connection_string=' + encodeURIComponent(elAzureConnectionString.el.value) +
+              '&input_folder=' + encodeURIComponent(elAzureInputFolder.el.value) +
+              '&output_folder=' + encodeURIComponent(elAzureOutputFolder.el.value);
+      }
+
+      if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
+        axios.get(encodedUrl).then(
         response => {
           if (response.data.success) {
             if (!response.data.tables || response.data.tables.length === 0) {
@@ -433,14 +515,30 @@
     const elAwsTablesColumns = document.getElementById('aws-tables-columns');
     elAwsTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
-    axios.post('/cb/web/tables/columns', {
-      region: elAwsRegion.el.value,
-      access_key_id: elAwsAccessKeyId.el.value,
-      secret_access_key: elAwsSecretAccessKey.el.value,
-      input_folder: elAwsInputFolder.el.value,
-      output_folder: elAwsOutputFolder.el.value,
-      tables: tables,
-    }).then(response => {
+      let postProperties;
+      if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+          postProperties = {
+              storage: 's3',
+              region: elAwsRegion.el.value,
+              access_key_id: elAwsAccessKeyId.el.value,
+              secret_access_key: elAwsSecretAccessKey.el.value,
+              input_folder: elAwsInputFolder.el.value,
+              output_folder: elAwsOutputFolder.el.value,
+              tables: tables,
+          }
+      }
+
+      if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+          postProperties = {
+              storage: 'azure',
+              connection_string: elAzureConnectionString.el.value,
+              input_folder: elAzureInputFolder.el.value,
+              output_folder: elAzureOutputFolder.el.value,
+              tables: tables,
+          }
+      }
+
+      axios.post('/cb/web/tables/columns', postProperties).then(response => {
       if (response.data.success) {
         if (!response.data.tables || response.data.tables.length === 0) {
           elAwsTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('No columns found.') }}</td></tr>";
@@ -492,18 +590,38 @@
     const copy = document.getElementById('toggle-copy').checked === true;
     const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
 
-    axios.post('/cb/web/tables/import', {
-      region: elAwsRegion.el.value,
-      access_key_id: elAwsAccessKeyId.el.value,
-      secret_access_key: elAwsSecretAccessKey.el.value,
-      input_folder: elAwsInputFolder.el.value,
-      output_folder: elAwsOutputFolder.el.value,
-      tables: tables,
-      updatable: updatable,
-      copy: copy,
-      deduplicate: deduplicate,
-      description: description,
-    }).then(response => {
+      let postProperties;
+      if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+          postProperties = {
+              storage: 's3',
+              region: elAwsRegion.el.value,
+              access_key_id: elAwsAccessKeyId.el.value,
+              secret_access_key: elAwsSecretAccessKey.el.value,
+              input_folder: elAwsInputFolder.el.value,
+              output_folder: elAwsOutputFolder.el.value,
+              tables: tables,
+              updatable: updatable,
+              copy: copy,
+              deduplicate: deduplicate,
+              description: description,
+          }
+      }
+
+      if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+          postProperties = {
+              storage: 'azure',
+              connection_string: elAzureConnectionString.el.value,
+              input_folder: elAzureInputFolder.el.value,
+              output_folder: elAzureOutputFolder.el.value,
+              tables: tables,
+              updatable: updatable,
+              copy: copy,
+              deduplicate: deduplicate,
+              description: description,
+          }
+      }
+
+      axios.post('/cb/web/tables/import', postProperties).then(response => {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
