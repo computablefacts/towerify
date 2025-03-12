@@ -35,6 +35,10 @@ class EndVulnsScanListener extends AbstractListener
             Log::warning("Vulns scan has been removed : {$event->scanId}");
             return;
         }
+        if ($scan->vulnsScanHasEnded()) {
+            Log::warning("Vulns scan has ended : {$event->scanId}");
+            return;
+        }
         if (count($taskResult) > 0) {
             $task = $taskResult;
         } else {

@@ -37,6 +37,10 @@ class EndPortsScanListener extends AbstractListener
             Log::warning("Asset has been removed : {$event->assetId}");
             return;
         }
+        if ($scan->portsScanHasEnded()) {
+            Log::warning("Ports scan has ended : {$event->scanId}");
+            return;
+        }
         if (count($taskResult) > 0) {
             $ports = collect($taskResult);
         } else {
