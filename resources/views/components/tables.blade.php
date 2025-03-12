@@ -74,7 +74,7 @@
       </div>
       <div class="row mt-2">
         <div class="col text-center">
-          <button class="btn btn-primary next-button" data-next="2">{{ __('Next >') }}</button>
+          <button class="btn btn-primary next-button" data-next="2">{{ __('Next step >') }}</button>
         </div>
       </div>
     </div>
@@ -169,8 +169,8 @@
       </div>
       <div class="row mt-2">
         <div class="col text-center">
-          <button class="btn btn-primary prev-button" data-prev="1">{{ __('< Previous') }}</button>
-          <button class="btn btn-primary next-button" data-next="3">{{ __('Next >') }}</button>
+          <button class="btn btn-primary prev-button" data-prev="1">{{ __('< Previous step') }}</button>
+          <button class="btn btn-primary next-button" data-next="3">{{ __('Next step >') }}</button>
         </div>
       </div>
     </div>
@@ -199,8 +199,8 @@
       </div>
       <div class="row mt-2">
         <div class="col text-center">
-          <button class="btn btn-primary prev-button" data-prev="2">{{ __('Previous') }}</button>
-          <button id="get-columns" class="btn btn-primary next-button" data-next="4">{{ __('Next >') }}</button>
+          <button class="btn btn-primary prev-button" data-prev="2">{{ __('< Previous step') }}</button>
+          <button id="get-columns" class="btn btn-primary next-button" data-next="4">{{ __('Next step >') }}</button>
         </div>
       </div>
     </div>
@@ -262,8 +262,8 @@
       </div>
       <div class="row mt-2">
         <div class="col text-center">
-          <button class="btn btn-primary prev-button" data-prev="3">{{ __('Previous') }}</button>
-          <button id="import-tables" class="btn btn-primary next-button" data-next="6">{{ __('Next') }}</button>
+          <button class="btn btn-primary prev-button" data-prev="3">{{ __('< Previous step') }}</button>
+          <button id="import-tables" class="btn btn-primary next-button" data-next="6">{{ __('Next step >') }}</button>
         </div>
       </div>
     </div>
@@ -299,8 +299,8 @@
       </div>
       <div class="row mt-2">
         <div class="col text-center">
-          <button class="btn btn-primary prev-button" data-prev="1">{{ __('Previous') }}</button>
-          <button id="create-vtable" class="btn btn-primary next-button" data-next="6">{{ __('Next') }}</button>
+          <button class="btn btn-primary prev-button" data-prev="1">{{ __('< Previous step') }}</button>
+          <button id="create-vtable" class="btn btn-primary next-button" data-next="6">{{ __('Next step >') }}</button>
         </div>
       </div>
     </div>
