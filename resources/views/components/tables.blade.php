@@ -40,6 +40,10 @@
     display: block;
   }
 
+  .hidden {
+    display: none;
+  }
+
 </style>
 <div class="steps mb-2">
   <div class="step active" data-step="1">
@@ -89,82 +93,86 @@
           <div id="storage-kinds-container"></div>
         </div>
       </div>
-      <div class="row mt-2">
-        <div class="col">
-          <h5>
-            {{ __('2.2 What are the credentials for your AWS S3 Bucket?') }}
-          </h5>
+      <div id="aws-settings">
+        <div class="row mt-2">
+          <div class="col">
+            <h5>
+              {{ __('2.2 What are the credentials for your AWS S3 Bucket?') }}
+            </h5>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col col-2 align-content-center text-end">
+            <b>{{ __('Region') }}</b>
+          </div>
+          <div class="col">
+            <div id="aws-region"></div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col col-2 align-content-center text-end">
+            <b>{{ __('Access Key Id') }}</b>
+          </div>
+          <div class="col">
+            <div id="aws-access-key-id"></div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col col-2 align-content-center text-end">
+            <b>{{ __('Secret Access Key') }}</b>
+          </div>
+          <div class="col">
+            <div id="aws-secret-access-key"></div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col col-2 align-content-center text-end">
+            <b>{{ __('Input Folder') }}</b>
+          </div>
+          <div class="col">
+            <div id="aws-input-folder"></div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col col-2 align-content-center text-end">
+            <b>{{ __('Output Folder') }}</b>
+          </div>
+          <div class="col">
+            <div id="aws-output-folder"></div>
+          </div>
         </div>
       </div>
-      <div class="row mt-2">
-        <div class="col col-2 align-content-center text-end">
-          <b>{{ __('Region') }}</b>
+      <div id="azure-settings" class="hidden">
+        <div class="row mt-2">
+          <div class="col">
+            <h5 class="card-title">
+              {{ __('2.2 What are the credentials for your Azure Blob Storage?') }}
+            </h5>
+          </div>
         </div>
-        <div class="col">
-          <div id="aws-region"></div>
+        <div class="row mt-2">
+          <div class="col col-2 align-content-center text-end">
+            <b>{{ __('Connection String') }}</b>
+          </div>
+          <div class="col">
+            <div id="azure-connection-string"></div>
+          </div>
         </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col col-2 align-content-center text-end">
-          <b>{{ __('Access Key Id') }}</b>
+        <div class="row mt-2">
+          <div class="col col-2 align-content-center text-end">
+            <b>{{ __('Input Folder') }}</b>
+          </div>
+          <div class="col">
+            <div id="azure-input-folder"></div>
+          </div>
         </div>
-        <div class="col">
-          <div id="aws-access-key-id"></div>
-        </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col col-2 align-content-center text-end">
-          <b>{{ __('Secret Access Key') }}</b>
-        </div>
-        <div class="col">
-          <div id="aws-secret-access-key"></div>
-        </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col col-2 align-content-center text-end">
-          <b>{{ __('Input Folder') }}</b>
-        </div>
-        <div class="col">
-          <div id="aws-input-folder"></div>
-        </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col col-2 align-content-center text-end">
-          <b>{{ __('Output Folder') }}</b>
-        </div>
-        <div class="col">
-          <div id="aws-output-folder"></div>
-        </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col">
-          <h5 class="card-title">
-            {{ __('2.2 What are the credentials for your Azure Blob Storage?') }}
-          </h5>
-        </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col col-2 align-content-center text-end">
-          <b>{{ __('Connection String') }}</b>
-        </div>
-        <div class="col">
-          <div id="azure-connection-string"></div>
-        </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col col-2 align-content-center text-end">
-          <b>{{ __('Input Folder') }}</b>
-        </div>
-        <div class="col">
-          <div id="azure-input-folder"></div>
-        </div>
-      </div>
-      <div class="row mt-2">
-        <div class="col col-2 align-content-center text-end">
-          <b>{{ __('Output Folder') }}</b>
-        </div>
-        <div class="col">
-          <div id="azure-output-folder"></div>
+        <div class="row mt-2">
+          <div class="col col-2 align-content-center text-end">
+            <b>{{ __('Output Folder') }}</b>
+          </div>
+          <div class="col">
+            <div id="azure-output-folder"></div>
+          </div>
         </div>
       </div>
       <div class="row mt-2">
@@ -367,7 +375,7 @@
   });
 
   const goToStep = (stepIndex) => {
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
     if (stepIndex === 1 /* 0-based */ && elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
       stepIndex = 4; // 0-based, when next is clicked bypass steps 2, 3 and 4
     }
@@ -394,18 +402,37 @@
   });
 
   const AWS_STORAGE = {
-      label: "{{ __('AWS S3 Bucket') }}", value: 's3'
+    label: "{{ __('AWS S3 Bucket') }}", value: 's3'
   };
   const AZURE_STORAGE = {
-      label: "{{ __('Azure Blob Storage') }}", value: 'azure'
+    label: "{{ __('Azure Blob Storage') }}", value: 'azure'
   };
 
   const elStorageType = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-      type: 'RadioGroup',
-      container: 'storage-kinds-container',
-      inline: false,
-      items: [AWS_STORAGE, AZURE_STORAGE],
-      selected_item: AWS_STORAGE.value,
+    type: 'RadioGroup',
+    container: 'storage-kinds-container',
+    inline: false,
+    items: [AWS_STORAGE, AZURE_STORAGE],
+    selected_item: AWS_STORAGE.value,
+  });
+
+  const storageTypeButtons = document.querySelectorAll('#storage-kinds-container input');
+  const awsSettings = document.getElementById('aws-settings');
+  const azureSettings = document.getElementById('azure-settings');
+
+  storageTypeButtons.forEach(button => {
+    button.addEventListener('change', () => {
+      if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+        console.log('AWS_STORAGE selected')
+        azureSettings.classList.add('hidden')
+        awsSettings.classList.remove('hidden')
+      }
+      if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+        console.log('AZURE_STORAGE selected')
+        awsSettings.classList.add('hidden')
+        azureSettings.classList.remove('hidden')
+      }
+    });
   });
 
   const elAwsRegion = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
@@ -429,15 +456,17 @@
   });
 
   const elAzureConnectionString = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-      type: 'TextInput', container: 'azure-connection-string', placeholder: 'ex. DefaultEndpointsProtocol=https;AccountName=my_storage_account;AccountKey=my_account_key;EndpointSuffix=core.windows.net',
+    type: 'TextInput',
+    container: 'azure-connection-string',
+    placeholder: 'ex. DefaultEndpointsProtocol=https;AccountName=my_storage_account;AccountKey=my_account_key;EndpointSuffix=core.windows.net',
   });
 
   const elAzureInputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-      type: 'TextInput', container: 'azure-input-folder', placeholder: 'ex. my_container/in/',
+    type: 'TextInput', container: 'azure-input-folder', placeholder: 'ex. my_container/in/',
   });
 
   const elAzureOutputFolder = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-      type: 'TextInput', container: 'azure-output-folder', placeholder: 'ex. my_container/out/',
+    type: 'TextInput', container: 'azure-output-folder', placeholder: 'ex. my_container/out/',
   });
 
   const elVirtualTableName = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
@@ -451,34 +480,34 @@
     const elListTables = document.getElementById('list-tables');
     elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
-      let encodedUrl;
-      if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
-          encodedUrl = '/cb/web/tables/' +
-              '?storage=s3' +
-              '&region=' + encodeURIComponent(elAwsRegion.el.value) +
-              '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) +
-              '&secret_access_key=' + encodeURIComponent(elAwsSecretAccessKey.el.value) +
-              '&input_folder=' + encodeURIComponent(elAwsInputFolder.el.value) +
-              '&output_folder=' + encodeURIComponent(elAwsOutputFolder.el.value);
-      }
+    let encodedUrl;
+    if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+      encodedUrl = '/cb/web/tables/' +
+          '?storage=s3' +
+          '&region=' + encodeURIComponent(elAwsRegion.el.value) +
+          '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) +
+          '&secret_access_key=' + encodeURIComponent(elAwsSecretAccessKey.el.value) +
+          '&input_folder=' + encodeURIComponent(elAwsInputFolder.el.value) +
+          '&output_folder=' + encodeURIComponent(elAwsOutputFolder.el.value);
+    }
 
-      if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
-          encodedUrl = '/cb/web/tables/' +
-              '?storage=azure' +
-              '&connection_string=' + encodeURIComponent(elAzureConnectionString.el.value) +
-              '&input_folder=' + encodeURIComponent(elAzureInputFolder.el.value) +
-              '&output_folder=' + encodeURIComponent(elAzureOutputFolder.el.value);
-      }
+    if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+      encodedUrl = '/cb/web/tables/' +
+          '?storage=azure' +
+          '&connection_string=' + encodeURIComponent(elAzureConnectionString.el.value) +
+          '&input_folder=' + encodeURIComponent(elAzureInputFolder.el.value) +
+          '&output_folder=' + encodeURIComponent(elAzureOutputFolder.el.value);
+    }
 
-      if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
-        axios.get(encodedUrl).then(
-        response => {
-          if (response.data.success) {
-            if (!response.data.tables || response.data.tables.length === 0) {
-              elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('No files found.') }}</td></tr>";
-            } else {
-              const rows = response.data.tables.map(table => {
-                return `
+    if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
+      axios.get(encodedUrl).then(
+          response => {
+            if (response.data.success) {
+              if (!response.data.tables || response.data.tables.length === 0) {
+                elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('No files found.') }}</td></tr>";
+              } else {
+                const rows = response.data.tables.map(table => {
+                  return `
                 <tr>
                   <td><input type="checkbox" value="${table.object}" data-file="${table.object}"/></td>
                   <td>${table.object}</td>
@@ -486,16 +515,16 @@
                   <td class="text-end">${table.last_modified}</td>
                 </tr>
               `;
-              });
-              elListTables.innerHTML = rows.join('');
+                });
+                elListTables.innerHTML = rows.join('');
+              }
+            } else if (response.data.error) {
+              toaster.toastError(response.data.error);
+            } else {
+              console.log(response.data);
             }
-          } else if (response.data.error) {
-            toaster.toastError(response.data.error);
-          } else {
-            console.log(response.data);
-          }
-        })
-      .catch(error => toaster.toastAxiosError(error));
+          })
+          .catch(error => toaster.toastAxiosError(error));
     } else if (elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
       // TODO
     } else {
@@ -516,30 +545,30 @@
     const elTablesColumns = document.getElementById('tables-columns');
     elTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
-      let postProperties;
-      if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
-          postProperties = {
-              storage: 's3',
-              region: elAwsRegion.el.value,
-              access_key_id: elAwsAccessKeyId.el.value,
-              secret_access_key: elAwsSecretAccessKey.el.value,
-              input_folder: elAwsInputFolder.el.value,
-              output_folder: elAwsOutputFolder.el.value,
-              tables: tables,
-          }
+    let postProperties;
+    if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+      postProperties = {
+        storage: 's3',
+        region: elAwsRegion.el.value,
+        access_key_id: elAwsAccessKeyId.el.value,
+        secret_access_key: elAwsSecretAccessKey.el.value,
+        input_folder: elAwsInputFolder.el.value,
+        output_folder: elAwsOutputFolder.el.value,
+        tables: tables,
       }
+    }
 
-      if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
-          postProperties = {
-              storage: 'azure',
-              connection_string: elAzureConnectionString.el.value,
-              input_folder: elAzureInputFolder.el.value,
-              output_folder: elAzureOutputFolder.el.value,
-              tables: tables,
-          }
+    if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+      postProperties = {
+        storage: 'azure',
+        connection_string: elAzureConnectionString.el.value,
+        input_folder: elAzureInputFolder.el.value,
+        output_folder: elAzureOutputFolder.el.value,
+        tables: tables,
       }
+    }
 
-      axios.post('/cb/web/tables/columns', postProperties).then(response => {
+    axios.post('/cb/web/tables/columns', postProperties).then(response => {
       if (response.data.success) {
         if (!response.data.tables || response.data.tables.length === 0) {
           elTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('No columns found.') }}</td></tr>";
@@ -565,8 +594,7 @@
       } else {
         console.log(response.data);
       }
-    })
-    .catch(error => toaster.toastAxiosError(error));
+    }).catch(error => toaster.toastAxiosError(error));
 
     return true;
   };
@@ -576,7 +604,7 @@
     const description = document.getElementById('table-description').value;
     const checkboxes = Array.from(document.querySelectorAll('#tables-columns input[type="checkbox"]:checked'));
     const tables = checkboxes.map(
-      checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
+        checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
 
     if (tables.length === 0) {
       toaster.toastError("{{ __('Please select the table to import.') }}");
@@ -591,38 +619,38 @@
     const copy = document.getElementById('toggle-copy').checked === true;
     const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
 
-      let postProperties;
-      if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
-          postProperties = {
-              storage: 's3',
-              region: elAwsRegion.el.value,
-              access_key_id: elAwsAccessKeyId.el.value,
-              secret_access_key: elAwsSecretAccessKey.el.value,
-              input_folder: elAwsInputFolder.el.value,
-              output_folder: elAwsOutputFolder.el.value,
-              tables: tables,
-              updatable: updatable,
-              copy: copy,
-              deduplicate: deduplicate,
-              description: description,
-          }
+    let postProperties;
+    if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+      postProperties = {
+        storage: 's3',
+        region: elAwsRegion.el.value,
+        access_key_id: elAwsAccessKeyId.el.value,
+        secret_access_key: elAwsSecretAccessKey.el.value,
+        input_folder: elAwsInputFolder.el.value,
+        output_folder: elAwsOutputFolder.el.value,
+        tables: tables,
+        updatable: updatable,
+        copy: copy,
+        deduplicate: deduplicate,
+        description: description,
       }
+    }
 
-      if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
-          postProperties = {
-              storage: 'azure',
-              connection_string: elAzureConnectionString.el.value,
-              input_folder: elAzureInputFolder.el.value,
-              output_folder: elAzureOutputFolder.el.value,
-              tables: tables,
-              updatable: updatable,
-              copy: copy,
-              deduplicate: deduplicate,
-              description: description,
-          }
+    if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+      postProperties = {
+        storage: 'azure',
+        connection_string: elAzureConnectionString.el.value,
+        input_folder: elAzureInputFolder.el.value,
+        output_folder: elAzureOutputFolder.el.value,
+        tables: tables,
+        updatable: updatable,
+        copy: copy,
+        deduplicate: deduplicate,
+        description: description,
       }
+    }
 
-      axios.post('/cb/web/tables/import', postProperties).then(response => {
+    axios.post('/cb/web/tables/import', postProperties).then(response => {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
@@ -656,7 +684,7 @@
     }
 
     axios.post(`/cb/web/tables/query`,
-      {query: sql, store: true, name: name, materialize: materialize, description: description}).then(response => {
+        {query: sql, store: true, name: name, materialize: materialize, description: description}).then(response => {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
@@ -664,8 +692,7 @@
       } else {
         console.log(response.data);
       }
-    })
-    .catch(error => toaster.toastAxiosError(error));
+    }).catch(error => toaster.toastAxiosError(error));
 
     return true;
   };
