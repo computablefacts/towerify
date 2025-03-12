@@ -367,6 +367,7 @@
   });
 
   const goToStep = (stepIndex) => {
+    window.scrollTo(0,0);
     if (stepIndex === 1 /* 0-based */ && elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
       stepIndex = 4; // 0-based, when next is clicked bypass steps 2, 3 and 4
     }
