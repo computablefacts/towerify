@@ -147,8 +147,7 @@ class TableStorage
 
     private static function inClickhouseTableFunctionS3(array $credentials, string $tableName): string
     {
-        $bucket = explode('/', $credentials['input_folder'], 2)[0];
-        return "s3('https://s3.{$credentials['region']}.amazonaws.com/$bucket/$tableName', "
+        return "s3('https://s3.{$credentials['region']}.amazonaws.com/{$credentials['input_folder']}/$tableName', "
             . "'{$credentials['access_key_id']}', '{$credentials['secret_access_key']}', 'TabSeparatedWithNames')";
     }
 
