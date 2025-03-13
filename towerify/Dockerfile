@@ -47,7 +47,21 @@ RUN apt-get update && apt-get install -y \
     dnsutils \
     wget \
     jq \
-    ffmpeg
+    ffmpeg \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg
+
+# Install clickhouse-client
+# See: https://clickhouse.com/docs/install#setup-the-debian-repository
+RUN curl -fsSL 'https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key' | gpg --dearmor -o /usr/share/keyrings/clickhouse-keyring.gpg \
+    && ARCH=$(dpkg --print-architecture) \
+    && echo "deb [signed-by=/usr/share/keyrings/clickhouse-keyring.gpg arch=${ARCH}] https://packages.clickhouse.com/deb stable main" | tee /etc/apt/sources.list.d/clickhouse.list \
+    && apt-get update \
+    && apt-get install -y clickhouse-client \
+    && clickhouse-client --version \
+    && clickhouse-local --version
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
