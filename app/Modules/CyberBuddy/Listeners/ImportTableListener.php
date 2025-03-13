@@ -158,7 +158,7 @@ class ImportTableListener extends AbstractListener
             $tbl->nb_rows = ClickhouseClient::numberOfRows($normalizedTableName) ?? 0;
             $tbl->save();
 
-            TableStorage::deleteOldOutFiles($credentials, $normalizedTableName);
+            TableStorage::deleteOldOutFiles($credentials, $normalizedTableName, 10);
 
             // TODO : create tmp_* view in clickhouse server for backward compatibility
 
