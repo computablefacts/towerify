@@ -1,7 +1,7 @@
 #
 # PHP Dependencies
 #
-FROM composer:2 as vendor
+FROM composer:2 AS vendor
 
 # Needed dependencies from composer.json
 COPY composer.json composer.lock ./
@@ -21,7 +21,7 @@ RUN composer install \
 #
 # Frontend
 #
-FROM node:18 as frontend
+FROM node:18 AS frontend
 
 COPY --chown=www-data:www-data . /app
 # Add composer dependencies
@@ -38,9 +38,9 @@ RUN npm run prod
 #
 # Application
 #
-FROM php:8.3-apache as final
+FROM php:8.3-apache AS final
 
-MAINTAINER Patrick Brisacier <pbrisacier@mncc.fr>
+LABEL maintainer="Patrick Brisacier <pbrisacier@mncc.fr>"
 
 RUN apt-get update && apt-get install -y \
     poppler-utils \
