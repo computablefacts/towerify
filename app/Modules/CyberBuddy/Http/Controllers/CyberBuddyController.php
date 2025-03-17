@@ -753,7 +753,7 @@ class CyberBuddyController extends Controller
                     'nb_columns' => count($table->schema),
                     'description' => $table->description,
                     'last_update' => $table->finished_at ? $table->finished_at->format('Y-m-d H:i') : '',
-                    'last_error' => $table->last_error ?? '',
+                    'status' => $table->status(),
                 ]),
         ]);
     }

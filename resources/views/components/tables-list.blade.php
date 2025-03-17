@@ -6,7 +6,7 @@
     <th class="text-end">{{ __('Number of Columns') }}</th>
     <th>{{ __('Description') }}</th>
     <th>{{ __('Last Update') }}</th>
-    <th>{{ __('Last Error') }}</th>
+    <th>{{ __('Status') }}</th>
   </tr>
   </thead>
   <tbody id="databases-and-tables">
@@ -34,7 +34,7 @@
                   <td class="text-end">${table.nb_columns}</td>
                   <td>${table.description}</td>
                   <td>${table.last_update}</td>
-                  <td>${table.last_error}</td>
+                  <td>${table.status}</td>
                 </tr>
               `;
           });

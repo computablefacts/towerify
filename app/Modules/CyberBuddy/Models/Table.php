@@ -70,4 +70,18 @@ class Table extends Model
             set: fn(array $value) => TwHasher::hash(json_encode($value))
         );
     }
+
+    public function status(): string
+    {
+        if ($this->last_error) {
+            return 'Error: ' . $this->last_error;
+        }
+        if ($this->started_at && !$this->finished_at) {
+            return 'Importing...';
+        }
+        if ($this->started_at && $this->finished_at) {
+            return 'Imported';
+        }
+        return '';
+    }
 }
