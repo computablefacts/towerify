@@ -34,7 +34,9 @@
                   <td class="text-end">${table.nb_columns}</td>
                   <td>${table.description}</td>
                   <td>${table.last_update}</td>
-                  <td>${table.status}</td>
+                  <td>
+                    <span class="lozenge new">${table.status}</span>
+                  </td>
                 </tr>
               `;
           });
