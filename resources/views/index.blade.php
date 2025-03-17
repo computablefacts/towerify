@@ -40,7 +40,7 @@
                :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
   @if($tab === 'tables')
-  <x-tables :step="request()->input('step') ? request()->input('step') : ''"/>
+  <x-tables/>
   @endif
   @if($tab === 'tables-add')
   <x-tables-add :step="request()->input('step') ? request()->input('step') : ''"/>

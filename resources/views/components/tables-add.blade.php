@@ -325,7 +325,7 @@
       </div>
       <div class="row mt-2">
         <div class="col text-center">
-          <button class="btn btn-primary prev-button" data-prev="1">{{ __('New import') }}</button>
+          <a class="btn btn-primary" href="{{ route('home', ['tab' => 'tables']) }}">{{ __('Back to tables list') }}</a>
         </div>
       </div>
     </div>
