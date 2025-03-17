@@ -124,7 +124,7 @@ if [ -f /etc/os-release ]; then
           done | sort | uniq -c | awk '$1 >= 3' | sort -nr | gzip -c >/opt/logparser/nginx.txt.gz
           
           if [ -f /opt/logparser/nginx.txt.gz ]; then
-            curl -X POST \
+            curl --silent -X POST \
               -H "Content-Type: multipart/form-data" \
               -F "data=@/opt/logparser/nginx.txt.gz" \
               {$url}/logparser/{$server->secret}
@@ -170,7 +170,7 @@ if [ -f /etc/os-release ]; then
           done | sort | uniq -c | awk '$1 >= 3' | sort -nr | gzip -c >/opt/logparser/apache.txt.gz
           
           if [ -f /opt/logparser/apache.txt.gz ]; then
-            curl -X POST \
+            curl --silent -X POST \
               -H "Content-Type: multipart/form-data" \
               -F "data=@/opt/logparser/apache.txt.gz" \
               {$url}/logparser/{$server->secret}
