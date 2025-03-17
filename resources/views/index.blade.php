@@ -42,6 +42,9 @@
   @if($tab === 'tables')
   <x-tables :step="request()->input('step') ? request()->input('step') : ''"/>
   @endif
+  @if($tab === 'tables-add')
+  <x-tables-add :step="request()->input('step') ? request()->input('step') : ''"/>
+  @endif
   @if($tab === 'chunks')
   <x-chunks :collection="request()->input('collection') ? request()->input('collection') : ''"
             :file="request()->input('file') ? request()->input('file') : ''"
