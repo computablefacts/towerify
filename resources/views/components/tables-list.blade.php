@@ -1,22 +1,18 @@
-<div class="row mt-2">
-  <div class="col">
-    <table class="table">
-      <thead>
-      <tr>
-        <th>{{ __('Table') }}</th>
-        <th class="text-end">{{ __('Number of Rows') }}</th>
-        <th class="text-end">{{ __('Number of Columns') }}</th>
-        <th>{{ __('Description') }}</th>
-        <th>{{ __('Last Update') }}</th>
-        <th>{{ __('Last Error') }}</th>
-      </tr>
-      </thead>
-      <tbody id="databases-and-tables">
-      <!-- FILLED DYNAMICALLY -->
-      </tbody>
-    </table>
-  </div>
-</div>
+<table class="table table-hover no-bottom-margin">
+  <thead>
+  <tr>
+    <th>{{ __('Table') }}</th>
+    <th class="text-end">{{ __('Number of Rows') }}</th>
+    <th class="text-end">{{ __('Number of Columns') }}</th>
+    <th>{{ __('Description') }}</th>
+    <th>{{ __('Last Update') }}</th>
+    <th>{{ __('Last Error') }}</th>
+  </tr>
+  </thead>
+  <tbody id="databases-and-tables">
+  <!-- FILLED DYNAMICALLY -->
+  </tbody>
+</table>
 <script>
 
   const elDatabasesAndTables = document.getElementById('databases-and-tables');
@@ -50,7 +46,7 @@
         console.log(response.data);
       }
     })
-    .catch(error => toaster.toastAxiosError(error));
+        .catch(error => toaster.toastAxiosError(error));
   });
 
 </script>

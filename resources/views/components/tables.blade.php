@@ -8,11 +8,7 @@
       </h6>
     </div>
   </div>
-  <div class="card-body">
-    <div class="row">
-      <div class="col">
-        <x-tables-list/>
-      </div>
-    </div>
+  <div class="card-body p-0">
+    <x-tables-list/>
   </div>
 </div>
