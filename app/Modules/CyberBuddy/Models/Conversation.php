@@ -15,10 +15,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property string dom
  * @property boolean autosaved
  * @property int created_by
+ * @property int format
  */
 class Conversation extends Model
 {
     use HasFactory, HasTenant;
+
+    const int FORMAT_V0 = 0; // dom contains DOM
+    const int FORMAT_V1 = 1; // dom contains JSON
 
     protected $table = 'cb_conversations';
 
@@ -27,11 +31,21 @@ class Conversation extends Model
         'dom',
         'autosaved',
         'created_by',
+        'format',
     ];
 
     protected $casts = [
         'autosaved' => 'boolean',
+        'format' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function thread(): string|array
+    {
+        return match ($this->format) {
+            self::FORMAT_V1 => json_decode($this->dom, true),
+            default => $this->dom,
+        };
+    }
 }

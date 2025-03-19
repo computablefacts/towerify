@@ -40,6 +40,7 @@ use League\Flysystem\UnableToListContents;
 use League\Flysystem\UnableToRetrieveMetadata;
 use Symfony\Component\Process\Process;
 
+/** @deprecated */
 class CyberBuddyController extends Controller
 {
     public function __construct()
@@ -749,7 +750,7 @@ class CyberBuddyController extends Controller
                 ->get()
                 ->map(fn(Table $table) => [
                     'name' => $table->name,
-                    'nb_rows' => \Illuminate\Support\Number::format($table->nb_rows, locale:'sv'),
+                    'nb_rows' => \Illuminate\Support\Number::format($table->nb_rows, locale: 'sv'),
                     'nb_columns' => count($table->schema),
                     'description' => $table->description,
                     'last_update' => $table->finished_at ? $table->finished_at->format('Y-m-d H:i') : '',

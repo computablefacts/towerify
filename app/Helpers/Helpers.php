@@ -233,6 +233,11 @@ if (!function_exists('app_sidebar')) {
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ama',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_CYBERBUDDY),
                         ], [
+                            'label' => __('CyberBuddy (nextgen)'),
+                            'route' => route('home', ['tab' => 'ama2']),
+                            'active' => request()->route()->named('home') && request()->get('tab') === 'ama2',
+                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_CYBERBUDDY),
+                        ], [
                             'label' => __('Conversations'),
                             'route' => route('home', ['tab' => 'conversations']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'conversations',

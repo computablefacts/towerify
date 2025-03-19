@@ -37,6 +37,8 @@
     <div class="bd-main-content">
       @if(isset($tab) && $tab === 'ama')
       @include('modules.cyber-buddy.widget')
+      @elseif(isset($tab) && $tab === 'ama2')
+      @include('modules.cyber-buddy.assistant')
       @else
       <div class="bd-content py-3">
         @if(Auth::user() && Auth::user()->isBarredFromAccessingTheApp())

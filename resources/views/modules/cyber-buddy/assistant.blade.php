@@ -1,0 +1,720 @@
+@php
+$conversation = \App\Modules\CyberBuddy\Models\Conversation::create([
+'thread_id' => \Illuminate\Support\Str::random(10),
+'dom' => json_encode([]),
+'autosaved' => true,
+'created_by' => Auth::user()?->id,
+'format' => \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V1,
+]);
+@endphp
+<style>
+  .tw-wrapper1 {
+    color: rgb(2, 8, 23);
+    flex-direction: column;
+    flex-grow: 1;
+    padding-top: 4rem;
+    display: flex;
+    overflow: hidden;
+    background-color: rgb(243, 244, 246);
+    height: calc(100vh - 57px);
+  }
+
+  .tw-wrapper2 {
+    background-color: rgb(249, 250, 251);
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: auto
+  }
+
+  .tw-chat {
+    background-color: rgb(255, 255, 255);
+    flex-direction: column;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    border-width: 2px;
+    border-color: rgb(226, 232, 240);
+    border-style: solid;
+    border-radius: 8px
+  }
+
+  .tw-chat-header {
+    flex-direction: column;
+    padding: 1rem;
+    display: flex;
+    font-size: 24px;
+    font-weight: 600
+  }
+
+  .tw-chat-wrapper {
+    align-items: center;
+    padding: 1rem;
+    display: flex;
+    width: 80%;
+    margin: auto;
+  }
+
+  .tw-chat-footer {
+    flex-direction: column;
+    display: flex;
+    width: 100%
+  }
+
+  .tw-chat-footer-input {
+    cursor: text;
+    flex-grow: 1;
+    font-size: 14px;
+    padding-bottom: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.5rem;
+    display: flex;
+    width: 100%;
+    height: 2.5rem;
+    border-width: 2px;
+    border-color: rgb(226, 232, 240);
+    border-style: solid;
+    border-radius: 6px
+  }
+
+  .tw-chat-footer-input:focus {
+    outline: 2px solid black;
+    outline-offset: 2px;
+  }
+
+  .tw-chat-footer-wrapper {
+    display: flex;
+    margin-top: .5rem;
+    margin-bottom: 0
+  }
+
+  .tw-chat-footer-upload {
+    color: black;
+    align-items: center;
+    cursor: pointer;
+    justify-content: center;
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-width: 0;
+    border-radius: 6px;
+  }
+
+  .tw-chat-footer-upload:hover {
+    color: rgb(250, 250, 250);
+    background-color: rgb(68, 74, 238);
+  }
+
+  .tw-chat-footer-upload-svg {
+    width: 1rem;
+    height: 1rem
+  }
+
+  .tw-chat-footer-upload-svg-rect {
+    width: 18px;
+    height: 18px
+  }
+
+  .tw-chat-footer-send {
+    color: rgb(250, 250, 250);
+    background-color: rgb(68, 74, 238);
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    justify-content: center;
+    opacity: 0.5;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    text-align: center;
+    display: inline-flex;
+    width: 100%;
+    height: 2.5rem;
+    margin-left: .5rem;
+    border-radius: 6px;
+    border: unset;
+  }
+
+  .tw-chat-footer-send.bactive {
+    opacity: 1;
+  }
+
+  .tw-chat-footer-send.bactive:hover {
+    background-color: hsl(238 83% 60% / .9);
+  }
+
+  .tw-chat-footer-send-svg {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem
+  }
+
+  .tw-chat-header-title {
+    margin-bottom: 0;
+    color: #fbca3e;
+  }
+
+  .tw-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .tw-conversation-wrapper {
+    flex-grow: 1;
+    overflow: hidden
+  }
+
+  .tw-conversation {
+    padding: 1rem;
+    height: 100%;
+    overflow: hidden;
+    overflow-y: auto;
+  }
+
+  .typing-wrapper {
+    height: 25px;
+    display: flex;
+    align-items: center;
+  }
+
+  .typing {
+    position: relative;
+    margin-left: .5rem;
+  }
+
+  .typing span {
+    content: "";
+    -webkit-animation: blink 1.5s infinite;
+    animation: blink 1.5s infinite;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    height: 10px;
+    width: 10px;
+    background: hsl(238 83% 60% / .9);
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+  }
+
+  .typing span:nth-child(2) {
+    -webkit-animation-delay: 0.2s;
+    animation-delay: 0.2s;
+    margin-left: 15px;
+  }
+
+  .typing span:nth-child(3) {
+    -webkit-animation-delay: 0.4s;
+    animation-delay: 0.4s;
+    margin-left: 30px;
+  }
+
+  @-webkit-keyframes blink {
+    0% {
+      opacity: 0.1;
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.1;
+    }
+  }
+
+  @keyframes blink {
+    0% {
+      opacity: 0.1;
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.1;
+    }
+  }
+
+  @media (min-width: 768px) {
+
+    .tw-wrapper1 {
+      padding: 1rem !important;
+    }
+  }
+
+  @media (min-width: 640px) {
+
+    .tw-chat-footer {
+      flex-direction: row !important;
+    }
+
+    .tw-chat-footer-wrapper {
+      margin-right: 0 !important;
+      margin-left: .5rem !important;
+      margin-top: 0px !important;
+      margin-bottom: 0 !important;
+    }
+
+    .tw-chat-footer-send {
+      width: auto !important;
+    }
+  }
+
+  .tw-question-wrapper {
+    flex-direction: column;
+    display: flex;
+    margin-bottom: 1rem
+  }
+
+  .tw-question {
+    align-items: flex-start;
+    flex-direction: row-reverse;
+    display: flex
+  }
+
+  .tw-question-avatar-wrapper {
+    margin-left: 0.5rem
+  }
+
+  .tw-question-avatar {
+    background-color: rgb(224, 231, 255);
+    border-radius: 10000px;
+    padding: 0.5rem
+  }
+
+  .tw-question-avatar span {
+    display: flex;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 10000px;
+    overflow: hidden
+  }
+
+  .tw-question-avatar img {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+    max-width: 100%
+  }
+
+  .tw-question-directive {
+    color: rgb(0, 0, 0);
+    background-color: rgb(224, 231, 255);
+    display: inline-block;
+    /* max-width: 85%; */
+    margin-left: .5rem;
+    border-radius: 8px;
+    padding: 0.75rem
+  }
+
+  .tw-question-timestamp {
+    color: rgb(107, 114, 128);
+    font-size: 12px;
+    padding-right: 48px;
+    padding-top: 0.5rem;
+    text-align: right;
+  }
+
+  .tw-answer-wrapper {
+    flex-direction: column;
+    display: flex;
+    margin-bottom: 1rem
+  }
+
+  .tw-answer {
+    align-items: flex-start;
+    display: flex
+  }
+
+  .tw-answer-avatar-wrapper {
+    margin-right: 0.5rem;
+    color: rgb(68, 74, 238);
+  }
+
+  .tw-answer-avatar {
+    background-color: rgba(68, 74, 238, 0.1);
+    border-radius: 10000px;
+    padding: 0.5rem;
+  }
+
+  .tw-answer-avatar-svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+  }
+
+  .tw-answer-avatar-svg-rect {
+    width: 16px;
+    height: 12px
+  }
+
+  .tw-answer-message {
+    color: rgb(0, 0, 0);
+    background-color: rgba(68, 74, 238, 0.1);
+    display: inline-block;
+    max-width: 85%;
+    margin-left: .5rem;
+    border-radius: 8px;
+    padding: 0.75rem;
+  }
+
+  .tw-answer-message-paragraph {
+    margin-bottom: 0.5rem
+  }
+
+  .tw-answer-message-html {
+    /* background-color: rgb(255, 255, 255); */
+    margin-top: 1rem;
+    border-radius: 8px;
+    /* padding: 1rem */
+  }
+
+  .tw-answer-timestamp {
+    color: rgb(107, 114, 128);
+    font-size: 12px;
+    padding-left: 48px;
+    padding-top: 0.5rem;
+  }
+
+
+  .tw-answer-table-wrapper {
+    background-color: rgb(255, 255, 255);
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: auto;
+    padding: 1rem;
+    font-size: 14px
+  }
+
+  .tw-answer-table {
+    width: 100%;
+    overflow: auto
+  }
+
+  .tw-answer-table table {
+    border-collapse: collapse;
+    caption-side: bottom;
+    display: table;
+    width: 100%
+  }
+
+  .tw-answer-table table thead {
+    display: table-header-group;
+    color: rgb(100, 116, 139);
+    font-weight: 500
+  }
+
+  .tw-answer-table table tr {
+    border-bottom-width: 2px;
+    display: table-row;
+    border-color: rgb(226, 232, 240);
+    border-style: solid;
+  }
+
+  .tw-answer-table table tbody {
+    display: table-row-group
+  }
+
+  .tw-answer-table table thead tr th {
+    padding-bottom: 2px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 2px;
+    vertical-align: middle;
+    display: table-cell;
+    height: 3rem;
+  }
+
+  .tw-answer-table table thead tr th.left {
+    text-align: left;
+  }
+
+  .tw-answer-table table thead tr th.right {
+    text-align: right;
+  }
+
+  .tw-answer-table table tbody tr td {
+    vertical-align: middle;
+    display: table-cell;
+    padding: 1rem;
+  }
+
+  .tw-answer-table table tbody tr td.left {
+    text-align: left;
+  }
+
+  .tw-answer-table table tbody tr td.right {
+    text-align: right;
+  }
+
+</style>
+<div class="tw-wrapper1">
+  <div class="tw-wrapper2">
+    <div class="tw-chat">
+
+      <!-- HEADER -->
+      <div class="tw-chat-header">
+        <h3 class="tw-chat-header-title">
+          <img alt="Bear" fetchpriority="high" width="250" height="250" decoding="async" data-nimg="1"
+               style="color:transparent;width:50px;height:50px" src="https://www.svgrepo.com/show/10913/bear.svg">
+          CyberBuddy
+        </h3>
+      </div>
+
+      <!-- CONVERSATION -->
+      <div class="tw-conversation-wrapper">
+        <div class="tw-conversation">
+          <!-- DYNAMICALLY FILLED -->
+        </div>
+      </div>
+
+      <!-- INPUT FIELD -->
+      <div class="tw-chat-wrapper">
+        <div class="tw-chat-footer">
+          <input value="" type="text" placeholder="{{ __('Ask me anything!') }}" class="tw-chat-footer-input"/>
+          <div class="tw-chat-footer-wrapper">
+            <button class="tw-chat-footer-upload">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-linecap="round" stroke-linejoin="round" class="tw-chat-footer-upload-svg">
+                <rect height="18" x="3" y="3" rx="2" ry="2" fill="none" stroke="currentColor"
+                      class="tw-chat-footer-upload-svg-rect"></rect>
+                <circle cx="9" cy="9" r="2" fill="none" stroke="currentColor"></circle>
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" fill="none" stroke="currentColor"></path>
+              </svg>
+            </button>
+            <button class="tw-chat-footer-send bactive">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24" viewbox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tw-chat-footer-send-svg">
+                <path
+                  d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+                  fill="none" stroke="currentColor"></path>
+                <path d="m21.854 2.147-10.94 10.939" fill="none" stroke="currentColor"></path>
+              </svg>
+              {{ __('Send') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+
+  let run = 0;
+  let elThinkingDots = null;
+
+  const toggleInput = (enable) => {
+
+    const elInputField = document.querySelector('.tw-chat-footer-input');
+    elInputField.disabled = !enable;
+
+    if (enable) {
+      elInputField.focus();
+    }
+  };
+
+  const toggleButtons = (enable) => {
+
+    const elInputField = document.querySelector('.tw-chat-footer-input');
+    const elUploadButton = document.querySelector('.tw-chat-footer-upload');
+    const elSendButton = document.querySelector('.tw-chat-footer-send');
+
+    if (enable) {
+      elSendButton.disabled = false;
+      elSendButton.classList.remove('tw-disabled');
+    } else {
+      const message = elInputField.value.trim();
+      if (message === '') {
+        elSendButton.disabled = true;
+        elSendButton.classList.add('tw-disabled');
+      }
+    }
+
+    elUploadButton.disabled = true;
+    elUploadButton.classList.add('tw-disabled');
+  };
+
+  const addThinkingDots = () => {
+
+    run++;
+
+    setTimeout(() => {
+      if (run > 0) {
+
+        elThinkingDots = document.createElement('div');
+        elThinkingDots.classList.add('tw-answer-wrapper');
+        elThinkingDots.innerHTML = `
+          <div class="tw-answer">
+            <div class="tw-answer-avatar-wrapper">
+              <div class="tw-answer-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewbox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tw-answer-avatar-svg">
+                  <path d="M12 8V4H8" fill="none" stroke="currentColor"></path>
+                  <rect height="12" x="4" y="8" rx="2" fill="none" stroke="currentColor"
+                        class="tw-answer-avatar-svg-rect"></rect>
+                  <path d="M2 14h2" fill="none" stroke="currentColor"></path>
+                  <path d="M20 14h2" fill="none" stroke="currentColor"></path>
+                  <path d="M15 13v2" fill="none" stroke="currentColor"></path>
+                  <path d="M9 13v2" fill="none" stroke="currentColor"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="typing-wrapper">
+              <div class="typing">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+      `;
+
+        toggleButtons(false);
+        toggleInput(false);
+
+        const elConversation = document.querySelector('.tw-conversation');
+        elConversation.appendChild(elThinkingDots);
+        elConversation.scrollTop = elConversation.scrollHeight; // scroll to bottom
+      }
+    }, 500);
+  };
+
+  const removeThinkingDots = () => {
+    if (elThinkingDots) {
+
+      elThinkingDots.remove();
+      elThinkingDots = null;
+
+      toggleInput(true);
+      toggleButtons(true);
+    }
+    run--;
+  };
+
+  const addUserDirective = (directive) => {
+
+    const formatTimestamp = (timestamp) => {
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    };
+
+    const elDirective = document.createElement('div');
+    elDirective.classList.add('tw-question-wrapper');
+    elDirective.innerHTML = `
+      <div class="tw-question">
+        <div class="tw-question-avatar-wrapper">
+          <div class="tw-question-avatar">
+            <span>
+              <img src="https://wispa-ai.vercel.app/assets/images/bot-avatars/profile.svg"/>
+            </span>
+          </div>
+        </div>
+        <div class="tw-question-directive">${directive}</div>
+      </div>
+      <div class="tw-question-timestamp">${formatTimestamp(new Date())}</div>
+    `;
+
+    const elConversation = document.querySelector('.tw-conversation');
+    elConversation.appendChild(elDirective);
+    elConversation.scrollTop = elConversation.scrollHeight; // scroll to bottom
+  };
+
+  const addBotAnswer = (answer) => {
+
+    const formatTimestamp = (timestamp) => {
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    };
+
+    const paragraphs = answer.response.map(line => `<p class="tw-answer-message-paragraph">${line}</p>`).join('');
+    const html = answer.html.trim() !== '' ? `<div class="tw-answer-message-html">${answer.html}</div>` : '';
+
+    const elDirective = document.createElement('div');
+    elDirective.classList.add('tw-answer-wrapper');
+    elDirective.innerHTML = `
+      <div class="tw-answer">
+        <div class="tw-answer-avatar-wrapper">
+          <div class="tw-answer-avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewbox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tw-answer-avatar-svg">
+              <path d="M12 8V4H8" fill="none" stroke="currentColor"></path>
+              <rect height="12" x="4" y="8" rx="2" fill="none" stroke="currentColor"
+                    class="tw-answer-avatar-svg-rect"></rect>
+              <path d="M2 14h2" fill="none" stroke="currentColor"></path>
+              <path d="M20 14h2" fill="none" stroke="currentColor"></path>
+              <path d="M15 13v2" fill="none" stroke="currentColor"></path>
+              <path d="M9 13v2" fill="none" stroke="currentColor"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="tw-answer-message">
+          ${paragraphs}
+          ${html}
+        </div>
+      </div>
+      <div class="tw-answer-timestamp">${formatTimestamp(new Date())}</div>
+    `;
+
+    const elConversation = document.querySelector('.tw-conversation');
+    elConversation.appendChild(elDirective);
+    elConversation.scrollTop = elConversation.scrollHeight; // scroll to bottom
+  };
+
+  const askQuestion = () => {
+
+    const elInputField = document.querySelector('.tw-chat-footer-input');
+    const directive = elInputField.value.trim();
+
+    if (directive && run === 0) {
+
+      addThinkingDots();
+      addUserDirective(directive);
+
+      elInputField.value = '';
+
+      axios.post('/cb/web/assistant/converse', {
+        thread_id: '{{ $conversation->thread_id }}', directive: directive
+      }).then((answer) => {
+        if (answer.data.success) {
+          addBotAnswer(answer.data.answer);
+        } else if (answer.data.error) {
+          toaster.toastError(answer.data.error);
+        } else {
+          console.log(answer.data);
+        }
+      })
+      .catch(error => toaster.toastAxiosError(error))
+      .finally(removeThinkingDots);
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const elInputField = document.querySelector('.tw-chat-footer-input');
+    const elSendButton = document.querySelector('.tw-chat-footer-send');
+
+    toggleButtons(false); // Initially, disable buttons
+
+    elInputField.addEventListener('focus', () => toggleButtons(true));
+    elInputField.addEventListener('blur', () => toggleButtons(false));
+    elSendButton.addEventListener('click', askQuestion);
+    elInputField.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        askQuestion();
+      }
+    });
+    elInputField.focus();
+  });
+</script>
+

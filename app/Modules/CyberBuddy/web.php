@@ -60,3 +60,10 @@ Route::group([
     Route::post('/query', 'CyberBuddyController@queryTables')->name('query-tables');
     Route::post('/prompt-to-query', 'CyberBuddyController@promptToTablesQuery')->name('prompt-to-tables-query');
 })->middleware(['auth']);
+
+Route::group([
+    'prefix' => 'assistant',
+], function () {
+    Route::get('/', 'CyberBuddyNextGenController@showAssistant');
+    Route::post('/converse', 'CyberBuddyNextGenController@converse');
+})->middleware(['auth']);
