@@ -5,14 +5,13 @@ namespace App\Modules\CyberBuddy\Helpers;
 use App\Modules\CyberBuddy\Events\ImportTable;
 use App\User;
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\Routing\Exception\InvalidParameterException;
 
 class TableStorage
 {
-    private static function StorageTypeFormString(string $storage): StorageType
+    public static function StorageTypeFormString(string $storage): StorageType
     {
         foreach (StorageType::cases() as $storageType) {
             if ($storageType->value === $storage) {
@@ -24,8 +23,7 @@ class TableStorage
 
     public static function credentialsFromOptions(array $options): array
     {
-        Log::debug($options);
-        $storage = TableStorage::StorageTypeFormString($options['storage']);
+        $storage = self::StorageTypeFormString($options['storage']);
         switch ($storage) {
             case StorageType::AWS_S3:
                 return self::credentialsFromOptionsS3($options);
@@ -58,7 +56,7 @@ class TableStorage
 
     public static function inDisk(array $credentials): Filesystem
     {
-        $storage = TableStorage::StorageTypeFormString($credentials['storage']);
+        $storage = self::StorageTypeFormString($credentials['storage']);
         switch ($storage) {
             case StorageType::AWS_S3:
                 return self::inDiskS3($credentials);
@@ -97,7 +95,7 @@ class TableStorage
 
     public static function outDisk(array $credentials): Filesystem
     {
-        $storage = TableStorage::StorageTypeFormString($credentials['storage']);
+        $storage = self::StorageTypeFormString($credentials['storage']);
         switch ($storage) {
             case StorageType::AWS_S3:
                 return self::outDiskS3($credentials);
@@ -136,7 +134,7 @@ class TableStorage
 
     public static function inClickhouseTableFunction(array $credentials, string $tableName): string
     {
-        $storage = TableStorage::StorageTypeFormString($credentials['storage']);
+        $storage = self::StorageTypeFormString($credentials['storage']);
         switch ($storage) {
             case StorageType::AWS_S3:
                 return self::inClickhouseTableFunctionS3($credentials, $tableName);
@@ -147,7 +145,8 @@ class TableStorage
 
     private static function inClickhouseTableFunctionS3(array $credentials, string $tableName): string
     {
-        return "s3('https://s3.{$credentials['region']}.amazonaws.com/{$credentials['input_folder']}/$tableName', "
+        $inputFolder = Str::chopEnd($credentials['input_folder'], '/');
+        return "s3('https://s3.{$credentials['region']}.amazonaws.com/$inputFolder/$tableName', "
             . "'{$credentials['access_key_id']}', '{$credentials['secret_access_key']}', 'TabSeparatedWithNames')";
     }
 
@@ -156,13 +155,14 @@ class TableStorage
         $container = explode('/', $credentials['input_folder'], 2)[0];
         $prefix = explode('/', $credentials['input_folder'], 2)[1] ?? '';
         $prefix = Str::chopEnd($prefix, '/');
+        $blobPath = $prefix == '' ? $tableName : "$prefix/$tableName";
         return "azureBlobStorage('{$credentials['connection_string']}', '$container', "
-            . "'$prefix/$tableName', 'TabSeparatedWithNames')";
+            . "'$blobPath', 'TabSeparatedWithNames')";
     }
 
     public static function outClickhouseTableFunction(array $credentials, string $tableName, string $suffix = ''): string
     {
-        $storage = TableStorage::StorageTypeFormString($credentials['storage']);
+        $storage = self::StorageTypeFormString($credentials['storage']);
         switch ($storage) {
             case StorageType::AWS_S3:
                 return self::outClickhouseTableFunctionS3($credentials, $tableName, $suffix);
@@ -173,7 +173,8 @@ class TableStorage
 
     private static function outClickhouseTableFunctionS3(array $credentials, string $tableName, string $suffix = ''): string
     {
-        return "s3('https://s3.{$credentials['region']}.amazonaws.com/{$credentials['output_folder']}{$tableName}$suffix.parquet', "
+        $outputFolder = Str::chopEnd($credentials['output_folder'], '/');
+        return "s3('https://s3.{$credentials['region']}.amazonaws.com/$outputFolder/{$tableName}$suffix.parquet', "
             . "'{$credentials['access_key_id']}', '{$credentials['secret_access_key']}', 'Parquet')";
     }
 
@@ -182,13 +183,14 @@ class TableStorage
         $container = explode('/', $credentials['output_folder'], 2)[0];
         $prefix = explode('/', $credentials['output_folder'], 2)[1] ?? '';
         $prefix = Str::chopEnd($prefix, '/');
+        $blobPath = $prefix == '' ? "$tableName$suffix.parquet" : "$prefix/$tableName$suffix.parquet";
         return "azureBlobStorage('{$credentials['connection_string']}', '$container', "
-            . "'$prefix/{$tableName}$suffix.parquet', 'Parquet')";
+            . "'$blobPath', 'Parquet')";
     }
 
     public static function outClickhouseTableEngine(array $credentials, string $tableName, string $suffix = ''): string
     {
-        $storage = TableStorage::StorageTypeFormString($credentials['storage']);
+        $storage = self::StorageTypeFormString($credentials['storage']);
         switch ($storage) {
             case StorageType::AWS_S3:
                 return self::outClickhouseTableEngineS3($credentials, $tableName, $suffix);
@@ -212,7 +214,6 @@ class TableStorage
         $tables = collect($validated['tables'])->groupBy('table');
         $credentials = self::credentialsFromOptions($validated);
         foreach ($tables as $table => $columns) {
-            Log::debug($table);
             ImportTable::dispatch($user, $credentials, $validated['copy'], $validated['deduplicate'], $validated['updatable'], $table, $columns->toArray(), $validated['description']);
         }
         return $tables->count();
