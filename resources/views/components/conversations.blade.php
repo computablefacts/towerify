@@ -44,6 +44,7 @@
               <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>
             </svg>
           </a>
+          @if($conversation->format === \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V0)
           &nbsp;&nbsp;&nbsp;&nbsp;
           <a data-bs-toggle="collapse" href="#conversation{{ $conversation->id }}" class="text-decoration-none">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -52,13 +53,27 @@
               <path d="M9 6l6 6l-6 6"/>
             </svg>
           </a>
+          @elseif($conversation->format === \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V1)
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <a href="{{ route('home', ['tab' => 'ama2', 'conversation_id' => $conversation->id]) }}"
+             class="text-decoration-none"
+             target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M9 6l6 6l-6 6"/>
+            </svg>
+          </a>
+          @endif
         </td>
       </tr>
+      @if($conversation->format === \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V0)
       <tr class="collapse" id="conversation{{ $conversation->id }}">
         <td colspan="5" class="cb-conversation">
           {!! $conversation->dom !!}
         </td>
       </tr>
+      @endif
       @endforeach
       </tbody>
     </table>

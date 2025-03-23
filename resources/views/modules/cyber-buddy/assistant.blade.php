@@ -1,11 +1,22 @@
 @php
-$conversation = \App\Modules\CyberBuddy\Models\Conversation::create([
+
+$conversationId = request()->query('conversation_id');
+
+if ($conversationId) {
+$conversation = \App\Modules\CyberBuddy\Models\Conversation::where('id', $conversationId)
+->where('format', \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V1)
+->where('created_by', Auth::user()?->id)
+->first();
+}
+
+$conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::create([
 'thread_id' => \Illuminate\Support\Str::random(10),
 'dom' => json_encode([]),
 'autosaved' => true,
 'created_by' => Auth::user()?->id,
 'format' => \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V1,
 ]);
+
 @endphp
 <style>
   .tw-wrapper1 {
@@ -445,6 +456,139 @@ $conversation = \App\Modules\CyberBuddy\Models\Conversation::create([
 
   .tw-answer-table table tbody tr td.right {
     text-align: right;
+  }
+
+  /* STARS */
+
+  .stars {
+    --rating: 0;
+    --percent: calc(var(--rating) / 1 * 100%);
+    display: inline-block;
+    font-size: 20px;
+    font-family: Times;
+    line-height: 1;
+    text-align: right;
+  }
+
+  .stars::before {
+    content: "★";
+    letter-spacing: 3px;
+    background: linear-gradient(90deg, #fc0 var(--percent), #fff var(--percent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* TOOLTIP */
+
+  .cb-tooltip-list {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+    cursor: pointer;
+  }
+
+  .cb-tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted #f8b500; /* If you want dots under the hoverable text */
+    cursor: pointer;
+  }
+
+  .cb-tooltip-list .cb-tooltiptext,
+  .cb-tooltip .cb-tooltiptext {
+    visibility: hidden;
+    width: 650px;
+    background-color: #f8b500;
+    color: white;
+    text-align: left;
+    padding: 5px 5px;
+
+    /* Position the tooltip text */
+    position: absolute;
+    z-index: 1;
+
+    /* Fade in tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .cb-tooltip-list:hover .cb-tooltiptext,
+  .cb-tooltip:hover .cb-tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .cb-tooltip-list-top {
+    bottom: 125%;
+    left: 0;
+  }
+
+  .cb-tooltip-top {
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+  }
+
+  .cb-tooltip-list-top::after,
+  .cb-tooltip-top::after {
+    /* content: ""; */
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #f8b500 transparent transparent transparent;
+  }
+
+  .cb-tooltip-bottom {
+    top: 135%;
+    left: 50%;
+    margin-left: -60px;
+  }
+
+  .cb-tooltip-bottom::after {
+    /* content: ""; */
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #f8b500 transparent;
+  }
+
+  .cb-tooltip-left {
+    top: -5px;
+    bottom: auto;
+    right: 128%;
+  }
+
+  .cb-tooltip-left::after {
+    /* content: ""; */
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent #f8b500;
+  }
+
+  .cb-tooltip-right {
+    top: -5px;
+    left: 125%;
+  }
+
+  .cb-tooltip-right::after {
+    /* content: ""; */
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #f8b500 transparent transparent;
   }
 
 </style>

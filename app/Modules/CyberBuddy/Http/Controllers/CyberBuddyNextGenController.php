@@ -6,10 +6,14 @@ use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Http\Requests\ConverseRequest;
+use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\Conversation;
+use App\Modules\CyberBuddy\Models\File;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -20,20 +24,32 @@ class CyberBuddyNextGenController extends Controller
         //
     }
 
-    public function showAssistant()
+    public function showAssistant(Request $request)
     {
+        $conversationId = $request->query('conversation_id');
+
         /** @var User $user */
         $user = Auth::user();
 
+        if ($conversationId) {
+            $conversation = Conversation::where('id', $conversationId)
+                ->where('format', Conversation::FORMAT_V1)
+                ->where('created_by', $user?->id)
+                ->first();
+        }
+
         /** @var Conversation $conversation */
-        $conversation = Conversation::create([
+        $conversation = $conversation ?? Conversation::create([
             'thread_id' => Str::random(10),
             'dom' => json_encode([]),
             'autosaved' => true,
             'created_by' => $user?->id,
             'format' => Conversation::FORMAT_V1,
         ]);
-        return view('modules.cyber-buddy.assistant', ['threadId' => $conversation->thread_id]);
+
+        $threadId = $conversation->thread_id;
+
+        return view('modules.cyber-buddy.assistant', ['threadId' => $threadId]);
     }
 
     public function converse(ConverseRequest $request): JsonResponse
@@ -166,12 +182,58 @@ class CyberBuddyNextGenController extends Controller
                 'html' => '',
             ];
         }
-
-        $answer = CyberBuddyController::enhanceAnswerWithSources($response['response'], collect($response['context'] ?? []));
-
         return [
             'response' => [],
-            'html' => $answer,
+            'html' => $this->enhanceAnswerWithSources($response['response'], collect($response['context'] ?? [])),
         ];
+    }
+
+    private function enhanceAnswerWithSources(string $answer, Collection $sources): string
+    {
+        $matches = [];
+        // Extract: [12] from [[12]] or [[12] and [13]] from [[12],[13]]
+        $isOk = preg_match_all("/\[\[\d+]]|\[\[\d+]|\[\d+]]/", $answer, $matches);
+        if (!$isOk) {
+            return Str::replace(["\n\n", "\n-"], "<br>", $answer);
+        }
+        $references = [];
+        /** @var array $refs */
+        $refs = $matches[0];
+        foreach ($refs as $ref) {
+            $id = Str::replace(['[', ']'], '', $ref);
+            /** @var array $tooltip */
+            $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
+            /** @var Chunk $chunk */
+            $chunk = Chunk::find($id);
+            /** @var File $file */
+            $file = $chunk?->file()->first();
+            $src = $file ? "<a href=\"{$file->downloadUrl()}\" style=\"text-decoration:none;color:black\">{$file->name_normalized}.{$file->extension}</a>, p. {$chunk->page}" : "";
+            if ($tooltip) {
+                if (Str::startsWith($tooltip['text'], 'ESSENTIAL DIRECTIVE')) {
+                    $color = '#1DD288';
+                } else if (Str::startsWith($tooltip['text'], 'STANDARD DIRECTIVE')) {
+                    $color = '#C5C3C3';
+                } else if (Str::startsWith($tooltip['text'], 'ADVANCED DIRECTIVE')) {
+                    $color = '#FDC99D';
+                } else {
+                    $color = '#F8B500';
+                }
+                $answer = Str::replace($ref, "<b style=\"color:{$color}\">[{$id}]</b>", $answer);
+                $references[$id] = "
+                  <li style=\"padding:0;margin-bottom:0.25rem\">
+                    <b style=\"color:{$color}\">[{$id}]</b>&nbsp;
+                    <div class=\"cb-tooltip-list\">
+                      {$src}
+                      <span class=\"cb-tooltiptext cb-tooltip-list-top\" style=\"background-color:{$color};color:#444;\">
+                        {$tooltip['text']}
+                      </span>
+                    </div>
+                  </li>
+                ";
+            }
+        }
+        ksort($references);
+        $answer = "{$answer}<br><br><b>Sources :</b><ul>" . collect($references)->values()->join("") . "</ul>";
+        return Str::replace(["\n\n", "\n-"], "<br>", $answer);
     }
 }
