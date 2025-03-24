@@ -19,6 +19,7 @@
         <th>{{ __('Created At') }}</th>
         <th>{{ __('Updated At') }}</th>
         <th>{{ __('Created By') }}</th>
+        <th>{{ __('Description') }}</th>
         <th></th>
       </tr>
       </thead>
@@ -31,6 +32,7 @@
         <td>{{ $conversation->created_at->format('Y-m-d H:i') }}</td>
         <td>{{ $conversation->updated_at->format('Y-m-d H:i') }}</td>
         <td>{{ $conversation->createdBy()?->name }}</td>
+        <td>{{ $conversation->description ?? '' }}</td>
         <td class="text-end">
           <a href="#" onclick="deleteConversation({{ $conversation->id }})" class="text-decoration-none"
              style="color:red">
@@ -69,7 +71,7 @@
       </tr>
       @if($conversation->format === \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V0)
       <tr class="collapse" id="conversation{{ $conversation->id }}">
-        <td colspan="5" class="cb-conversation">
+        <td colspan="6" class="cb-conversation">
           {!! $conversation->dom !!}
         </td>
       </tr>
