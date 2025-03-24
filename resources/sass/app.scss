@@ -79,6 +79,21 @@
   color: var(--ds-text-danger);
 }
 
+.lozenge.warning {
+  background-color: var(--ds-background-warning);
+  color: var(--ds-text-warning);
+}
+
+.lozenge.information {
+  background-color: var(--ds-background-information);
+  color: var(--ds-text-information);
+}
+
+.lozenge.neutral {
+  background-color: var(--ds-background-neutral);
+  color: var(--ds-text-neutral);
+}
+
 /* CyberBuddy */
 
 #botmanWidgetRoot .desktop-closed-message-avatar {

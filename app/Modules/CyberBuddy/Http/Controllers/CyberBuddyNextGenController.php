@@ -4,6 +4,8 @@ namespace App\Modules\CyberBuddy\Http\Controllers;
 
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
+use App\Modules\AdversaryMeter\Models\Alert;
+use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\CyberBuddy\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Modules\CyberBuddy\Helpers\DeepInfra;
 use App\Modules\CyberBuddy\Http\Requests\ConverseRequest;
@@ -248,6 +250,85 @@ class CyberBuddyNextGenController extends Controller
             $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
             return $this->queryIssp($user, $threadId, $args['question'] ?? '');
         }
+        if (count($toolCalls) === 1 && ($toolCalls[0]['function']['name'] ?? '') === 'query_vulnerability_database') {
+
+            $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
+            $asset = $args['asset'] ?? null;
+            $severity = $args['severity'] ?? null;
+            $query = Asset::where('is_monitored', true);
+
+            if (!empty($asset)) {
+                $query->where('asset', $asset);
+            }
+
+            $alerts = $query->get()
+                ->flatMap(fn(Asset $asset) => $asset->alerts()->get())
+                ->filter(fn(Alert $alert) => $alert->is_hidden === 0)
+                ->filter(fn(Alert $alert) => !isset($severity) || !is_array($severity) || count($severity) <= 0 || in_array($alert->level, $severity))
+                ->sortBy(function (Alert $item) {
+                    if ($item->level === 'High') {
+                        return 1;
+                    }
+                    if ($item->level === 'Medium') {
+                        return 2;
+                    }
+                    if ($item->level === 'Low') {
+                        return 3;
+                    }
+                    return 4;
+                })
+                ->map(function (Alert $alert) {
+
+                    $cve = $alert->cve_id ?
+                        "<a href='https://nvd.nist.gov/vuln/detail/{$alert->cve_id}' target='_blank'>{$alert->cve_id}</a>" :
+                        "n/a";
+
+                    if ($alert->level === 'High') {
+                        $level = "<span class='lozenge error'>{$alert->level}</span>";
+                    } else if ($alert->level === 'Medium') {
+                        $level = "<span class='lozenge warning'>{$alert->level}</span>";
+                    } else if ($alert->level === 'Low') {
+                        $level = "<span class='lozenge information'>{$alert->level}</span>";
+                    } else {
+                        $level = "<span class='lozenge neutral'>{$alert->level}</span>";
+                    }
+                    return "
+                        <tr>
+                            <td>{$alert->asset()?->asset}</td>
+                            <td>{$alert->port()?->ip}</td>
+                            <td>{$alert->port()?->port}</td>
+                            <td>{$alert->port()?->protocol}</td>
+                            <td>{$cve}</td>
+                            <td>{$level}</td>
+                        </tr>
+                    ";
+                })
+                ->join("\n");
+            return [
+                'response' => [],
+                'html' => "
+                    <div class='tw-answer-table-wrapper'>
+                      <div class='tw-answer-table'>
+                        <table>
+                          <thead>
+                          <tr>
+                            <th>Actif</th>
+                            <th>IP</th>
+                            <th>Port</th>
+                            <th>Protocole</th>
+                            <th>CVE</th>
+                            <th>Criticité</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                            {$alerts}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>              
+                ",
+            ];
+        }
         while (count($toolCalls) > 0) {
             $messages = array_merge($messages, $this->callTools($user, $threadId, $toolCalls));
             $response = DeepInfra::executeEx($messages, $model, $temperature, $tools);
@@ -338,7 +419,7 @@ class CyberBuddyNextGenController extends Controller
             $name = $function['name'];
             $args = json_decode($function['arguments'], true) ?? [];
 
-            // TODO : deal with functions here (query_issp is a very specific function)
+            // TODO
         }
         return $output;
     }
@@ -360,7 +441,31 @@ class CyberBuddyNextGenController extends Controller
                             ],
                         ],
                         "required" => ["question"],
+                        "additionalProperties" => false,
                     ],
+                    "strict" => true,
+                ],
+            ], [
+                "type" => "function",
+                "function" => [
+                    "name" => "query_vulnerability_database",
+                    "description" => "Query the vulnerability database.",
+                    "parameters" => [
+                        "type" => "object",
+                        "properties" => [
+                            "asset" => [
+                                "type" => ["string", "null"],
+                                "description" => "The asset's IP address, domain or subdomain.",
+                            ],
+                            "severity" => [
+                                "type" => ["array", "null"],
+                                "description" => "The severity levels of the vulnerabilities: High, Medium, or Low.",
+                            ],
+                        ],
+                        "required" => [],
+                        "additionalProperties" => false,
+                    ],
+                    "strict" => true,
                 ],
             ],
         ];
