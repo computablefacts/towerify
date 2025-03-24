@@ -844,7 +844,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
 
   document.addEventListener('DOMContentLoaded', () => {
 
-    const messages = JSON.parse(@json($conversation->dom));
+    const messages = @json($conversation->thread());
     messages.forEach(message => {
       if (message.role === 'user') {
         addUserDirective(message.timestamp ? new Date(message.timestamp) : new Date(), message.directive);
