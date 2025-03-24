@@ -18,6 +18,7 @@ class Conversations extends Component
     public function __construct(int $currentPage, int $pagesSize = 25)
     {
         $this->conversations = Conversation::query()
+            ->where('dom', '!=', '[]')
             ->orderBy('created_at', 'desc')
             ->orderBy('updated_at', 'desc')
             ->orderBy('id')

@@ -847,8 +847,8 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
     const messages = @json($conversation->thread());
     messages.forEach(message => {
       if (message.role === 'user') {
-        addUserDirective(message.timestamp ? new Date(message.timestamp) : new Date(), message.directive);
-      } else if (message.role === 'bot') {
+        addUserDirective(message.timestamp ? new Date(message.timestamp) : new Date(), message.content);
+      } else if (message.role === 'assistant') {
         addBotAnswer(message.timestamp ? new Date(message.timestamp) : new Date(), message.answer);
       } else {
         console.log('unknown message type', message);
