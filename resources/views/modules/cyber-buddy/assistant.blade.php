@@ -735,7 +735,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
     run--;
   };
 
-  const addUserDirective = (directive) => {
+  const addUserDirective = (ts, directive) => {
 
     const formatTimestamp = (timestamp) => {
       const date = new Date(timestamp);
@@ -760,7 +760,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
         </div>
         <div class="tw-question-directive">${directive}</div>
       </div>
-      <div class="tw-question-timestamp">${formatTimestamp(new Date())}</div>
+      <div class="tw-question-timestamp">${formatTimestamp(ts)}</div>
     `;
 
     const elConversation = document.querySelector('.tw-conversation');
@@ -768,7 +768,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
     elConversation.scrollTop = elConversation.scrollHeight; // scroll to bottom
   };
 
-  const addBotAnswer = (answer) => {
+  const addBotAnswer = (ts, answer) => {
 
     const formatTimestamp = (timestamp) => {
       const date = new Date(timestamp);
@@ -806,7 +806,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
           ${html}
         </div>
       </div>
-      <div class="tw-answer-timestamp">${formatTimestamp(new Date())}</div>
+      <div class="tw-answer-timestamp">${formatTimestamp(ts)}</div>
     `;
 
     const elConversation = document.querySelector('.tw-conversation');
@@ -822,7 +822,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
     if (directive && run === 0) {
 
       addThinkingDots();
-      addUserDirective(directive);
+      addUserDirective(new Date(), directive);
 
       elInputField.value = '';
 
@@ -830,7 +830,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
         thread_id: '{{ $conversation->thread_id }}', directive: directive
       }).then((answer) => {
         if (answer.data.success) {
-          addBotAnswer(answer.data.answer);
+          addBotAnswer(new Date(), answer.data.answer);
         } else if (answer.data.error) {
           toaster.toastError(answer.data.error);
         } else {
@@ -843,6 +843,17 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
   };
 
   document.addEventListener('DOMContentLoaded', () => {
+
+    const messages = JSON.parse(@json($conversation->dom));
+    messages.forEach(message => {
+      if (message.role === 'user') {
+        addUserDirective(message.timestamp ? new Date(message.timestamp) : new Date(), message.directive);
+      } else if (message.role === 'bot') {
+        addBotAnswer(message.timestamp ? new Date(message.timestamp) : new Date(), message.answer);
+      } else {
+        console.log('unknown message type', message);
+      }
+    });
 
     const elInputField = document.querySelector('.tw-chat-footer-input');
     const elSendButton = document.querySelector('.tw-chat-footer-send');
