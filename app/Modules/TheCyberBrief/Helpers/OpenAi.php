@@ -29,18 +29,25 @@ class OpenAi
         return $text;
     }
 
-    public static function summarize(string $prompt, string $model = 'gpt-4o', float $temperature = 0.7): array
+    public static function execute(string $prompt, string $model = 'gpt-4o', float $temperature = 0.7, array $tools = []): array
+    {
+        return self::executeEx([[
+            'role' => 'user',
+            'content' => $prompt
+        ]], $model, $temperature, $tools);
+    }
+
+    public static function executeEx(array $messages, string $model = 'gpt-4o', float $temperature = 0.7, array $tools = []): array
     {
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . config('towerify.openai.api_key'),
             'Accept' => 'application/json',
         ])->post('https://api.openai.com/v1/chat/completions', [
             'model' => $model,
-            'messages' => [[
-                'role' => 'user',
-                'content' => $prompt
-            ]],
+            'messages' => $messages,
             'temperature' => $temperature,
+            'tools' => $tools,
+            'tool_choice' => 'auto',
         ]);
         if ($response->successful()) {
             $json = $response->json();

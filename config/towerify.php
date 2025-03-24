@@ -30,6 +30,10 @@ return [
         'api_username' => env('CB_API_USERNAME'),
         'api_password' => env('CB_API_PASSWORD'),
     ],
+    'deepinfra' => [
+        'api' => env('DEEPINFRA_API'),
+        'api_key' => env('DEEPINFRA_API_KEY'),
+    ],
     'telescope' => [
         'whitelist' => [
             'usernames' => explode(',', env('TELESCOPE_WHITELIST_USERNAMES')),

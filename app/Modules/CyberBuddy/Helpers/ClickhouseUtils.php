@@ -41,7 +41,7 @@ class ClickhouseUtils
             Retourne uniquement la requête SQL, sans markdown et sans explications.
         ";
 
-        $response = OpenAi::summarize($prompt);
+        $response = OpenAi::execute($prompt);
         return $response['choices'][0]['message']['content'] ?? '';
     }
 }

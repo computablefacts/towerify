@@ -46,7 +46,7 @@ class TheCyberBriefController extends Controller
         $model = $request->string('model', 'gpt-4o');
         $temperature = $request->float('temperature', 0.7);
         $content = OpenAi::download($text);
-        $response = OpenAi::summarize(Str::replace('[TEXT]', $content, $prompt), $model, $temperature);
+        $response = OpenAi::execute(Str::replace('[TEXT]', $content, $prompt), $model, $temperature);
         return isset($response['choices'][0]['message']['content']) ?
             response()->json(['status' => 'ok', 'summary' => $response['choices'][0]['message']['content']]) :
             response()->json(['status' => 'ko', 'summary' => null], 500);

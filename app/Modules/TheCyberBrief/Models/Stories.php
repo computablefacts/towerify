@@ -112,7 +112,7 @@ class Stories extends Model
     private function summary(LanguageEnum $language): array
     {
         $news = OpenAi::download($this->news);
-        return OpenAi::summarize($this->prompt($language, $news));
+        return OpenAi::execute($this->prompt($language, $news));
     }
 
     private function prompt(LanguageEnum $language, string $news): string
