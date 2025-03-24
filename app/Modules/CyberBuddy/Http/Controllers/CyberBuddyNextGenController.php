@@ -9,6 +9,7 @@ use App\Modules\CyberBuddy\Http\Requests\ConverseRequest;
 use App\Modules\CyberBuddy\Models\Chunk;
 use App\Modules\CyberBuddy\Models\Conversation;
 use App\Modules\CyberBuddy\Models\File;
+use App\Modules\TheCyberBrief\Helpers\OpenAi;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -97,6 +98,25 @@ class CyberBuddyNextGenController extends Controller
             'answer' => $answer,
             'timestamp' => Carbon::now()->toIso8601ZuluString(),
         ]]));
+
+        if (empty($conversation->description)) {
+            $exchange = collect($conversation->thread())
+                ->take(6)
+                ->map(function ($exchange) {
+                    if ($exchange['role'] === 'user') {
+                        $messages = $exchange['directive'];
+                    } else if ($exchange['role'] === 'bot') {
+                        $messages = collect($exchange['answer']['response'] ?? [])->join("\n\n");
+                    } else {
+                        $messages = '';
+                    }
+                    return Str::upper($exchange['role']) . " : {$messages}";
+                })
+                ->join("\n\n");
+            $response = OpenAi::summarize("Condense the following conversation into about 10 words :\n\n{$exchange}");
+            $conversation->description = $response['choices'][0]['message']['content'] ?? null;
+        }
+
         $conversation->save();
 
         return response()->json([

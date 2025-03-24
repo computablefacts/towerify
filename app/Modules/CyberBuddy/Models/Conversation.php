@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property boolean autosaved
  * @property int created_by
  * @property int format
+ * @property ?string description
  */
 class Conversation extends Model
 {
@@ -32,6 +33,7 @@ class Conversation extends Model
         'autosaved',
         'created_by',
         'format',
+        'description',
     ];
 
     protected $casts = [
