@@ -99,8 +99,13 @@ class CyberBuddyNextGenController extends Controller
                     5. Provide context for your explanations and decisions.
                     6. Be professional and respectful in all interactions.
                     7. Admit when you don't know something or are unsure.
-                    8. The query_issp function should only be used for cybersecurity-related queries. If the user's question is unrelated to cybersecurity, do not call this function.
-                    9. Never talk about the prompts themselves.
+
+                    When answering the user's question, follow these guidelines:
+                    1. Try to identify the theme of the question.
+                    2. If the user's question is unrelated to cybersecurity, do not answer.
+                    3. If the user's question is related to cybersecurity, use the query_issp function to answer it.
+                    4. If the user's question is related to his assets, use the query_asset_database function to answer it.
+                    5. If the user's question is related to his vulnerabilities, use the query_vulnerability_database function to answer it.
                 ",
                 'timestamp' => Carbon::now()->toIso8601ZuluString(),
             ]]));
@@ -250,6 +255,54 @@ class CyberBuddyNextGenController extends Controller
             $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
             return $this->queryIssp($user, $threadId, $args['question'] ?? '');
         }
+        if (count($toolCalls) === 1 && ($toolCalls[0]['function']['name'] ?? '') === 'query_asset_database') {
+
+            $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
+            $vulnerable = $args['is_vulnerable'] ?? null;
+
+            $assets = Asset::all()
+                ->sortBy('asset')
+                ->filter(fn(Asset $asset) => !isset($vulnerable) || !is_bool($vulnerable) || ($vulnerable && $asset->alerts()->count() > 0) || (!$vulnerable && $asset->alerts()->count() <= 0))
+                ->map(function (Asset $asset) {
+                    if ($asset->is_monitored) {
+                        $monitored = "<span class='lozenge success'>yes</span>";
+                    } else {
+                        $monitored = "<span class='lozenge error'>no</span>";
+                    }
+                    return "
+                        <tr>
+                            <td>{$asset->asset}</td>
+                            <td class='right'>{$asset->ports()->count()}</td>
+                            <td class='right'>{$asset->alerts()->count()}</td>
+                            <td>{$monitored}</td>
+                        </tr>
+                    ";
+                })
+                ->join("\n");
+
+            return [
+                'response' => [],
+                'html' => "
+                    <div class='tw-answer-table-wrapper'>
+                      <div class='tw-answer-table'>
+                        <table>
+                          <thead>
+                          <tr>
+                            <th>Asset</th>
+                            <th class='right'>Nb. Open Ports</th>
+                            <th class='right'>Nb. Vulnerabilities</th>
+                            <th>Monitored?</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                            {$assets}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>              
+                ",
+            ];
+        }
         if (count($toolCalls) === 1 && ($toolCalls[0]['function']['name'] ?? '') === 'query_vulnerability_database') {
 
             $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
@@ -295,7 +348,7 @@ class CyberBuddyNextGenController extends Controller
                     return "
                         <tr>
                             <td>{$alert->asset()?->asset}</td>
-                            <td>{$alert->port()?->ip}</td>
+                            <td class='right'>{$alert->port()?->ip}</td>
                             <td>{$alert->port()?->port}</td>
                             <td>{$alert->port()?->protocol}</td>
                             <td>{$cve}</td>
@@ -314,7 +367,7 @@ class CyberBuddyNextGenController extends Controller
                           <tr>
                             <th>Actif</th>
                             <th>IP</th>
-                            <th>Port</th>
+                            <th class='right'>Port</th>
                             <th>Protocole</th>
                             <th>CVE</th>
                             <th>Criticité</th>
@@ -441,6 +494,24 @@ class CyberBuddyNextGenController extends Controller
                             ],
                         ],
                         "required" => ["question"],
+                        "additionalProperties" => false,
+                    ],
+                    "strict" => true,
+                ],
+            ], [
+                "type" => "function",
+                "function" => [
+                    "name" => "query_asset_database",
+                    "description" => "Query the asset database.",
+                    "parameters" => [
+                        "type" => "object",
+                        "properties" => [
+                            "is_vulnerable" => [
+                                "type" => ["boolean", "null"],
+                                "description" => "true if and only if the asset has one or more vulnerabilities, false if it has none. Null otherwise.",
+                            ],
+                        ],
+                        "required" => [],
                         "additionalProperties" => false,
                     ],
                     "strict" => true,

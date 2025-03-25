@@ -433,7 +433,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
     padding-top: 2px;
     vertical-align: middle;
     display: table-cell;
-    height: 3rem;
+    height: 2rem;
   }
 
   .tw-answer-table table thead tr th.left {
@@ -447,7 +447,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
   .tw-answer-table table tbody tr td {
     vertical-align: middle;
     display: table-cell;
-    padding: 1rem;
+    padding: 0.5rem;
   }
 
   .tw-answer-table table tbody tr td.left {
