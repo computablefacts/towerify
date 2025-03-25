@@ -432,6 +432,8 @@ class DatabaseSeeder extends Seeder
         $this->importFramework('seeds/frameworks/ncsc');
         $this->importFramework('seeds/frameworks/nist');
         $this->importFramework('seeds/frameworks/owasp');
+        $this->importFramework('seeds/frameworks/nis');
+        $this->importFramework('seeds/frameworks/nis2');
     }
 
     private function importFramework($root): void
