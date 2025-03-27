@@ -16,7 +16,7 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
             <th class='right'>Port</th>
             <th>Protocol</th>
             <th>Service</th>
-            <th>Tags</th>
+            <th>Technologies</th>
         ";
 
         $rows = $this->output()
@@ -58,7 +58,7 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
 
                 return "| {$port->hostname} | {$port->ip} | {$port->port} | {$port->protocol} | {$port->service} | {$tags} |";
             })
-            ->prepend("| Asset | IP | Port | Protocol | Service | Tags |")
+            ->prepend("| Asset | IP | Port | Protocol | Service | Technologies |")
             ->prepend("|---|---|---|---|---|---|")
             ->join("\n");
     }
@@ -81,9 +81,9 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
                             "type" => ["string", "null"],
                             "description" => "The service bind to the port.",
                         ],
-                        "tags" => [
+                        "technologies" => [
                             "type" => ["array", "null"],
-                            "description" => "One or more tags associated to the port.",
+                            "description" => "One or more technology tags associated to the port.",
                         ],
                     ],
                     "required" => [],
@@ -98,7 +98,7 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
     {
         $asset = $args['asset'] ?? null;
         $service = $args['service'] ?? null;
-        $tags = $args['tags'] ?? null;
+        $tags = $args['technologies'] ?? null;
 
         if (empty($asset)) {
             $assets = Asset::all();
