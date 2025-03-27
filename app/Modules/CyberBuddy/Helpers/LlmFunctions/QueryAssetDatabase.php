@@ -15,6 +15,7 @@ class QueryAssetDatabase extends AbstractLlmFunction
             <th class='right'>Nb. Vulnerabilities</th>
             <th>Monitored?</th>
             <th>Scan in progress?</th>
+            <th>Tags</th>
         ";
 
         $rows = $this->output()
@@ -30,6 +31,14 @@ class QueryAssetDatabase extends AbstractLlmFunction
                     $scanInProgress = "n/a";
                     $monitored = "<span class='lozenge error'>no</span>";
                 }
+
+                $tags = $asset->tags()
+                    ->orderBy('tag')
+                    ->get()
+                    ->pluck('tag')
+                    ->map(fn(string $tag) => "<span class='lozenge new'>{$tag}</span>")
+                    ->join(" ");
+
                 return "
                     <tr>
                         <td>{$asset->asset}</td>
@@ -37,12 +46,13 @@ class QueryAssetDatabase extends AbstractLlmFunction
                         <td class='right'>{$asset->alerts()->count()}</td>
                         <td>{$monitored}</td>
                         <td>{$scanInProgress}</td>
+                        <td>{$tags}</td>
                     </tr>
                 ";
             })
             ->join("\n");
 
-        return self::htmlTable($header, $rows, 5);
+        return self::htmlTable($header, $rows, 6);
     }
 
     public function text(): string
