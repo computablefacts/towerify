@@ -13,14 +13,14 @@ abstract class AbstractLlmFunction
     public static function schema(): array
     {
         return [
-            (new QueryAssetDatabase)->schema2(),
-            (new QueryVulnerabilityDatabase())->schema2(),
+            // (new QueryAssetDatabase)->schema2(),
+            // (new QueryVulnerabilityDatabase())->schema2(),
             (new QueryIssp())->schema2(),
             (new BeginAssetMonitoring())->schema2(),
             (new EndAssetMonitoring())->schema2(),
             (new RemoveAsset())->schema2(),
             (new DiscoverAssets())->schema2(),
-            (new QueryOpenPortDatabase())->schema2(),
+            // (new QueryOpenPortDatabase())->schema2(),
         ];
     }
 

@@ -5,14 +5,14 @@ namespace App\Modules\CyberBuddy\Helpers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class DeepInfra
+class Gemini
 {
     private function __construct()
     {
         //
     }
 
-    public static function execute(string $prompt, string $model = 'meta-llama/Meta-Llama-3-70B-Instruct', float $temperature = 0.7, array $tools = [])
+    public static function execute(string $prompt, string $model = 'gemini-2.0-flash', float $temperature = 0.7, array $tools = [])
     {
         return self::executeEx([[
             'role' => 'user',
@@ -20,14 +20,14 @@ class DeepInfra
         ]], $model, $temperature, $tools);
     }
 
-    public static function executeEx(array $messages, string $model = 'meta-llama/Meta-Llama-3-70B-Instruct', float $temperature = 0.7, array $tools = [])
+    public static function executeEx(array $messages, string $model = 'gemini-2.0-flash', float $temperature = 0.7, array $tools = [])
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . config('towerify.deepinfra.api_key'),
+            'Authorization' => 'Bearer ' . config('towerify.gemini.api_key'),
             'Accept' => 'application/json',
         ])
             ->timeout(60)
-            ->post(config('towerify.deepinfra.api') . '/chat/completions', [
+            ->post(config('towerify.gemini.api') . '/chat/completions', [
                 'model' => $model,
                 'messages' => $messages,
                 'temperature' => $temperature,

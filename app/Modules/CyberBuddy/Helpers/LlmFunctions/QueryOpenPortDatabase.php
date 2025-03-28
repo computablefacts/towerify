@@ -77,6 +77,10 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
                             "type" => ["string", "null"],
                             "description" => "The asset's IP address, domain or subdomain.",
                         ],
+                        "port" => [
+                            "type" => ["integer", "null"],
+                            "description" => "The port number.",
+                        ],
                         "service" => [
                             "type" => ["string", "null"],
                             "description" => "The service bind to the port.",
@@ -97,6 +101,7 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
     protected function handle2(User $user, string $threadId, array $args): AbstractLlmFunction
     {
         $asset = $args['asset'] ?? null;
+        $port = $args['port'] ?? null;
         $service = $args['service'] ?? null;
         $tags = $args['technologies'] ?? null;
 
@@ -112,12 +117,15 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
             $tags = [$tags];
         }
 
-        $this->output = $assets->flatMap(function (Asset $asset) use ($service, $tags) {
+        $this->output = $assets->flatMap(function (Asset $asset) use ($port, $service, $tags) {
 
             $query = $asset->ports()
                 ->where('closed', false)
                 ->orderBy('port');
 
+            if (!empty($port)) {
+                $query->where('port', $port);
+            }
             if (!empty($service)) {
                 $query->where('service', $service);
             }
