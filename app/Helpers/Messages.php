@@ -375,6 +375,15 @@ class Messages
     {
         return VUserAccount::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_user_accounts.server_id')
+                    ->whereColumn('name', '=', 'v_user_accounts.name')
+                    ->whereColumn('action', '=', 'v_user_accounts.action')
+                    ->whereColumn('columns_uid', '=', 'v_user_accounts.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VUserAccount $event) {
@@ -393,6 +402,15 @@ class Messages
             ->concat(
                 VGroup::where('timestamp', '>=', $cutOffTime)
                     ->whereIn('server_id', $servers->pluck('id'))
+                    ->whereNotExists(function (Builder $query) {
+                        $query->select(DB::raw(1))
+                            ->from('v_dismissed')
+                            ->whereColumn('ynh_server_id', '=', 'v_groups.server_id')
+                            ->whereColumn('name', '=', 'v_groups.ynh_osquery_name')
+                            ->whereColumn('action', '=', 'v_groups.action')
+                            ->whereColumn('columns_uid', '=', 'v_groups.columns_uid')
+                            ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+                    })
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VGroup $event) {
