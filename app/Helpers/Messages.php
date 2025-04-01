@@ -504,15 +504,20 @@ class Messages
     {
         return VLdPreload::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_ld_preload.server_id')
+                    ->whereColumn('name', '=', 'v_ld_preload.name')
+                    ->whereColumn('action', '=', 'v_ld_preload.action')
+                    ->whereColumn('columns_uid', '=', 'v_ld_preload.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VLdPreload $event) {
-                if ($event->isAdded()) {
-                    $msg = "Le binaire {$event->program} a été ajouté à la variable d'environnement LD_PRELOAD.";
-                    return self::message($event, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
-                }
-                if ($event->isRemoved()) {
-                    $msg = "Le binaire {$event->program} a été enlevé de la variable d'environnement LD_PRELOAD.";
+                if ($event->action === 'snapshot') {
+                    $msg = "Le binaire {$event->program} utilise la variable d'environnement LD_PRELOAD={$event->ld_preload_value}.";
                     return self::message($event, self::LD_PRELOAD, self::LD_PRELOAD, $msg);
                 }
                 return [];
