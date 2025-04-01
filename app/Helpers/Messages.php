@@ -24,7 +24,9 @@ use App\Models\YnhCve;
 use App\Models\YnhOsquery;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class Messages
 {
@@ -59,6 +61,9 @@ class Messages
     const string USERS = 'Users';
     const string GROUPS = 'Groups';
 
+    // Dismiss
+    const int HIDE_AFTER_DISMISS_COUNT = 3;
+
     public static function get(Collection $servers, Carbon $cutOffTime, array $categories = [
         self::PROCESSES_AND_BACKGROUND_TASKS,
         self::SHELL_HISTORY_AND_ROOT_COMMANDS,
@@ -76,17 +81,17 @@ class Messages
         $messages = collect();
         foreach ($categories as $category) {
             match ($category) {
-                self::PROCESSES_AND_BACKGROUND_TASKS => $messages = $messages->concat(self::processesAndBackgroundTasks($servers, $cutOffTime)),
-                self::SHELL_HISTORY_AND_ROOT_COMMANDS => $messages = $messages->concat(self::shellHistoryAndRootCommands($servers, $cutOffTime)),
-                self::CONNECTIONS_AND_SOCKET_EVENTS => $messages = $messages->concat(self::connectionsAndSocketEvents($servers, $cutOffTime)),
-                self::AUTHENTICATION_AND_SSH_ACTIVITY => $messages = $messages->concat(self::authenticationAndSshActivity($servers, $cutOffTime)),
-                self::PORTS_AND_INTERFACES => $messages = $messages->concat(self::portsAndInterfaces($servers, $cutOffTime)),
-                self::SERVICES_AND_SCHEDULED_TASKS => $messages = $messages->concat(self::servicesAndScheduledTasks($servers, $cutOffTime)),
-                self::USERS_AND_GROUPS => $messages = $messages->concat(self::usersAndGroups($servers, $cutOffTime)),
-                self::PACKAGES => $messages = $messages->concat(self::packages($servers, $cutOffTime)),
-                self::SUID_BIN => $messages = $messages->concat(self::suidBin($servers, $cutOffTime)),
-                self::LD_PRELOAD => $messages = $messages->concat(self::ldPreload($servers, $cutOffTime)),
-                self::KERNEL_MODULES => $messages = $messages->concat(self::kernelModules($servers, $cutOffTime)),
+                self::PROCESSES_AND_BACKGROUND_TASKS => $messages = $messages->concat(self::processesAndBackgroundTasks($servers, $cutOffTime)->toArray()),
+                self::SHELL_HISTORY_AND_ROOT_COMMANDS => $messages = $messages->concat(self::shellHistoryAndRootCommands($servers, $cutOffTime)->toArray()),
+                self::CONNECTIONS_AND_SOCKET_EVENTS => $messages = $messages->concat(self::connectionsAndSocketEvents($servers, $cutOffTime)->toArray()),
+                self::AUTHENTICATION_AND_SSH_ACTIVITY => $messages = $messages->concat(self::authenticationAndSshActivity($servers, $cutOffTime)->toArray()),
+                self::PORTS_AND_INTERFACES => $messages = $messages->concat(self::portsAndInterfaces($servers, $cutOffTime)->toArray()),
+                self::SERVICES_AND_SCHEDULED_TASKS => $messages = $messages->concat(self::servicesAndScheduledTasks($servers, $cutOffTime)->toArray()),
+                self::USERS_AND_GROUPS => $messages = $messages->concat(self::usersAndGroups($servers, $cutOffTime)->toArray()),
+                self::PACKAGES => $messages = $messages->concat(self::packages($servers, $cutOffTime)->toArray()),
+                self::SUID_BIN => $messages = $messages->concat(self::suidBin($servers, $cutOffTime)->toArray()),
+                self::LD_PRELOAD => $messages = $messages->concat(self::ldPreload($servers, $cutOffTime)->toArray()),
+                self::KERNEL_MODULES => $messages = $messages->concat(self::kernelModules($servers, $cutOffTime)->toArray()),
                 default => throw new \Exception("Unknown category: $category"),
             };
         }
@@ -173,8 +178,17 @@ class Messages
 
     public static function authenticationAndSshActivity(Collection $servers, Carbon $cutOffTime): Collection
     {
-        return VLoginAndLogout::where('timestamp', '>=', $cutOffTime)
+        return VLoginAndLogout::query()->where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_logins_and_logouts.server_id')
+                    ->whereColumn('name', '=', 'v_logins_and_logouts.name')
+                    ->whereColumn('action', '=', 'v_logins_and_logouts.action')
+                    ->whereColumn('columns_uid', '=', 'v_logins_and_logouts.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VLoginAndLogout $event) {
@@ -189,8 +203,17 @@ class Messages
                 return [];
             })
             ->concat(
-                VAuthorizedKey::where('timestamp', '>=', $cutOffTime)
+                VAuthorizedKey::query()->where('timestamp', '>=', $cutOffTime)
                     ->whereIn('server_id', $servers->pluck('id'))
+                    ->whereNotExists(function (Builder $query) {
+                        $query->select(DB::raw(1))
+                            ->from('v_dismissed')
+                            ->whereColumn('ynh_server_id', '=', 'v_authorized_keys.server_id')
+                            ->whereColumn('name', '=', 'v_authorized_keys.name')
+                            ->whereColumn('action', '=', 'v_authorized_keys.action')
+                            ->whereColumn('columns_uid', '=', 'v_authorized_keys.columns_uid')
+                            ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+                    })
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VAuthorizedKey $event) {
@@ -206,8 +229,17 @@ class Messages
                     })
             )
             ->concat(
-                VUserSshKey::where('timestamp', '>=', $cutOffTime)
+                VUserSshKey::query()->where('timestamp', '>=', $cutOffTime)
                     ->whereIn('server_id', $servers->pluck('id'))
+                    ->whereNotExists(function (Builder $query) {
+                        $query->select(DB::raw(1))
+                            ->from('v_dismissed')
+                            ->whereColumn('ynh_server_id', '=', 'v_user_ssh_keys.server_id')
+                            ->whereColumn('name', '=', 'v_user_ssh_keys.name')
+                            ->whereColumn('action', '=', 'v_user_ssh_keys.action')
+                            ->whereColumn('columns_uid', '=', 'v_user_ssh_keys.columns_uid')
+                            ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+                    })
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VUserSshKey $event) {
