@@ -529,6 +529,15 @@ class Messages
     {
         return VKernelModule::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_kernel_modules.server_id')
+                    ->whereColumn('name', '=', 'v_kernel_modules.ynh_osquery_name')
+                    ->whereColumn('action', '=', 'v_kernel_modules.action')
+                    ->whereColumn('columns_uid', '=', 'v_kernel_modules.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VKernelModule $event) {
