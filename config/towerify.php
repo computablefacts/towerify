@@ -34,6 +34,10 @@ return [
         'api' => env('DEEPINFRA_API'),
         'api_key' => env('DEEPINFRA_API_KEY'),
     ],
+    'gemini' => [
+        'api' => env('GEMINI_API'),
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
     'telescope' => [
         'whitelist' => [
             'usernames' => explode(',', env('TELESCOPE_WHITELIST_USERNAMES')),
