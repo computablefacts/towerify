@@ -1,6 +1,6 @@
 <?php
 
-namespace AdversaryMeter;
+namespace Tests\AdversaryMeter;
 
 use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
 use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;

@@ -1,6 +1,6 @@
 <?php
 
-namespace AdversaryMeter;
+namespace Tests\AdversaryMeter;
 
 use App\Models\Tenant;
 use App\Modules\AdversaryMeter\Events\CreateAsset;
