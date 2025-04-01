@@ -93,4 +93,35 @@ class YnhOsqueryFactory extends Factory
             ];
         });
     }
+
+    public function userAccount(): Factory
+    {
+        $user = $this->faker->randomElement(['terry.keagan', 'brandy41', 'fkrajcik']);
+        $columns = [
+            'username' => $user,
+            'directory' => "/home/$user",
+        ];
+        return $this->state(function (array $attributes) use ($columns) {
+            return [
+                'name' => 'users',
+                'action' => $this->faker->randomElement(['added', 'removed']),
+                'columns' => $columns,
+                'columns_uid' => YnhOsquery::computeColumnsUid($columns),
+            ];
+        });
+    }
+
+    public function group(): Factory
+    {
+        $groupName = $this->faker->randomElement(['adm', 'jenkins', 'nginx']);
+        $columns = ['groupname' => $groupName,];
+        return $this->state(function (array $attributes) use ($columns) {
+            return [
+                'name' => 'groups',
+                'action' => $this->faker->randomElement(['added', 'removed']),
+                'columns' => $columns,
+                'columns_uid' => YnhOsquery::computeColumnsUid($columns),
+            ];
+        });
+    }
 }

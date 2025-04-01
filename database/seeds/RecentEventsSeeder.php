@@ -17,6 +17,8 @@ class RecentEventsSeeder extends Seeder
             $this->call(RecentLoginOrLogoutEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
             $this->call(RecentAuthorizedKeyEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
             $this->call(RecentUserSshKeyEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
+            $this->call(RecentUserAccountEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
+            $this->call(RecentGroupEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
         });
     }
 }
