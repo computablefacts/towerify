@@ -433,6 +433,15 @@ class Messages
     {
         return VPackage::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_packages.server_id')
+                    ->whereColumn('name', '=', 'v_packages.name')
+                    ->whereColumn('action', '=', 'v_packages.action')
+                    ->whereColumn('columns_uid', '=', 'v_packages.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VPackage $event) {
