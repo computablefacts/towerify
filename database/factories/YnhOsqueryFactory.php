@@ -114,7 +114,7 @@ class YnhOsqueryFactory extends Factory
     public function group(): Factory
     {
         $groupName = $this->faker->randomElement(['adm', 'jenkins', 'nginx']);
-        $columns = ['groupname' => $groupName,];
+        $columns = ['groupname' => $groupName];
         return $this->state(function (array $attributes) use ($columns) {
             return [
                 'name' => 'groups',
