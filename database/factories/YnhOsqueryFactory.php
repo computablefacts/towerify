@@ -124,4 +124,22 @@ class YnhOsqueryFactory extends Factory
             ];
         });
     }
+
+    public function package(): Factory
+    {
+        $name = $this->faker->randomElement(['corepack', 'npm']);
+        $version = $this->faker->randomElement(['2.0', '2.1']);
+        $columns = [
+            'name' => $name,
+            'version' => $version,
+        ];
+        return $this->state(function (array $attributes) use ($columns) {
+            return [
+                'name' => 'npm_packages', // Other package types exist like win_packages, python_packages, etc
+                'action' => $this->faker->randomElement(['added', 'removed']),
+                'columns' => $columns,
+                'columns_uid' => YnhOsquery::computeColumnsUid($columns),
+            ];
+        });
+    }
 }
