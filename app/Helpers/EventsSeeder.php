@@ -8,6 +8,7 @@ use App\Models\YnhServer;
 use App\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EventsSeeder
 {
@@ -77,5 +78,17 @@ class EventsSeeder
             ->get();
 
         return $servers;
+    }
+
+    public static function findOrCreateOneServer(int $serverId = null)
+    {
+        $server = YnhServer::query()->where('id', '=', $serverId)->first();
+
+        if ($server === null) {
+            Log::debug('No server provided: create one or use an existing one');
+            $server = EventsSeeder::findOrCreateServers()->shuffle()->first();
+        }
+
+        return $server;
     }
 }
