@@ -22,6 +22,7 @@ class RecentEventsSeeder extends Seeder
             $this->call(RecentPackageEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
             $this->call(RecentSuidBinEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
             $this->call(RecentLdPreloadEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
+            $this->call(RecentKernelModuleEventsSeeder::class, true, ['serverId' => $server->id, 'count' => 10]);
         });
     }
 }

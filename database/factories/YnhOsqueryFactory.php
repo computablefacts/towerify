@@ -173,4 +173,18 @@ class YnhOsqueryFactory extends Factory
             ];
         });
     }
+
+    public function kernelModule(): Factory
+    {
+        $name = $this->faker->randomElement(['scsi_mod', 'crc32c_intel', 'ata_piix']);
+        $columns = ['name' => $name];
+        return $this->state(function (array $attributes) use ($columns) {
+            return [
+                'name' => 'kernel_modules',
+                'action' => $this->faker->randomElement(['added', 'removed']),
+                'columns' => $columns,
+                'columns_uid' => YnhOsquery::computeColumnsUid($columns),
+            ];
+        });
+    }
 }
