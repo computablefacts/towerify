@@ -156,4 +156,21 @@ class YnhOsqueryFactory extends Factory
             ];
         });
     }
+
+    public function ldPreload(): Factory
+    {
+        $path = $this->faker->randomElement(['/usr/lib/firefox-esr/firefox-esr', '/opt/firefox-133.0/firefox-bin']);
+        $columns = [
+            'path' => $path,
+            'value' => 'libmozsandbox.so',
+        ];
+        return $this->state(function (array $attributes) use ($columns) {
+            return [
+                'name' => 'ld_preload',
+                'action' => 'snapshot',
+                'columns' => $columns,
+                'columns_uid' => YnhOsquery::computeColumnsUid($columns),
+            ];
+        });
+    }
 }
