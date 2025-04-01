@@ -142,4 +142,18 @@ class YnhOsqueryFactory extends Factory
             ];
         });
     }
+
+    public function suidBin(): Factory
+    {
+        $path = $this->faker->randomElement(['/usr/bin/write', '/usr/bin/sg']);
+        $columns = ['path' => $path];
+        return $this->state(function (array $attributes) use ($columns) {
+            return [
+                'name' => 'suid_bin',
+                'action' => $this->faker->randomElement(['added', 'removed']),
+                'columns' => $columns,
+                'columns_uid' => YnhOsquery::computeColumnsUid($columns),
+            ];
+        });
+    }
 }
