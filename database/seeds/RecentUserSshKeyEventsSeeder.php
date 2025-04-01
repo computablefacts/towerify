@@ -19,7 +19,7 @@ class RecentUserSshKeyEventsSeeder extends Seeder
 
         if ($server === null) {
             Log::debug('No server provided: create one or use an existing one');
-            $server = EventsSeeder::firstOrCreateServers()->shuffle()->first();
+            $server = EventsSeeder::findOrCreateServers()->shuffle()->first();
         }
 
         Log::debug("Create $count user SSH key events for server {$server->name}(id={$server->id})");

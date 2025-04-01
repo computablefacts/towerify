@@ -55,7 +55,7 @@ class EventsSeeder
         }
     }
 
-    public static function firstOrCreateServers(int $count = self::SERVERS_COUNT): Collection
+    public static function findOrCreateServers(int $count = self::SERVERS_COUNT): Collection
     {
         $user = self::getDismissTestUser();
         $existingServersCount = YnhServer::query()
