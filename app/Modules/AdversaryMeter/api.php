@@ -79,6 +79,11 @@ Route::group([
     });
     Route::post('vulns-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
 
+        if (!$request->has('task_result')) {
+            return response('Missing task result', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+
         /** @var Scan $scan */
         $scan = Scan::where('vulns_scan_id', $uuid)->first();
 
