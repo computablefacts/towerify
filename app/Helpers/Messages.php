@@ -475,6 +475,15 @@ class Messages
     {
         return VSuidBinary::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_suid_binaries.server_id')
+                    ->whereColumn('name', '=', 'v_suid_binaries.name')
+                    ->whereColumn('action', '=', 'v_suid_binaries.action')
+                    ->whereColumn('columns_uid', '=', 'v_suid_binaries.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VSuidBinary $event) {
