@@ -524,3 +524,10 @@ Route::get('/subscribe', 'StripeController@subscribe')->name('subscribe');
 Route::get('/subscribe/success/{tx_id}', 'StripeController@subscribed')->name('subscribed');
 Route::get('/customer-portal', 'StripeController@customerPortal')->middleware('auth')->name('customer-portal');
 Route::get('/invitation', fn() => new \App\Mail\Invitation(\App\Models\Invitation::query()->latest()->first()))->middleware('auth');
+
+Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
+
+    Route::get('/', fn() => redirect()->route('public.cywise.onboarding', ['hash' => Str::random(128)]));
+    Route::get('/{hash}', 'CywiseController@show')->name('cywise.onboarding');
+
+})->middleware(['auth']);
