@@ -527,7 +527,11 @@ Route::get('/invitation', fn() => new \App\Mail\Invitation(\App\Models\Invitatio
 
 Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
 
-    Route::get('/', fn() => redirect()->route('public.cywise.onboarding', ['hash' => Str::random(128)]));
-    Route::get('/{hash}', 'CywiseController@show')->name('cywise.onboarding');
+    Route::get('/', fn() => redirect()->route('public.cywise.onboarding', [
+        'hash' => Str::random(128),
+        'step' => 1,
+    ]));
+    Route::match(['get', 'post'], '/{hash}/step/{step}', 'CywiseController@onboarding')->name('cywise.onboarding');
+    Route::post('/{hash}/discovery', 'CywiseController@discovery')->name('cywise.discovery');
 
 })->middleware(['auth']);

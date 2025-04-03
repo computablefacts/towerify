@@ -183,7 +183,7 @@ class ApiUtils
         $response = Http::withBasicAuth(
             config('towerify.adversarymeter.api_username'),
             config('towerify.adversarymeter.api_password')
-        )->withHeaders([
+        )->timeout(60)->withHeaders([
             'Accept' => 'application/json',
         ])->post($url, $json);
 
