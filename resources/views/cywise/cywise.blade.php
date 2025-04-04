@@ -142,6 +142,9 @@
     .list {
       color: var(--color-primary);
       margin-bottom: var(--spacing-large);
+      height: 50vh;
+      overflow: hidden;
+      overflow-y: scroll;
     }
 
     .list-item {
@@ -172,7 +175,7 @@
   </style>
 </head>
 <body>
-<div style="width:550px;">
+<div style="width: 550px;">
 
   @include('cywise._breadcrumbs')
 
