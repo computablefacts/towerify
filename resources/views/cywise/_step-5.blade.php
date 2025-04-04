@@ -140,7 +140,7 @@
   }
 
   .high {
-    background-color: #ff6666;
+    background-color: #ff4d4d;
     color: white;
     padding: 2px 5px;
     border-radius: 10px;
@@ -148,7 +148,7 @@
   }
 
   .medium {
-    background-color: #ff9933;
+    background-color: #ffaa00;
     color: white;
     padding: 2px 5px;
     border-radius: 10px;
@@ -156,7 +156,7 @@
   }
 
   .low {
-    background-color: #ffff66;
+    background-color: #4bd28f;
     color: white;
     padding: 2px 5px;
     border-radius: 10px;
@@ -196,7 +196,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #ff6666;
+    background-color: #ff4d4d;
     margin-right: 10px;
   }
 
@@ -205,7 +205,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #ff9933;
+    background-color: #ffaa00;
     margin-right: 10px;
   }
 
@@ -214,7 +214,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #ffff66;
+    background-color: #4bd28f;
     margin-right: 10px;
   }
 
