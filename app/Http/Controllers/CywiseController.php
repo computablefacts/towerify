@@ -58,7 +58,7 @@ class CywiseController extends Controller
             $trial->domain = $request->string('domain');
         }
         if ($step === 3 && $request->get('action') == 'next') {
-            $request->validate(['certificate' => 'required|string']);
+            $request->validate(['terms' => 'required|string']);
             $states = array_filter($request->all(), fn($key) => preg_match('/^d1-.*$/', $key), ARRAY_FILTER_USE_KEY);
             $domains = array_filter($request->all(), fn($key) => preg_match('/^d2-.*$/', $key), ARRAY_FILTER_USE_KEY);
             $trial->subdomains = array_map(fn($id) => $domains[Str::replace('d1-', 'd2-', $id)], array_keys($states));

@@ -1,53 +1,27 @@
 <style>
 
-  .domain-list {
-    margin-bottom: 20px;
-  }
-
-  .domain-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-    justify-content: start;
-  }
-
-  .domain-item a {
-    text-decoration: none;
-  }
-
-  .badge-container.high {
+  .badge {
     display: inline-table;
     vertical-align: middle;
     width: 25px;
     height: 25px;
     border-radius: 50%;
-    background-color: #ff4d4d;
     color: white;
   }
 
-  .badge-container.medium {
-    display: inline-table;
-    vertical-align: middle;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background-color: #ffaa00;
-    color: white;
+  .badge.high {
+    background-color: var(--color-red);
   }
 
-  .badge-container.low {
-    display: inline-table;
-    vertical-align: middle;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background-color: #4bd28f;
-    color: white;
+  .badge.medium {
+    background-color: var(--color-orange);
   }
 
-  .badge-content {
+  .badge.low {
+    background-color: var(--color-green);
+  }
+
+  .badge .content {
     display: table-cell;
     vertical-align: middle;
     text-align: center;
@@ -55,6 +29,9 @@
 
   .left {
     width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: start;
   }
 
   .right {
@@ -63,6 +40,8 @@
     align-items: center;
     justify-content: end;
   }
+
+  /** PROGRESSBAR */
 
   .circular-progress {
     --size: 250px;
@@ -104,7 +83,7 @@
 
   dialog {
     background-color: white;
-    padding: 20px;
+    padding: var(--spacing-large);
     border: none;
     border-radius: 8px;
     box-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
@@ -163,6 +142,8 @@
     font-size: 12px;
   }
 
+  /** TABLE */
+
   table {
     width: 100%;
     border-collapse: collapse;
@@ -191,37 +172,30 @@
     padding: 5px;
   }
 
-  .high-dot {
+  .dot {
     display: inline-block;
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #ff4d4d;
-    margin-right: 10px;
+    margin-right: var(--spacing-medium);
   }
 
-  .medium-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #ffaa00;
-    margin-right: 10px;
+  .dot.high {
+    background-color: var(--color-red);
   }
 
-  .low-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #4bd28f;
-    margin-right: 10px;
+  .dot.medium {
+    background-color: var(--color-orange);
+  }
+
+  .dot.low {
+    background-color: var(--color-green);
   }
 
 </style>
 <h1>Vos résultats</h1>
 <p>Retrouvez ici toutes vos vulnérabilités</p>
-<div class="domain-list">
+<div class="list">
   <!-- FILLED DYNAMICALLY -->
 </div>
 <button>Télécharger les résultats</button>
@@ -232,7 +206,7 @@
 
   const assets = @json($assets);
   const elDialog = document.querySelector("dialog");
-  const elDomains = document.querySelector('.domain-list');
+  const elDomains = document.querySelector('.list');
 
   const showModal = (azzet) => {
 
@@ -259,7 +233,7 @@
     let vulnsStr = vulnerabilities.map(vuln => `
       <tr>
         <td style="float:right">${vuln.port}</td>
-        <td><span class="${vuln.level}-dot"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title2}` : vuln.title}</td>
+        <td><span class="dot ${vuln.level}"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title2}` : vuln.title}</td>
       </tr>
     `).join("");
 
@@ -326,7 +300,7 @@
     const vulnScanCompleted = asset.timeline.sentinel.start && asset.timeline.sentinel.end;
 
     const elAsset = document.createElement('div');
-    elAsset.classList.add('domain-item');
+    elAsset.classList.add('list-item');
 
     if (vulnScanCompleted) { // the scan completed
 
@@ -339,17 +313,17 @@
           <a href="#" onclick="showModal('${asset.asset}')">
             <img src="https://www.svgrepo.com/show/12134/info-circle.svg" width="20" height="20">
           </a>
-          <span style="padding-left:10px">${asset.asset}</span>
+          <span style="padding-left:var(--spacing-medium)">${asset.asset}</span>
         </div>
         <div class="right">
-          <div class="badge-container high">
-            <div class="badge-content">${nbVulnsHigh}</div>
+          <div class="badge high">
+            <div class="content">${nbVulnsHigh}</div>
           </div>
-          <div class="badge-container medium" style="margin-left: 10px">
-            <div class="badge-content">${nbVulnsMedium}</div>
+          <div class="badge medium" style="margin-left:var(--spacing-medium)">
+            <div class="content">${nbVulnsMedium}</div>
           </div>
-          <div class="badge-container low" style="margin-left: 10px">
-            <div class="badge-content">${nbVulnsLow}</div>
+          <div class="badge low" style="margin-left:var(--spacing-medium)">
+            <div class="content">${nbVulnsLow}</div>
           </div>
         </div>
       `;
@@ -375,14 +349,12 @@
       elAsset.innerHTML = `
         <div class="left">
           <a href="#" onclick="showModal('${asset.asset}')">
-            <img src="https://www.svgrepo.com/show/12134/info-circle.svg" width="20" height="20">
+            <img src="https://www.svgrepo.com/show/12134/info-circle.svg" width="18" height="18">
           </a>
-          <span style="padding-left:10px">${asset.asset}</span>
+          <span style="padding-left:var(--spacing-medium)">${asset.asset}</span>
         </div>
         <div class="right">
-          <span style="float: right">
-            <b>${state}</b>
-          </span>
+          <b style="font-size:var(--font-size-small)">${state}</b>
           <svg width="20" height="20" viewBox="0 0 250 250" class="circular-progress" style="--progress:${progress}">
             <circle class="bg"></circle>
             <circle class="fg"></circle>

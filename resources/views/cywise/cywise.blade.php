@@ -19,34 +19,88 @@
 
   <style>
 
+    :root {
+      --color-cywise: #ffa500;
+      --color-cywise-hover: #e08e00;
+      --color-primary: #000000;
+      --color-secondary: #47627F;
+      --color-green: #4bd28f;
+      --color-orange: #ffaa00;
+      --color-red: #ff4d4d;
+      --spacing-large: 20px;
+      --spacing-medium: 10px;
+      --font-size-large: 24px;
+      --font-size-medium: 14px;
+      --font-size-small: 12px;
+    }
+
     body {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      font-family: poppins, sans-serif;
     }
 
+    /** TEXT */
+
     h1 {
-      font-size: 24px;
-      margin-top: 20px;
+      font-weight: bold;
+      font-size: var(--font-size-large);
+      margin-top: var(--spacing-large);
+    }
+
+    h2 {
+      font-weight: bold;
+      font-size: var(--font-size-medium);
+      margin-top: var(--spacing-medium);
     }
 
     p {
-      font-size: 14px;
-      color: #555;
+      font-weight: normal;
+      font-size: var(--font-size-medium);
+      color: var(--color-secondary);
     }
+
+    /** INPUTS */
 
     input[type="text"] {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
+      padding: var(--spacing-medium);
+      margin-bottom: var(--spacing-large);
+      border: 2px solid black;
     }
+
+    input[type=checkbox] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-cywise);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    input[type=checkbox]:checked {
+      background-color: var(--color-cywise);
+    }
+
+    input[type=checkbox]:checked::after {
+      content: '✓'; /* ou '✔' */
+      position: absolute;
+      color: white;
+      font-size: 16px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /** BUTTONS */
 
     button {
       width: 100%;
-      padding: 10px;
-      background-color: #FFA500;
+      padding: var(--spacing-medium);
+      background-color: var(--color-cywise);
       color: white;
       border: none;
       cursor: pointer;
@@ -54,7 +108,7 @@
     }
 
     button:hover {
-      background-color: #e08e00;
+      background-color: var(--color-cywise-hover);
     }
 
     .button-group {
@@ -63,42 +117,56 @@
     }
 
     .back-button {
-      padding: 10px 20px;
-      cursor: pointer;
+      border: 2px solid var(--color-cywise);
       background-color: white;
-      color: #FFA500;
-      border: 2px solid #FFA500;
+      color: var(--color-cywise);
     }
 
     .back-button:hover {
-      background-color: #e08e00;
+      border: 2px solid var(--color-cywise-hover);
+      background-color: var(--color-cywise-hover);
       color: white;
-      border: 2px solid #e08e00;
     }
 
     .next-button-300p {
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      background-color: #FFA500;
-      color: white;
       width: 300%;
-      margin-left: 20px;
-    }
-
-    .next-button-300p:hover {
-      background-color: #e08e00;
+      margin-left: var(--spacing-large);
     }
 
     .next-button-100p {
-      background-color: #FFA500;
-      color: white;
-      width: 100%;
-      margin-bottom: 20px;
+      margin-bottom: var(--spacing-medium);
     }
 
-    .next-button-100p:hover {
-      background-color: #e08e00;
+    /** LISTS */
+
+    .list {
+      color: var(--color-primary);
+      margin-bottom: var(--spacing-large);
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-medium);
+      border: 2px solid var(--color-secondary);
+      margin-bottom: var(--spacing-medium);
+      border-radius: 4px;
+    }
+
+    .list-item input[type="checkbox"] {
+      margin-right: var(--spacing-medium);
+      accent-color: var(--color-cywise);
+    }
+
+    .list-item label {
+      flex-grow: 1;
+    }
+
+    .list-item a {
+      text-decoration: none;
+      align-items: center;
+      display: flex;
     }
 
   </style>
