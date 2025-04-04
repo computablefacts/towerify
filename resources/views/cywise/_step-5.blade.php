@@ -245,10 +245,10 @@
 
     let portsStr = ports.map(port => `
       <tr>
-        <th style="float:right">${port.port}</th>
-        <th>${port.services[0]}</th>
-        <th>${port.products[0]}</th>
-        <th>${port.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</th>
+        <td style="float:right">${port.port}</td>
+        <td>${port.services[0]}</td>
+        <td>${port.products[0]}</td>
+        <td>${port.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</td>
       </tr>
     `).join("");
 
