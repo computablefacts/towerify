@@ -66,4 +66,4 @@ Route::group([
 ], function () {
     Route::get('/', 'CyberBuddyNextGenController@showAssistant');
     Route::post('/converse', 'CyberBuddyNextGenController@converse');
-})->middleware(['auth']);
+})->middleware(['auth', 'throttle:15,1']);
