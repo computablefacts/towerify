@@ -142,7 +142,7 @@
     .list {
       color: var(--color-primary);
       margin-bottom: var(--spacing-large);
-      height: 50vh;
+      max-height: 50vh;
       overflow: hidden;
       overflow-y: scroll;
     }
