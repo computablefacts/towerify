@@ -84,7 +84,7 @@
   dialog {
     background-color: white;
     padding: var(--spacing-large);
-    border: none;
+    border: 1px solid lightgray;;
     border-radius: 8px;
     box-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
     width: calc(100vw - 50%);
@@ -94,52 +94,50 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: var(--spacing-medium);
   }
 
   .header h1 {
-    font-size: 24px;
+    font-size: var(--font-size-large);
     margin-top: 0;
+    margin-bottom: 0;
   }
 
   .header button {
     background-color: transparent;
-    color: black;
+    color: var(--color-primary);
   }
 
   .section h2 {
-    font-size: 18px;
+    display: flex;
+    align-items: center;
   }
 
   .tag, .count {
     background-color: #ddd;
-    color: black;
+    color: var(--color-primary);
     padding: 2px 5px;
     border-radius: 10px;
-    font-size: 12px;
+    font-size: var(--font-size-small);
+    border: 1px solid var(--color-primary);
   }
 
-  .high {
-    background-color: #ff4d4d;
+  .count.high {
+    background-color: var(--color-red);
     color: white;
-    padding: 2px 5px;
-    border-radius: 10px;
-    font-size: 12px;
+    border: none;
   }
 
-  .medium {
-    background-color: #ffaa00;
+  .count.medium {
+    background-color: var(--color-orange);
     color: white;
-    padding: 2px 5px;
-    border-radius: 10px;
-    font-size: 12px;
+    border: none;
   }
 
-  .low {
-    background-color: #4bd28f;
+  .count.low {
+    background-color: var(--color-green);
     color: white;
-    padding: 2px 5px;
-    border-radius: 10px;
-    font-size: 12px;
+    border: none;
   }
 
   /** TABLE */
@@ -148,11 +146,12 @@
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 1rem;
+    font-size: var(--font-size-medium);
   }
 
   thead tr {
-    border-bottom: 1px solid black;
-    color: black;
+    border-bottom: 1px solid var(--color-primary);
+    color: var(--color-primary);
   }
 
   thead tr th {
@@ -222,35 +221,14 @@
         <td style="float:right">${port.port}</td>
         <td>${port.services[0]}</td>
         <td>${port.products[0]}</td>
-        <td>${port.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</td>
+        <td>${port.tags.map(tag => `<span class="tag">${tag}</span>`).join("&nbsp;")}</td>
       </tr>
     `).join("");
 
     if (portsStr.trim() === '') {
-      portsStr = "<tr><td colspan='4'>In n'y a aucun port d'ouvert.</td></tr>";
-    }
-
-    let vulnsStr = vulnerabilities.map(vuln => `
-      <tr>
-        <td style="float:right">${vuln.port}</td>
-        <td><span class="dot ${vuln.level}"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title2}` : vuln.title}</td>
-      </tr>
-    `).join("");
-
-    if (vulnsStr.trim() === '') {
-      vulnsStr = "<tr><td colspan='2'>In n'y a aucune vulnérabilité de détectée.</td></tr>";
-    }
-
-    elDialog.innerHTML = `
-      <div class="header">
-        <h1>Résultats</h1>
-        <div class="close">
-          <button autofocus><b>X</b></button>
-        </div>
-      </div>
-      <p>${asset.asset}</p>
-      <div class="section">
-        <h2>Ports ouverts&nbsp;<span class="count">${ports.length}</span></h2>
+      portsStr = "<p>Il n'y a aucun port d'ouvert.</p>";
+    } else {
+      portsStr = `
         <table>
           <thead>
           <tr>
@@ -264,14 +242,20 @@
             ${portsStr}
           </tbody>
         </table>
-      </div>
-      <div class="section">
-        <h2>
-          Vulnérabilités&nbsp;
-          <span class="high">${nbVulnsHigh}</span>&nbsp;
-          <span class="medium">${nbVulnsMedium}</span>&nbsp;
-          <span class="low">${nbVulnsLow}</span>&nbsp;
-        </h2>
+      `;
+    }
+
+    let vulnsStr = vulnerabilities.map(vuln => `
+      <tr>
+        <td style="float:right">${vuln.port}</td>
+        <td><span class="dot ${vuln.level}"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title2}` : vuln.title}</td>
+      </tr>
+    `).join("");
+
+    if (vulnsStr.trim() === '') {
+      vulnsStr = "<p>Il n'y a aucune vulnérabilité de détectée.</p>";
+    } else {
+      vulnsStr = `
         <table>
           <thead>
           <tr>
@@ -283,6 +267,31 @@
             ${vulnsStr}
           </tbody>
         </table>
+      `;
+    }
+
+    elDialog.innerHTML = `
+      <div class="header">
+        <h1>Résultats</h1>
+        <div class="close">
+          <button autofocus><b>X</b></button>
+        </div>
+      </div>
+      <p>${asset.asset}</p>
+      <div class="section">
+        <h2>
+          Ports ouverts&nbsp;<span class="count">${ports.length}</span>
+        </h2>
+        ${portsStr}
+      </div>
+      <div class="section">
+        <h2>
+          Vulnérabilités&nbsp;
+          <span class="count high">${nbVulnsHigh}</span>&nbsp;
+          <span class="count medium">${nbVulnsMedium}</span>&nbsp;
+          <span class="count low">${nbVulnsLow}</span>&nbsp;
+        </h2>
+        ${vulnsStr}
       </div>
     `;
 
