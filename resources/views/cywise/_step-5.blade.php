@@ -140,7 +140,7 @@
   }
 
   .high {
-    background-color: #ff4d4d;
+    background-color: #ff6666;
     color: white;
     padding: 2px 5px;
     border-radius: 10px;
@@ -148,7 +148,7 @@
   }
 
   .medium {
-    background-color: #ffaa00;
+    background-color: #ff9933;
     color: white;
     padding: 2px 5px;
     border-radius: 10px;
@@ -156,7 +156,7 @@
   }
 
   .low {
-    background-color: #4bd28f;
+    background-color: #ffff66;
     color: white;
     padding: 2px 5px;
     border-radius: 10px;
@@ -191,6 +191,33 @@
     padding: 5px;
   }
 
+  .high-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ff6666;
+    margin-right: 10px;
+  }
+
+  .medium-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ff9933;
+    margin-right: 10px;
+  }
+
+  .low-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ffff66;
+    margin-right: 10px;
+  }
+
 </style>
 <h1>Vos résultats</h1>
 <p>Retrouvez ici toutes vos vulnérabilités</p>
@@ -216,6 +243,30 @@
     const nbVulnsMedium = vulnerabilities.filter(vuln => vuln.level.startsWith("medium")).length;
     const nbVulnsLow = vulnerabilities.filter(vuln => vuln.level.startsWith("low")).length;
 
+    let portsStr = ports.map(port => `
+      <tr>
+        <th style="float:right">${port.port}</th>
+        <th>${port.services[0]}</th>
+        <th>${port.products[0]}</th>
+        <th>${port.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</th>
+      </tr>
+    `).join("");
+
+    if (portsStr.trim() === '') {
+      portsStr = "<tr><td colspan='4'>In n'y a aucun port d'ouvert.</td></tr>";
+    }
+
+    let vulnsStr = vulnerabilities.map(vuln => `
+      <tr>
+        <td style="float:right">${vuln.port}</td>
+        <td><span class="${vuln.level}-dot"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title2}` : vuln.title}</td>
+      </tr>
+    `).join("");
+
+    if (vulnsStr.trim() === '') {
+      vulnsStr = "<tr><td colspan='2'>In n'y a aucune vulnérabilité de détectée.</td></tr>";
+    }
+
     elDialog.innerHTML = `
       <div class="header">
         <h1>Résultats</h1>
@@ -232,30 +283,11 @@
             <th style="float:right">Port</th>
             <th>Service</th>
             <th>Produit</th>
-            <th>Tags</th>
+            <th>Technologies</th>
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td style="float:right">80</td>
-            <td>http</td>
-            <td>nginx 1.11.13</td>
-            <td>
-              <span class="tag">detection</span>
-              <span class="tag">http</span>
-              <span class="tag">nginx</span>
-              <span class="tag">network</span>
-              <span class="tag">portmap</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="float:right">21</td>
-            <td>ftp</td>
-            <td>vsftpd 2.0.8</td>
-            <td>
-              <span class="tag">ftp</span>
-            </td>
-          </tr>
+            ${portsStr}
           </tbody>
         </table>
       </div>
@@ -274,22 +306,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td style="float:right">80</td>
-            <td><span class="critical-dot"></span> Utilisation de mots de passe par défaut</td>
-          </tr>
-          <tr>
-            <td style="float:right">443</td>
-            <td><span class="critical-dot"></span> Certificat SSL expiré</td>
-          </tr>
-          <tr>
-            <td style="float:right">443</td>
-            <td><span class="high-dot"></span> Fichier ".bash_history" public</td>
-          </tr>
-          <tr>
-            <td style="float:right">443</td>
-            <td><span class="medium-dot"></span> Historique de shell</td>
-          </tr>
+            ${vulnsStr}
           </tbody>
         </table>
       </div>

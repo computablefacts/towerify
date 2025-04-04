@@ -66,10 +66,12 @@ class CywiseController extends Controller
         if ($step === 4 && $request->get('action') == 'next') {
             // FALL THROUGH
         }
-        if ($step === 5 && $request->get('action') == 'next') {
+        if ($step === 5 /* && $request->get('action') == 'next' */) {
 
-            $request->validate(['email' => 'required|string|email']);
-            $trial->email = $request->string('email');
+            if ($request->get('action') == 'next') {
+                $request->validate(['email' => 'required|string|email']);
+                $trial->email = $request->string('email');
+            }
 
             // Create shadow profile
             /** @var User $user */
