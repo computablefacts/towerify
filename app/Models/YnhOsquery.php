@@ -127,7 +127,8 @@ if [ -f /etc/os-release ]; then
             curl --silent -X POST \
               -H "Content-Type: multipart/form-data" \
               -F "data=@/opt/logparser/nginx.txt.gz" \
-              {$url}/logparser/{$server->secret}
+              {$url}/logparser/{$server->secret} \
+              > /dev/null
           fi
         fi
         
@@ -173,7 +174,8 @@ if [ -f /etc/os-release ]; then
             curl --silent -X POST \
               -H "Content-Type: multipart/form-data" \
               -F "data=@/opt/logparser/apache.txt.gz" \
-              {$url}/logparser/{$server->secret}
+              {$url}/logparser/{$server->secret} \
+              > /dev/null
           fi
         fi
     fi
