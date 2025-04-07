@@ -25,6 +25,7 @@
     <input type="checkbox" name="terms" checked>
     <label for="terms">Je certifie être propriétaire de ces domaines</label>
   </div>
+  @include('cywise._errors')
   <div class="button-group">
     <button class="back-button" name="action" value="back">
       Retour
@@ -38,7 +39,7 @@
 
   const elSubmitButton = document.querySelector('button[type="submit"]');
   const elTermsCheckbox = document.querySelector('input[type="checkbox"][name="terms"]');
-  
+
   const toggleButtons = () => {
 
     const domains = Array.from(document.querySelectorAll('input[type="checkbox"][name^="d-"]:checked')).map(
@@ -53,6 +54,20 @@
       elSubmitButton.classList.add('disabled');
     }
     elSubmitButton.disabled = !isReadyToSubmit;
+
+    let msg = '';
+
+    if (!isDomainSelected) {
+      msg += 'Veuillez sélectionner au moins un domaine.\n';
+    }
+    if (!isTermsChecked) {
+      msg += 'Veuillez attester que vous êtes bien le propriétaire de ces domaines.\n';
+    }
+    if (msg.length > 0) {
+      showErrors(msg);
+    } else {
+      hideErrors();
+    }
   };
 
   toggleButtons();

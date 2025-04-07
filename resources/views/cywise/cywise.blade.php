@@ -64,7 +64,7 @@
 
     /** INPUTS */
 
-    input[type="text"] {
+    input[type="text"], input[type="email"] {
       width: 100%;
       padding: var(--spacing-medium);
       margin-bottom: var(--spacing-large);
@@ -112,7 +112,7 @@
     }
 
     button.disabled {
-      pointer-events:none;
+      pointer-events: none;
     }
 
     .button-group {
