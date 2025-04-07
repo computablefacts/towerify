@@ -36,6 +36,29 @@
 </form>
 <script>
 
+  const elSubmitButton = document.querySelector('button[type="submit"]');
+  const elTermsCheckbox = document.querySelector('input[type="checkbox"][name="terms"]');
+  
+  const toggleButtons = () => {
+
+    const domains = Array.from(document.querySelectorAll('input[type="checkbox"][name^="d-"]:checked')).map(
+      el => el.value);
+    const isDomainSelected = domains.length > 0;
+    const isTermsChecked = elTermsCheckbox.checked;
+    const isReadyToSubmit = isDomainSelected && isTermsChecked;
+
+    if (isReadyToSubmit) {
+      elSubmitButton.classList.remove('disabled');
+    } else {
+      elSubmitButton.classList.add('disabled');
+    }
+    elSubmitButton.disabled = !isReadyToSubmit;
+  };
+
+  toggleButtons();
+
+  elTermsCheckbox.addEventListener('change', toggleButtons);
+
   fetch("{{ route('public.cywise.discovery', [ 'hash' => $hash ]) }}", {
     method: 'POST', headers: {
       'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -55,12 +78,15 @@
       const elDomain = document.createElement('div');
       elDomain.classList.add('list-item');
       elDomain.innerHTML = `
-        <input type="checkbox" name="d1-${idx}" checked>
-        <input type="text" name="d2-${idx}" value="${domain}" hidden>
+        <input type="checkbox" name="d-${idx}" value="${domain}" checked>
         <label for="d1-${idx}">${domain}</label>
       `;
       elDomains.appendChild(elDomain);
     });
+
+    // Capture the change event
+    document.querySelectorAll('input[type="checkbox"][name^="d-"]:checked').forEach(
+      el => el.addEventListener('change', toggleButtons));
 
     // Hide the loader
     const elLoader = document.querySelector('.loader-container');
@@ -69,6 +95,9 @@
     // Display the list of domains
     const elForm = document.querySelector('form');
     elForm.classList.remove('hidden');
+
+    // Update submit button state
+    toggleButtons();
   })
   .catch(error => console.error('Error:', error));
 

@@ -12,7 +12,16 @@
 
   const elInput = document.querySelector('input[name="domain"]');
   const elSubmitButton = document.querySelector('button[type="submit"]');
-  const toggleButtonState = () => elSubmitButton.disabled = !elInput.value.trim();
+  
+  const toggleButtonState = () => {
+    const isInputEmpty = elInput.value.trim() === '';
+    if (isInputEmpty) {
+      elSubmitButton.classList.add('disabled');
+    } else {
+      elSubmitButton.classList.remove('disabled');
+    }
+    elSubmitButton.disabled = isInputEmpty;
+  };
 
   toggleButtonState();
 

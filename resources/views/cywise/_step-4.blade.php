@@ -13,3 +13,23 @@
     Retour
   </button>
 </form>
+<script>
+
+  const elInput = document.querySelector('input[name="email"]');
+  const elSubmitButton = document.querySelector('button[type="submit"]');
+  
+  const toggleButtonState = () => {
+    const isInputEmpty = elInput.value.trim() === '';
+    if (isInputEmpty) {
+      elSubmitButton.classList.add('disabled');
+    } else {
+      elSubmitButton.classList.remove('disabled');
+    }
+    elSubmitButton.disabled = isInputEmpty;
+  };
+
+  toggleButtonState();
+
+  elInput.addEventListener('input', toggleButtonState);
+
+</script>

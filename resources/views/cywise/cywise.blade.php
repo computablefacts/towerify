@@ -111,6 +111,10 @@
       background-color: var(--color-cywise-hover);
     }
 
+    button.disabled {
+      pointer-events:none;
+    }
+
     .button-group {
       display: flex;
       justify-content: space-between;
