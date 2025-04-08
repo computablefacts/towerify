@@ -39,6 +39,7 @@ class ClickhouseUtils
             
             Génère une requête SQL ClickHouse pour répondre à la demande suivante: \"{$question}\".
             Retourne uniquement la requête SQL, sans markdown et sans explications.
+            N'utilise pas de ` dans ta réponse.
         ";
 
         $response = OpenAi::execute($prompt);
