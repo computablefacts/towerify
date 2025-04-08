@@ -14,7 +14,7 @@
 
 </style>
 <h1>Vos sous-domaines</h1>
-<p>Liste des sous-domaines de <b>{{ $trial->domain }}</b> compatibles avec le scanner</p>
+<p>Liste des sous-domaines de <b>{{ $trial->domain }}</b> compatibles avec le scanner :</p>
 @include('cywise._loader', [ 'title' => 'Recherche de sous-domaines...', 'subtitle' => 'Compter environ 60 secondes' ])
 <form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 3 ]) }}" method="post" class="hidden">
   @csrf
@@ -23,7 +23,8 @@
   </div>
   <div class="terms">
     <input type="checkbox" name="terms" checked>
-    <label for="terms">Je certifie être propriétaire de ces domaines</label>
+    <label for="terms">Je certifie être propriétaire de ces domaines et autoriser Cywise à effectuer un test de
+      sécurité sur les domaines sélectionnés (notre test est non intrusif et sans impact sur vos serveurs)</label>
   </div>
   @include('cywise._errors')
   <div class="button-group">

@@ -192,12 +192,12 @@
   }
 
 </style>
-<h1>Vos résultats</h1>
-<p>Retrouvez ici toutes vos vulnérabilités</p>
+<h1>Résultats du test</h1>
+<p>Suivez ci-dessous la progression du test. Attention, le test complet peut durer jusqu'à 24 heures. Un email vous
+  sera envoyé une fois le test terminé.</p>
 <div class="list">
   <!-- FILLED DYNAMICALLY -->
 </div>
-<button>Télécharger les résultats</button>
 <dialog>
   <!-- FILLED DYNAMICALLY -->
 </dialog>

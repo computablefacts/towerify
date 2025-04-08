@@ -1,5 +1,6 @@
 <h1>Vos honeypots</h1>
-<p>Configuration automatique de vos honeypots</p>
+<p>Configuration automatique de vos honeypots. Un honeypot c'est la version numérique d'un papier avec écrit un faux mot
+  de passe dessus : si ce mot de passe est utilisé, vous savez qu'un intrus rôde !</p>
 @include('cywise._loader', [ 'title' => 'Création des honeypots...', 'subtitle' => 'Compter environ 60 secondes' ])
 <form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 4 ]) }}" method="post">
   @csrf
