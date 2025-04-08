@@ -57,4 +57,9 @@ class OpenAi
         Log::error($response->body());
         return [];
     }
+
+    public static function cleanSqlQuery(string $query): string
+    {
+        return Str::rtrim($query, ';');
+    }
 }
