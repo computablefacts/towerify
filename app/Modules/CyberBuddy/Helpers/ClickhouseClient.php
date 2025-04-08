@@ -8,6 +8,8 @@ use Symfony\Component\Process\Process;
 
 class ClickhouseClient
 {
+    private static ?string $executeQueryLastError = null;
+
     private function __construct()
     {
         //
@@ -15,6 +17,7 @@ class ClickhouseClient
 
     public static function executeQuery(string $query): ?string
     {
+        self::$executeQueryLastError = null;
         $process = Process::fromShellCommandline(self::cmd($query));
         $process->setTimeout(null);
         $process->run();
@@ -24,8 +27,14 @@ class ClickhouseClient
             return empty($output) ? 'ok' : $output;
         }
 
-        Log::error($process->getErrorOutput());
+        self::$executeQueryLastError = $process->getErrorOutput();
+        Log::error(self::$executeQueryLastError);
         return null;
+    }
+
+    public static function getExecuteQueryLastError(): ?string
+    {
+        return self::$executeQueryLastError;
     }
 
     public static function showTables(): ?string

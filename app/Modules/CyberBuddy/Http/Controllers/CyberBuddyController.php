@@ -830,7 +830,10 @@ class CyberBuddyController extends Controller
         $output = ClickhouseClient::executeQuery($query);
 
         if (!$output) {
-            return response()->json(['error' => 'The query has failed.']);
+            return response()->json([
+                'error' => 'The query has failed.',
+                'message' => ClickhouseClient::getExecuteQueryLastError(),
+            ]);
         }
         return response()->json([
             'success' => 'The query has been executed.',
