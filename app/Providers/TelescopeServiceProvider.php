@@ -28,8 +28,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
                     /** @var IncomingEntry $entry */
 
-                    return $this->isLogEntry($entry) ||
-                        $entry->isReportableException() ||
+                    return $entry->isReportableException() ||
                         $entry->isFailedRequest() ||
                         $entry->isFailedJob() ||
                         $this->isLogEntry($entry) ||
