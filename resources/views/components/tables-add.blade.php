@@ -689,6 +689,7 @@
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
         toaster.toastError(response.data.error);
+        if (response.data.message) toaster.toastError(response.data.message);
       } else {
         console.log(response.data);
       }
