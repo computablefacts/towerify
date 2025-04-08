@@ -79,6 +79,7 @@
       border-radius: 2px;
       position: relative;
       cursor: pointer;
+      padding: 6px;
     }
 
     input[type=checkbox]:checked {
