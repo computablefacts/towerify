@@ -24,10 +24,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         $isLocal = $this->app->environment('local');
 
         Telescope::filterBatch(function (Collection $entries) use ($isLocal) {
-            return $isLocal || $entries->contains(function ($entry) {
-
-                    /** @var IncomingEntry $entry */
-
+            return $isLocal || $entries->contains(function (IncomingEntry $entry) {
                     return $entry->isReportableException() ||
                         $entry->isFailedRequest() ||
                         $entry->isFailedJob() ||
