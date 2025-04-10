@@ -25,7 +25,7 @@
   }
 
 </style>
-<div class="tw-actions">
+<div class="tw-actions" style="display: none;">
   <div class="tw-centered">
     <div class="tw-grid">
       @include('modules.cyber-buddy._action', [

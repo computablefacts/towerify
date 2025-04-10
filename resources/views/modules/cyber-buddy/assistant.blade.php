@@ -847,7 +847,11 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
 
   document.addEventListener('DOMContentLoaded', () => {
 
+    const elActions = document.querySelector('.tw-actions');
     const messages = @json($conversation->thread());
+    if (elActions && messages.length <= 0) {
+      elActions.style.display = 'unset';
+    }
     messages.forEach(message => {
       if (message.role === 'user') {
         addUserDirective(message.timestamp ? new Date(message.timestamp) : new Date(), message.content);
@@ -867,7 +871,6 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
     elInputField.addEventListener('blur', () => toggleButtons(false));
     elSendButton.addEventListener('click', askQuestion);
     elInputField.addEventListener('input', () => {
-      const elActions = document.querySelector('.tw-actions');
       if (elActions) {
         if (elInputField.value.trim() !== '') {
           elActions.style.display = 'none';
