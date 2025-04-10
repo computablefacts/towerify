@@ -57,8 +57,9 @@ class QueryAssetDatabase extends AbstractLlmFunction
 
     public function text(): string
     {
-        return $this->output()
-            ->map(function (Asset $asset) {
+        $output = $this->output();
+        return $output->isEmpty() ? 'No assets to monitor. Please add one.'
+            : $output->map(function (Asset $asset) {
 
                 if ($asset->is_monitored) {
                     if ($asset->scanInProgress()->isEmpty()) {
@@ -80,9 +81,9 @@ class QueryAssetDatabase extends AbstractLlmFunction
 
                 return "| {$asset->asset} | {$asset->ports()->count()} | {$asset->alerts()->count()} | {$monitored} | {$scanInProgress} | {$tags} |";
             })
-            ->prepend("| Asset | Number of Open Ports | Number of Vulnerabilities | Monitored? | Scan in progress? | Tags |")
-            ->prepend("|---|---|---|---|---|---|")
-            ->join("\n");
+                ->prepend("| Asset | Number of Open Ports | Number of Vulnerabilities | Monitored? | Scan in progress? | Tags |")
+                ->prepend("|---|---|---|---|---|---|")
+                ->join("\n");
     }
 
     protected function schema2(): array

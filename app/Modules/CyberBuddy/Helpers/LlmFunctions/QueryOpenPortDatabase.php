@@ -47,8 +47,9 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
 
     public function text(): string
     {
-        return $this->output()
-            ->map(function (Port $port) {
+        $output = $this->output();
+        return $output->isEmpty() ? 'No open ports were found.'
+            : $output->map(function (Port $port) {
 
                 $tags = $port->tags()
                     ->orderBy('tag')
@@ -58,9 +59,9 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
 
                 return "| {$port->hostname} | {$port->ip} | {$port->port} | {$port->protocol} | {$port->service} | {$tags} |";
             })
-            ->prepend("| Asset | IP | Port | Protocol | Service | Technologies |")
-            ->prepend("|---|---|---|---|---|---|")
-            ->join("\n");
+                ->prepend("| Asset | IP | Port | Protocol | Service | Technologies |")
+                ->prepend("|---|---|---|---|---|---|")
+                ->join("\n");
     }
 
     protected function schema2(): array
