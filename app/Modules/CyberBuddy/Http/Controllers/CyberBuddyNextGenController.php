@@ -5,7 +5,7 @@ namespace App\Modules\CyberBuddy\Http\Controllers;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Enums\RoleEnum;
-use App\Modules\CyberBuddy\Helpers\DeepInfra;
+use App\Modules\CyberBuddy\Helpers\DeepSeek;
 use App\Modules\CyberBuddy\Helpers\LlmFunctions\AbstractLlmFunction;
 use App\Modules\CyberBuddy\Http\Requests\ConverseRequest;
 use App\Modules\CyberBuddy\Models\Conversation;
@@ -127,12 +127,15 @@ class CyberBuddyNextGenController extends Controller
                     - If the user wants to remove an asset, use the remove_asset function to do it.
                     - If the user wants to discover the subdomains of a given domain, use the discover_assets function to do it.
                     - If the user asks questions about his assets, use the Your Assets subsection of the What I Know About You section.
+                    - If there are no assets, respond with a message indicating that there are no assets.
 
                     ### Open Ports Management Capabilities
                     - If the user asks questions about his open ports, use the Your Open Ports subsection of the What I Know About You section.
+                    - If there are no open ports, respond with a message indicating that there are no open ports.
 
                     ### Vulnerabilities Management Capabilities
                     - If the user asks questions about his vulnerabilities, use the Your Vulnerabilities subsection of the What I Know About You section.
+                    - If there are no vulnerabilities, respond with a message indicating that there are no vulnerabilities.
 
                     ### Security Policies Retrieval Capabilities
                     - If the user's question is unrelated to cybersecurity, do not answer it.
@@ -291,7 +294,7 @@ class CyberBuddyNextGenController extends Controller
 
     private function processQuestion(User $user, string $threadId, Conversation $conversation): array
     {
-        $model = 'deepseek-ai/DeepSeek-R1-Turbo';
+        $model = 'deepseek-chat';
         $temperature = 0.7;
         $tools = AbstractLlmFunction::schema();
 
@@ -314,7 +317,7 @@ class CyberBuddyNextGenController extends Controller
             ->values()
             ->toArray();
 
-        $response = DeepInfra::executeEx($messages, $model, $temperature, $tools);
+        $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
         $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
 
         /* if (count($toolCalls) === 1) {
@@ -334,7 +337,7 @@ class CyberBuddyNextGenController extends Controller
         } */
         while (count($toolCalls) > 0) {
             $messages = array_merge($messages, $this->callTools($user, $threadId, $toolCalls));
-            $response = DeepInfra::executeEx($messages, $model, $temperature, $tools);
+            $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
             $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
         }
 
