@@ -2,7 +2,9 @@
 
   .tw-actions {
     flex-grow: 1;
-    overflow: hidden
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
   }
 
   .tw-actions .tw-centered {

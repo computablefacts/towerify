@@ -609,6 +609,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
       <div class="tw-conversation-wrapper">
         <div class="tw-conversation">
           <!-- DYNAMICALLY FILLED -->
+          @include('modules.cyber-buddy._actions')
         </div>
       </div>
 
@@ -863,6 +864,20 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
     elInputField.addEventListener('focus', () => toggleButtons(true));
     elInputField.addEventListener('blur', () => toggleButtons(false));
     elSendButton.addEventListener('click', askQuestion);
+    elInputField.addEventListener('input', () => {
+      const elActions = document.querySelector('.tw-actions');
+      if (elActions) {
+        if (elInputField.value.trim() !== '') {
+          elActions.style.display = 'none';
+        } else if (elActions.style.display == 'none') {
+          const elQuestions = document.querySelectorAll('.tw-question');
+          const elAnswers = document.querySelectorAll('.tw-answer');
+          if (elQuestions.length === 0 && elAnswers.length === 0) {
+            elActions.style.display = 'unset';
+          }
+        }
+      }
+    });
     elInputField.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
