@@ -223,7 +223,7 @@ class CyberBuddyNextGenController extends Controller
                     if ($message['role'] === RoleEnum::USER->value) {
                         $msg = $message['content'] ?? '';
                     } else if ($message['role'] === RoleEnum::ASSISTANT->value) {
-                        $msg = collect($message['answer']['response'] ?? [])->join("\n\n");
+                        $msg = $message['answer']['raw_answer'] ?? '';
                     } else {
                         $msg = '';
                     }
@@ -234,6 +234,9 @@ class CyberBuddyNextGenController extends Controller
             $conversation->description = $response['choices'][0]['message']['content'] ?? null;
             $conversation->save();
         }
+
+        unset($answer['raw_answer']);
+
         return response()->json([
             'success' => 'The directive has been successfully processed.',
             'answer' => $answer,
@@ -281,14 +284,18 @@ class CyberBuddyNextGenController extends Controller
                 <th class='left'>Users</th>
             ";
 
+            $table = AbstractLlmFunction::htmlTable($header, $rows, 6);
+
             return [
                 'response' => ['Here are the servers you have instrumented :'],
-                'html' => AbstractLlmFunction::htmlTable($header, $rows, 6),
+                'html' => $table,
+                'raw_answer' => "Here are the servers you have instrumented :\n{$table}",
             ];
         }
         return [
             'response' => ['Sorry, I did not understand your request.'],
             'html' => '',
+            'raw_answer' => 'Sorry, I did not understand your request.',
         ];
     }
 
@@ -311,7 +318,7 @@ class CyberBuddyNextGenController extends Controller
                 }
                 return [
                     'role' => RoleEnum::ASSISTANT->value,
-                    'content' => collect($message['answer']['response'] ?? [])->join("\n"),
+                    'content' => $message['answer']['raw_answer'] ?? '',
                 ];
             })
             ->values()
@@ -320,22 +327,27 @@ class CyberBuddyNextGenController extends Controller
         $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
         $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
 
-        /* if (count($toolCalls) === 1) {
+        if (count($toolCalls) === 1) {
+
             $name = $toolCalls[0]['function']['name'] ?? '';
             $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
-            $response = AbstractLlmFunction::handle($user, $threadId, $name, $args);
-            $messages[] = [
-                'role' => RoleEnum::TOOL->value,
-                'tool_call_id' => $toolCalls[0]['id'],
-                'content' => $response->text(),
-            ];
-            return [
-                'messages' => $messages,
-                'response' => [],
-                'html' => $response->html(),
-            ];
-        } */
+
+            if ($name === 'query_issp') {
+
+                $messages[] = $response['choices'][0]['message'] ?? [];
+                $response = AbstractLlmFunction::handle($user, $threadId, $name, $args);
+                $answer = $response->html();
+
+                return [
+                    'messages' => $messages,
+                    'response' => [],
+                    'html' => $answer,
+                    'raw_answer' => $answer,
+                ];
+            }
+        }
         while (count($toolCalls) > 0) {
+            $messages[] = $response['choices'][0]['message'] ?? [];
             $messages = array_merge($messages, $this->callTools($user, $threadId, $toolCalls));
             $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
             $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
@@ -348,6 +360,7 @@ class CyberBuddyNextGenController extends Controller
             'messages' => $messages,
             'response' => [],
             'html' => (new Parsedown)->text($answer),
+            'raw_answer' => $answer,
         ];
     }
 
