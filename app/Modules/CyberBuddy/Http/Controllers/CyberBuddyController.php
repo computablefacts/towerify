@@ -628,7 +628,7 @@ class CyberBuddyController extends Controller
 
     public function deletePrompt(int $id)
     {
-        Prompt::where('id', $id)->update(['is_deleted' => true]);
+        Prompt::where('id', $id)->delete();
         return response()->json([
             'success' => __('The prompt has been deleted!'),
         ]);
