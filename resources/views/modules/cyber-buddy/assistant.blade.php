@@ -592,8 +592,8 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
       <!-- HEADER -->
       <div class="tw-chat-header">
         <h3 class="tw-chat-header-title">
-          <img alt="Bear" fetchpriority="high" width="250" height="250" decoding="async" data-nimg="1"
-               style="color:transparent;width:50px;height:50px" src="https://www.svgrepo.com/show/10913/bear.svg">
+          <!-- <img alt="Bear" fetchpriority="high" width="250" height="250" decoding="async" data-nimg="1"
+               style="color:transparent;width:50px;height:50px" src="https://www.svgrepo.com/show/10913/bear.svg"> -->
           CyberBuddy
         </h3>
       </div>
