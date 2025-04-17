@@ -2,7 +2,6 @@
 
 namespace App\Modules\CyberBuddy\Jobs;
 
-use App\Hashing\TwHasher;
 use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyNextGenController;
 use App\Modules\CyberBuddy\Http\Requests\ConverseRequest;
 use App\Modules\CyberBuddy\Models\Conversation;
@@ -71,10 +70,11 @@ class ProcessIncomingEmails implements ShouldQueue
                         continue;
                     }
 
+                    // Search the user who sent the email in the database
                     /** @var \Webklex\PHPIMAP\Address $address */
                     $address = $from[0];
                     /** @var User $user */
-                    $user = User::where('email', /* config('towerify.admin.email') */ $address->mail)->first();
+                    $user = User::where('email', config('towerify.admin.email') /* $address->mail */)->first();
 
                     if (!$user) {
                         Log::error("Unknown user: {$address->mail}");
@@ -83,12 +83,21 @@ class ProcessIncomingEmails implements ShouldQueue
 
                     Auth::login($user);
 
-                    Log::debug('seq=' . $message->getSequence());
-                    Log::debug('uid=' . $message->getUid());
-                    Log::debug('subject=' . $message->getSubject()->all()[0]);
-                    Log::debug('body=' . $message->getTextBody());
+                    // Extract the thread id in order to be able to load the existing conversation
+                    // If the thread id cannot be found, a new conversation is created
+                    $threadId = null;
+                    $matches = [];
+                    preg_match_all("/\s*thread_id=(?<threadid>[a-zA-Z0-9]{10})\s*/i", $message->getTextBody(), $matches, PREG_SET_ORDER);
 
-                    $threadId = Str::limit(TwHasher::hash("{$address->mail}-{$message->getUid()}"), 10, '');
+                    foreach ($matches as $match) {
+                        if (!empty($match['threadid'])) {
+                            $threadId = $match['threadid'];
+                            break;
+                        }
+                    }
+                    if (empty($threadId)) {
+                        $threadId = Str::random(10);
+                    }
 
                     /** @var Conversation $conversation */
                     $conversation = Conversation::where('thread_id', $threadId)
@@ -104,10 +113,17 @@ class ProcessIncomingEmails implements ShouldQueue
                         'format' => Conversation::FORMAT_V1,
                     ]);
 
+                    // Remove previous messages i.e. rows starting with >
+                    $body = trim(preg_replace("/^(>.*)|(On\s+.*\s+wrote:)[\n\r]?$/im", '', $message->getTextBody()));
+
+                    Log::debug('subject=' . $message->getSubject()->all()[0]);
+                    Log::debug('body=' . $body);
+
+                    // Call CyberBuddy
                     $request = new ConverseRequest();
                     $request->replace([
                         'thread_id' => $threadId,
-                        'directive' => $message->getTextBody(),
+                        'directive' => $body,
                     ]);
 
                     $controller = new CyberBuddyNextGenController();
