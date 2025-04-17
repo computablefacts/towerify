@@ -11,6 +11,7 @@ use App\Modules\AdversaryMeter\Jobs\TriggerScan;
 use App\Modules\AdversaryMeter\Jobs\TriggerSendAuditReport;
 use App\Modules\CyberBuddy\Jobs\DeleteEmbeddedChunks;
 use App\Modules\CyberBuddy\Jobs\EmbedChunks;
+use App\Modules\CyberBuddy\Jobs\ProcessIncomingEmails;
 use App\Modules\CyberBuddy\Jobs\UpdateTables;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -49,6 +50,7 @@ class Kernel extends ConsoleKernel
         // CyberBuddy
         $schedule->job(new EmbedChunks())->everyMinute();
         $schedule->job(new DeleteEmbeddedChunks())->everyMinute();
+        $schedule->job(new ProcessIncomingEmails())->everyMinute();
         $schedule->job(new UpdateTables())->everyMinute();
     }
 

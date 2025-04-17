@@ -30,7 +30,8 @@
         "symfony/yaml": "^7.2",
         "vanilo/admin": "^4.0",
         "vanilo/framework": "^4.0",
-        "vanilo/payment": "^4.0"
+        "vanilo/payment": "^4.0",
+        "webklex/laravel-imap": "^6.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.13",
