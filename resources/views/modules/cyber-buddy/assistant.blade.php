@@ -367,9 +367,22 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
 
   .tw-answer-message-html {
     /* background-color: rgb(255, 255, 255); */
-    margin-top: 1rem;
+    /* margin-top: 1rem; */
     border-radius: 8px;
     /* padding: 1rem */
+    --font-size: 16px;
+  }
+
+  .tw-answer-message-html h1 {
+    font-size: calc(var(--font-size) + 4px);
+  }
+
+  .tw-answer-message-html h2 {
+    font-size: calc(var(--font-size) + 2px);
+  }
+
+  .tw-answer-message-html h3 {
+    font-size: calc(var(--font-size));
   }
 
   .tw-answer-timestamp {
