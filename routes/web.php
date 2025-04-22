@@ -15,7 +15,7 @@ use App\Enums\OsqueryPlatformEnum;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
-use App\Http\Middleware\Subscribed;
+use App\Http\Middleware\RedirectIfNotSubscribed;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Models\YnhServer;
 use App\User;
@@ -432,25 +432,25 @@ Route::get('', function () {
         return redirect()->route('home');
     }
     return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::get('/', function () {
     if (\Illuminate\Support\Facades\Auth::user()) {
         return redirect()->route('home');
     }
     return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home')->middleware([Subscribed::class]);
+Route::get('/home', 'HomeController@index')->name('home')->middleware([RedirectIfNotSubscribed::class]);
 
 Route::get('/terms', 'TermsController@show')->name('terms');
 
 Route::post('/reset-password', function () {
     $email = \Illuminate\Support\Facades\Auth::user()->email;
     return view('auth.passwords.email', compact('email'));
-})->middleware(['auth', Subscribed::class])->name('reset-password');
+})->middleware(['auth', RedirectIfNotSubscribed::class])->name('reset-password');
 
 Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
     \Illuminate\Notifications\DatabaseNotification::query()
@@ -458,7 +458,7 @@ Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifi
         ->whereJsonContains('data->group', $notification->data['group'])
         ->get()
         ->each(fn($notif) => $notif->markAsRead());
-})->middleware(['auth', Subscribed::class]);
+})->middleware(['auth', RedirectIfNotSubscribed::class]);
 
 Route::get('/events/{osquery}/dismiss', function (\App\Models\YnhOsquery $osquery, \Illuminate\Http\Request $request) {
     /** @var YnhServer $server */
@@ -469,7 +469,7 @@ Route::get('/events/{osquery}/dismiss', function (\App\Models\YnhOsquery $osquer
         return response()->json(['success' => "The event has been dismissed!"]);
     }
     return response()->json(['error' => "Unknown event."], 500);
-})->middleware(['auth', Subscribed::class]);
+})->middleware(['auth', RedirectIfNotSubscribed::class]);
 
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
@@ -497,14 +497,14 @@ Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
         Route::get('{user}/toggle-gets-audit-report', 'UserController@toggleGetsAuditReport')->name('toggle-gets-audit-report');
     });
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::group(['prefix' => 'shop', 'as' => 'product.'], function () {
     Route::get('index', 'ProductController@index')->name('index');
     Route::get('c/{taxonomyName}/{taxon}', 'ProductController@index')->name('category');
     Route::get('p/{slug}', 'ProductController@show')->name('show');
     Route::get('p/{slug}/{taxon}', 'ProductController@show')->name('show-with-taxon');
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
     Route::get('show', 'CartController@show')->name('show');
@@ -512,12 +512,12 @@ Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
     Route::post('adv/{masterProductVariant}', 'CartController@addVariant')->name('add-variant');
     Route::post('update/{cart_item}', 'CartController@update')->name('update');
     Route::post('remove/{cart_item}', 'CartController@remove')->name('remove');
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
     Route::get('show', 'CheckoutController@show')->name('show');
     Route::post('submit', 'CheckoutController@submit')->name('submit');
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::get('/plans', 'StripeController@plan')->name('plans');
 Route::get('/subscribe', 'StripeController@subscribe')->name('subscribe');

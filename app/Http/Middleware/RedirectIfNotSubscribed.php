@@ -3,8 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 
-class Subscribed
+class RedirectIfNotSubscribed
 {
     /**
      * Handle an incoming request.
@@ -14,7 +15,7 @@ class Subscribed
      * @param string|null $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next, $guard = null)
     {
         if ($request->user() && $request->user()->isBarredFromAccessingTheApp()) {
             return redirect()->route('plans');
