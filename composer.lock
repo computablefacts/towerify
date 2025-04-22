@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "00b42e989459aa31a3ec852a8361094c",
+    "content-hash": "091ba65b28e999be39e73a7a004c8e72",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -6975,6 +6975,80 @@
                 }
             ],
             "time": "2024-06-11T12:45:25+00:00"
+        },
+        {
+            "name": "sajya/server",
+            "version": "7.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sajya/server.git",
+                "reference": "de5411d9cca32c24d9e347e2ff2221d36ce36e84"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sajya/server/zipball/de5411d9cca32c24d9e347e2ff2221d36ce36e84",
+                "reference": "de5411d9cca32c24d9e347e2ff2221d36ce36e84",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "laravel/framework": "^10.0|^11.0|^12.0"
+            },
+            "conflict": {
+                "laravel/framework": ">=10.0.0,<=10.48.27 || >11.0.0,<=11.42.0",
+                "league/flysystem": "<3.0.16",
+                "mockery/mockery": "<1.6.1",
+                "orchestra/testbench": ">=9.0.0,<9.8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^v1.20",
+                "orchestra/testbench": "^8.0|^9.0|^10.0",
+                "phpunit/php-code-coverage": "^10.|^11.0|^12.0",
+                "phpunit/phpunit": "^10.5|^11.0",
+                "vimeo/psalm": "^5.0 | ^6.0"
+            },
+            "suggest": {
+                "ext-zlib": "Required to compress the response into gzip",
+                "sajya/client": "HTTP(S) client for JSON-RPC 2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "RPC": "Sajya\\Server\\Facades\\RPC"
+                    },
+                    "providers": [
+                        "Sajya\\Server\\ServerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Sajya\\Server\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alexandr Chernyaev",
+                    "email": "bliz48rus@gmail.com"
+                }
+            ],
+            "description": "Easy implementation of the JSON-RPC 2.0 server for the Laravel framework.",
+            "homepage": "https://sajya.github.io",
+            "keywords": [
+                "api",
+                "json-prc",
+                "rpc"
+            ],
+            "support": {
+                "issues": "https://github.com/sajya/server/issues",
+                "source": "https://github.com/sajya/server/tree/7.0.0"
+            },
+            "time": "2025-03-09T02:00:15+00:00"
         },
         {
             "name": "spatie/image",

@@ -474,25 +474,10 @@ Route::get('/events/{osquery}/dismiss', function (\App\Models\YnhOsquery $osquer
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
         Route::get('', 'YnhServerController@create')->name('create');
-        Route::delete('{server}', 'YnhServerController@delete')->name('delete');
         Route::get('{server}/edit', 'YnhServerController@index')->name('edit');
         Route::post('{server}/edit', 'YnhServerController@index')->name('edit');
-        Route::post('{server}/pull-server-infos', 'YnhServerController@pullServerInfos')->name('pull-server-infos');
-        Route::post('{server}/test-ssh-connection', 'YnhServerController@testSshConnection')->name('test-ssh-connection');
-        Route::post('{server}/configure', 'YnhServerController@configure')->name('configure');
         Route::post('{server}/backup', 'YnhServerController@createBackup')->name('create-backup');
         Route::get('{server}/backup/{backup}', 'YnhServerController@downloadBackup')->name('download-backup');
-        Route::post('{server}/execute-shell-command', 'YnhServerController@executeShellCommand')->name('execute-shell-command');
-        Route::delete('{server}/apps/{application}', 'YnhServerController@uninstallApp')->name('uninstall-app');
-        Route::post('{server}/orders/{ynhOrder}', 'YnhServerController@installApp')->name('install-app');
-        Route::post('{server}/users/{ynhUser}/permissions/{perm}', 'YnhServerController@addUserPermission')->name('add-user-permission');
-        Route::delete('{server}/users/{ynhUser}/permissions/{perm}', 'YnhServerController@removeUserPermission')->name('remove-user-permission');
-        Route::post('{server}/twr-users/{user}/permissions/{perm}', 'YnhServerController@addTwrUserPermission')->name('add-twr-user-permission');
-        Route::get('{server}/messages', 'YnhServerController@messages')->name('messages');
-    });
-    Route::group(['prefix' => 'invitations', 'as' => 'invitations.'], function () {
-        Route::post('create', 'YnhInvitationController@create')->name('create');
-        Route::post('send', 'YnhInvitationController@send')->name('send');
     });
     Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
         Route::get('{user}/toggle-gets-audit-report', 'UserController@toggleGetsAuditReport')->name('toggle-gets-audit-report');

@@ -1,3 +1,4 @@
+@once
 <div id="toaster"></div>
 <script>
 
@@ -17,3 +18,4 @@
   };
   
 </script>
+@endonce

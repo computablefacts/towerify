@@ -84,19 +84,9 @@
 <script>
 
   function installApp(serverId, orderId, appName) {
-
     const response = confirm(`Are you sure you want to install ${appName} on this server?`);
-
     if (response) {
-      axios.post(`/ynh/servers/${serverId}/orders/${orderId}`, {}).then(function (data) {
-        if (data.data.success) {
-          toaster.toastSuccess(data.data.success);
-        } else if (data.data.error) {
-          toaster.toastError(data.data.error);
-        } else {
-          console.log(response.data);
-        }
-      }).catch(error => toaster.toastAxiosError(error));
+      installAppApiCall(serverId, orderId);
     }
   }
 
