@@ -29,7 +29,6 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
                     ->header('Cache-Control', 'public, max-age=3600');
             }
             return response()->json(['error' => 'Fichier HTML non trouvé.'], 404);
-
         })->name('rpc.docs');
 
         Route::rpc('/endpoint', [
@@ -52,7 +51,6 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
                     ->header('Cache-Control', 'public, max-age=3600');
             }
             return response()->json(['error' => 'Fichier HTML non trouvé.'], 404);
-
         })->name('rpc.docs');
 
         Route::rpc('/endpoint', [
