@@ -262,7 +262,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Reports
         $this->app->bind('re_api_utils', function () {
-            return new \App\Modules\Reports\Helpers\ApiUtils();
+            return new \App\Helpers\SupersetApiUtils();
         });
     }
 }

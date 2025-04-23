@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Modules\Reports\Helpers;
+namespace App\Helpers;
 
 use Illuminate\Support\Facades\Facade;
 
-class ApiUtilsFacade extends Facade
+class SupersetApiUtilsFacade extends Facade
 {
     protected static function getFacadeAccessor()
     {

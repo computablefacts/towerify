@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Modules\Reports\Helpers;
+namespace App\Helpers;
 
 use App\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class ApiUtils
+class SupersetApiUtils
 {
     public function get_or_add_user(User $user): ?array
     {
