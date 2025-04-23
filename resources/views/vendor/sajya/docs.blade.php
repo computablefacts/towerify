@@ -50,8 +50,8 @@
 
     @foreach($procedures as $procedure)
 
-        <div class="row g-2 g-md-5 mb-3 mb-md-0">
-            <div class="col-12 col-md-3 pe-md-0">
+        <div class="row mb-3">
+            <div class="col-4">
                 <h4 class="user-select-all mb-3">
                     {{ $procedure['name'] }}
                     <span class="d-block text-muted">{{ $procedure['delimiter'] }}{{ $procedure['method'] }}</span>
@@ -62,8 +62,8 @@
             </div>
 
 
-            <div class="col">
-                <div class="p-4 {{ $loop->last ? 'rounded-bottom': '' }} {{ $loop->first ? 'rounded-top' : '' }}" style="background: rgb(37 42 55)">
+            <div class="col-8">
+                <div class="p-4 {{ $loop->last ? 'rounded-top rounded-bottom': 'rounded-top rounded-bottom' }} {{ $loop->first ? 'rounded-top rounded-bottom' : 'rounded-top rounded-bottom' }}" style="background: rgb(37 42 55)">
                 <div class="row">
                     <div class="col">
                         <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
