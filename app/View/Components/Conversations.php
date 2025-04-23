@@ -2,7 +2,7 @@
 
 namespace App\View\Components;
 
-use App\Modules\CyberBuddy\Models\Conversation;
+use App\Models\Conversation;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;

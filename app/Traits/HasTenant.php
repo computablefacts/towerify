@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Models\Tenant;
 use App\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -36,13 +35,13 @@ trait HasTenant
         });
     }
 
-    public function createdBy(): BelongsTo
+    public function createdBy(): User
     {
-        return $this->belongsTo(User::class, 'created_by', 'id');
+        return User::where('id', $this->created_by)->firstOrFail();
     }
 
     public function tenant(): ?Tenant
     {
-        return $this->createdBy?->tenant();
+        return $this->createdBy()->tenant();
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\View\Components;
 
+use App\Models\File;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Models\Asset;
 use App\Modules\AdversaryMeter\Models\Honeypot;
-use App\Modules\CyberBuddy\Models\File;
 use App\User;
 use Closure;
 use Illuminate\Contracts\View\View;

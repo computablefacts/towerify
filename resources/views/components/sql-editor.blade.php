@@ -53,7 +53,7 @@
 
     const prompt = document.getElementById('prompt').value;
 
-    axios.post(`/cb/web/tables/prompt-to-query`, {prompt: prompt}).then(response => {
+    axios.post(`/tables/prompt-to-query`, {prompt: prompt}).then(response => {
       if (response.data.success && response.data.result) {
         editor.setValue(response.data.result);
       } else {
@@ -77,7 +77,7 @@
     elTableBody.innerHTML = "<tr><td>{{ __('Loading...') }}</td></tr>";
 
     const sql = editor.getValue();
-    axios.post(`/cb/web/tables/query`, {query: sql, store: false}).then(response => {
+    axios.post(`/tables/query`, {query: sql, store: false}).then(response => {
       if (response.data.success) {
         elTableHead.innerHTML = `
           <tr>${response.data.result[0].map(column => `<th>${column}</th>`).join('')}</tr>

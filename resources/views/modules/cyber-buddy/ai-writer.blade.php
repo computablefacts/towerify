@@ -68,7 +68,7 @@
     const file = files[0];
     const reader = new FileReader();
     reader.onload = e => {
-      axios.post('/cb/web/templates', {name: file.name, template: JSON.parse(e.target.result), is_model: true})
+      axios.post('/templates', {name: file.name, template: JSON.parse(e.target.result), is_model: true})
       .then(response => {
         elTemplates.items = elTemplates.items.concat(response.data); // TODO : sort by name?
         toaster.toastSuccess("{{ __('Your model has been successfully uploaded!') }}");
@@ -89,7 +89,7 @@
   elFile.buttonText = "{{ __('Browse') }}";
 
   document.addEventListener('DOMContentLoaded', function (event) {
-    axios.get('/cb/web/templates').then(response => {
+    axios.get('/templates').then(response => {
       elTemplates.items = response.data;
     }).catch(error => toaster.toastAxiosError(error));
   });
@@ -103,7 +103,7 @@
       toaster.toastError("{{ __('The document is not loaded!') }}");
       return;
     }
-    axios.post('/cb/web/templates', {id: template.id, name: template.name, template: ctx.blocks})
+    axios.post('/templates', {id: template.id, name: template.name, template: ctx.blocks})
     .then(response => {
       if (!template.id) {
         template.type = response.data.type;
@@ -154,7 +154,7 @@
           const editor = window.BlockNote.ctx.editor;
           const blocksFromMarkdown = editor.tryParseMarkdownToBlocks(markdownContent);
           blocksFromMarkdown.then(blocks => {
-            axios.get('/cb/web/collections').then(response => {
+            axios.get('/collections').then(response => {
               const collections = response.data.map(collection => collection.name);
               for (let i = 0; i < blocks.length; i++) {
                 const block = blocks[i];
@@ -200,7 +200,7 @@
       clearDocument();
       return;
     }
-    axios.delete(`/cb/web/templates/${elTemplates.selectedItem.id}`).then(response => {
+    axios.delete(`/templates/${elTemplates.selectedItem.id}`).then(response => {
       elTemplates.items = elTemplates.items.filter(item => item.id !== elTemplates.selectedItem.id);
       clearDocument();
       toaster.toastSuccess("{{ __('The document has been deleted!') }}");

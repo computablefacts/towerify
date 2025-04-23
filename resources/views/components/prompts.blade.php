@@ -132,7 +132,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this prompt?') }}");
 
     if (response) {
-      axios.delete(`/cb/web/prompts/${promptId}`).then(function (response) {
+      axios.delete(`/prompts/${promptId}`).then(function (response) {
         if (response.data.success) {
           toaster.toastSuccess(response.data.success);
         } else if (response.data.error) {
@@ -170,7 +170,7 @@
       if (!response) {
         pre.innerText = oldValue;
       } else {
-        axios.post(`/cb/web/prompts/${promptId}`, {template: newValue}).then(function (response) {
+        axios.post(`/prompts/${promptId}`, {template: newValue}).then(function (response) {
           if (response.data.success) {
             toaster.toastSuccess(response.data.success);
           } else if (response.data.error) {

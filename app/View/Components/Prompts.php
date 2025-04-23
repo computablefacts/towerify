@@ -2,7 +2,7 @@
 
 namespace App\View\Components;
 
-use App\Modules\CyberBuddy\Models\Prompt;
+use App\Models\Prompt;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;

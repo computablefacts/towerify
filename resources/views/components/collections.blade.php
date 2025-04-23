@@ -123,7 +123,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this collection?') }}");
 
     if (response) {
-      axios.delete(`/cb/web/collections/${collectionId}`).then(function (response) {
+      axios.delete(`/collections/${collectionId}`).then(function (response) {
         if (response.data.success) {
           toaster.toastSuccess(response.data.success);
         } else if (response.data.error) {
@@ -160,7 +160,7 @@
       if (!response) {
         td.innerText = oldValue;
       } else {
-        axios.post(`/cb/web/collections/${collectionId}`, {priority: newValue}).then(function (response) {
+        axios.post(`/collections/${collectionId}`, {priority: newValue}).then(function (response) {
           if (response.data.success) {
             toaster.toastSuccess(response.data.success);
           } else if (response.data.error) {

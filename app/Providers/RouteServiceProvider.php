@@ -31,8 +31,8 @@ class RouteServiceProvider extends ServiceProvider
             'logalert/*',
             'logparser/*',
             'osquery/*',
-            'cb/web/botman',
-            'cb/web/files/*',
+            'botman',
+            'files/*',
             'stripe/*',
         ]);
     }
@@ -64,10 +64,6 @@ class RouteServiceProvider extends ServiceProvider
             ->prefix('am/web')
             ->namespace('App\Modules\AdversaryMeter\Http\Controllers')
             ->group(base_path('app/Modules/AdversaryMeter/web.php'));
-        Route::middleware('web')
-            ->prefix('cb/web')
-            ->namespace('App\Modules\CyberBuddy\Http\Controllers')
-            ->group(base_path('app/Modules/CyberBuddy/web.php'));
     }
 
     /**
@@ -87,9 +83,5 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace('App\Modules\AdversaryMeter\Http\Controllers')
             ->group(base_path('app/Modules/AdversaryMeter/api.php'));
-        Route::prefix('cb/api/v2')
-            ->middleware('api')
-            ->namespace('App\Modules\CyberBuddy\Http\Controllers')
-            ->group(base_path('app/Modules/CyberBuddy/api.php'));
     }
 }

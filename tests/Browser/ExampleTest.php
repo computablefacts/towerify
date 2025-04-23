@@ -13,7 +13,7 @@ class ExampleTest extends DuskTestCase
     public function testBasicExample(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/tcb/web/the-cyber-brief?lang=fr')
+            $browser->visit('/the-cyber-brief?lang=fr')
             ->assertSee('All clear—no briefs today!');
         });
     }

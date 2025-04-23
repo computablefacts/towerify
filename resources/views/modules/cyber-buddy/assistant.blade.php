@@ -3,18 +3,18 @@
 $conversationId = request()->query('conversation_id');
 
 if ($conversationId) {
-$conversation = \App\Modules\CyberBuddy\Models\Conversation::where('id', $conversationId)
-->where('format', \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V1)
+$conversation = \App\Models\Conversation::where('id', $conversationId)
+->where('format', \App\Models\Conversation::FORMAT_V1)
 ->where('created_by', Auth::user()?->id)
 ->first();
 }
 
-$conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::create([
+$conversation = $conversation ?? \App\Models\Conversation::create([
 'thread_id' => \Illuminate\Support\Str::random(10),
 'dom' => json_encode([]),
 'autosaved' => true,
 'created_by' => Auth::user()?->id,
-'format' => \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V1,
+'format' => \App\Models\Conversation::FORMAT_V1,
 ]);
 
 @endphp
@@ -842,7 +842,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
 
       elInputField.value = '';
 
-      axios.post('/cb/web/assistant/converse', {
+      axios.post('/assistant/converse', {
         thread_id: '{{ $conversation->thread_id }}', directive: directive
       }).then((answer) => {
         if (answer.data.success) {

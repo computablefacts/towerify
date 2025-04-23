@@ -3,16 +3,16 @@
 namespace App\Console;
 
 use App\Jobs\Cleanup;
+use App\Jobs\DeleteEmbeddedChunks;
 use App\Jobs\DownloadDebianSecurityBugTracker;
+use App\Jobs\EmbedChunks;
+use App\Jobs\ProcessIncomingEmails;
 use App\Jobs\PullServersInfos;
 use App\Jobs\Summarize;
+use App\Jobs\UpdateTables;
 use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
 use App\Modules\AdversaryMeter\Jobs\TriggerScan;
 use App\Modules\AdversaryMeter\Jobs\TriggerSendAuditReport;
-use App\Modules\CyberBuddy\Jobs\DeleteEmbeddedChunks;
-use App\Modules\CyberBuddy\Jobs\EmbedChunks;
-use App\Modules\CyberBuddy\Jobs\ProcessIncomingEmails;
-use App\Modules\CyberBuddy\Jobs\UpdateTables;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
