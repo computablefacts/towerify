@@ -10,7 +10,6 @@ use App\Http\Requests\ConverseRequest;
 use App\Models\Conversation;
 use App\Models\Prompt;
 use App\Models\YnhServer;
-use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;

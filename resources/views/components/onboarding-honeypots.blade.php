@@ -12,7 +12,7 @@
     </div>
     <div class="card-text">
       Pour configurer vos honeypots SSH, HTTPS et HTTP, cliquez <a
-        href="{{ App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('setup_honeypots') }}" target="_blank">ici</a>.
+        href="{{ App\Helpers\AdversaryMeter::redirectUrl('setup_honeypots') }}" target="_blank">ici</a>.
     </div>
   </div>
 </div>
