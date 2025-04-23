@@ -59,6 +59,7 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
             \App\Http\Procedures\ApplicationsProcedure::class,
             \App\Http\Procedures\InvitationsProcedure::class,
             \App\Http\Procedures\ServersProcedure::class,
+            \App\Http\Procedures\TheCyberBriefProcedure::class,
         ])
             ->name('rpc.endpoint')
             ->middleware([GzipCompress::class, \App\Http\Middleware\Authenticate::class]);

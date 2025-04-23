@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\TheCyberBrief\Helpers;
+namespace App\Helpers;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;

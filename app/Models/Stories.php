@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Modules\TheCyberBrief\Models;
+namespace App\Models;
 
 use App\Enums\LanguageEnum;
-use App\Modules\TheCyberBrief\Helpers\OpenAi;
+use App\Helpers\OpenAi;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -2,6 +2,7 @@
 
 namespace App\Modules\CyberBuddy\Http\Controllers;
 
+use App\Helpers\OpenAi;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Modules\CyberBuddy\Enums\RoleEnum;
@@ -10,7 +11,6 @@ use App\Modules\CyberBuddy\Helpers\LlmFunctions\AbstractLlmFunction;
 use App\Modules\CyberBuddy\Http\Requests\ConverseRequest;
 use App\Modules\CyberBuddy\Models\Conversation;
 use App\Modules\CyberBuddy\Models\Prompt;
-use App\Modules\TheCyberBrief\Helpers\OpenAi;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;

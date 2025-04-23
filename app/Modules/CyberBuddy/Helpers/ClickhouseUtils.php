@@ -2,8 +2,8 @@
 
 namespace App\Modules\CyberBuddy\Helpers;
 
+use App\Helpers\OpenAi;
 use App\Modules\CyberBuddy\Models\Table;
-use App\Modules\TheCyberBrief\Helpers\OpenAi;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 

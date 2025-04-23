@@ -2,6 +2,7 @@
 
 namespace App\Modules\CyberBuddy\Http\Controllers;
 
+use App\Helpers\OpenAi;
 use App\Models\YnhFramework;
 use App\Models\YnhServer;
 use App\Modules\AdversaryMeter\Http\Controllers\Controller;
@@ -25,7 +26,6 @@ use App\Modules\CyberBuddy\Models\Prompt;
 use App\Modules\CyberBuddy\Models\Table;
 use App\Modules\CyberBuddy\Models\Template;
 use App\Modules\CyberBuddy\Rules\IsValidCollectionName;
-use App\Modules\TheCyberBrief\Helpers\OpenAi;
 use App\User;
 use BotMan\BotMan\BotMan;
 use Carbon\Carbon;

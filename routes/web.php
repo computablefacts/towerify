@@ -520,3 +520,5 @@ Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
     Route::post('/{hash}/discovery', 'CywiseController@discovery')->name('cywise.discovery');
 
 })->middleware(['auth']);
+
+Route::get('/the-cyber-brief', 'TheCyberBriefController@index')->name('the-cyber-brief');

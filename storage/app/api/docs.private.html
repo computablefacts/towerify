@@ -697,10 +697,53 @@
             </div>
         </div>
     
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    the-cyber-brief
+                    <span class="d-block text-muted">@summarize</span>
+                </h4>
+                <p>
+                    Summarize a text or a webpage.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">the-cyber-brief@summarize</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">url_or_text</span>": "<span style="color:#9ECE6A;">The text or webpage (URL) to summarize. The webpage will be automatically downloaded and converted to text.</span>",
+        "<span style="color:#A0AEC0;">prompt</span>": "<span style="color:#9ECE6A;">The prompt to use. Any [TEXT] in the prompt will be replaced by the text or webpage.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">summary</span>": "<span style="color:#9ECE6A;">The summary of the text or webpage.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
 
     <footer class="pt-5 my-5 text-muted d-flex align-items-center">
         <div class="mx-auto">
-            <abbr title="2025-04-23T09:12:49+00:00">Created</abbr> by the <a href="http://sajya.github.io" class="text-dark" target="_blank">Sajya</a>.
+            <abbr title="2025-04-23T11:17:32+00:00">Created</abbr> by the <a href="http://sajya.github.io" class="text-dark" target="_blank">Sajya</a>.
         </div>
     </footer>
 </div>
