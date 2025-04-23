@@ -17,8 +17,8 @@ class InvitationsProcedure extends Procedure
     #[RpcMethod(
         description: "Create a single invitation, but do not send it.",
         params: [
-            "fullname" => "The user name (mandatory).",
-            "email" => "The user email address (mandatory).",
+            "fullname" => "The user name.",
+            "email" => "The user email address.",
         ],
         result: [
             "msg" => "A success message.",
@@ -75,7 +75,7 @@ class InvitationsProcedure extends Procedure
     #[RpcMethod(
         description: "Send a previously created invitation.",
         params: [
-            "id" => "The invitation id (mandatory).",
+            "id" => "The invitation id.",
         ],
         result: [
             "msg" => "A success message.",

@@ -26,8 +26,8 @@ class ApplicationsProcedure extends Procedure
     #[RpcMethod(
         description: "Install an app on a server.",
         params: [
-            "order_id" => "The order id (mandatory).",
-            "server_id" => "The server id (mandatory).",
+            "order_id" => "The order id.",
+            "server_id" => "The server id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -77,8 +77,8 @@ class ApplicationsProcedure extends Procedure
     #[RpcMethod(
         description: "Uninstall a previously installed app.",
         params: [
-            "application_id" => "The application id (mandatory).",
-            "server_id" => "The server id (mandatory).",
+            "application_id" => "The application id.",
+            "server_id" => "The server id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -119,9 +119,9 @@ class ApplicationsProcedure extends Procedure
     #[RpcMethod(
         description: "Add a permission to the Towerify user.",
         params: [
-            "permission" => "The permission to add (mandatory).",
-            "server_id" => "The server id (mandatory).",
-            "user_id" => "The user id (mandatory).",
+            "permission" => "The permission to add.",
+            "server_id" => "The server id.",
+            "user_id" => "The user id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -165,9 +165,9 @@ class ApplicationsProcedure extends Procedure
     #[RpcMethod(
         description: "Add a permission to a given user.",
         params: [
-            "permission" => "The permission to add (mandatory).",
-            "server_id" => "The server id (mandatory).",
-            "user_id" => "The user id (mandatory).",
+            "permission" => "The permission to add.",
+            "server_id" => "The server id.",
+            "user_id" => "The user id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -211,9 +211,9 @@ class ApplicationsProcedure extends Procedure
     #[RpcMethod(
         description: "Remove a permission from a given user.",
         params: [
-            "permission" => "The permission to remove (mandatory).",
-            "server_id" => "The server id (mandatory).",
-            "user_id" => "The user id (mandatory).",
+            "permission" => "The permission to remove.",
+            "server_id" => "The server id.",
+            "user_id" => "The user id.",
         ],
         result: [
             "msg" => "A success message.",

@@ -76,7 +76,7 @@ class ServersProcedure extends Procedure
     #[RpcMethod(
         description: "Delete a single server and all its associated data.",
         params: [
-            "server_id" => "The server id (mandatory).",
+            "server_id" => "The server id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -128,12 +128,12 @@ class ServersProcedure extends Procedure
     #[RpcMethod(
         description: "Configure the SSH connection of a server.",
         params: [
-            "name" => "The server name (mandatory).",
-            "ip" => "The server IP address (mandatory).",
-            "port" => "The server SSH port (mandatory).",
-            "username" => "The server SSH username (mandatory).",
-            "domain" => "The domain pointing to the server (mandatory).",
-            "server_id" => "The server id (mandatory).",
+            "name" => "The server name.",
+            "ip" => "The server IP address.",
+            "port" => "The server SSH port.",
+            "username" => "The server SSH username.",
+            "domain" => "The domain pointing to the server.",
+            "server_id" => "The server id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -234,10 +234,10 @@ class ServersProcedure extends Procedure
     #[RpcMethod(
         description: "Test if the SSH connection to a server is working.",
         params: [
-            "ip" => "The server IP address (mandatory).",
-            "port" => "The server SSH port (mandatory).",
-            "username" => "The server SSH username (mandatory).",
-            "server_id" => "The server id (mandatory).",
+            "ip" => "The server IP address.",
+            "port" => "The server SSH port.",
+            "username" => "The server SSH username.",
+            "server_id" => "The server id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -273,8 +273,8 @@ class ServersProcedure extends Procedure
     #[RpcMethod(
         description: "Execute a shell command on a server.",
         params: [
-            "cmd" => "The shell command to execute (mandatory).",
-            "server_id" => "The server id (mandatory).",
+            "cmd" => "The shell command to execute.",
+            "server_id" => "The server id.",
         ],
         result: [
             "output" => "The command output.",
@@ -321,7 +321,7 @@ class ServersProcedure extends Procedure
     #[RpcMethod(
         description: "Pull the server's information.",
         params: [
-            "server_id" => "The server id (mandatory).",
+            "server_id" => "The server id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -358,7 +358,7 @@ class ServersProcedure extends Procedure
     #[RpcMethod(
         description: "Backup a server.",
         params: [
-            "server_id" => "The server id (mandatory).",
+            "server_id" => "The server id.",
         ],
         result: [
             "msg" => "A success message.",
@@ -395,7 +395,7 @@ class ServersProcedure extends Procedure
     #[RpcMethod(
         description: "Retrieve the security events for a specific server over the past 10 days.",
         params: [
-            "server_id" => "The server id (mandatory).",
+            "server_id" => "The server id.",
         ],
         result: [
             "events" => "An array of security events.",
