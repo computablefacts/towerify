@@ -22,7 +22,7 @@ export async function whoAmI() {
 
 export async function apiCall(method, url, params = {}, body = null) {
 
-    let fullUrl = httpClient.getBaseUrl() + "/am/" + url;
+    let fullUrl = httpClient.getBaseUrl() + "/" + url;
 
     if (method.toUpperCase() === "GET" && Object.keys(params).length > 0) {
         const queryParams = new URLSearchParams(params).toString();

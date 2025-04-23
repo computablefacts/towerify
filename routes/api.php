@@ -175,6 +175,10 @@ Route::group([
     Route::post('honeypots/set-next-step', 'HoneypotController@moveHoneypotsConfigurationToNextStep');
 })->middleware(['auth']);
 
+Route::middleware('auth:api')->get('/v2/public/whoami', function (Request $request) {
+    return Auth::user();
+});
+
 Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
 
     /** PUBLIC ENDPOINTS */
