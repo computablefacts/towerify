@@ -156,17 +156,17 @@ if (!function_exists('app_sidebar')) {
                     'section_items' => [
                         [
                             'label' => __('Assets'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('assets'),
+                            'route' => \App\Helpers\AdversaryMeter::redirectUrl('assets'),
                             'target' => '_blank',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_ASSETS),
                         ], [
                             'label' => __('Vulnerabilities'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('vulnerabilities'),
+                            'route' => \App\Helpers\AdversaryMeter::redirectUrl('vulnerabilities'),
                             'target' => '_blank',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_VULNERABILITIES),
                         ], [
                             'label' => __('Service Provider Delegation'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('delegation'),
+                            'route' => \App\Helpers\AdversaryMeter::redirectUrl('delegation'),
                             'target' => '_blank',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_SERVICE_PROVIDER_DELEGATION),
                         ],
@@ -193,17 +193,17 @@ if (!function_exists('app_sidebar')) {
                     'section_items' => [
                         [
                             'label' => __('Honeypots'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('setup_honeypots'),
+                            'route' => \App\Helpers\AdversaryMeter::redirectUrl('setup_honeypots'),
                             'target' => '_blank',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_HONEYPOTS),
                         ], [
                             'label' => __('Attackers'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('attackers'),
+                            'route' => \App\Helpers\AdversaryMeter::redirectUrl('attackers'),
                             'target' => '_blank',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_ATTACKERS),
                         ], [
                             'label' => __('IP Blacklist'),
-                            'route' => App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('blacklist'),
+                            'route' => \App\Helpers\AdversaryMeter::redirectUrl('blacklist'),
                             'target' => '_blank',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_IP_BLACKLIST),
                         ],

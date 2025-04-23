@@ -17,9 +17,9 @@ class FixupTables4 extends Migration
 
             // Deal with ranges
             $table->enum('asset_type', [
-                \App\Modules\AdversaryMeter\Enums\AssetTypesEnum::DNS->value,
-                \App\Modules\AdversaryMeter\Enums\AssetTypesEnum::IP->value,
-                \App\Modules\AdversaryMeter\Enums\AssetTypesEnum::RANGE->value,
+                \App\Enums\AssetTypesEnum::DNS->value,
+                \App\Enums\AssetTypesEnum::IP->value,
+                \App\Enums\AssetTypesEnum::RANGE->value,
             ])->change();
 
             // Scope assets

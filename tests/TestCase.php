@@ -2,14 +2,14 @@
 
 namespace Tests;
 
-use App\Modules\AdversaryMeter\Models\Alert;
-use App\Modules\AdversaryMeter\Models\Asset;
-use App\Modules\AdversaryMeter\Models\Attacker;
-use App\Modules\AdversaryMeter\Models\HiddenAlert;
-use App\Modules\AdversaryMeter\Models\Honeypot;
-use App\Modules\AdversaryMeter\Models\Port;
-use App\Modules\AdversaryMeter\Models\Scan;
-use App\Modules\AdversaryMeter\Models\Screenshot;
+use App\Models\Alert;
+use App\Models\Asset;
+use App\Models\Attacker;
+use App\Models\HiddenAlert;
+use App\Models\Honeypot;
+use App\Models\Port;
+use App\Models\Scan;
+use App\Models\Screenshot;
 use App\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 

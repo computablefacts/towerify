@@ -2,8 +2,8 @@
 
 namespace App\Helpers\LlmFunctions;
 
-use App\Modules\AdversaryMeter\Models\Asset;
-use App\Modules\AdversaryMeter\Models\Port;
+use App\Models\Asset;
+use App\Models\Port;
 use App\User;
 
 class QueryOpenPortDatabase extends AbstractLlmFunction

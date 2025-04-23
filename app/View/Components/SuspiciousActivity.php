@@ -2,9 +2,9 @@
 
 namespace App\View\Components;
 
+use App\Models\Asset;
 use App\Models\YnhOsquery;
 use App\Models\YnhServer;
-use App\Modules\AdversaryMeter\Models\Asset;
 use App\User;
 use Carbon\Carbon;
 use Closure;

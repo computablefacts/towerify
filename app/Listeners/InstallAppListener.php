@@ -3,11 +3,11 @@
 namespace App\Listeners;
 
 use App\Enums\SshTraceStateEnum;
+use App\Events\CreateAsset;
 use App\Events\InstallApp;
 use App\Events\PullServerInfos;
 use App\Helpers\AppStore;
 use App\Models\YnhApplication;
-use App\Modules\AdversaryMeter\Events\CreateAsset;
 use Illuminate\Support\Facades\Auth;
 
 class InstallAppListener extends AbstractListener

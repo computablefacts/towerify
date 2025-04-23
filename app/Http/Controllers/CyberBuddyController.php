@@ -24,7 +24,6 @@ use App\Models\Table;
 use App\Models\Template;
 use App\Models\YnhFramework;
 use App\Models\YnhServer;
-use App\Modules\AdversaryMeter\Http\Controllers\Controller;
 use App\Rules\IsValidCollectionName;
 use App\User;
 use BotMan\BotMan\BotMan;

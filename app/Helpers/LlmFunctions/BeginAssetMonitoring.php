@@ -2,7 +2,7 @@
 
 namespace App\Helpers\LlmFunctions;
 
-use App\Modules\AdversaryMeter\Http\Controllers\AssetController;
+use App\Http\Controllers\AssetController;
 use App\User;
 use Illuminate\Http\Request;
 

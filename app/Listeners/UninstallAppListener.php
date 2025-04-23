@@ -3,9 +3,9 @@
 namespace App\Listeners;
 
 use App\Enums\SshTraceStateEnum;
+use App\Events\DeleteAsset;
 use App\Events\PullServerInfos;
 use App\Events\UninstallApp;
-use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 

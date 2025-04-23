@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Hashing\TwHasher;
 use App\Models\Address;
 use App\Models\Adjustment;
+use App\Models\Asset;
+use App\Models\AssetTag;
+use App\Models\AssetTagHash;
 use App\Models\Billpayer;
 use App\Models\Carrier;
 use App\Models\Cart;
@@ -16,6 +19,8 @@ use App\Models\Collection;
 use App\Models\Conversation;
 use App\Models\Customer;
 use App\Models\File;
+use App\Models\HiddenAlert;
+use App\Models\Honeypot;
 use App\Models\Invitation;
 use App\Models\LinkGroup;
 use App\Models\LinkGroupItem;
@@ -49,18 +54,11 @@ use App\Models\YnhOverview;
 use App\Models\YnhServer;
 use App\Models\Zone;
 use App\Models\ZoneMember;
-use App\Modules\AdversaryMeter\Models\Asset;
-use App\Modules\AdversaryMeter\Models\AssetTag;
-use App\Modules\AdversaryMeter\Models\AssetTagHash;
-use App\Modules\AdversaryMeter\Models\HiddenAlert;
-use App\Modules\AdversaryMeter\Models\Honeypot;
-use App\Modules\AdversaryMeter\Observers\AssetObserver;
-use App\Modules\AdversaryMeter\Observers\AssetTagHashObserver;
-use App\Modules\AdversaryMeter\Observers\AssetTagObserver;
-use App\Modules\AdversaryMeter\Observers\HiddenAlertObserver;
-use App\Modules\AdversaryMeter\Observers\HoneypotObserver;
 use App\Observers\AddressObserver;
 use App\Observers\AdjustmentObserver;
+use App\Observers\AssetObserver;
+use App\Observers\AssetTagHashObserver;
+use App\Observers\AssetTagObserver;
 use App\Observers\BillpayerObserver;
 use App\Observers\CarrierObserver;
 use App\Observers\CartItemObserver;
@@ -72,6 +70,8 @@ use App\Observers\CollectionObserver;
 use App\Observers\ConversationObserver;
 use App\Observers\CustomerObserver;
 use App\Observers\FilesObserver;
+use App\Observers\HiddenAlertObserver;
+use App\Observers\HoneypotObserver;
 use App\Observers\InvitationObserver;
 use App\Observers\LinkGroupItemObserver;
 use App\Observers\LinkGroupObserver;
@@ -252,7 +252,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // AdversaryMeter
         $this->app->bind('am_api_utils', function () {
-            return new \App\Modules\AdversaryMeter\Helpers\ApiUtils();
+            return new \App\Helpers\VulnerabilityScannerApiUtils();
         });
 
         // CyberBuddy

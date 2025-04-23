@@ -60,10 +60,6 @@ class RouteServiceProvider extends ServiceProvider
         Route::middleware('web')
             ->namespace($this->namespace)
             ->group(base_path('routes/web.php'));
-        Route::middleware('web')
-            ->prefix('am/web')
-            ->namespace('App\Modules\AdversaryMeter\Http\Controllers')
-            ->group(base_path('app/Modules/AdversaryMeter/web.php'));
     }
 
     /**
@@ -79,9 +75,5 @@ class RouteServiceProvider extends ServiceProvider
             ->middleware('api')
             ->namespace($this->namespace)
             ->group(base_path('routes/api.php'));
-        Route::prefix('am/api/v2')
-            ->middleware('api')
-            ->namespace('App\Modules\AdversaryMeter\Http\Controllers')
-            ->group(base_path('app/Modules/AdversaryMeter/api.php'));
     }
 }

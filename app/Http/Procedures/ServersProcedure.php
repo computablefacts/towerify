@@ -4,14 +4,14 @@ namespace App\Http\Procedures;
 
 use App\Enums\SshTraceStateEnum;
 use App\Events\ConfigureHost;
+use App\Events\CreateAsset;
 use App\Events\CreateBackup;
+use App\Events\DeleteAsset;
 use App\Events\PullServerInfos;
 use App\Helpers\Messages;
 use App\Helpers\SshKeyPair;
 use App\Models\YnhDomain;
 use App\Models\YnhServer;
-use App\Modules\AdversaryMeter\Events\CreateAsset;
-use App\Modules\AdversaryMeter\Events\DeleteAsset;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

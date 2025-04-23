@@ -2,7 +2,7 @@
 
 namespace App\Helpers\LlmFunctions;
 
-use App\Modules\AdversaryMeter\Models\Asset;
+use App\Models\Asset;
 use App\User;
 
 class QueryAssetDatabase extends AbstractLlmFunction

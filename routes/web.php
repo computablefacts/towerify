@@ -17,6 +17,7 @@ use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
 use App\Http\Middleware\RedirectIfNotSubscribed;
 use App\Jobs\DownloadDebianSecurityBugTracker;
+use App\Mail\AuditReport;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Http\JsonResponse;
@@ -121,7 +122,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
                 'platform' => $platform,
             ]);
 
-            \App\Modules\AdversaryMeter\Events\CreateAsset::dispatch($user, $server->ip(), true, [$server->name]);
+            \App\Events\CreateAsset::dispatch($user, $server->ip(), true, [$server->name]);
         }
     }
     if ($server->is_ready) {
@@ -588,3 +589,7 @@ Route::group([
     Route::get('/', 'CyberBuddyNextGenController@showAssistant');
     Route::post('/converse', 'CyberBuddyNextGenController@converse');
 })->middleware(['auth', 'throttle:15,1']);
+
+Route::get('/cyber-todo/{hash}', 'CyberTodoController@show');
+
+Route::get('/audit-report', fn() => AuditReport::create()['report'])->middleware('auth');

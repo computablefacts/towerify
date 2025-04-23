@@ -9,10 +9,10 @@ use App\Jobs\EmbedChunks;
 use App\Jobs\ProcessIncomingEmails;
 use App\Jobs\PullServersInfos;
 use App\Jobs\Summarize;
+use App\Jobs\TriggerDiscoveryShallow;
+use App\Jobs\TriggerScan;
+use App\Jobs\TriggerSendAuditReport;
 use App\Jobs\UpdateTables;
-use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
-use App\Modules\AdversaryMeter\Jobs\TriggerScan;
-use App\Modules\AdversaryMeter\Jobs\TriggerSendAuditReport;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 

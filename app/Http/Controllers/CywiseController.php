@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\HoneypotCloudProvidersEnum;
+use App\Enums\HoneypotCloudSensorsEnum;
+use App\Enums\HoneypotStatusesEnum;
+use App\Mail\HoneypotRequested;
+use App\Models\Honeypot;
 use App\Models\Invitation;
 use App\Models\YnhTrial;
-use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
-use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
-use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
-use App\Modules\AdversaryMeter\Http\Controllers\AssetController;
-use App\Modules\AdversaryMeter\Mail\HoneypotRequested;
-use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

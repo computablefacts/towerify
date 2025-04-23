@@ -2,8 +2,8 @@
 
 namespace App\Helpers\LlmFunctions;
 
-use App\Modules\AdversaryMeter\Http\Controllers\AssetController;
-use App\Modules\AdversaryMeter\Models\Asset;
+use App\Http\Controllers\AssetController;
+use App\Models\Asset;
 use App\User;
 
 class RemoveAsset extends AbstractLlmFunction

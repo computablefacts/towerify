@@ -37,8 +37,8 @@ class CreateAssetsTable extends Migration
             // The asset name and type (DNS, IP, etc.)
             $table->string('asset');
             $table->enum('asset_type', [
-                \App\Modules\AdversaryMeter\Enums\AssetTypesEnum::DNS->value,
-                \App\Modules\AdversaryMeter\Enums\AssetTypesEnum::IP->value,
+                \App\Enums\AssetTypesEnum::DNS->value,
+                \App\Enums\AssetTypesEnum::IP->value,
             ]);
 
             // If the asset type is DNS, the TLD

@@ -4,8 +4,8 @@ namespace App\Listeners;
 
 use App\Enums\SshTraceStateEnum;
 use App\Events\ConfigureHost;
+use App\Events\CreateAsset;
 use App\Events\PullServerInfos;
-use App\Modules\AdversaryMeter\Events\CreateAsset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Vanilo\Order\Models\FulfillmentStatus;
