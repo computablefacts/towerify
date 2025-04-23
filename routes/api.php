@@ -1,9 +1,11 @@
 <?php
 
+use App\Events\BeginVulnsScan;
 use App\Events\EndPortsScan;
 use App\Events\EndVulnsScan;
 use App\Models\Asset;
 use App\Models\Honeypot;
+use App\Models\Port;
 use App\Models\Scan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -72,11 +74,6 @@ Route::group([
     });
     Route::post('ports-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
 
-        if (!$request->has('task_result')) {
-            return response('Missing task result', 500)
-                ->header('Content-Type', 'text/plain');
-        }
-
         /** @var Scan $scan */
         $scan = Scan::where('ports_scan_id', $uuid)->first();
 
@@ -90,6 +87,29 @@ Route::group([
 
         if (!$asset) {
             return response('Unknown asset', 500)
+                ->header('Content-Type', 'text/plain');
+        }
+        if (!$request->has('task_result')) {
+
+            /* BEGIN COPY/PASTE FROM EndPortsScanListener.php */
+
+            // Legacy stuff: if no port is open, create a dummy one that will be marked as closed by the vulns scanner
+            $port = Port::create([
+                'scan_id' => $scan->id,
+                'hostname' => "localhost",
+                'ip' => "127.0.0.1",
+                'port' => 666,
+                'protocol' => "tcp",
+            ]);
+
+            $scan->ports_scan_ends_at = \Carbon\Carbon::now();
+            $scan->save();
+
+            BeginVulnsScan::dispatch($scan, $port);
+
+            /* END COPY/PASTE FROM EndPortsScanListener.php */
+
+            return response('Missing task result', 500)
                 ->header('Content-Type', 'text/plain');
         }
 
