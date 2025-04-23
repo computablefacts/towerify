@@ -89,8 +89,9 @@ Route::group([
             return response('Unknown asset', 500)
                 ->header('Content-Type', 'text/plain');
         }
-        if (!$request->has('task_result')) {
-
+        if ($request->has('task_result')) {
+            EndPortsScan::dispatch(Carbon::now(), $asset, $scan, $request->get('task_result', []));
+        } else {
             /* BEGIN COPY/PASTE FROM EndPortsScanListener.php */
 
             // Legacy stuff: if no port is open, create a dummy one that will be marked as closed by the vulns scanner
@@ -108,13 +109,7 @@ Route::group([
             BeginVulnsScan::dispatch($scan, $port);
 
             /* END COPY/PASTE FROM EndPortsScanListener.php */
-
-            return response('Missing task result', 500)
-                ->header('Content-Type', 'text/plain');
         }
-
-        EndPortsScan::dispatch(Carbon::now(), $asset, $scan, $request->get('task_result', []));
-
         return response("ok", 200)
             ->header('Content-Type', 'text/plain');
     });
