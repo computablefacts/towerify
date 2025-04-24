@@ -1,8 +1,8 @@
 <h1>Configuration de vos honeypots</h1>
 <p>Une petite seconde, je configure maintenant vos honeypots. Les honeypots agissent comme des leurres pour attirer les
   cyber-attaquants et analyser leur comportement. <b>Pas d'inquiétude, tout est isolé et sécurisé !</b></p>
-<p>Pour aller plus loin, vous aurez la possibilité de configurer des honeypots sur vos propres domaines et sous-domaines
-  une fois connecté à Cywise.</p>
+<p>Si vous décidez d'aller plus loin, la solution Cywise vous offre la possibilité de configurer des honeypots sur vos
+  propres domaines et sous-domaines !</p>
 @include('cywise._loader', [ 'title' => 'La création de vos honeypots est en cours...', 'subtitle' => 'Compter environ 60 secondes' ])
 <form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 4 ]) }}" method="post">
   @csrf
