@@ -1,8 +1,11 @@
 <style>
 
 </style>
-<h1>Votre nom de domaine</h1>
-<p>Saisissez votre nom de domaine et Cywise se charge de tester votre sécurité.</p>
+<h1>Analyse de votre domaine</h1>
+<p>Bonjour, je suis CyberBuddy, votre assistant en cybersécurité ! C'est moi qui vais vous accompagner tout au long de
+  votre analyse. Entrez simplement le nom de domaine que vous souhaitez auditer. Je vais m'occuper du reste pour
+  détecter les failles potentielles. Pas besoin d'être un expert, je suis là pour vous guider !</p>
+<p>On se lance ?!</p>
 <form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 2 ]) }}" method="post">
   @csrf
   <input type="text" placeholder="Votre nom de domaine ex. cywise.io" name="domain" value="{{ $trial->domain }}">
@@ -12,7 +15,7 @@
 
   const elInput = document.querySelector('input[name="domain"]');
   const elSubmitButton = document.querySelector('button[type="submit"]');
-  
+
   const toggleButtonState = () => {
     const isInputEmpty = elInput.value.trim() === '';
     if (isInputEmpty) {

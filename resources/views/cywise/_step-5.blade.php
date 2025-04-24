@@ -192,9 +192,11 @@
   }
 
 </style>
-<h1>Résultats du test</h1>
-<p>Suivez ci-dessous la progression du test. Attention, le test complet peut durer jusqu'à 24 heures. Un email vous
-  sera envoyé une fois le test terminé.</p>
+<h1>Résultats de l'audit</h1>
+<p>Bravo, la configuration de l'audit est maintenant terminée ! <b>Vous pouvez suivre sur cette page la progression de
+    l'audit en temps réel.</b><p>
+<p>L'audit peut durer jusqu'à 24 heures, mais n'hésitez pas à fermer la page. Quoi qu'il en soit, je vous enverrai les
+  résultats par e-mail.</p>
 <div class="list">
   <!-- FILLED DYNAMICALLY -->
 </div>

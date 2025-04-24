@@ -1,8 +1,12 @@
 <style>
 
 </style>
-<h1>Votre adresse email</h1>
-<p>Saisissez votre adresse email pour recevoir les résultats du test.</p>
+<h1>Récupération des résultats</h1>
+<p>Je vous invite maintenant à entrer votre adresse e-mail pour recevoir les résultats détaillés de l'audit. <b>Vous
+  pourrez consulter les vulnérabilités identifiées et mes recommandations (gratuites) pour vous aider à renforcer votre
+    sécurité.</b></p>
+<p>Votre adresse e-mail ne sera jamais utilisée à des fins commerciales. Elle sert uniquement à vous transmettre le
+  rapport.</p>
 <form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 5 ]) }}" method="post">
   @csrf
   <input type="email" placeholder="Votre adresse email ex. j.doe@cywise.io" name="email" value="{{ $trial->email }}">
