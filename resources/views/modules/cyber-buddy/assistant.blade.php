@@ -615,7 +615,7 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
       <div class="tw-conversation-wrapper">
         <div class="tw-conversation">
           <!-- DYNAMICALLY FILLED -->
-          @include('modules.cyber-buddy._actions')
+          @include('modules.cyber-buddy._actions2')
         </div>
       </div>
 
@@ -756,6 +756,12 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
       const minutes = String(date.getMinutes()).padStart(2, '0');
       return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
+
+    const elInputField = document.querySelector('.tw-chat-footer-input');
+    if (elInputField.value.trim() !== '') {
+      const elActions = document.querySelector('.tw-actions');
+      elActions.style.display = 'none';
+    }
 
     const elDirective = document.createElement('div');
     elDirective.classList.add('tw-question-wrapper');
