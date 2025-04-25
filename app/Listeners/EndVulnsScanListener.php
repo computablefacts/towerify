@@ -275,7 +275,7 @@ class EndVulnsScanListener extends AbstractListener
         }
 
         $assets = $trial->assets()->get();
-        $scansInProgress = $assets->every(fn(Asset $asset) => $asset->scanInProgress()->isNotEmpty());
+        $scansInProgress = $assets->contains(fn(Asset $asset) => $asset->scanInProgress()->isNotEmpty());
 
         if ($scansInProgress) {
             Log::warning("Assets are still being scanned for trial {$trial->id}");
