@@ -12,6 +12,7 @@ use App\Models\AssetTag;
 use App\Models\HiddenAlert;
 use App\Models\Port;
 use App\Models\PortTag;
+use App\Models\Scan;
 use App\Models\Screenshot;
 use App\Rules\IsValidAsset;
 use App\Rules\IsValidDomain;
@@ -69,6 +70,7 @@ class AssetController extends Controller
     {
         $asset = $request->string('asset');
         $watch = $request->boolean('watch');
+        $trialId = $request->integer('trial_id', 0);
 
         if (!IsValidAsset::test($asset)) {
             abort(500, "Invalid asset : {$asset}");
@@ -76,7 +78,7 @@ class AssetController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        $obj = CreateAssetListener::execute($user, $asset, is_bool($watch) && $watch);
+        $obj = CreateAssetListener::execute($user, $asset, is_bool($watch) && $watch, [], $trialId);
 
         if (!$obj) {
             abort(500, "The asset could not be created : {$asset}");
@@ -226,12 +228,16 @@ class AssetController extends Controller
         }
     }
 
-    public function infosFromAsset(string $assetBase64): array
+    public function infosFromAsset(string $assetBase64, int $trialId = 0): array
     {
         $domainOrIpOrRange = base64_decode($assetBase64);
-        /** @var Asset $asset */
-        $asset = Asset::where('asset', $domainOrIpOrRange)->first();
-
+        if ($trialId > 0) {
+            /** @var Asset $asset */
+            $asset = Asset::where('asset', $domainOrIpOrRange)->where('ynh_trial_id', $trialId)->first();
+        } else {
+            /** @var Asset $asset */
+            $asset = Asset::where('asset', $domainOrIpOrRange)->first();
+        }
         if (!$asset) {
 
             // The asset cannot be identified: check if it is an IP address from a known range
@@ -242,7 +248,7 @@ class AssetController extends Controller
                     ->where('am_ports.ip', $domainOrIpOrRange)
                     ->first();
                 if ($asset) {
-                    return $this->infosFromAsset(base64_encode($asset->asset));
+                    return $this->infosFromAsset(base64_encode($asset->asset), $trialId);
                 }
             }
             return [];
@@ -313,11 +319,23 @@ class AssetController extends Controller
             $scans = $asset->scanCompleted();
         }
 
-        $portsScanBeginsAt = $scans->sortBy('ports_scan_begins_at')->first()?->ports_scan_begins_at;
-        $portsScanEndsAt = $scans->sortBy('ports_scan_ends_at')->last()?->ports_scan_ends_at;
+        $portsScanBeginsAt = $scans
+            ->filter(fn(Scan $scan) => $scan->ports_scan_begins_at != null)
+            ->sortBy('ports_scan_begins_at')
+            ->first()?->ports_scan_begins_at;
 
-        $vulnsScanBeginsAt = $scans->sortBy('vulns_scan_begins_at')->first()?->vulns_scan_begins_at;
-        $vulnsScanEndsAt = $scans->sortBy('vulns_scan_ends_at')->last()?->vulns_scan_ends_at;
+        $portsScanEndsAt = $scans->contains(fn(Scan $scan) => $scan->ports_scan_ends_at == null) ?
+            null :
+            $scans->sortBy('ports_scan_ends_at')->last()?->ports_scan_ends_at;
+
+        $vulnsScanBeginsAt = $scans
+            ->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at != null)
+            ->sortBy('vulns_scan_begins_at')
+            ->first()?->vulns_scan_begins_at;
+
+        $vulnsScanEndsAt = $scans->contains(fn(Scan $scan) => $scan->vulns_scan_ends_at == null) ?
+            null :
+            $scans->sortBy('vulns_scan_ends_at')->last()?->vulns_scan_ends_at;
 
         $frequency = config('towerify.adversarymeter.days_between_scans');
         $nextScanDate = $asset->is_monitored ?
@@ -352,6 +370,8 @@ class AssetController extends Controller
                     'end' => $vulnsScanEndsAt,
                 ],
                 'next_scan' => $nextScanDate,
+                'nb_vulns_scans_running' => $scans->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at == null)->count(),
+                'nb_vulns_scans_completed' => $scans->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at != null)->count(),
             ],
             'hiddenAlerts' => HiddenAlert::all()->toArray(),
         ];

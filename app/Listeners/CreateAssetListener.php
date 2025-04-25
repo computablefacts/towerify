@@ -6,6 +6,7 @@ use App\Enums\AssetTypesEnum;
 use App\Events\CreateAsset;
 use App\Models\Asset;
 use App\Models\AssetTag;
+use App\Models\YnhTrial;
 use App\Rules\IsValidAsset;
 use App\Rules\IsValidDomain;
 use App\Rules\IsValidIpAddress;
@@ -17,7 +18,7 @@ use Illuminate\Support\Str;
 
 class CreateAssetListener extends AbstractListener
 {
-    public static function execute(User $user, string $asset, bool $monitor, array $tags = []): ?Asset
+    public static function execute(User $user, string $asset, bool $monitor, array $tags = [], int $trialId = 0): ?Asset
     {
         if (!IsValidAsset::test($asset)) {
             Log::error("Invalid asset : {$asset}");
@@ -30,14 +31,28 @@ class CreateAssetListener extends AbstractListener
         } else {
             $assetType = AssetTypesEnum::RANGE;
         }
-        /** @var Asset $azzet */
-        $azzet = Asset::where('asset', $asset)->first();
+        if ($trialId > 0) {
+            /** @var YnhTrial $trial */
+            $trial = YnhTrial::where('id', $trialId)->firstOrFail();
+            /** @var Asset $azzet */
+            $azzet = Asset::where('asset', $asset)
+                ->where('created_by', $trial->created_by)
+                ->where('ynh_trial_id', $trial->id)
+                ->first();
+        } else {
+            /** @var Asset $azzet */
+            $azzet = Asset::where('asset', $asset)
+                ->where('created_by', $user->id)
+                ->whereNull('ynh_trial_id')
+                ->first();
+        }
         if (!$azzet) {
             $azzet = Asset::create([
                 'asset' => $asset,
                 'type' => $assetType,
                 'is_monitored' => $monitor,
                 'created_by' => $user->id,
+                'ynh_trial_id' => $trialId > 0 ? $trialId : null,
             ]);
             collect($tags)->map(fn(string $tag) => Str::lower($tag))
                 ->filter(fn(string $tag) => IsValidTag::test($tag))

@@ -221,9 +221,12 @@
     let portsStr = ports.map(port => `
       <tr>
         <td style="float:right">${port.port}</td>
-        <td>${port.services[0]}</td>
-        <td>${port.products[0]}</td>
-        <td>${port.tags.map(tag => `<span class="tag">${tag}</span>`).join("&nbsp;")}</td>
+        <td>${port.services[0] ? port.services[0].slice(0, 7) + (port.services[0].length > 7 ? '...' : '') : 'n/a'}</td>
+        <td>${port.products[0] ? port.products[0].slice(0, 7) + (port.products[0].length > 7 ? '...' : '') : 'n/a'}</td>
+        <td>
+          ${port.tags.slice(0, 5).map(tag => `<span class="tag">${tag}</span>`).join("&nbsp;")}
+          ${port.tags.length > 5 ? `&nbsp;+ ${port.tags.length - 5} de plus` : ''}
+        </td>
       </tr>
     `).join("");
 
@@ -353,7 +356,9 @@
         progress = 50;
       }
       if (vulnScanRunning) {
-        state = 'Scan de vulnérabilités en cours';
+        const completed = asset.timeline.nb_vulns_scans_completed;
+        const total = completed + asset.timeline.nb_vulns_scans_running;
+        state = `Scan de vulnérabilités en cours (${completed}/${total})`;
         progress = 75;
       }
 
@@ -362,7 +367,9 @@
           <a href="#" onclick="showModal('${asset.asset}')">
             <img src="https://www.svgrepo.com/show/12134/info-circle.svg" width="18" height="18">
           </a>
-          <span style="padding-left:var(--spacing-medium)">${asset.asset}</span>
+          <span style="padding-left:var(--spacing-medium)">
+            ${asset.asset.slice(0, 27) + (asset.asset.length > 27 ? '...' : '')}
+          </span>
         </div>
         <div class="right">
           <b style="font-size:var(--font-size-small)">${state}</b>

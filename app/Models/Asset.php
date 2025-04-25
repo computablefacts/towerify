@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\DB;
  * @property ?string discovery_id
  * @property bool is_monitored
  * @property int created_by
+ * @property int ynh_trial_id
  */
 class Asset extends Model
 {
@@ -42,14 +44,21 @@ class Asset extends Model
         'discovery_id',
         'is_monitored',
         'created_by',
+        'ynh_trial_id',
     ];
 
     protected $casts = [
         'type' => AssetTypesEnum::class,
         'is_monitored' => 'boolean',
+        'ynh_trial_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function trial(): BelongsTo
+    {
+        return $this->belongsTo(YnhTrial::class, 'ynh_trial_id', 'id');
+    }
 
     public function isDns(): bool
     {

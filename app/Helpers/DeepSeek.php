@@ -22,19 +22,22 @@ class DeepSeek
 
     public static function executeEx(array $messages, string $model = 'deepseek-chat', float $temperature = 0.7, array $tools = [])
     {
+        $payload = [
+            'model' => $model,
+            'messages' => $messages,
+            'temperature' => $temperature,
+            'stream' => false,
+        ];
+        if (count($tools) > 0) {
+            $payload['tools'] = $tools;
+            $payload['tool_choice'] = 'auto';
+        }
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . config('towerify.deepseek.api_key'),
             'Accept' => 'application/json',
         ])
-            ->timeout(60)
-            ->post(config('towerify.deepseek.api') . '/chat/completions', [
-                'model' => $model,
-                'messages' => $messages,
-                'temperature' => $temperature,
-                'tools' => $tools,
-                'tool_choice' => 'auto',
-                'stream' => false,
-            ]);
+            ->timeout(120)
+            ->post(config('towerify.deepseek.api') . '/chat/completions', $payload);
         if ($response->successful()) {
             $json = $response->json();
             // Log::debug($json);

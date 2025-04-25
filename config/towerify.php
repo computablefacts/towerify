@@ -83,4 +83,8 @@ return [
         'password' => env('CH_PASSWORD'),
         'database' => env('CH_DATABASE'),
     ],
+    'sendgrid' => [
+        'api' => env('SENDGRID_API'),
+        'api_key' => env('SENDGRID_API_KEY'),
+    ],
 ];
