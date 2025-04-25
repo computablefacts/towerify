@@ -53,7 +53,7 @@
                 // const doc = parser.parseFromString(serializedMessageArea, 'text/html');
                 // const deserializedMessageArea = doc.body.firstChild;
 
-                fetch('/cb/web/botman', {
+                fetch('/botman', {
                   method: 'POST', headers: {
                     'Content-Type': 'application/json', 'Accept': 'application/json'
                   }, body: JSON.stringify({
@@ -67,7 +67,7 @@
               };
 
               setTimeout(() => { // triggers /autosave after addedNode has been added to the DOM
-                fetch('/cb/web/botman', {
+                fetch('/botman', {
                   method: 'POST', headers: {
                     'Content-Type': 'application/json', 'Accept': 'application/json'
                   }, body: JSON.stringify({

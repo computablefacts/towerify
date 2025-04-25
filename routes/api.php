@@ -25,12 +25,6 @@ use Sajya\Server\Middleware\GzipCompress;
 |
 */
 
-Route::post('am/api/v2/public/ports-scan/{uuid}', fn() => redirect('/public/ports-scan/{uuid}', 301))
-    ->middleware(['auth', 'throttle:120,1']);
-
-Route::post('am/api/v2/public/vulns-scan/{uuid}', fn() => redirect('/public/vulns-scan/{uuid}', 301))
-    ->middleware(['auth', 'throttle:120,1']);
-
 Route::group([
     'prefix' => 'public',
 ], function () {

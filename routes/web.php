@@ -593,3 +593,12 @@ Route::group([
 Route::get('/cyber-todo/{hash}', 'CyberTodoController@show');
 
 Route::get('/audit-report', fn() => AuditReport::create()['report'])->middleware('auth');
+
+Route::post('am/api/v2/public/ports-scan/{uuid}', fn() => redirect('/public/ports-scan/{uuid}', 301))
+    ->middleware(['auth', 'throttle:120,1']);
+
+Route::post('am/api/v2/public/vulns-scan/{uuid}', fn() => redirect('/public/vulns-scan/{uuid}', 301))
+    ->middleware(['auth', 'throttle:120,1']);
+
+Route::post('am/api/v2/public/honeypots/{dns}', fn() => redirect('/public/honeypots/{dns}', 301))
+    ->middleware(['auth', 'throttle:120,1']);

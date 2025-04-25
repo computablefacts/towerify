@@ -61,7 +61,7 @@ const QaBlock = createReactBlockSpec({
     // Submit the questions and answers to the LLM
     const handleClick = (event) => {
       setLoading(true);
-      axios.post(`/cb/web/llm2`, {
+      axios.post(`/llm2`, {
         template: props.block.props.template,
         prompt: props.block.props.prompt,
         q_and_a: props.block.props.answers.map(answer => {
@@ -138,7 +138,7 @@ const AiBlock = createReactBlockSpec({
         const propz = props.block.props;
         if (propz.prompt && propz.prompt.trim()) {
           setLoading(true);
-          axios.post(`/cb/web/llm1`, {collection: propz.collection, prompt: propz.prompt})
+          axios.post(`/llm1`, {collection: propz.collection, prompt: propz.prompt})
           .then(function (response) {
             if (response.data) {
               props.editor.insertBlocks(text2blocks(response.data), props.block, 'after');
@@ -207,7 +207,7 @@ const getCustomSlashMenuItems = (editor, isSlash) => {
       title: 'CyberBuddy',
       subtext: 'Use AI to generate paragraph',
       onItemClick: () => {
-        axios.get('/cb/web/collections')
+        axios.get('/collections')
         .then(response => {
           const collections = response.data.map(collection => collection.name);
           insertOrUpdateBlock(editor, {
