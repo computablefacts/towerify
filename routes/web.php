@@ -442,6 +442,8 @@ Route::get('/', function () {
 })->middleware([Subscribed::class]);
 
 Auth::routes();
+Route::post('/login/email', 'Auth\LoginController@loginEmail')->name('login.email');
+Route::get('/login/password', 'Auth\LoginController@showLoginPasswordForm')->name('login.password');
 
 Route::get('/home', 'HomeController@index')->name('home')->middleware([Subscribed::class]);
 
