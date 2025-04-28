@@ -7,6 +7,7 @@ use App\Models\Prompt;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ApiUtils
 {
@@ -79,7 +80,7 @@ class ApiUtils
             'generate_question' => $generateQuestion,
             'collections' => $collections,
             'collection_name' => $collections[0],
-            'prompt' => $prompt,
+            'prompt' => Str::replace("\r", "", $prompt),
             'reranking' => $rerankings,
             'show_context' => $showContext,
             'lang' => $lang,
@@ -147,7 +148,7 @@ class ApiUtils
         return $this->post('/capsule', [
             'facts' => $facts,
             'title' => $title,
-            'prompt' => $prompt
+            'prompt' => Str::replace("\r", "", $prompt)
         ]);
     }
 
@@ -183,7 +184,7 @@ class ApiUtils
             'collections' => $collections,
             'collection_name' => $collections[0],
             'history_key' => $historyKey,
-            'prompt' => $prompt,
+            'prompt' => Str::replace("\r", "", $prompt),
             'history_prompt' => $historyPrompt,
             'max_docs_used' => $maxDocsUsed,
             'lang' => $lang,
@@ -196,7 +197,7 @@ class ApiUtils
         return $this->post('/generate_from_template', [
             'template' => $template,
             'qa_list' => $questionsAndAnswers,
-            'prompt' => $prompt,
+            'prompt' => Str::replace("\r", "", $prompt),
         ]);
     }
 
