@@ -249,7 +249,7 @@ return [
         |
         */
 
-        'authnRequestsSigned' => false,
+        'authnRequestsSigned' => true,
 
         /*
         |--------------------------------------------------------------------------
@@ -261,7 +261,7 @@ return [
         |
         */
 
-        'logoutRequestSigned' => false,
+        'logoutRequestSigned' => true,
 
         /*
         |--------------------------------------------------------------------------
