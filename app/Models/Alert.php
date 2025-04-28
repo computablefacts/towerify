@@ -73,7 +73,7 @@ class Alert extends Model
         $events = HoneypotEvent::query()
             ->join('am_honeypots', 'am_honeypots.id', '=', 'am_honeypots_events.honeypot_id')
             ->where('am_honeypots_events.event', 'cve_tested')
-            ->whereLike('am_honeypots_events.event', 'CVE-%')
+            ->whereLike('am_honeypots_events.details', 'CVE-%')
             ->whereNotIn('am_honeypots_events.ip', $ips)
             ->whereRaw("TRIM(UPPER(am_honeypots_events.details)) = '{$cveId}'");
         if ($attackerId) {
