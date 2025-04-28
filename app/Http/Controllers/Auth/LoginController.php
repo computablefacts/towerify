@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\SamlEmailDomain;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -42,16 +44,24 @@ class LoginController extends Controller
     /**
      * Handle a login request with email only to the application.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function loginEmail(Request $request)
     {
-        // TODO: check email domain to redirect to the corresponding IdP if needed
-
         $request->validate(['email' => 'required|email']);
-        session(['login_email' => $request->email]);
+        $email = $request->input('email');
+        session(['login_email' => $email]);
+
+        $samlDomain = SamlEmailDomain::query()
+            ->where('domain', '=', Str::after($email, '@'))
+            ->first();
+        if ($samlDomain) {
+            $samlTenant = $samlDomain->tenant;
+            return redirect()->intended(saml_route($this->redirectTo(), $samlTenant->uuid));
+        }
+
         return redirect()->route('login.password');
     }
 
