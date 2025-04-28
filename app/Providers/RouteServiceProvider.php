@@ -34,6 +34,7 @@ class RouteServiceProvider extends ServiceProvider
             'botman',
             'files/*',
             'stripe/*',
+            'am/api/v2/public/*',
         ]);
     }
 

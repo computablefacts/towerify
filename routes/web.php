@@ -12,15 +12,23 @@
 */
 
 use App\Enums\OsqueryPlatformEnum;
+use App\Events\BeginVulnsScan;
+use App\Events\EndPortsScan;
+use App\Events\EndVulnsScan;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
 use App\Http\Middleware\RedirectIfNotSubscribed;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Mail\AuditReport;
+use App\Models\Asset;
+use App\Models\Honeypot;
+use App\Models\Port;
+use App\Models\Scan;
 use App\Models\YnhServer;
 use App\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -594,11 +602,105 @@ Route::get('/cyber-todo/{hash}', 'CyberTodoController@show');
 
 Route::get('/audit-report', fn() => AuditReport::create()['report'])->middleware('auth');
 
-Route::post('am/api/v2/public/ports-scan/{uuid}', fn() => redirect('/public/ports-scan/{uuid}', 301))
-    ->middleware(['auth', 'throttle:120,1']);
+/** @deprecated */
+Route::post('am/api/v2/public/ports-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
 
-Route::post('am/api/v2/public/vulns-scan/{uuid}', fn() => redirect('/public/vulns-scan/{uuid}', 301))
-    ->middleware(['auth', 'throttle:120,1']);
+    /** @var Scan $scan */
+    $scan = Scan::where('ports_scan_id', $uuid)->first();
 
-Route::post('am/api/v2/public/honeypots/{dns}', fn() => redirect('/public/honeypots/{dns}', 301))
-    ->middleware(['auth', 'throttle:120,1']);
+    if (!$scan) {
+        return response('Unknown scan', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    /** @var Asset $asset */
+    $asset = $scan->asset()->first();
+
+    if (!$asset) {
+        return response('Unknown asset', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+    if ($request->has('task_result')) {
+        EndPortsScan::dispatch(Carbon::now(), $asset, $scan, $request->get('task_result', []));
+    } else {
+        /* BEGIN COPY/PASTE FROM EndPortsScanListener.php */
+
+        // Legacy stuff: if no port is open, create a dummy one that will be marked as closed by the vulns scanner
+        $port = Port::create([
+            'scan_id' => $scan->id,
+            'hostname' => "localhost",
+            'ip' => "127.0.0.1",
+            'port' => 666,
+            'protocol' => "tcp",
+        ]);
+
+        $scan->ports_scan_ends_at = \Carbon\Carbon::now();
+        $scan->save();
+
+        BeginVulnsScan::dispatch($scan, $port);
+
+        /* END COPY/PASTE FROM EndPortsScanListener.php */
+    }
+    return response("ok", 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware(['auth', 'throttle:240,1']);
+
+/** @deprecated */
+Route::post('am/api/v2/public/vulns-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
+
+    if (!$request->has('task_result')) {
+        return response('Missing task result', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    /** @var Scan $scan */
+    $scan = Scan::where('vulns_scan_id', $uuid)->first();
+
+    if (!$scan) {
+        return response('Unknown scan', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    EndVulnsScan::dispatch(Carbon::now(), $scan, $request->get('task_result', []));
+
+    return response("ok", 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware(['auth', 'throttle:240,1']);
+
+/** @deprecated */
+Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illuminate\Http\Request $request) {
+
+    if (!$request->hasFile('data')) {
+        return response('Missing attachment', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $file = $request->file('data');
+
+    if (!$file->isValid()) {
+        return response('Invalid attachment', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $honeypot = Honeypot::where('dns', $dns)->first();
+
+    if (!$honeypot) {
+        return response('Unknown honeypot', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $filename = $file->getClientOriginalName();
+    $timestamp = Carbon::createFromFormat('Y.m.d_H.i.s', \Illuminate\Support\Str::substr($filename, \Illuminate\Support\Str::position($filename, '-access.') + 8, 19));
+    $events = collect(implode(gzfile($file->getRealPath())))
+        ->flatMap(fn(string $line) => json_decode(trim($line), true));
+
+    if ($events->isEmpty()) {
+        return response('ok (empty file)', 200)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    \App\Events\IngestHoneypotsEvents::dispatch($timestamp, $dns, $events->toArray());
+
+    return response("ok ({$events->count()} events in file)", 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware(['auth', 'throttle:240,1']);
