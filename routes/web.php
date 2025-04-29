@@ -20,12 +20,14 @@ use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
 use App\Http\Middleware\RedirectIfNotSubscribed;
 use App\Jobs\DownloadDebianSecurityBugTracker;
+use App\Listeners\EndVulnsScanListener;
 use App\Mail\AuditReport;
 use App\Models\Asset;
 use App\Models\Honeypot;
 use App\Models\Port;
 use App\Models\Scan;
 use App\Models\YnhServer;
+use App\Models\YnhTrial;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
@@ -412,7 +414,7 @@ Route::get('/performa/user/login/{performa_domain}', function (string $performa_
 })->middleware('throttle:6,1');
 
 /** @deprecated */
-Route::get('/dispatch/{job}', function (string $job) {
+Route::get('/dispatch/job/{job}/{trialId?}', function (string $job, ?int $trialId = null) {
 
     /** @var User $user */
     $user = Auth::user();
@@ -427,6 +429,10 @@ Route::get('/dispatch/{job}', function (string $job) {
                 RebuildPackagesList::sink();
             } elseif ($job === 'rebuild_latest_events_cache') {
                 RebuildLatestEventsCache::sink();
+            } elseif ($job === 'resend_trial_email') {
+                /** @var YnhTrial $trial */
+                $trial = YnhTrial::findOrFail($trialId);
+                EndVulnsScanListener::sendEmailReport($trial);
             }
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
