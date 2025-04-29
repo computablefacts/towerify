@@ -247,8 +247,10 @@ class SamlEventSubscriber
             Log::info('[SAML2 Authentication] User already exist, we update attributes');
 
             $user->name = $this->saml2UserName;
-            // TODO: change password if option set 'putRandomPassword'
-            //$user->password = 'xxx';
+            if ($this->saml2Tenant->config('updateUser.putRandomPassword', false)) {
+                Log::info('[SAML2 Authentication] Update user password with a random string to be very secure');
+                $user->password = Str::random(64);
+            }
             $user->save();
         }
 
