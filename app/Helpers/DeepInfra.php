@@ -26,7 +26,7 @@ class DeepInfra
             'Authorization' => 'Bearer ' . config('towerify.deepinfra.api_key'),
             'Accept' => 'application/json',
         ])
-            ->timeout(60)
+            ->timeout(120)
             ->post(config('towerify.deepinfra.api') . '/chat/completions', [
                 'model' => $model,
                 'messages' => $messages,
