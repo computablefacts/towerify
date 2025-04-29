@@ -7,6 +7,7 @@ use App\Models\Saml2Tenant;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -88,7 +89,7 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         if ($uuid = saml_tenant_uuid()) {
-            Log::debug('[SAML2 Authentication] Logout', ['uuid' => $uuid]);
+            Log::debug('[SAML2 Authentication] Logout', ['uuid' => $uuid, 'email' => Auth::user()->email]);
             return redirect(URL::route('saml.logout', ['uuid' => $uuid]));
         }
 

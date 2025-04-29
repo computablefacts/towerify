@@ -51,6 +51,7 @@ class SamlEventSubscriber
         // Replace name with email if no name found
         if ($this->saml2UserName == '') {
             $this->saml2UserName = $this->saml2UserEmail;
+            Log::info('[SAML2 Authentication] Empty user name replace with email: "' . $this->saml2UserName . '"');
         }
 
         $user = $this->createOrUpdateUser();
