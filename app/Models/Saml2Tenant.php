@@ -23,4 +23,24 @@ class Saml2Tenant extends Tenant
     {
         return $this->customer_id;
     }
+
+    public function config(string $key, $default = null)
+    {
+        $keys = explode('.', $key);
+        $current = $this->getConfigs();
+
+        foreach ($keys as $k) {
+            if (!isset($current[$k])) {
+                return $default;
+            }
+            $current = $current[$k];
+        }
+
+        return $current;
+    }
+
+    private function getConfigs(): array
+    {
+        return $this->metadata;
+    }
 }

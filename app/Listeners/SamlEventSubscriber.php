@@ -124,8 +124,7 @@ class SamlEventSubscriber
         ]);
 
         // First, try with Friendly Names of attributes
-        // TODO: put friendly name in tenant JSON config
-        $emailFriendlyName = 'email';
+        $emailFriendlyName = $this->saml2Tenant->config('claims.email.friendlyName', 'email');
         $saml2UserEmail = $saml2UserFriendlyNameAttributes[$emailFriendlyName][0] ?? '';
         if ($saml2UserEmail != '') {
             Log::debug('[SAML2 Authentication] User email found: "' . $saml2UserEmail . '" (from friendly name "' . $emailFriendlyName . '")');
@@ -133,8 +132,7 @@ class SamlEventSubscriber
 
         // Second, try with "full" names of attribute
         if ($saml2UserEmail == '') {
-            // TODO: put full name in tenant JSON config
-            $emailKey = 'http://schemas.xmlsoap.org/claims/EmailAddress';
+            $emailKey = $this->saml2Tenant->config('claims.email.name', 'http://schemas.xmlsoap.org/claims/EmailAddress');
             $saml2UserEmail = $saml2UserAttributes[$emailKey][0] ?? '';
             if ($saml2UserEmail != '') {
                 Log::debug('[SAML2 Authentication] User email found: "' . $saml2UserEmail . '" (from name "' . $emailKey . '")');
@@ -167,8 +165,7 @@ class SamlEventSubscriber
         $saml2UserAttributes = $this->saml2User->getAttributes();
 
         // First, try with Friendly Names of attributes
-        // TODO: put friendly name in tenant JSON config
-        $nameFriendlyName = 'name';
+        $nameFriendlyName = $this->saml2Tenant->config('claims.name.friendlyName', 'name');
         $saml2UserName = $saml2UserFriendlyNameAttributes[$nameFriendlyName][0] ?? '';
         if ($saml2UserName != '') {
             Log::debug('[SAML2 Authentication] User name found: "' . $saml2UserName . '" (from friendly name "' . $nameFriendlyName . '")');
@@ -176,8 +173,7 @@ class SamlEventSubscriber
 
         // Second, try with "full" names of attribute
         if ($saml2UserName == '') {
-            // TODO: put full name in tenant JSON config
-            $nameKey = 'http://schemas.xmlsoap.org/claims/CommonName';
+            $nameKey = $this->saml2Tenant->config('claims.name.name', 'http://schemas.xmlsoap.org/claims/CommonName');
             $saml2UserName = $saml2UserAttributes[$nameKey][0] ?? '';
             if ($saml2UserName != '') {
                 Log::debug('[SAML2 Authentication] User name found: "' . $saml2UserName . '" (from name "' . $nameKey . '")');
@@ -196,8 +192,7 @@ class SamlEventSubscriber
         $saml2UserAttributes = $this->saml2User->getAttributes();
 
         // First, try with Friendly Names of attributes
-        // TODO: put friendly name in tenant JSON config
-        $roleFriendlyName = 'Role';
+        $roleFriendlyName = $this->saml2Tenant->config('claims.role.friendlyName', 'role');
         if (isset($saml2UserFriendlyNameAttributes[$roleFriendlyName])) {
             Log::info('[SAML2 Authentication] Role attribute found from friendly name "' . $roleFriendlyName . '"');
             $roles = $saml2UserFriendlyNameAttributes[$roleFriendlyName];
@@ -209,8 +204,7 @@ class SamlEventSubscriber
         }
 
         // Second, try with "full" names of attribute
-        // TODO: put full name in tenant JSON config
-        $roleKey = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+        $roleKey = $this->saml2Tenant->config('claims.role.name', 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role');
         if (isset($saml2UserAttributes[$roleKey])) {
             Log::info('[SAML2 Authentication] Role attribute found from name "' . $roleKey . '"');
             $roles = $saml2UserAttributes[$roleKey];
