@@ -84,7 +84,7 @@
   dialog {
     background-color: white;
     padding: var(--spacing-large);
-    border: 1px solid lightgray;;
+    border: 1px solid lightgray;
     border-radius: 8px;
     box-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
     width: calc(100vw - 50%);

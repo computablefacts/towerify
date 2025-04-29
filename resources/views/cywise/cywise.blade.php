@@ -40,6 +40,7 @@
       align-items: center;
       height: 100vh;
       font-family: poppins, sans-serif;
+      background-color: rgba(0, 0, 0, 0.05);
     }
 
     /** TEXT */
@@ -177,25 +178,39 @@
       display: flex;
     }
 
+    /** WRAPPER */
+
+    .outer-wrapper {
+      padding: 30px;
+      border: 1px solid lightgray;
+      border-radius: 8px;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
+      background-color: white;
+    }
+
+    .inner-wrapper {
+      width: 550px;
+    }
+
   </style>
 </head>
 <body>
-<div style="width: 550px;">
+<div class="outer-wrapper">
+  <div class="inner-wrapper">
+    @include('cywise._breadcrumbs')
 
-  @include('cywise._breadcrumbs')
-
-  @if($step == 1)
-  @include('cywise._step-1')
-  @elseif($step == 2)
-  @include('cywise._step-2')
-  @elseif($step == 3)
-  @include('cywise._step-3')
-  @elseif($step == 4)
-  @include('cywise._step-4')
-  @elseif($step == 5)
-  @include('cywise._step-5')
-  @endif
-
+    @if($step == 1)
+    @include('cywise._step-1')
+    @elseif($step == 2)
+    @include('cywise._step-2')
+    @elseif($step == 3)
+    @include('cywise._step-3')
+    @elseif($step == 4)
+    @include('cywise._step-4')
+    @elseif($step == 5)
+    @include('cywise._step-5')
+    @endif
+  </div>
 </div>
 </body>
 </html>
