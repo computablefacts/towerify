@@ -11,7 +11,7 @@ return [
     |
     */
 
-    'tenantModel' => \Slides\Saml2\Models\Tenant::class,
+    'tenantModel' => \App\Models\Saml2Tenant::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -393,5 +393,5 @@ return [
     | This will allow you to disable or enable the default migrations of the package.
     |
     */
-    'load_migrations' => true,
+    'load_migrations' => false,
 ];

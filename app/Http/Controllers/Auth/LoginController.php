@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\SamlEmailDomain;
+use App\Models\Saml2Tenant;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -54,12 +54,9 @@ class LoginController extends Controller
         $email = $request->input('email');
         session(['login_email' => $email]);
 
-        $samlDomain = SamlEmailDomain::query()
-            ->where('domain', '=', Str::after($email, '@'))
-            ->first();
-        if ($samlDomain) {
-            $samlTenant = $samlDomain->tenant;
-            return redirect()->intended(saml_route($this->redirectTo(), $samlTenant->uuid));
+        $samlTenant = Saml2Tenant::firstFromDomain(Str::after($email, '@'));
+        if ($samlTenant) {
+            return redirect()->intended(saml_route('home', $samlTenant->uuid));
         }
 
         return redirect()->route('login.password');
