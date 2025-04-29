@@ -85,7 +85,7 @@ return [
     |
     */
 
-    'logoutRoute' => env('SAML2_LOGOUT_URL'),
+    'logoutRoute' => env('SAML2_LOGOUT_URL', '/'),
 
 
     /*
