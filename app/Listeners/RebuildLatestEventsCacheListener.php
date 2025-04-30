@@ -32,7 +32,7 @@ class RebuildLatestEventsCacheListener extends AbstractListener
             YnhOsquery::where('ynh_server_id', $server->id)
                 ->where('name', $name)
                 ->orderBy('calendar_time', 'desc')
-                ->limit(1000)
+                ->limit(100)
                 ->get()
                 ->each(function (YnhOsquery $event) use ($server) {
                     YnhOsqueryLatestEvent::updateOrCreate([
