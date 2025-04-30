@@ -65,7 +65,7 @@
                   <?php $permissionId = $server ? $permission : $permission->permission; ?>
                   <?php $userId = $server ? $user->id : $permission->ynh_user_id; ?>
                 <li>
-                  <a onclick="addUserPermission('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
+                  <a onclick="addUserPermissionApiCall('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
                      class="dropdown-item">
                     @if(\Illuminate\Support\Str::after($permissionId, '.') === 'main')
                     {{ \Illuminate\Support\Str::before($permissionId, '.') }} / {{ $serverName }}
@@ -105,7 +105,7 @@
                   <?php $userId = $server ? $user->id : $permission->ynh_user_id; ?>
                 <li>
                   <a
-                    onclick="removeUserPermission('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
+                    onclick="removeUserPermissionApiCall('{{ $serverId }}', '{{ $userId }}', '{{ $permissionId }}')"
                     class="dropdown-item">
                     @if(\Illuminate\Support\Str::after($permissionId, '.') === 'main')
                     {{ \Illuminate\Support\Str::before($permissionId, '.') }} / {{ $serverName }}
@@ -154,30 +154,6 @@
   document.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
     checkbox.addEventListener('change', (event) => toggleGetsAuditReport(event.target.getAttribute('data-user-id')));
   });
-
-  function addUserPermission(serverId, userId, permission) {
-    axios.post(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`).then(function (response) {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
-  }
-
-  function removeUserPermission(serverId, userId, permission) {
-    axios.delete(`/ynh/servers/${serverId}/users/${userId}/permissions/${permission}`).then(function (response) {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
-  }
 
   function toggleGetsAuditReport(userId) {
     axios.get(`/ynh/users/${userId}/toggle-gets-audit-report`).then(function (response) {

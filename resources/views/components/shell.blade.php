@@ -155,15 +155,7 @@
         </div>
       `;
     } else {
-      axios.post(`/ynh/servers/{{ $server->id }}/execute-shell-command`, {
-        cmd: command
-      }).then(function (data) {
-        _insertStdout(data.data.success.join('\n'));
-      }).catch(error => {
-        // TODO
-      }).finally(() => {
-        // TODO
-      });
+      executeShellCommandApiCall('{{ $server->id }}', command, (result) => _insertStdout(result.output));
     }
   }
 

@@ -3,18 +3,18 @@
 $conversationId = request()->query('conversation_id');
 
 if ($conversationId) {
-$conversation = \App\Modules\CyberBuddy\Models\Conversation::where('id', $conversationId)
-->where('format', \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V1)
+$conversation = \App\Models\Conversation::where('id', $conversationId)
+->where('format', \App\Models\Conversation::FORMAT_V1)
 ->where('created_by', Auth::user()?->id)
 ->first();
 }
 
-$conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::create([
+$conversation = $conversation ?? \App\Models\Conversation::create([
 'thread_id' => \Illuminate\Support\Str::random(10),
 'dom' => json_encode([]),
 'autosaved' => true,
 'created_by' => Auth::user()?->id,
-'format' => \App\Modules\CyberBuddy\Models\Conversation::FORMAT_V1,
+'format' => \App\Models\Conversation::FORMAT_V1,
 ]);
 
 @endphp
@@ -367,9 +367,22 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
 
   .tw-answer-message-html {
     /* background-color: rgb(255, 255, 255); */
-    margin-top: 1rem;
+    /* margin-top: 1rem; */
     border-radius: 8px;
     /* padding: 1rem */
+    --font-size: 16px;
+  }
+
+  .tw-answer-message-html h1 {
+    font-size: calc(var(--font-size) + 4px);
+  }
+
+  .tw-answer-message-html h2 {
+    font-size: calc(var(--font-size) + 2px);
+  }
+
+  .tw-answer-message-html h3 {
+    font-size: calc(var(--font-size));
   }
 
   .tw-answer-timestamp {
@@ -592,8 +605,8 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
       <!-- HEADER -->
       <div class="tw-chat-header">
         <h3 class="tw-chat-header-title">
-          <img alt="Bear" fetchpriority="high" width="250" height="250" decoding="async" data-nimg="1"
-               style="color:transparent;width:50px;height:50px" src="https://www.svgrepo.com/show/10913/bear.svg">
+          <!-- <img alt="Bear" fetchpriority="high" width="250" height="250" decoding="async" data-nimg="1"
+               style="color:transparent;width:50px;height:50px" src="https://www.svgrepo.com/show/10913/bear.svg"> -->
           CyberBuddy
         </h3>
       </div>
@@ -602,7 +615,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
       <div class="tw-conversation-wrapper">
         <div class="tw-conversation">
           <!-- DYNAMICALLY FILLED -->
-          @include('modules.cyber-buddy._actions')
+          @include('modules.cyber-buddy._actions2')
         </div>
       </div>
 
@@ -744,6 +757,12 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
       return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
 
+    const elInputField = document.querySelector('.tw-chat-footer-input');
+    if (elInputField.value.trim() !== '') {
+      const elActions = document.querySelector('.tw-actions');
+      elActions.style.display = 'none';
+    }
+
     const elDirective = document.createElement('div');
     elDirective.classList.add('tw-question-wrapper');
     elDirective.innerHTML = `
@@ -829,7 +848,7 @@ $conversation = $conversation ?? \App\Modules\CyberBuddy\Models\Conversation::cr
 
       elInputField.value = '';
 
-      axios.post('/cb/web/assistant/converse', {
+      axios.post('/assistant/converse', {
         thread_id: '{{ $conversation->thread_id }}', directive: directive
       }).then((answer) => {
         if (answer.data.success) {

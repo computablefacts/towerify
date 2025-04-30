@@ -2,14 +2,14 @@
 
 namespace Tests\AdversaryMeter;
 
-use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
-use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
-use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
-use App\Modules\AdversaryMeter\Events\IngestHoneypotsEvents;
-use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
-use App\Modules\AdversaryMeter\Models\Attacker;
-use App\Modules\AdversaryMeter\Models\Honeypot;
-use App\Modules\AdversaryMeter\Models\HoneypotEvent;
+use App\Enums\HoneypotCloudProvidersEnum;
+use App\Enums\HoneypotCloudSensorsEnum;
+use App\Enums\HoneypotStatusesEnum;
+use App\Events\IngestHoneypotsEvents;
+use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
+use App\Models\Attacker;
+use App\Models\Honeypot;
+use App\Models\HoneypotEvent;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;

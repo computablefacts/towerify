@@ -12,14 +12,25 @@
 */
 
 use App\Enums\OsqueryPlatformEnum;
+use App\Events\BeginVulnsScan;
+use App\Events\EndPortsScan;
+use App\Events\EndVulnsScan;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
-use App\Http\Middleware\Subscribed;
+use App\Http\Middleware\RedirectIfNotSubscribed;
 use App\Jobs\DownloadDebianSecurityBugTracker;
+use App\Listeners\EndVulnsScanListener;
+use App\Mail\AuditReport;
+use App\Models\Asset;
+use App\Models\Honeypot;
+use App\Models\Port;
+use App\Models\Scan;
 use App\Models\YnhServer;
+use App\Models\YnhTrial;
 use App\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -121,7 +132,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
                 'platform' => $platform,
             ]);
 
-            \App\Modules\AdversaryMeter\Events\CreateAsset::dispatch($user, $server->ip(), true, [$server->name]);
+            \App\Events\CreateAsset::dispatch($user, $server->ip(), true, [$server->name]);
         }
     }
     if ($server->is_ready) {
@@ -403,7 +414,7 @@ Route::get('/performa/user/login/{performa_domain}', function (string $performa_
 })->middleware('throttle:6,1');
 
 /** @deprecated */
-Route::get('/dispatch/{job}', function (string $job) {
+Route::get('/dispatch/job/{job}/{trialId?}', function (string $job, ?int $trialId = null) {
 
     /** @var User $user */
     $user = Auth::user();
@@ -418,6 +429,10 @@ Route::get('/dispatch/{job}', function (string $job) {
                 RebuildPackagesList::sink();
             } elseif ($job === 'rebuild_latest_events_cache') {
                 RebuildLatestEventsCache::sink();
+            } elseif ($job === 'resend_trial_email') {
+                /** @var YnhTrial $trial */
+                $trial = YnhTrial::findOrFail($trialId);
+                EndVulnsScanListener::sendEmailReport($trial);
             }
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
@@ -432,27 +447,27 @@ Route::get('', function () {
         return redirect()->route('home');
     }
     return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::get('/', function () {
     if (\Illuminate\Support\Facades\Auth::user()) {
         return redirect()->route('home');
     }
     return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Auth::routes();
 Route::post('/login/email', 'Auth\LoginController@loginEmail')->name('login.email');
 Route::get('/login/password', 'Auth\LoginController@showLoginPasswordForm')->name('login.password');
 
-Route::get('/home', 'HomeController@index')->name('home')->middleware([Subscribed::class]);
+Route::get('/home', 'HomeController@index')->name('home')->middleware([RedirectIfNotSubscribed::class]);
 
 Route::get('/terms', 'TermsController@show')->name('terms');
 
 Route::post('/reset-password', function () {
     $email = \Illuminate\Support\Facades\Auth::user()->email;
     return view('auth.passwords.email', compact('email'));
-})->middleware(['auth', Subscribed::class])->name('reset-password');
+})->middleware(['auth', RedirectIfNotSubscribed::class])->name('reset-password');
 
 Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
     \Illuminate\Notifications\DatabaseNotification::query()
@@ -460,7 +475,7 @@ Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifi
         ->whereJsonContains('data->group', $notification->data['group'])
         ->get()
         ->each(fn($notif) => $notif->markAsRead());
-})->middleware(['auth', Subscribed::class]);
+})->middleware(['auth', RedirectIfNotSubscribed::class]);
 
 Route::get('/events/{osquery}/dismiss', function (\App\Models\YnhOsquery $osquery, \Illuminate\Http\Request $request) {
     /** @var YnhServer $server */
@@ -471,42 +486,27 @@ Route::get('/events/{osquery}/dismiss', function (\App\Models\YnhOsquery $osquer
         return response()->json(['success' => "The event has been dismissed!"]);
     }
     return response()->json(['error' => "Unknown event."], 500);
-})->middleware(['auth', Subscribed::class]);
+})->middleware(['auth', RedirectIfNotSubscribed::class]);
 
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
         Route::get('', 'YnhServerController@create')->name('create');
-        Route::delete('{server}', 'YnhServerController@delete')->name('delete');
         Route::get('{server}/edit', 'YnhServerController@index')->name('edit');
         Route::post('{server}/edit', 'YnhServerController@index')->name('edit');
-        Route::post('{server}/pull-server-infos', 'YnhServerController@pullServerInfos')->name('pull-server-infos');
-        Route::post('{server}/test-ssh-connection', 'YnhServerController@testSshConnection')->name('test-ssh-connection');
-        Route::post('{server}/configure', 'YnhServerController@configure')->name('configure');
         Route::post('{server}/backup', 'YnhServerController@createBackup')->name('create-backup');
         Route::get('{server}/backup/{backup}', 'YnhServerController@downloadBackup')->name('download-backup');
-        Route::post('{server}/execute-shell-command', 'YnhServerController@executeShellCommand')->name('execute-shell-command');
-        Route::delete('{server}/apps/{application}', 'YnhServerController@uninstallApp')->name('uninstall-app');
-        Route::post('{server}/orders/{ynhOrder}', 'YnhServerController@installApp')->name('install-app');
-        Route::post('{server}/users/{ynhUser}/permissions/{perm}', 'YnhServerController@addUserPermission')->name('add-user-permission');
-        Route::delete('{server}/users/{ynhUser}/permissions/{perm}', 'YnhServerController@removeUserPermission')->name('remove-user-permission');
-        Route::post('{server}/twr-users/{user}/permissions/{perm}', 'YnhServerController@addTwrUserPermission')->name('add-twr-user-permission');
-        Route::get('{server}/messages', 'YnhServerController@messages')->name('messages');
-    });
-    Route::group(['prefix' => 'invitations', 'as' => 'invitations.'], function () {
-        Route::post('create', 'YnhInvitationController@create')->name('create');
-        Route::post('send', 'YnhInvitationController@send')->name('send');
     });
     Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
         Route::get('{user}/toggle-gets-audit-report', 'UserController@toggleGetsAuditReport')->name('toggle-gets-audit-report');
     });
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::group(['prefix' => 'shop', 'as' => 'product.'], function () {
     Route::get('index', 'ProductController@index')->name('index');
     Route::get('c/{taxonomyName}/{taxon}', 'ProductController@index')->name('category');
     Route::get('p/{slug}', 'ProductController@show')->name('show');
     Route::get('p/{slug}/{taxon}', 'ProductController@show')->name('show-with-taxon');
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
     Route::get('show', 'CartController@show')->name('show');
@@ -514,12 +514,12 @@ Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
     Route::post('adv/{masterProductVariant}', 'CartController@addVariant')->name('add-variant');
     Route::post('update/{cart_item}', 'CartController@update')->name('update');
     Route::post('remove/{cart_item}', 'CartController@remove')->name('remove');
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
     Route::get('show', 'CheckoutController@show')->name('show');
     Route::post('submit', 'CheckoutController@submit')->name('submit');
-})->middleware([Subscribed::class]);
+})->middleware([RedirectIfNotSubscribed::class]);
 
 Route::get('/plans', 'StripeController@plan')->name('plans');
 Route::get('/subscribe', 'StripeController@subscribe')->name('subscribe');
@@ -537,3 +537,178 @@ Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
     Route::post('/{hash}/discovery', 'CywiseController@discovery')->name('cywise.discovery');
 
 })->middleware(['auth']);
+
+Route::get('/the-cyber-brief', 'TheCyberBriefController@index')->name('the-cyber-brief');
+
+Route::post('/llm1', 'CyberBuddyController@llm1')->middleware('auth');
+
+Route::post('/llm2', 'CyberBuddyController@llm2')->middleware('auth');
+
+Route::get('/templates', 'CyberBuddyController@templates')->middleware('auth');
+
+Route::post('/templates', 'CyberBuddyController@saveTemplate')->middleware('auth');
+
+Route::delete('/templates/{id}', 'CyberBuddyController@deleteTemplate')->middleware('auth');
+
+Route::get('/files', 'CyberBuddyController@files')->middleware('auth');
+
+Route::delete('/files/{id}', 'CyberBuddyController@deleteFile')->middleware('auth');
+
+Route::get('/files/stream/{secret}', 'CyberBuddyController@streamFile');
+
+Route::get('/files/download/{secret}', 'CyberBuddyController@downloadFile');
+
+Route::post('/files/one', 'CyberBuddyController@uploadOneFile')->middleware('auth:sanctum');
+
+Route::post('/files/many', 'CyberBuddyController@uploadManyFiles')->middleware('auth:sanctum');
+
+Route::get('/collections', 'CyberBuddyController@collections')->middleware('auth');
+
+Route::delete('/collections/{id}', 'CyberBuddyController@deleteCollection')->middleware('auth');
+
+Route::post('/collections/{id}', 'CyberBuddyController@saveCollection')->middleware('auth');
+
+Route::delete('/chunks/{id}', 'CyberBuddyController@deleteChunk')->middleware('auth');
+
+Route::post('/chunks/{id}', 'CyberBuddyController@saveChunk')->middleware('auth');
+
+Route::delete('/prompts/{id}', 'CyberBuddyController@deletePrompt')->middleware('auth');
+
+Route::post('/prompts/{id}', 'CyberBuddyController@savePrompt')->middleware('auth');
+
+Route::delete('/conversations/{id}', 'CyberBuddyController@deleteConversation')->middleware('auth');
+
+Route::delete('/frameworks/{id}', 'CyberBuddyController@unloadFramework')->middleware('auth');
+
+Route::post('/frameworks/{id}', 'CyberBuddyController@loadFramework')->middleware('auth');
+
+Route::get('/cyber-buddy', 'CyberBuddyController@showPage')->middleware('auth');
+
+Route::get('/cyber-buddy/chat', 'CyberBuddyController@showChat');
+
+Route::match(['get', 'post'], 'botman', 'CyberBuddyController@handle');
+
+Route::group([
+    'prefix' => 'tables',
+], function () {
+    Route::get('/', 'CyberBuddyController@listTables')->name('list-tables');
+    Route::post('/columns', 'CyberBuddyController@listTablesColumns')->name('list-tables-columns');
+    Route::post('/import', 'CyberBuddyController@importTables')->name('import-tables');
+    Route::get('/available', 'CyberBuddyController@availableTables')->name('available-tables');
+    Route::post('/query', 'CyberBuddyController@queryTables')->name('query-tables');
+    Route::post('/prompt-to-query', 'CyberBuddyController@promptToTablesQuery')->name('prompt-to-tables-query');
+})->middleware(['auth']);
+
+Route::group([
+    'prefix' => 'assistant',
+], function () {
+    Route::get('/', 'CyberBuddyNextGenController@showAssistant');
+    Route::post('/converse', 'CyberBuddyNextGenController@converse');
+})->middleware(['auth', 'throttle:15,1']);
+
+Route::get('/cyber-todo/{hash}', 'CyberTodoController@show');
+
+Route::get('/audit-report', fn() => AuditReport::create()['report'])->middleware('auth');
+
+/** @deprecated */
+Route::post('am/api/v2/public/ports-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
+
+    /** @var Scan $scan */
+    $scan = Scan::where('ports_scan_id', $uuid)->first();
+
+    if (!$scan) {
+        return response('Unknown scan', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    /** @var Asset $asset */
+    $asset = $scan->asset()->first();
+
+    if (!$asset) {
+        return response('Unknown asset', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+    if ($request->has('task_result')) {
+        EndPortsScan::dispatch(Carbon::now(), $asset, $scan, $request->get('task_result', []));
+    } else {
+        /* BEGIN COPY/PASTE FROM EndPortsScanListener.php */
+
+        // Legacy stuff: if no port is open, create a dummy one that will be marked as closed by the vulns scanner
+        $port = Port::create([
+            'scan_id' => $scan->id,
+            'hostname' => "localhost",
+            'ip' => "127.0.0.1",
+            'port' => 666,
+            'protocol' => "tcp",
+        ]);
+
+        $scan->ports_scan_ends_at = \Carbon\Carbon::now();
+        $scan->save();
+
+        BeginVulnsScan::dispatch($scan, $port);
+
+        /* END COPY/PASTE FROM EndPortsScanListener.php */
+    }
+    return response("ok", 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware(['auth', 'throttle:240,1']);
+
+/** @deprecated */
+Route::post('am/api/v2/public/vulns-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
+
+    if (!$request->has('task_result')) {
+        return response('Missing task result', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    /** @var Scan $scan */
+    $scan = Scan::where('vulns_scan_id', $uuid)->first();
+
+    if (!$scan) {
+        return response('Unknown scan', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    EndVulnsScan::dispatch(Carbon::now(), $scan, $request->get('task_result', []));
+
+    return response("ok", 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware(['auth', 'throttle:240,1']);
+
+/** @deprecated */
+Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illuminate\Http\Request $request) {
+
+    if (!$request->hasFile('data')) {
+        return response('Missing attachment', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $file = $request->file('data');
+
+    if (!$file->isValid()) {
+        return response('Invalid attachment', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $honeypot = Honeypot::where('dns', $dns)->first();
+
+    if (!$honeypot) {
+        return response('Unknown honeypot', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $filename = $file->getClientOriginalName();
+    $timestamp = Carbon::createFromFormat('Y.m.d_H.i.s', \Illuminate\Support\Str::substr($filename, \Illuminate\Support\Str::position($filename, '-access.') + 8, 19));
+    $events = collect(implode(gzfile($file->getRealPath())))
+        ->flatMap(fn(string $line) => json_decode(trim($line), true));
+
+    if ($events->isEmpty()) {
+        return response('ok (empty file)', 200)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    \App\Events\IngestHoneypotsEvents::dispatch($timestamp, $dns, $events->toArray());
+
+    return response("ok ({$events->count()} events in file)", 200)
+        ->header('Content-Type', 'text/plain');
+})->middleware(['auth', 'throttle:240,1']);

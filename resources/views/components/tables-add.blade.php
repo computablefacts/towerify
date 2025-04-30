@@ -482,7 +482,7 @@
 
     let encodedUrl;
     if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
-      encodedUrl = '/cb/web/tables/' +
+      encodedUrl = '/tables/' +
           '?storage=s3' +
           '&region=' + encodeURIComponent(elAwsRegion.el.value) +
           '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) +
@@ -492,7 +492,7 @@
     }
 
     if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
-      encodedUrl = '/cb/web/tables/' +
+      encodedUrl = '/tables/' +
           '?storage=azure' +
           '&connection_string=' + encodeURIComponent(elAzureConnectionString.el.value) +
           '&input_folder=' + encodeURIComponent(elAzureInputFolder.el.value) +
@@ -568,7 +568,7 @@
       }
     }
 
-    axios.post('/cb/web/tables/columns', postProperties).then(response => {
+    axios.post('/tables/columns', postProperties).then(response => {
       if (response.data.success) {
         if (!response.data.tables || response.data.tables.length === 0) {
           elTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('No columns found.') }}</td></tr>";
@@ -650,7 +650,7 @@
       }
     }
 
-    axios.post('/cb/web/tables/import', postProperties).then(response => {
+    axios.post('/tables/import', postProperties).then(response => {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
@@ -683,7 +683,7 @@
       return false;
     }
 
-    axios.post(`/cb/web/tables/query`,
+    axios.post(`/tables/query`,
         {query: sql, store: true, name: name, materialize: materialize, description: description}).then(response => {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);

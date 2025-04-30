@@ -26,6 +26,10 @@ const text2blocks = (text) => {
   .filter(block => block.content.length > 0);
 };
 
+const markdown2blocks = (props, text) => {
+  props.editor.tryParseMarkdownToBlocks(text).then(blocks => props.editor.insertBlocks(blocks, props.block, 'after'));
+};
+
 // This component render a list of questions. The user answers the questions. Then, a paragraph is generated using the
 // provided paragraph template and answers.
 const QaBlock = createReactBlockSpec({
@@ -61,7 +65,7 @@ const QaBlock = createReactBlockSpec({
     // Submit the questions and answers to the LLM
     const handleClick = (event) => {
       setLoading(true);
-      axios.post(`/cb/web/llm2`, {
+      axios.post(`/llm2`, {
         template: props.block.props.template,
         prompt: props.block.props.prompt,
         q_and_a: props.block.props.answers.map(answer => {
@@ -70,7 +74,7 @@ const QaBlock = createReactBlockSpec({
       })
       .then(function (response) {
         if (response.data) {
-          props.editor.insertBlocks(text2blocks(response.data), props.block, 'after');
+          markdown2blocks(props, response.data);
         } else {
           console.log(response.data);
         }
@@ -138,10 +142,10 @@ const AiBlock = createReactBlockSpec({
         const propz = props.block.props;
         if (propz.prompt && propz.prompt.trim()) {
           setLoading(true);
-          axios.post(`/cb/web/llm1`, {collection: propz.collection, prompt: propz.prompt})
+          axios.post(`/llm1`, {collection: propz.collection, prompt: propz.prompt})
           .then(function (response) {
             if (response.data) {
-              props.editor.insertBlocks(text2blocks(response.data), props.block, 'after');
+              markdown2blocks(props, response.data);
               // insertOrUpdateBlock(props.editor, {type: "paragraph", content: response.data});
             } else {
               console.log(response.data);
@@ -207,7 +211,7 @@ const getCustomSlashMenuItems = (editor, isSlash) => {
       title: 'CyberBuddy',
       subtext: 'Use AI to generate paragraph',
       onItemClick: () => {
-        axios.get('/cb/web/collections')
+        axios.get('/collections')
         .then(response => {
           const collections = response.data.map(collection => collection.name);
           insertOrUpdateBlock(editor, {

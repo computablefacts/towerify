@@ -31,19 +31,19 @@ class CreateHoneypotsTables extends Migration
             // The honeypot attributes
             $table->string('dns');
             $table->enum('status', [
-                \App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum::DNS_SETUP->value,
-                \App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum::HONEYPOT_SETUP->value,
-                \App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum::SETUP_COMPLETE->value,
+                \App\Enums\HoneypotStatusesEnum::DNS_SETUP->value,
+                \App\Enums\HoneypotStatusesEnum::HONEYPOT_SETUP->value,
+                \App\Enums\HoneypotStatusesEnum::SETUP_COMPLETE->value,
             ])->nullable();
             $table->enum('cloud_provider', [
-                \App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum::AWS->value,
-                \App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum::AZURE->value,
-                \App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum::GCP->value,
+                \App\Enums\HoneypotCloudProvidersEnum::AWS->value,
+                \App\Enums\HoneypotCloudProvidersEnum::AZURE->value,
+                \App\Enums\HoneypotCloudProvidersEnum::GCP->value,
             ]);
             $table->enum('cloud_sensor', [
-                \App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum::HTTP->value,
-                \App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum::HTTPS->value,
-                \App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum::SSH->value,
+                \App\Enums\HoneypotCloudSensorsEnum::HTTP->value,
+                \App\Enums\HoneypotCloudSensorsEnum::HTTPS->value,
+                \App\Enums\HoneypotCloudSensorsEnum::SSH->value,
             ]);
 
             // Scope honeypots

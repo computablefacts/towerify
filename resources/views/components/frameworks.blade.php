@@ -133,7 +133,7 @@
   const load = (id, event) => {
     event.preventDefault();
     event.stopPropagation();
-    axios.post(`/cb/web/frameworks/${id}`, {}).then(function (response) {
+    axios.post(`/frameworks/${id}`, {}).then(function (response) {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
@@ -147,7 +147,7 @@
   const unload = (id, event) => {
     event.preventDefault();
     event.stopPropagation();
-    axios.delete(`/cb/web/frameworks/${id}`).then(function (response) {
+    axios.delete(`/frameworks/${id}`).then(function (response) {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {

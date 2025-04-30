@@ -97,7 +97,7 @@
       </div>
     </div>
   </div>
-  @if(App\Modules\AdversaryMeter\Models\Asset::exists() > 0 || App\Models\YnhServer::exists() > 0)
+  @if(App\Models\Asset::exists() > 0 || App\Models\YnhServer::exists() > 0)
   <div class="row mt-2">
     <x-suspicious-activity/>
   </div>

@@ -6,12 +6,22 @@ use App\Hashing\TwHasher;
 use App\Listeners\SamlEventSubscriber;
 use App\Models\Address;
 use App\Models\Adjustment;
+use App\Models\Asset;
+use App\Models\AssetTag;
+use App\Models\AssetTagHash;
 use App\Models\Billpayer;
 use App\Models\Carrier;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Channel;
+use App\Models\Chunk;
+use App\Models\ChunkTag;
+use App\Models\Collection;
+use App\Models\Conversation;
 use App\Models\Customer;
+use App\Models\File;
+use App\Models\HiddenAlert;
+use App\Models\Honeypot;
 use App\Models\Invitation;
 use App\Models\LinkGroup;
 use App\Models\LinkGroupItem;
@@ -29,6 +39,7 @@ use App\Models\Permission;
 use App\Models\Person;
 use App\Models\Product;
 use App\Models\Profile;
+use App\Models\Prompt;
 use App\Models\Property;
 use App\Models\PropertyValue;
 use App\Models\Role;
@@ -38,43 +49,30 @@ use App\Models\TaxCategory;
 use App\Models\Taxon;
 use App\Models\Taxonomy;
 use App\Models\TaxRate;
+use App\Models\Template;
 use App\Models\YnhBackup;
 use App\Models\YnhOverview;
 use App\Models\YnhServer;
 use App\Models\Zone;
 use App\Models\ZoneMember;
-use App\Modules\AdversaryMeter\Models\Asset;
-use App\Modules\AdversaryMeter\Models\AssetTag;
-use App\Modules\AdversaryMeter\Models\AssetTagHash;
-use App\Modules\AdversaryMeter\Models\HiddenAlert;
-use App\Modules\AdversaryMeter\Models\Honeypot;
-use App\Modules\AdversaryMeter\Observers\AssetObserver;
-use App\Modules\AdversaryMeter\Observers\AssetTagHashObserver;
-use App\Modules\AdversaryMeter\Observers\AssetTagObserver;
-use App\Modules\AdversaryMeter\Observers\HiddenAlertObserver;
-use App\Modules\AdversaryMeter\Observers\HoneypotObserver;
-use App\Modules\CyberBuddy\Models\Chunk;
-use App\Modules\CyberBuddy\Models\ChunkTag;
-use App\Modules\CyberBuddy\Models\Collection;
-use App\Modules\CyberBuddy\Models\Conversation;
-use App\Modules\CyberBuddy\Models\File;
-use App\Modules\CyberBuddy\Models\Prompt;
-use App\Modules\CyberBuddy\Models\Template;
-use App\Modules\CyberBuddy\Observers\ChunkObserver;
-use App\Modules\CyberBuddy\Observers\ChunkTagObserver;
-use App\Modules\CyberBuddy\Observers\CollectionObserver;
-use App\Modules\CyberBuddy\Observers\ConversationObserver;
-use App\Modules\CyberBuddy\Observers\FilesObserver;
-use App\Modules\CyberBuddy\Observers\PromptObserver;
-use App\Modules\CyberBuddy\Observers\TemplateObserver;
 use App\Observers\AddressObserver;
 use App\Observers\AdjustmentObserver;
+use App\Observers\AssetObserver;
+use App\Observers\AssetTagHashObserver;
+use App\Observers\AssetTagObserver;
 use App\Observers\BillpayerObserver;
 use App\Observers\CarrierObserver;
 use App\Observers\CartItemObserver;
 use App\Observers\CartObserver;
 use App\Observers\ChannelObserver;
+use App\Observers\ChunkObserver;
+use App\Observers\ChunkTagObserver;
+use App\Observers\CollectionObserver;
+use App\Observers\ConversationObserver;
 use App\Observers\CustomerObserver;
+use App\Observers\FilesObserver;
+use App\Observers\HiddenAlertObserver;
+use App\Observers\HoneypotObserver;
 use App\Observers\InvitationObserver;
 use App\Observers\LinkGroupItemObserver;
 use App\Observers\LinkGroupObserver;
@@ -92,6 +90,7 @@ use App\Observers\PermissionObserver;
 use App\Observers\PersonObserver;
 use App\Observers\ProductObserver;
 use App\Observers\ProfileObserver;
+use App\Observers\PromptObserver;
 use App\Observers\PropertyObserver;
 use App\Observers\PropertyValueObserver;
 use App\Observers\RoleObserver;
@@ -101,6 +100,7 @@ use App\Observers\TaxCategoryObserver;
 use App\Observers\TaxonObserver;
 use App\Observers\TaxonomyObserver;
 use App\Observers\TaxRateObserver;
+use App\Observers\TemplateObserver;
 use App\Observers\YnhBackupObserver;
 use App\Observers\YnhServerObserver;
 use App\Observers\YnhSummaryObserver;
@@ -257,17 +257,17 @@ class AppServiceProvider extends ServiceProvider
     {
         // AdversaryMeter
         $this->app->bind('am_api_utils', function () {
-            return new \App\Modules\AdversaryMeter\Helpers\ApiUtils();
+            return new \App\Helpers\VulnerabilityScannerApiUtils();
         });
 
         // CyberBuddy
         $this->app->bind('cb_api_utils', function () {
-            return new \App\Modules\CyberBuddy\Helpers\ApiUtils();
+            return new \App\Helpers\ApiUtils();
         });
 
         // Reports
         $this->app->bind('re_api_utils', function () {
-            return new \App\Modules\Reports\Helpers\ApiUtils();
+            return new \App\Helpers\SupersetApiUtils();
         });
     }
 }

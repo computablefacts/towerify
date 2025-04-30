@@ -83,7 +83,8 @@ Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->
             </a>
           </span>
           <div class="text-muted">
-            {{ isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os : '-' }}
+            {{ isset($os_infos[$server->id]) && $os_infos[$server->id]->count() >= 1 ? $os_infos[$server->id][0]->os :
+            '-' }}
           </div>
         </td>
         <td>
@@ -121,7 +122,8 @@ Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->
           @endif
         </td>
         <td class="text-end">
-          @if(Auth::user()->canManageServers() && $server->isYunoHost() && $server->isReady() && !$server->addedWithCurl())
+          @if(Auth::user()->canManageServers() && $server->isYunoHost() && $server->isReady() &&
+          !$server->addedWithCurl())
           <a id="refresh-{{ $server->id }}"
              onclick="refresh('{{ $server->id }}')"
              class="cursor-pointer"
@@ -150,15 +152,7 @@ Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->
     refreshBtn.classList.add('loading');
     refreshBtn.innerHTML = '<span class=refresh>&#x25cc;</span>';
 
-    axios.post(`/ynh/servers/${serverId}/pull-server-infos`, {}).then(function (response) {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error)).finally(() => {
+    pullServerInfosApiCall(serverId, () => {
       refreshBtn.innerHTML = '<span class=refresh>&#x27f3;</span>';
       refreshBtn.classList.remove('loading');
       setTimeout(() => window.location.reload(), 5000);

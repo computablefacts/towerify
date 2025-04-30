@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
+/** @deprecated */
 class DownloadBackupRequest extends FormRequest implements \App\Contracts\Requests\DownloadBackup
 {
     /**

@@ -36,10 +36,10 @@
       $urlPssi = route('home', ['tab' => 'ai_writer']);
       $pssi = "Vous souhaitez créer ou importer une Politique de Sécurité des Systèmes d\'Information? Cliquez <a href=\"$urlPssi\">ici</a>!";
 
-      $urlHoneypots = App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('setup_honeypots');
+      $urlHoneypots = App\Helpers\AdversaryMeter::redirectUrl('setup_honeypots');
       $honeypots = "Vous souhaitez piéger les acteurs malveillants? Cliquez <a href=\"$urlHoneypots\">ici</a>!";
 
-      $urlScanner = App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('assets');
+      $urlScanner = App\Helpers\AdversaryMeter::redirectUrl('assets');
       $scanner = "Vous souhaitez surveiller vos serveurs exposés sur Internet? Cliquez <a href=\"$urlScanner\">ici</a>!";
 
       @endphp

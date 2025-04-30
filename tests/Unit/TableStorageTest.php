@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use App\Modules\CyberBuddy\Events\ImportTable;
-use App\Modules\CyberBuddy\Helpers\StorageType;
-use App\Modules\CyberBuddy\Helpers\TableStorage;
+use App\Events\ImportTable;
+use App\Helpers\StorageType;
+use App\Helpers\TableStorage;
 use App\User;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Event;

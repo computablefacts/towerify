@@ -235,7 +235,7 @@
       });
     };
 
-    fetch(`/am/api/v2/public/vulnerabilities/${hash}`)
+    fetch(`/api/public/vulnerabilities/${hash}`)
     .then(response => response.json())
     .then(data => {
       let vulnerabilitiesDiv = document.getElementById('vulnerabilities');
@@ -315,7 +315,7 @@
           disableInputs(true);
           levelSpan.style.display = "none";
           loaderSpan.style.diplay = "inline-block";
-          fetch(`/am/api/v2/public/alert/${e.target.id}/mark-and-check-again`, {
+          fetch(`/api/public/alert/${e.target.id}/mark-and-check-again`, {
             method: 'POST', headers: {
               'Content-Type': 'application/json'
             }, body: JSON.stringify({

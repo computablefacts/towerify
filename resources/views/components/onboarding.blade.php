@@ -65,7 +65,7 @@
     <ul class="breadcrumbs mb-6">
       <li class="{{ $hasAssets ? 'completed' : 'incomplete' }}">
         @if($hasAssets)
-        <a href="{{ App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('assets') }}" target="_blank">
+        <a href="{{ App\Helpers\AdversaryMeter::redirectUrl('assets') }}" target="_blank">
           {{ __('Vulnerability Scanner') }}
         </a>
         @else
@@ -87,7 +87,7 @@
       </li>
       <li class="{{ $hasHoneypots ? 'completed' : 'incomplete' }}">
         @if($hasHoneypots)
-        <a href="{{ App\Modules\AdversaryMeter\Helpers\AdversaryMeter::redirectUrl('setup_honeypots') }}" target="_blank">
+        <a href="{{ App\Helpers\AdversaryMeter::redirectUrl('setup_honeypots') }}" target="_blank">
           {{ __('Honeypots') }}
         </a>
         @else

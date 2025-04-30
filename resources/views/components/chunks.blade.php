@@ -177,7 +177,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this chunk?') }}");
 
     if (response) {
-      axios.delete(`/cb/web/chunks/${chunkId}`).then(function (response) {
+      axios.delete(`/chunks/${chunkId}`).then(function (response) {
         if (response.data.success) {
           toaster.toastSuccess(response.data.success);
         } else if (response.data.error) {
@@ -215,7 +215,7 @@
       if (!response) {
         pre.innerText = oldValue;
       } else {
-        axios.post(`/cb/web/chunks/${chunkId}`, {text: newValue}).then(function (response) {
+        axios.post(`/chunks/${chunkId}`, {text: newValue}).then(function (response) {
           if (response.data.success) {
             toaster.toastSuccess(response.data.success);
           } else if (response.data.error) {

@@ -154,19 +154,7 @@
           }
         });
 
-        axios.post("{{ route('ynh.invitations.create') }}", {
-          users: users,
-        }).then(function (response) {
-          if (response.data.success) {
-            toaster.toastSuccess(response.data.success);
-          } else if (response.data.error) {
-            toaster.toastError(response.data.error);
-          } else {
-            console.log(response.data);
-          }
-        })
-        .catch(error => toaster.toastAxiosError(error))
-        .finally(() => {
+        createInvitationsApiCall(users, () => {
           elSubmit.loading = false;
           elSubmit.disabled = false;
         });
@@ -211,18 +199,12 @@
     const fullname = document.querySelector('#fullname').value;
     const email = document.querySelector('#email').value;
 
-    axios.post("{{ route('ynh.invitations.create') }}", {
-      fullname: fullname, email: email,
-    }).then(function (response) {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-        toggleForm();
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
+    createInvitationApiCall(fullname, email, (result) => {
+      if (toaster && result.msg) {
+        toaster.toastSuccess(result.msg);
       }
-    }).catch(error => toaster.toastAxiosError(error));
+      toggleForm();
+    });
   }
 
   function sendInvitation(id, event) {
@@ -230,17 +212,7 @@
     event.preventDefault();
     event.stopPropagation();
 
-    axios.post("{{ route('ynh.invitations.send') }}", {
-      id: id,
-    }).then(function (response) {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
+    sendInvitationApiCall(id);
   }
 
 </script>

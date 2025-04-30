@@ -19,7 +19,7 @@
   elDatabasesAndTables.innerHTML = "<tr><td colspan='6'>{{ __('Loading...') }}</td></tr>";
 
   document.addEventListener('DOMContentLoaded', function () {
-    axios.get(`/cb/web/tables/available`).then(response => {
+    axios.get(`/tables/available`).then(response => {
       if (response.data.success) {
         if (!response.data.tables || response.data.tables.length === 0) {
           elDatabasesAndTables.innerHTML = "<tr><td colspan='6'>{{ __('No tables found.') }}</td></tr>";

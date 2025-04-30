@@ -2,20 +2,20 @@
 
 namespace Tests\AdversaryMeter;
 
-use App\Modules\AdversaryMeter\Enums\AssetTypesEnum;
-use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
-use App\Modules\AdversaryMeter\Jobs\TriggerScan;
-use App\Modules\AdversaryMeter\Models\Asset;
-use App\Modules\AdversaryMeter\Models\AssetTag;
-use App\Modules\AdversaryMeter\Models\AssetTagHash;
-use App\Modules\AdversaryMeter\Models\Attacker;
-use App\Modules\AdversaryMeter\Models\HiddenAlert;
-use App\Modules\AdversaryMeter\Models\Honeypot;
-use App\Modules\AdversaryMeter\Models\HoneypotEvent;
-use App\Modules\AdversaryMeter\Models\Port;
-use App\Modules\AdversaryMeter\Models\PortTag;
-use App\Modules\AdversaryMeter\Models\Scan;
-use App\Modules\AdversaryMeter\Models\Screenshot;
+use App\Enums\AssetTypesEnum;
+use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
+use App\Jobs\TriggerScan;
+use App\Models\Asset;
+use App\Models\AssetTag;
+use App\Models\AssetTagHash;
+use App\Models\Attacker;
+use App\Models\HiddenAlert;
+use App\Models\Honeypot;
+use App\Models\HoneypotEvent;
+use App\Models\Port;
+use App\Models\PortTag;
+use App\Models\Scan;
+use App\Models\Screenshot;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -27,7 +27,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->post("/am/api/v2/inventory/assets", [
+        ])->post("/api/inventory/assets", [
             'asset' => 'www+example+com',
             'watch' => false,
         ]);
@@ -303,7 +303,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+        ])->get("/api/adversary/infos-from-asset/" . base64_encode('www.example.com'));
 
         $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset) {
             $json->where('asset', 'www.example.com')
@@ -375,7 +375,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+        ])->get("/api/adversary/infos-from-asset/" . base64_encode('www.example.com'));
 
         $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset) {
             $json->where('asset', 'www.example.com')
@@ -509,7 +509,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+        ])->get("/api/adversary/infos-from-asset/" . base64_encode('www.example.com'));
 
         $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset, $scan80, $scan443, $screenshot80, $screenshot443) {
             $json->where('asset', 'www.example.com')
@@ -604,7 +604,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+        ])->get("/api/adversary/infos-from-asset/" . base64_encode('www.example.com'));
 
         $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset) {
             $json->where('asset', 'www.example.com')
@@ -738,7 +738,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->get("/am/api/v2/adversary/infos-from-asset/" . base64_encode('www.example.com'));
+        ])->get("/api/adversary/infos-from-asset/" . base64_encode('www.example.com'));
 
         $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($asset, $scan80, $scan443, $screenshot80, $screenshot443) {
             $json->where('asset', 'www.example.com')
@@ -831,7 +831,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->post("/am/api/v2/inventory/assets", [
+        ])->post("/api/inventory/assets", [
             'asset' => 'www.example.com',
             'watch' => false,
         ]);
@@ -853,7 +853,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->post("/am/api/v2/inventory/assets", [
+        ])->post("/api/inventory/assets", [
             'asset' => '93.184.215.14',
             'watch' => false,
         ]);
@@ -875,7 +875,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->post("/am/api/v2/inventory/assets", [
+        ])->post("/api/inventory/assets", [
             'asset' => '255.255.255.255/32',
             'watch' => false,
         ]);
@@ -897,7 +897,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->post("/am/api/v2/inventory/asset/{$id}/monitoring/begin");
+        ])->post("/api/inventory/asset/{$id}/monitoring/begin");
         $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($id, $asset, $tld, $type) {
             $json->whereType('asset.tags', 'array')
                 ->where('asset.uid', $id)
@@ -915,7 +915,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->post("/am/api/v2/inventory/asset/{$id}/monitoring/end");
+        ])->post("/api/inventory/asset/{$id}/monitoring/end");
         $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($id, $asset, $tld, $type) {
             $json->whereType('asset.tags', 'array')
                 ->where('asset.uid', $id)
@@ -934,7 +934,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->post("/am/api/v2/facts/{$assetId}/metadata", [
+        ])->post("/api/facts/{$assetId}/metadata", [
             'key' => $tag,
         ]);
         $response->assertStatus(200)->assertJson(function (AssertableJson $json) use ($tag) {
@@ -950,7 +950,7 @@ class ScansTest extends TestCase
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",
-        ])->delete("/am/api/v2/facts/{$assetId}/metadata/{$tagId}");
+        ])->delete("/api/facts/{$assetId}/metadata/{$tagId}");
         $response->assertStatus(200);
         return $response;
     }

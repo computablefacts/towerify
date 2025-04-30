@@ -182,7 +182,7 @@
       formData.append('files[]', files[i]);
     }
 
-    axios.post('/cb/web/files/many', formData, {
+    axios.post('/files/many', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
@@ -210,7 +210,7 @@
   elCollections.defaultText = "{{ __('Select or create collection...') }}";
 
   document.addEventListener('DOMContentLoaded', function (event) {
-    axios.get('/cb/web/collections').then(response => {
+    axios.get('/collections').then(response => {
       elCollections.items = response.data.map(collection => collection.name);
     }).catch(error => toaster.toastAxiosError(error));
   });
@@ -220,7 +220,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this file?') }}");
 
     if (response) {
-      axios.delete(`/cb/web/files/${fileId}`).then(function (response) {
+      axios.delete(`/files/${fileId}`).then(function (response) {
         if (response.data.success) {
           toaster.toastSuccess(response.data.success);
         } else if (response.data.error) {

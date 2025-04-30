@@ -16,15 +16,15 @@ export function newDatastore() {
 
         whoAmI: () => whoAmI(),
 
-        discoverFromDomain: (domain) => apiCall('POST', 'api/v2/inventory/assets/discover', null, {
+        discoverFromDomain: (domain) => apiCall('POST', 'api/inventory/assets/discover', null, {
             domain: domain
         }),
 
-        discoverFromIp: (ip) => apiCall('POST', 'api/v2/inventory/assets/discover/from/ip', null, {
+        discoverFromIp: (ip) => apiCall('POST', 'api/inventory/assets/discover/from/ip', null, {
             ip: ip
         }),
 
-        saveAsset: (domain, type, watch = null) => apiCall('POST', 'api/v2/inventory/assets', null, {
+        saveAsset: (domain, type, watch = null) => apiCall('POST', 'api/inventory/assets', null, {
             asset: domain, type: type, watch: watch
         }).then(response => new InventoryAsset(response.asset)),
 
@@ -39,33 +39,33 @@ export function newDatastore() {
                 params.hours = hours;
             }
 
-            return apiCall('GET', `api/v2/inventory/assets`, params)
+            return apiCall('GET', `api/inventory/assets`, params)
             .then(data => data.assets.map(asset => new InventoryAsset(asset)));
         }).promise(valid),
 
-        getInfosFromAsset: (asset) => apiCall('GET', 'api/v2/adversary/infos-from-asset/' + btoa(asset)),
+        getInfosFromAsset: (asset) => apiCall('GET', 'api/adversary/infos-from-asset/' + btoa(asset)),
 
-        getScreenshot: (id) => apiCall('GET', 'api/v2/inbox/screenshot/' + id),
+        getScreenshot: (id) => apiCall('GET', 'api/inbox/screenshot/' + id),
 
         getAttackerIndex: () => new com.computablefacts.promises.Memoize(3, () => {
-            return apiCall('GET', `api/v2/adversary/attacker-index`, {})
+            return apiCall('GET', `api/adversary/attacker-index`, {})
             .then(data => data.map(adversary => new Adversary(adversary)));
         }).promise(),
 
         getRecentEvents: (isAuto = true, isManual = true) => new com.computablefacts.promises.Memoize(3, () => {
-            return apiCall('GET', `api/v2/adversary/recent-events`, {
+            return apiCall('GET', `api/adversary/recent-events`, {
                 manual: isManual, auto: isAuto
             })
             .then(data => data.map(event => new EventHoneypot(event)));
         }).promise(),
 
         getBlacklistIps: (attackerProfileId = null) => new com.computablefacts.promises.Memoize(3, () => {
-            const url = `api/v2/adversary/blacklist-ips${attackerProfileId ? `/${attackerProfileId}` : ''}`;
+            const url = `api/adversary/blacklist-ips${attackerProfileId ? `/${attackerProfileId}` : ''}`;
             return apiCall('GET', url, {}).then(data => data.map(ip => new IP(ip)));
         }).promise(),
 
         getVulnerabilities: (attackerProfileId = null) => new com.computablefacts.promises.Memoize(1, () => {
-            const url = `api/v2/adversary/vulnerabilities${attackerProfileId ? `/${attackerProfileId}` : ''}`;
+            const url = `api/adversary/vulnerabilities${attackerProfileId ? `/${attackerProfileId}` : ''}`;
             return apiCall('GET', url, {})
             .then(data => {
                 return data.map(alert => new InventoryVulnerability(alert))
@@ -78,7 +78,7 @@ export function newDatastore() {
         }).promise(),
 
         getVulnerabilities2: (asset) => new com.computablefacts.promises.Memoize(1, () => {
-            const url = `api/v2/adversary/vulnerabilities2/${btoa(asset)}`;
+            const url = `api/adversary/vulnerabilities2/${btoa(asset)}`;
             return apiCall('GET', url, {})
             .then(data => {
                 return data.map(alert => new InventoryVulnerability(alert))
@@ -91,7 +91,7 @@ export function newDatastore() {
         }).promise(),
 
         getAttackerActivity: (attackerProfileId) => new com.computablefacts.promises.Memoize(3, () => {
-            return apiCall('GET', 'api/v2/adversary/activity/' + attackerProfileId, {})
+            return apiCall('GET', 'api/adversary/activity/' + attackerProfileId, {})
             .then(data => {
                 return {
                     firstDate: data.firstEvent,
@@ -102,55 +102,55 @@ export function newDatastore() {
         }).promise(),
 
         getAttackerProfile: (attackerProfileId) => new com.computablefacts.promises.Memoize(3, () => {
-            return apiCall('GET', 'api/v2/adversary/profile/' + attackerProfileId, {})
+            return apiCall('GET', 'api/adversary/profile/' + attackerProfileId, {})
         }).promise(),
 
         getAttackerStats: (attackerProfileId) => new com.computablefacts.promises.Memoize(3, () => {
-            return apiCall('GET', 'api/v2/adversary/profile/stats/' + attackerProfileId, {})
+            return apiCall('GET', 'api/adversary/profile/stats/' + attackerProfileId, {})
         }).promise(),
 
         getMostRecentEvent: (attackerProfileId) => new com.computablefacts.promises.Memoize(3, () => {
-            return apiCall('GET', 'api/v2/adversary/last/events' + (attackerProfileId ? `/${attackerProfileId}` : ''),
+            return apiCall('GET', 'api/adversary/last/events' + (attackerProfileId ? `/${attackerProfileId}` : ''),
                 {})
             .then(response => response.map(event => new EventHoneypot(event)))
         }).promise(),
 
         getTools: (attackerProfileId) => new com.computablefacts.promises.Memoize(3,
-            () => apiCall('GET', `api/v2/adversary/profile/tools/${attackerProfileId}`, {})).promise(),
+            () => apiCall('GET', `api/adversary/profile/tools/${attackerProfileId}`, {})).promise(),
 
         calculateCompetencyScores: (attackerProfileId) => new com.computablefacts.promises.Memoize(3,
-            () => apiCall('GET', `api/v2/adversary/profile/competency/${attackerProfileId}`, {})).promise(),
+            () => apiCall('GET', `api/adversary/profile/competency/${attackerProfileId}`, {})).promise(),
 
         getHoneypots: () => new com.computablefacts.promises.Memoize(3,
-            () => apiCall('GET', `api/v2/adversary/last/honeypots`, {})).promise(),
+            () => apiCall('GET', `api/adversary/last/honeypots`, {})).promise(),
 
         getHoneypotStats: (honeypot, days) => new com.computablefacts.promises.Memoize(3,
-            () => apiCall('GET', `api/v2/adversary/honeypots/stats/${honeypot}`, {days: days})).promise(),
+            () => apiCall('GET', `api/adversary/honeypots/stats/${honeypot}`, {days: days})).promise(),
 
         getAlertStats: () => new com.computablefacts.promises.Memoize(3,
-            () => apiCall('GET', `api/v2/adversary/alerts/stats`)).promise(),
+            () => apiCall('GET', `api/adversary/alerts/stats`)).promise(),
 
-        getHoneypotsStatus: () => apiCall('GET', `api/v2/adversary/honeypots/status`),
+        getHoneypotsStatus: () => apiCall('GET', `api/adversary/honeypots/status`),
 
-        postHoneypots: (honeypots) => apiCall('POST', `api/v2/adversary/honeypots`, null, {
+        postHoneypots: (honeypots) => apiCall('POST', `api/adversary/honeypots`, null, {
             honeypots: honeypots
         }),
 
-        setHoneypotsNextStep: () => apiCall('POST', `api/v2/adversary/honeypots/set-next-step`, null),
+        setHoneypotsNextStep: () => apiCall('POST', `api/adversary/honeypots/set-next-step`, null),
 
-        getAssetTags: () => apiCall('GET', `api/v2/adversary/assets/tags`),
+        getAssetTags: () => apiCall('GET', `api/adversary/assets/tags`),
 
-        getHashes: () => apiCall('GET', `api/v2/adversary/hashes`).then(
+        getHashes: () => apiCall('GET', `api/adversary/hashes`).then(
             response => response.map(hash => new HashObject(hash))),
 
-        postHash: (tag) => apiCall('POST', `api/v2/adversary/hashes`, null, {tag: tag}).then(
+        postHash: (tag) => apiCall('POST', `api/adversary/hashes`, null, {tag: tag}).then(
             response => new HashObject(response)),
 
-        deleteHash: (id) => apiCall('DELETE', `api/v2/adversary/hashes/${id}`),
+        deleteHash: (id) => apiCall('DELETE', `api/adversary/hashes/${id}`),
 
-        postHiddenAlert: (payload) => apiCall('POST', 'api/v2/adversary/hidden-alerts', null, payload),
+        postHiddenAlert: (payload) => apiCall('POST', 'api/adversary/hidden-alerts', null, payload),
 
-        deleteHiddenAlert: (id) => apiCall('DELETE', 'api/v2/adversary/hidden-alerts/' + id),
+        deleteHiddenAlert: (id) => apiCall('DELETE', 'api/adversary/hidden-alerts/' + id),
 
         toast: function (msg) {
             toaster.toast(msg, 'primary');

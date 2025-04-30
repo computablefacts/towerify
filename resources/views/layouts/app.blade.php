@@ -53,6 +53,7 @@
 @auth
 @include('layouts._toaster')
 @include('layouts._drawer')
+@include('layouts._json-rpc')
 @endauth
 @include('layouts._freshdesk')
 @stack('alpine')

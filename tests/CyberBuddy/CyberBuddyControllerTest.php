@@ -2,7 +2,7 @@
 
 namespace Tests\CyberBuddy;
 
-use App\Modules\CyberBuddy\Http\Controllers\CyberBuddyController;
+use App\Http\Controllers\CyberBuddyController;
 use Tests\TestCaseNoDb;
 
 class CyberBuddyControllerTest extends TestCaseNoDb

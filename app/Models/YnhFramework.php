@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use App\Helpers\Snippet;
-use App\Modules\CyberBuddy\Models\Collection;
-use App\Modules\CyberBuddy\Models\File;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

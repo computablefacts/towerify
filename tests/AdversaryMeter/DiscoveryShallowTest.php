@@ -2,11 +2,11 @@
 
 namespace Tests\AdversaryMeter;
 
+use App\Events\CreateAsset;
+use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
+use App\Jobs\TriggerDiscoveryShallow;
+use App\Models\Asset;
 use App\Models\Tenant;
-use App\Modules\AdversaryMeter\Events\CreateAsset;
-use App\Modules\AdversaryMeter\Helpers\ApiUtilsFacade as ApiUtils;
-use App\Modules\AdversaryMeter\Jobs\TriggerDiscoveryShallow;
-use App\Modules\AdversaryMeter\Models\Asset;
 use App\User;
 use Tests\TestCase;
 

@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\HoneypotCloudProvidersEnum;
+use App\Enums\HoneypotCloudSensorsEnum;
+use App\Enums\HoneypotStatusesEnum;
+use App\Mail\HoneypotRequested;
+use App\Models\Honeypot;
 use App\Models\Invitation;
 use App\Models\YnhTrial;
-use App\Modules\AdversaryMeter\Enums\HoneypotCloudProvidersEnum;
-use App\Modules\AdversaryMeter\Enums\HoneypotCloudSensorsEnum;
-use App\Modules\AdversaryMeter\Enums\HoneypotStatusesEnum;
-use App\Modules\AdversaryMeter\Http\Controllers\AssetController;
-use App\Modules\AdversaryMeter\Mail\HoneypotRequested;
-use App\Modules\AdversaryMeter\Models\Honeypot;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,10 +55,12 @@ class CywiseController extends Controller
         if ($step === 2 && $request->get('action') == 'next') {
             $request->validate(['domain' => 'required|string|min:1|max:100']);
             $trial->domain = $request->string('domain');
+            $trial->save();
         }
         if ($step === 3 && $request->get('action') == 'next') {
             $request->validate(['terms' => 'required|string']);
             $trial->subdomains = array_values(array_filter($request->all(), fn(string $key) => preg_match('/^d-\d+$/', $key), ARRAY_FILTER_USE_KEY));
+            $trial->save();
         }
         if ($step === 4 && $request->get('action') == 'next') {
             // FALL THROUGH
@@ -69,6 +70,7 @@ class CywiseController extends Controller
             if ($request->get('action') == 'next') {
                 $request->validate(['email' => 'required|string|email']);
                 $trial->email = $request->string('email');
+                $trial->save();
             }
 
             // Create shadow profile
@@ -82,15 +84,19 @@ class CywiseController extends Controller
                 }
                 $user = $invitation->createUser(['password' => Str::random(64)]);
             }
+            if (!$trial->created_by) {
+                $trial->created_by = $user->id;
+                $trial->save();
+            }
 
             Auth::login($user);
 
             if (!$trial->honeypots) {
 
                 // Generate honeypots names
-                $http = Str::random(10);
-                $https = Str::random(10);
-                $ssh = Str::random(10);
+                $http = Str::lower(Str::random(10));
+                $https = Str::lower(Str::random(10));
+                $ssh = Str::lower(Str::random(10));
 
                 // HTTP
                 /** @var Honeypot $honeypot */
@@ -144,6 +150,7 @@ class CywiseController extends Controller
                 Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested($user, $subject, $body));
 
                 $trial->honeypots = true;
+                $trial->save();
             }
 
             // Register assets and start scans
@@ -152,12 +159,12 @@ class CywiseController extends Controller
             foreach ($trial->subdomains as $subdomain) {
 
                 $request = new Request();
-                $request->replace(['asset' => $subdomain, 'watch' => true]);
+                $request->replace(['asset' => $subdomain, 'watch' => true, 'trial_id' => $trial->id]);
 
                 $controller = new AssetController();
                 $controller->saveAsset($request);
 
-                $assets[] = $controller->infosFromAsset(base64_encode($subdomain));
+                $assets[] = $controller->infosFromAsset(base64_encode($subdomain), $trial->id);
             }
 
             usort($assets, fn($a, $b) => strcmp($a['asset'], $b['asset']));
@@ -165,9 +172,6 @@ class CywiseController extends Controller
             // Logout!
             Auth::logout();
         }
-
-        $trial->save();
-
         return view('cywise.cywise', [
             'hash' => $hash,
             'step' => $step,

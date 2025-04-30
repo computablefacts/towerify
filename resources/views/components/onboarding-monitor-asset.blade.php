@@ -34,7 +34,7 @@
 
     const asset = document.querySelector('#asset').value;
 
-    axios.post('/am/api/v2/inventory/assets', {
+    axios.post('/api/inventory/assets', {
       asset: asset, watch: true,
     }, {
       headers: {

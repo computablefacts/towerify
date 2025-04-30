@@ -16,8 +16,8 @@ class Collections extends Component
 
     public function __construct(int $currentPage, int $pagesSize = 25)
     {
-        $this->collections = \App\Modules\CyberBuddy\Models\Collection::query()->orderBy('priority')->orderBy('name')->get();
-        $this->nbPages = ceil(\App\Modules\CyberBuddy\Models\Collection::count() / $pagesSize);
+        $this->collections = \App\Models\Collection::query()->orderBy('priority')->orderBy('name')->get();
+        $this->nbPages = ceil(\App\Models\Collection::count() / $pagesSize);
         $this->currentPage = $currentPage;
         $this->pagesSize = $pagesSize;
     }

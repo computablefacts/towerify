@@ -7,9 +7,9 @@
     aboutText: null, // "⚡ Powered by {{ config('app.name') }}",
     aboutLink: '{{ app_url() }}',
     userId: '{{ Auth::user() ? Auth::user()->id : \Illuminate\Support\Str::random(10) }}',
-    chatServer: '/cb/web/botman',
+    chatServer: '/botman',
     bubbleAvatarUrl: '/images/icons/cyber-buddy.svg',
-    frameEndpoint: '/cb/web/cyber-buddy/chat',
+    frameEndpoint: '/cyber-buddy/chat',
     introMessage: 'Bonjour! Je suis votre cyber assistant. Que puis-je faire pour vous?',
     desktopHeight: 900,
     desktopWidth: 2 * window.innerWidth / 3,
@@ -19,7 +19,7 @@
   };
 
   const iframe = document.getElementById('chatBotManFrame');
-  const url = `/cb/web/cyber-buddy/chat?conf=${encodeURIComponent(JSON.stringify(window.botmanWidget))}`;
+  const url = `/cyber-buddy/chat?conf=${encodeURIComponent(JSON.stringify(window.botmanWidget))}`;
 
   iframe.onload = () => {
     const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;

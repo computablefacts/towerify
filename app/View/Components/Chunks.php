@@ -2,7 +2,7 @@
 
 namespace App\View\Components;
 
-use App\Modules\CyberBuddy\Models\Chunk;
+use App\Models\Chunk;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;

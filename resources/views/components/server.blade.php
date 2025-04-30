@@ -3,7 +3,8 @@
   <div class="card-body">
     <div class="row">
       <div class="col">
-        {{ __('To configure or restore metrics and security event collection on this server, execute the following command with root privileges:') }}
+        {{ __('To configure or restore metrics and security event collection on this server, execute the following
+        command with root privileges:') }}
         <br><br>
         @if($server->platform === App\Enums\OsqueryPlatformEnum::WINDOWS)
         <pre class="m-0">
@@ -13,7 +14,9 @@ Invoke-WebRequest -Uri '<a href="{{ app_url() }}/update/{{ $server->secret }}">{
 curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/update/{{ $server->secret }}</a> | bash</pre>
         @endif
         <br>
-        {{ __('The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.') }}
+        {{ __('The command is idempotent, meaning you can run it multiple times, but it will produce the same result
+        each time without creating additional changes or effects beyond the initial execution. This ensures consistency
+        and prevents duplication of settings or data each time it is run.') }}
       </div>
     </div>
   </div>
@@ -171,17 +174,7 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
     const port = document.querySelector('[name="ssh_port"]').value;
     const username = document.querySelector('[name="ssh_username"]').value;
 
-    axios.post("{{ route('ynh.servers.test-ssh-connection', $server) }}", {
-      ip: ip, port: port, username: username
-    }).then(response => {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
+    testSshConnectionApiCall('{{ $server->id }}', ip, port, username);
   }
 
   function setupHost() {
@@ -192,33 +185,13 @@ curl -s <a href="{{ app_url() }}/update/{{ $server->secret }}">{{ app_url() }}/u
     const username = document.querySelector('[name="ssh_username"]').value;
     const domain = document.querySelector('[name="principal_domain"]').value;
 
-    axios.post("{{ route('ynh.servers.configure', $server) }}", {
-      name: name, ip: ip, port: port, username: username, domain: domain,
-    }).then(function (response) {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
+    configureServerApiCall('{{ $server->id }}', name, domain, ip, port, username);
   }
 
   function removeFromInventory() {
-
-    const response = confirm(`Are you sure you want to remove {{ $server->name }} from the inventory?`);
-
+    const response = confirm('Are you sure you want to remove {{ $server->name }} from the inventory?');
     if (response) {
-      axios.delete("{{ route('ynh.servers.delete', $server) }}").then(function (response) {
-        if (response.data.success) {
-          toaster.toastSuccess(response.data.success);
-        } else if (response.data.error) {
-          toaster.toastError(response.data.error);
-        } else {
-          console.log(response.data);
-        }
-      }).catch(error => toaster.toastAxiosError(error));
+      deleteServerApiCall('{{ $server->id }}');
     }
   }
 

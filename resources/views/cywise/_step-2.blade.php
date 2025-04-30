@@ -13,18 +13,20 @@
   }
 
 </style>
-<h1>Vos sous-domaines</h1>
-<p>Liste des sous-domaines de <b>{{ $trial->domain }}</b> compatibles avec le scanner :</p>
-@include('cywise._loader', [ 'title' => 'Recherche de sous-domaines...', 'subtitle' => 'Compter environ 60 secondes' ])
+<h1>Sélection des sous-domaines</h1>
+@include('cywise._loader', [ 'title' => 'La découverte de vos sous-domaines est en cours...', 'subtitle' => 'Compter environ 60 secondes' ])
 <form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 3 ]) }}" method="post" class="hidden">
   @csrf
+  <p>Super, je vois que nous avons trouvé plusieurs sous-domaines associés à votre domaine. Décochez ceux que vous
+    ne souhaitez pas inclure dans l'audit.</p>
+  <p>Ne vous inquiétez pas, <b>l'audit est non intrusif et sans impact sur vos serveurs.</b></p>
   <div class="list">
     <!-- FILLED DYNAMICALLY -->
   </div>
   <div class="terms">
     <input type="checkbox" name="terms" checked>
     <label for="terms">Je certifie être propriétaire de ces domaines et autoriser Cywise à effectuer un test de
-      sécurité sur les domaines sélectionnés (notre test est non intrusif et sans impact sur vos serveurs)</label>
+      sécurité sur les domaines sélectionnés.</label>
   </div>
   @include('cywise._errors')
   <div class="button-group">

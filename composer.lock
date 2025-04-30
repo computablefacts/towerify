@@ -4,83 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "81532922a2be709d2b2fda692d4a9ea1",
+    "content-hash": "091ba65b28e999be39e73a7a004c8e72",
     "packages": [
-        {
-            "name": "24slides/laravel-saml2",
-            "version": "2.4.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/24Slides/laravel-saml2.git",
-                "reference": "e7f4938586c65fbe1fdd91552c582cac745223b9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/24Slides/laravel-saml2/zipball/e7f4938586c65fbe1fdd91552c582cac745223b9",
-                "reference": "e7f4938586c65fbe1fdd91552c582cac745223b9",
-                "shasum": ""
-            },
-            "require": {
-                "ext-openssl": "*",
-                "illuminate/console": "~5.5|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "illuminate/database": "~5.5|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "illuminate/support": "~5.4|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "onelogin/php-saml": "^3.0|^4.0",
-                "php": ">=7.1",
-                "ramsey/uuid": "^3.8|^4.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "^0.9.9",
-                "phpunit/phpunit": "^7.5|^9.0",
-                "squizlabs/php_codesniffer": "^2.3"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "Saml2": "Slides\\Saml2\\Facades\\Auth"
-                    },
-                    "providers": [
-                        "Slides\\Saml2\\ServiceProvider"
-                    ]
-                },
-                "branch-aliases": {
-                    "dev-master": "2.0.8-dev"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/helpers.php"
-                ],
-                "psr-4": {
-                    "Slides\\Saml2\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Artem Brezhnev",
-                    "email": "brezzhnev@gmail.com"
-                }
-            ],
-            "description": "SAML2 Service Provider integration to your Laravel 5.4+ application, based on OneLogin toolkit",
-            "homepage": "https://github.com/24slides/laravel-saml2",
-            "keywords": [
-                "SAML2",
-                "SSO",
-                "laravel",
-                "onelogin",
-                "saml"
-            ],
-            "support": {
-                "issues": "https://github.com/24Slides/laravel-saml2/issues",
-                "source": "https://github.com/24Slides/laravel-saml2/tree/2.4.2"
-            },
-            "time": "2025-03-12T12:39:37+00:00"
-        },
         {
             "name": "aws/aws-crt-php",
             "version": "v1.2.7",
@@ -5547,70 +5472,6 @@
             "time": "2024-11-21T10:39:51+00:00"
         },
         {
-            "name": "onelogin/php-saml",
-            "version": "4.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/SAML-Toolkits/php-saml.git",
-                "reference": "d3b5172f137db2f412239432d77253ceaaa1e939"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/SAML-Toolkits/php-saml/zipball/d3b5172f137db2f412239432d77253ceaaa1e939",
-                "reference": "d3b5172f137db2f412239432d77253ceaaa1e939",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.3",
-                "robrichards/xmlseclibs": "^3.1"
-            },
-            "require-dev": {
-                "pdepend/pdepend": "^2.8.0",
-                "php-coveralls/php-coveralls": "^2.0",
-                "phploc/phploc": "^4.0 || ^5.0 || ^6.0 || ^7.0",
-                "phpunit/phpunit": "^9.5",
-                "sebastian/phpcpd": "^4.0 || ^5.0 || ^6.0 ",
-                "squizlabs/php_codesniffer": "^3.5.8"
-            },
-            "suggest": {
-                "ext-curl": "Install curl lib to be able to use the IdPMetadataParser for parsing remote XMLs",
-                "ext-dom": "Install xml lib",
-                "ext-openssl": "Install openssl lib in order to handle with x509 certs (require to support sign and encryption)",
-                "ext-zlib": "Install zlib"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "OneLogin\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "PHP SAML Toolkit",
-            "homepage": "https://github.com/SAML-Toolkits/php-saml",
-            "keywords": [
-                "Federation",
-                "SAML2",
-                "SSO",
-                "identity",
-                "saml"
-            ],
-            "support": {
-                "email": "sixto.martin.garcia@gmail.com",
-                "issues": "https://github.com/onelogin/SAML-Toolkits/issues",
-                "source": "https://github.com/onelogin/SAML-Toolkits/"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/SAML-Toolkits",
-                    "type": "github"
-                }
-            ],
-            "time": "2024-05-30T15:10:40+00:00"
-        },
-        {
             "name": "paragonie/constant_time_encoding",
             "version": "v3.0.0",
             "source": {
@@ -7116,46 +6977,78 @@
             "time": "2024-06-11T12:45:25+00:00"
         },
         {
-            "name": "robrichards/xmlseclibs",
-            "version": "3.1.3",
+            "name": "sajya/server",
+            "version": "7.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/robrichards/xmlseclibs.git",
-                "reference": "2bdfd742624d739dfadbd415f00181b4a77aaf07"
+                "url": "https://github.com/sajya/server.git",
+                "reference": "de5411d9cca32c24d9e347e2ff2221d36ce36e84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/2bdfd742624d739dfadbd415f00181b4a77aaf07",
-                "reference": "2bdfd742624d739dfadbd415f00181b4a77aaf07",
+                "url": "https://api.github.com/repos/sajya/server/zipball/de5411d9cca32c24d9e347e2ff2221d36ce36e84",
+                "reference": "de5411d9cca32c24d9e347e2ff2221d36ce36e84",
                 "shasum": ""
             },
             "require": {
-                "ext-openssl": "*",
-                "php": ">= 5.4"
+                "ext-json": "*",
+                "laravel/framework": "^10.0|^11.0|^12.0"
+            },
+            "conflict": {
+                "laravel/framework": ">=10.0.0,<=10.48.27 || >11.0.0,<=11.42.0",
+                "league/flysystem": "<3.0.16",
+                "mockery/mockery": "<1.6.1",
+                "orchestra/testbench": ">=9.0.0,<9.8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^v1.20",
+                "orchestra/testbench": "^8.0|^9.0|^10.0",
+                "phpunit/php-code-coverage": "^10.|^11.0|^12.0",
+                "phpunit/phpunit": "^10.5|^11.0",
+                "vimeo/psalm": "^5.0 | ^6.0"
+            },
+            "suggest": {
+                "ext-zlib": "Required to compress the response into gzip",
+                "sajya/client": "HTTP(S) client for JSON-RPC 2.0"
             },
             "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "RPC": "Sajya\\Server\\Facades\\RPC"
+                    },
+                    "providers": [
+                        "Sajya\\Server\\ServerServiceProvider"
+                    ]
+                }
+            },
             "autoload": {
                 "psr-4": {
-                    "RobRichards\\XMLSecLibs\\": "src"
+                    "Sajya\\Server\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD-3-Clause"
+                "MIT"
             ],
-            "description": "A PHP library for XML Security",
-            "homepage": "https://github.com/robrichards/xmlseclibs",
+            "authors": [
+                {
+                    "name": "Alexandr Chernyaev",
+                    "email": "bliz48rus@gmail.com"
+                }
+            ],
+            "description": "Easy implementation of the JSON-RPC 2.0 server for the Laravel framework.",
+            "homepage": "https://sajya.github.io",
             "keywords": [
-                "security",
-                "signature",
-                "xml",
-                "xmldsig"
+                "api",
+                "json-prc",
+                "rpc"
             ],
             "support": {
-                "issues": "https://github.com/robrichards/xmlseclibs/issues",
-                "source": "https://github.com/robrichards/xmlseclibs/tree/3.1.3"
+                "issues": "https://github.com/sajya/server/issues",
+                "source": "https://github.com/sajya/server/tree/7.0.0"
             },
-            "time": "2024-11-20T21:13:56+00:00"
+            "time": "2025-03-09T02:00:15+00:00"
         },
         {
             "name": "spatie/image",
@@ -10388,6 +10281,164 @@
                 }
             ],
             "time": "2024-11-21T01:49:47+00:00"
+        },
+        {
+            "name": "webklex/laravel-imap",
+            "version": "6.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Webklex/laravel-imap.git",
+                "reference": "f51a2d5f05b2d545c9ea2af13fe351030e3819e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Webklex/laravel-imap/zipball/f51a2d5f05b2d545c9ea2af13fe351030e3819e2",
+                "reference": "f51a2d5f05b2d545c9ea2af13fe351030e3819e2",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": ">=6.0.0",
+                "php": "^8.0.2",
+                "webklex/php-imap": "^6.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Client": "Webklex\\IMAP\\Facades\\Client"
+                    },
+                    "providers": [
+                        "Webklex\\IMAP\\Providers\\LaravelServiceProvider"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Webklex\\IMAP\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Malte Goldenbaum",
+                    "email": "github@webklex.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Laravel IMAP client",
+            "homepage": "https://github.com/webklex/laravel-imap",
+            "keywords": [
+                "idle",
+                "imap",
+                "laravel",
+                "laravel-imap",
+                "mail",
+                "oauth",
+                "pop3",
+                "webklex"
+            ],
+            "support": {
+                "issues": "https://github.com/Webklex/laravel-imap/issues",
+                "source": "https://github.com/Webklex/laravel-imap/tree/6.1.0"
+            },
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/webklex",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://ko-fi.com/webklex",
+                    "type": "ko_fi"
+                }
+            ],
+            "time": "2025-01-19T20:28:46+00:00"
+        },
+        {
+            "name": "webklex/php-imap",
+            "version": "6.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Webklex/php-imap.git",
+                "reference": "dedff6f679829d4aadfa0b17f150923b2f8dd1fe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Webklex/php-imap/zipball/dedff6f679829d4aadfa0b17f150923b2f8dd1fe",
+                "reference": "dedff6f679829d4aadfa0b17f150923b2f8dd1fe",
+                "shasum": ""
+            },
+            "require": {
+                "ext-fileinfo": "*",
+                "ext-iconv": "*",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "ext-mbstring": "*",
+                "ext-openssl": "*",
+                "ext-zip": "*",
+                "illuminate/pagination": ">=5.0.0",
+                "nesbot/carbon": "^2.62.1|^3.2.4",
+                "php": "^8.0.2",
+                "symfony/http-foundation": ">=2.8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5.10"
+            },
+            "suggest": {
+                "symfony/mime": "Recomended for better extension support",
+                "symfony/var-dumper": "Usefull tool for debugging"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "6.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Webklex\\PHPIMAP\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Malte Goldenbaum",
+                    "email": "github@webklex.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP IMAP client",
+            "homepage": "https://github.com/webklex/php-imap",
+            "keywords": [
+                "imap",
+                "mail",
+                "php-imap",
+                "pop3",
+                "webklex"
+            ],
+            "support": {
+                "issues": "https://github.com/Webklex/php-imap/issues",
+                "source": "https://github.com/Webklex/php-imap/tree/6.1.0"
+            },
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/webklex",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://ko-fi.com/webklex",
+                    "type": "ko_fi"
+                }
+            ],
+            "time": "2025-01-19T20:23:12+00:00"
         },
         {
             "name": "webmozart/assert",
@@ -13879,7 +13930,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -13888,6 +13939,6 @@
         "ext-imagick": "*",
         "ext-pcntl": "*"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
 }
