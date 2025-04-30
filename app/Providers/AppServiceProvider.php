@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Hashing\TwHasher;
+use App\Listeners\SamlEventSubscriber;
 use App\Models\Address;
 use App\Models\Adjustment;
 use App\Models\Asset;
@@ -111,6 +112,7 @@ use App\Rules\AtLeastOneLowercaseLetter;
 use App\Rules\AtLeastOneUppercaseLetter;
 use App\Rules\OnlyLettersAndDigits;
 use App\User;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
@@ -241,6 +243,9 @@ class AppServiceProvider extends ServiceProvider
         File::observe(FilesObserver::class);
         Prompt::observe(PromptObserver::class);
         Template::observe(TemplateObserver::class);
+
+        // SAML
+        Event::subscribe(SamlEventSubscriber::class);
     }
 
     /**
