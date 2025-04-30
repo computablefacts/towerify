@@ -43,7 +43,9 @@ class EndVulnsScanListener extends AbstractListener
             return;
         }
 
-        $output = JosianneClient::executeQuery("SELECT DISTINCT login_email AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website FROM default.dumps WHERE login_domain = '{$assets->first()->tld}' ORDER BY email ASC");
+        $query = "SELECT DISTINCT login_email AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website FROM default.dumps WHERE login_domain = '{$assets->first()->tld}' ORDER BY email ASC";
+        Log::debug($query);
+        $output = JosianneClient::executeQuery($query);
         $leaks = collect(explode("\n", $output))
             ->filter(fn(string $line) => !empty($line) && $line !== 'ok')
             ->map(function (string $line) {
