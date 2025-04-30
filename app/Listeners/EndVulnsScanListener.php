@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\EndVulnsScan;
+use App\Helpers\JosianneClient;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
 use App\Http\Controllers\AssetController;
 use App\Models\Alert;
@@ -41,6 +42,19 @@ class EndVulnsScanListener extends AbstractListener
             return;
         }
 
+        $output = JosianneClient::executeQuery("SELECT DISTINCT login_email AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website FROM default.dumps WHERE login_domain = '{$assets->first()->domain}' ORDER BY email ASC");
+        $leaks = collect(explode("\n", $output))
+            ->filter(fn(string $line) => !empty($line) && $line !== 'ok')
+            ->map(function (string $line) {
+                $line = trim($line);
+                return [
+                    'email' => Str::before($line, "\t"),
+                    'website' => Str::after($line, "\t"),
+                ];
+            })
+            ->values();
+        $msgLeaks = $leaks->isNotEmpty() ? "<li><b>{$leaks->count()}</b> identifiants compromis appartenant au domaine {$assets->first()->domain}.</li>" : "";
+
         $onboarding = route('public.cywise.onboarding', ['hash' => $trial->hash, 'step' => 5]);
         $alerts = $assets->flatMap(fn(Asset $asset) => $asset->alerts()->get())->filter(fn(Alert $alert) => $alert->is_hidden === 0);
         $alertsHigh = $alerts->filter(fn(Alert $alert) => $alert->level === 'High');
@@ -48,9 +62,9 @@ class EndVulnsScanListener extends AbstractListener
         $alertsLow = $alerts->filter(fn(Alert $alert) => $alert->level === 'Low');
         $nbServers = $alerts->map(fn(Alert $alert) => $alert->port()->ip)->unique()->count();
         $to = $user->email;
-        $msgHigh = $alertsHigh->count() > 0 ? "<li><b>{$alertsHigh->count()}</b> sont des vulnérabilités critiques et <b>doivent</b> être corrigées.</li>" : "";
-        $msgMedium = $alertsMedium->count() > 0 ? "<li><b>{$alertsMedium->count()}</b> sont des vulnérabilités de criticité moyenne et <b>devraient</b> être corrigées.</li>" : "";
-        $msgLow = $alertsLow->count() > 0 ? "<li><b>{$alertsLow->count()}</b> sont des vulnérabilités de criticité basse et ne posent pas un risque de sécurité immédiat.</li>" : "";
+        $msgHigh = $alertsHigh->isNotEmpty() ? "<li><b>{$alertsHigh->count()}</b> sont des vulnérabilités critiques et <b>doivent</b> être corrigées.</li>" : "";
+        $msgMedium = $alertsMedium->isNotEmpty() ? "<li><b>{$alertsMedium->count()}</b> sont des vulnérabilités de criticité moyenne et <b>devraient</b> être corrigées.</li>" : "";
+        $msgLow = $alertsLow->isNotEmpty() ? "<li><b>{$alertsLow->count()}</b> sont des vulnérabilités de criticité basse et ne posent pas un risque de sécurité immédiat.</li>" : "";
         $answer = $alertsHigh->concat($alertsMedium)
             ->concat($alertsLow)
             ->map(function (Alert $alert) {
@@ -78,6 +92,18 @@ class EndVulnsScanListener extends AbstractListener
                 ";
             })->join("");
 
+        if ($leaks->isNotEmpty()) {
+            $website = $leaks->map(fn(array $leak) => "<li>L'identifiant <b>{$leak['email']}</b> donnant accès à <b>{$leak['website']}</b> a été compromis.</li>")->join("\n");
+            $answer .= "
+            <h3>Identifiants compromis</h3>
+            <p>Cywise surveille également les fuites de données !<p>
+            <ul>
+              {$website}
+            </ul>
+            <p>Si aucune action n'a encore été entreprise, veuillez demander aux utilisateurs concernés de modifier leur mot de passe.</p>
+            ";
+        }
+
         $subject = "Cywise - Résultats de ton audit de sécurité";
 
         $beforeCta = "
@@ -90,6 +116,7 @@ class EndVulnsScanListener extends AbstractListener
               {$msgHigh}
               {$msgMedium}
               {$msgLow}
+              {$msgLeaks}
             </ul>
             <p>Je te propose d'effectuer les correctifs suivants :</p>
             {$answer}

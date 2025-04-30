@@ -87,4 +87,10 @@ return [
         'api' => env('SENDGRID_API'),
         'api_key' => env('SENDGRID_API_KEY'),
     ],
+    'josianne' => [
+        'host' => env('JOSIANNE_HOST'),
+        'username' => env('JOSIANNE_USERNAME'),
+        'password' => env('JOSIANNE_PASSWORD'),
+        'database' => env('JOSIANNE_DATABASE'),
+    ],
 ];
