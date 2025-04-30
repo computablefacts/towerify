@@ -41,7 +41,7 @@ class Cleanup implements ShouldQueue
         Log::debug('Cleanup completed');
 
         // When the list of cached events "overflow" for a given (server, rule), remove the oldest events
-        $threshold = 100;
+        $threshold = 1000;
 
         $overflowingEvents = DB::table('ynh_osquery_latest_events')
             ->select('ynh_server_id', 'server_name', 'event_name', DB::raw('COUNT(*) as event_count'))
