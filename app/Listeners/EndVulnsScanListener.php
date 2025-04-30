@@ -43,7 +43,7 @@ class EndVulnsScanListener extends AbstractListener
             return;
         }
 
-        $output = JosianneClient::executeQuery("SELECT DISTINCT login_email AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website FROM default.dumps WHERE login_domain = '{$assets->first()->domain}' ORDER BY email ASC");
+        $output = JosianneClient::executeQuery("SELECT DISTINCT login_email AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website FROM default.dumps WHERE login_domain = '{$assets->first()->tld}' ORDER BY email ASC");
         $leaks = collect(explode("\n", $output))
             ->filter(fn(string $line) => !empty($line) && $line !== 'ok')
             ->map(function (string $line) {
@@ -54,7 +54,9 @@ class EndVulnsScanListener extends AbstractListener
                 ];
             })
             ->values();
-        $msgLeaks = $leaks->isNotEmpty() ? "<li><b>{$leaks->count()}</b> identifiants compromis appartenant au domaine {$assets->first()->domain}.</li>" : "";
+        $msgLeaks = $leaks->isNotEmpty() ? "<li><b>{$leaks->count()}</b> identifiants compromis appartenant au domaine {$assets->first()->tld}.</li>" : "";
+
+        unset($output);
 
         $onboarding = route('public.cywise.onboarding', ['hash' => $trial->hash, 'step' => 5]);
         $alerts = $assets->flatMap(fn(Asset $asset) => $asset->alerts()->get())->filter(fn(Alert $alert) => $alert->is_hidden === 0);
