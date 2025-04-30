@@ -11,6 +11,16 @@ use Illuminate\Support\Str;
 
 class ApiUtils
 {
+    public function translate(string $text, string $lang = 'fr', string $prompt = ''): array
+    {
+        return $this->post('/translate', [
+            'model_name' => 'default',
+            'prompt' => $prompt,
+            'text' => $text,
+            'lang' => $lang,
+        ]);
+    }
+
     public function whisper(string $url, string $lang = 'fr')
     {
         return $this->post('/api/whisper', [

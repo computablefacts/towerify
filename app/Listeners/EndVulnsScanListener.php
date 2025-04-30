@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\EndVulnsScan;
+use App\Helpers\ApiUtilsFacade as ApiUtils2;
 use App\Helpers\JosianneClient;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
 use App\Http\Controllers\AssetController;
@@ -68,6 +69,7 @@ class EndVulnsScanListener extends AbstractListener
         $answer = $alertsHigh->concat($alertsMedium)
             ->concat($alertsLow)
             ->map(function (Alert $alert) {
+
                 if ($alert->level === 'High') {
                     $level = "(criticité haute)";
                 } elseif ($alert->level === 'Medium') {
@@ -82,12 +84,20 @@ class EndVulnsScanListener extends AbstractListener
                 } else {
                     $cve = "<p><b>Note.</b> Cette vulnérabilité a pour identifiant <a href=\"https://nvd.nist.gov/vuln/detail/{$alert->cve_id}\">{$alert->cve_id}</a>.</p>";
                 }
+
+                $result = ApiUtils2::translate($alert->vulnerability);
+
+                if ($result ['error'] !== false) {
+                    $vulnerability = $alert->vulnerability;
+                } else {
+                    $vulnerability = $result ['response'];
+                }
                 return "
                     <h3>{$alert->title} {$level}</h3>
                     <p><b>Actif concerné.</b> L'actif concerné est {$alert->asset()?->asset} pointant vers le serveur 
                     {$alert->port()?->ip}. Le port {$alert->port()?->port} de ce serveur est ouvert et expose un service 
                     {$alert->port()?->service} ({$alert->port()?->product}).</p>
-                    <p><b>Description détaillée</b>. {$alert->vulnerability}</p>
+                    <p><b>Description détaillée</b>. {$vulnerability}</p>
                     {$cve}
                 ";
             })->join("");
