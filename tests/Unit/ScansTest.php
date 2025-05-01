@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\AdversaryMeter;
+namespace Tests\Unit;
 
 use App\Enums\AssetTypesEnum;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;

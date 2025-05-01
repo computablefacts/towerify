@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\CyberBuddy;
+namespace Tests\Unit;
 
 use App\Http\Controllers\CyberBuddyController;
 use Tests\TestCaseNoDb;
