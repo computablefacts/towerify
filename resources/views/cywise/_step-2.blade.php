@@ -17,8 +17,9 @@
 @include('cywise._loader', [ 'title' => 'La découverte de vos sous-domaines est en cours...', 'subtitle' => 'Compter environ 60 secondes' ])
 <form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 3 ]) }}" method="post" class="hidden">
   @csrf
-  <p>Super, je vois que nous avons trouvé plusieurs sous-domaines associés à votre domaine. Décochez ceux que vous
-    ne souhaitez pas inclure dans l'audit.</p>
+  <p class="msg">
+    <!-- FILLED DYNAMICALLY -->
+  </p>
   <p>Ne vous inquiétez pas, <b>l'audit est non intrusif et sans impact sur vos serveurs.</b></p>
   <div class="list">
     <!-- FILLED DYNAMICALLY -->
@@ -88,6 +89,16 @@
     return response.json();
   })
   .then(domains => {
+
+    // Set the message
+    const elMessage = document.querySelector('.msg');
+    if (domains.length === 0) {
+      elMessage.innerText = "Aïe ! Je n'ai trouvé aucun sous-domaine associé à votre domaine. Revenez à l'étape précédente pour essayer avec un autre de vos domaines.";
+    } else if (domains.length === 1) {
+      elMessage.innerText = "Super, je vois que nous avons trouvé un sous-domaine associé à votre domaine.";
+    } else {
+      elMessage.innerText = "Super, je vois que nous avons trouvé plusieurs sous-domaines associés à votre domaine. Décochez ceux que vous ne souhaitez pas inclure dans l'audit.";
+    }
 
     // Set the list of domains
     const elDomains = document.querySelector('.list');
