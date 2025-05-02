@@ -8,6 +8,8 @@ use App\Enums\HoneypotStatusesEnum;
 use App\Mail\HoneypotRequested;
 use App\Models\Honeypot;
 use App\Models\Invitation;
+use App\Models\Role;
+use App\Models\Tenant;
 use App\Models\YnhTrial;
 use App\User;
 use Illuminate\Http\Request;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Konekt\User\Models\InvitationProxy;
+use Konekt\User\Models\UserType;
 
 class CywiseController extends Controller
 {
@@ -77,12 +80,24 @@ class CywiseController extends Controller
             /** @var User $user */
             $user = User::where('email', $trial->email)->first();
             if (!$user) {
+
                 /** @var Invitation $invitation */
                 $invitation = Invitation::where('email', $trial->email)->first();
+
                 if (!$invitation) {
                     $invitation = InvitationProxy::createInvitation($trial->email, "J. Doe");
                 }
-                $user = $invitation->createUser(['password' => Str::random(64)]);
+
+                /** @var Tenant $tenant */
+                $tenant = Tenant::create(['name' => Str::random()]);
+                $user = $invitation->createUser([
+                    'password' => Str::random(64),
+                    'tenant_id' => $tenant->id,
+                    'type' => UserType::CLIENT(),
+                    'terms_accepted' => true,
+                ]);
+
+                $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
             }
             if (!$trial->created_by) {
                 $trial->created_by = $user->id;
