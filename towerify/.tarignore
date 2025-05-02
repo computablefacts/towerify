@@ -5,3 +5,5 @@ storage/app/public/*
 performa
 node_modules
 ./vendor/*
+.env
+.env.*
