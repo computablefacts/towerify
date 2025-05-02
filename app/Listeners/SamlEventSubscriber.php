@@ -3,9 +3,11 @@
 namespace App\Listeners;
 
 use App\Models\Invitation;
+use App\Models\Role;
 use App\Models\Saml2Tenant;
 use App\User;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -272,8 +274,59 @@ class SamlEventSubscriber
             abort(401, 'Authentication failed.' . ($debug ? ' User already exist but with different IDs.' : ''));
         }
 
-        // TODO: sync roles with those from SAML2 claims
+        $this->syncUserRoles($user);
 
         return $user;
+    }
+
+    /**
+     *
+     * Default roles and roles to synchronize between IdP and Cywise are defined
+     * in saml2_tenants.metadata JSON settings. For example:
+     *  "roles": {
+     *      "default": ["role1", "role2"],
+     *      "idp_roles": ["user", "admin"],
+     *      "user_to_cywise": ["cywise_user"],
+     *      "admin_to_cywise": ["cywise_admin", "cywise_admin2"]
+     *   }
+     *
+     * @param User $user
+     * @return void
+     */
+    private function syncUserRoles(User $user): void
+    {
+        // Get default roles from settings
+        $newRoles = Arr::wrap($this->saml2Tenant->config('roles.default', []));
+        Log::debug('[SAML2 Authentication] Default roles = ', $newRoles);
+        Log::debug('[SAML2 Authentication] SAML roles = ', $this->saml2UserRoles);
+
+        // Get link between IdP roles and cywise roles
+        // Add Cywise roles based on IdP roles the user has
+        $idpRoles = Arr::wrap($this->saml2Tenant->config('roles.idp_roles', []));
+        Log::debug('[SAML2 Authentication] IdP roles settings = ', $idpRoles);
+        foreach ($idpRoles as $idpRole) {
+            if (in_array($idpRole, $this->saml2UserRoles)) {
+                $cywiseRoles = Arr::wrap($this->saml2Tenant->config('roles.' . $idpRole . '_to_cywise', []));
+                Log::debug('[SAML2 Authentication] Cywise roles for ' . $idpRole . ' = ', $cywiseRoles);
+                $newRoles = array_merge($newRoles, $cywiseRoles);
+            }
+        }
+        Log::debug('[SAML2 Authentication] New roles = ', $newRoles);
+
+        $userRoles = collect($newRoles)->map(function ($role) {
+            try {
+                $dbRole = Role::query()->where('name', '=', constant($role))->first();
+                return $dbRole ? $dbRole->id : 'unknown';
+            } catch (\Error) {
+                return 'unknown';
+            }
+        })->filter(function ($role) {
+            return $role <> 'unknown';
+        })->toArray();
+        Log::debug('[SAML2 Authentication] User roles', $userRoles);
+
+        $changes = $user->roles()->sync($userRoles);
+
+        Log::debug('[SAML2 Authentication] User roles updated', $changes);
     }
 }
