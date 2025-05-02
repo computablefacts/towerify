@@ -188,7 +188,7 @@ class EndVulnsScanListener extends AbstractListener
                 ]
             ]],
             "from" => [
-                "email" => config('towerify.admin.email'),
+                "email" => Str::replace('computablefacts.com', 'cywise.io', config('towerify.admin.email')),
             ],
             "template_id" => "d-a7f35a5a052e4ac4b127d6f12034331d"
         ]);
