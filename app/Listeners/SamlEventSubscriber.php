@@ -221,13 +221,13 @@ class SamlEventSubscriber
 
     private function createOrUpdateUser(): User
     {
+        $debug = config('app.debug');
+
         $tenantId = $this->saml2Tenant->getTenantId(); // Cywise Tenant ID
         $customerId = $this->saml2Tenant->getCustomerId();
 
         $user = User::query()
             ->where('email', '=', $this->saml2UserEmail)
-            ->where('tenant_id', '=', $tenantId)
-            ->where('customer_id', '=', $customerId)
             ->first();
 
         if (!$user) {
@@ -244,7 +244,7 @@ class SamlEventSubscriber
                 'tenant_id' => $tenantId,
                 'customer_id' => $customerId,
             ]);
-        } else {
+        } elseif ($user && $tenantId == $user->tenant_id && $customerId == $user->customer_id) {
             Log::info('[SAML2 Authentication] User already exist, we update attributes');
 
             $user->name = $this->saml2UserName;
@@ -253,6 +253,15 @@ class SamlEventSubscriber
                 $user->password = Str::random(64);
             }
             $user->save();
+        } else {
+            Log::error('[SAML2 Authentication] User already exist but with different IDs', [
+                'saml_tenant_id' => $tenantId,
+                'saml_customer_id' => $customerId,
+                'user_tenant_id' => $user->tenant_id,
+                'user_customer_id' => $user->customer_id,
+            ]);
+            Log::error('[SAML2 Authentication] Failed: User email not found.');
+            abort(401, 'Authentication failed.' . ($debug ? ' User already exist but with different IDs.' : ''));
         }
 
         // TODO: sync roles with those from SAML2 claims
