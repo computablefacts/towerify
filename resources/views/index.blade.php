@@ -86,5 +86,8 @@
   @if($tab === 'ai_writer')
   @include('modules.cyber-buddy.ai-writer')
   @endif
+  @if($tab === 'timeline')
+  <x-timeline/>
+  @endif
 </div>
 @endsection
