@@ -52,7 +52,9 @@ class TimelineItem extends Model
                 'flags' => max($flags, 0),
             ]);
             foreach ($attributes as $attribute => $value) {
-                $item->addAttribute($attribute, $value);
+                if ($attribute && $value) {
+                    $item->addAttribute($attribute, $value);
+                }
             }
             return $item;
         });
