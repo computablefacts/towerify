@@ -27,6 +27,10 @@ class User extends \Konekt\AppShell\Models\User
 {
     use HasApiTokens, Billable;
 
+    protected $fillable = [
+        'name', 'email', 'password', 'type', 'is_active', 'customer_id', 'tenant_id'
+    ];
+
     public function tenant(): ?Tenant
     {
         if ($this->tenant_id) {

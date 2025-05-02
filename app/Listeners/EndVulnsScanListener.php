@@ -116,7 +116,7 @@ class EndVulnsScanListener extends AbstractListener
             <ul>
               {$website}
             </ul>
-            <p>Si aucune action n'a encore été entreprise, veuillez demander aux utilisateurs concernés de modifier leur mot de passe.</p>
+            <p>Si aucune action n'a encore été entreprise, demande aux utilisateurs concernés de modifier leur mot de passe.</p>
             ";
         }
 
@@ -150,7 +150,7 @@ class EndVulnsScanListener extends AbstractListener
             <p>CyberBuddy</p>
         ";
 
-        self::sendEmail($to, $subject, "Bienvenu !", $beforeCta, $ctaLink, $ctaName, $afterCta);
+        self::sendEmail($to, $subject, "Bienvenue !", $beforeCta, $ctaLink, $ctaName, $afterCta);
 
         $controller = new AssetController();
         $assets->each(fn(Asset $asset) => $controller->assetMonitoringEnds($asset));
@@ -188,7 +188,7 @@ class EndVulnsScanListener extends AbstractListener
                 ]
             ]],
             "from" => [
-                "email" => config('towerify.admin.email'),
+                "email" => Str::replace('computablefacts.com', 'cywise.io', config('towerify.admin.email')),
             ],
             "template_id" => "d-a7f35a5a052e4ac4b127d6f12034331d"
         ]);

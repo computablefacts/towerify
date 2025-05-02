@@ -6,6 +6,7 @@ use App\Events\SendAuditReport;
 use App\Mail\AuditReport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class SendAuditReportListener extends AbstractListener
 {
@@ -25,7 +26,8 @@ class SendAuditReportListener extends AbstractListener
         $report = AuditReport::create();
 
         if (!$report['is_empty']) {
-            Mail::to($user->email)->bcc(config('towerify.admin.email'))->send($report['report']);
+            $email = Str::replace('computablefacts.com', 'cywise.io', config('towerify.admin.email'));
+            Mail::to($user->email)->bcc($email)->send($report['report']);
         }
     }
 }
