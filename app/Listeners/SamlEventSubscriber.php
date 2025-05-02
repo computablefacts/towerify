@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Konekt\User\Models\InvitationProxy;
+use Konekt\User\Models\UserType;
 use Slides\Saml2\Events\SignedIn;
 use Slides\Saml2\Events\SignedOut;
 use Slides\Saml2\Saml2User;
@@ -237,12 +238,19 @@ class SamlEventSubscriber
                 ->where('email', $this->saml2UserEmail)
                 ->first();
             if (!$invitation) {
-                $invitation = InvitationProxy::createInvitation($this->saml2UserEmail, $this->saml2UserName);
+                $invitation = InvitationProxy::createInvitation(
+                    $this->saml2UserEmail,
+                    $this->saml2UserName,
+                    UserType::CLIENT(),
+                    [
+                        'tenant_id' => $tenantId,
+                        'customer_id' => $customerId,
+                        'terms_accepted' => true,
+                    ]
+                );
             }
             $user = $invitation->createUser([
                 'password' => Str::random(64),
-                'tenant_id' => $tenantId,
-                'customer_id' => $customerId,
             ]);
         } elseif ($user && $tenantId == $user->tenant_id && $customerId == $user->customer_id) {
             Log::info('[SAML2 Authentication] User already exist, we update attributes');
