@@ -362,7 +362,7 @@ class HoneypotController extends Controller
                         'provider' => $honeypot->cloud_provider,
                         'query' => "UPDATE am_honeypots SET status = 'setup_complete' WHERE id = {$honeypot->id};",
                     ];
-                    Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested($user, $subject, $body));
+                    Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested($user->email, $user->name, $subject, $body));
                 }
             });
     }

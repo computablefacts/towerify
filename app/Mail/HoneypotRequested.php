@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -11,7 +10,8 @@ class HoneypotRequested extends Mailable
 {
     use Queueable, SerializesModels;
 
-    private User $user;
+    private string $email;
+    private string $name;
     private string $emailSubject;
     private array $emailBody;
 
@@ -20,9 +20,10 @@ class HoneypotRequested extends Mailable
      *
      * @return void
      */
-    public function __construct(User $user, string $subject, array $body)
+    public function __construct(string $email, string $name, string $subject, array $body)
     {
-        $this->user = $user;
+        $this->email = $email;
+        $this->name = $name;
         $this->emailSubject = $subject;
         $this->emailBody = $body;
     }
@@ -35,7 +36,7 @@ class HoneypotRequested extends Mailable
     public function build()
     {
         return $this
-            ->from($this->user->email, $this->user->name)
+            ->from($this->email, $this->name)
             ->subject("Cywise : {$this->emailSubject}")
             ->markdown('modules.adversary-meter.email.honeypot-requested', [
                 'params' => $this->emailBody
