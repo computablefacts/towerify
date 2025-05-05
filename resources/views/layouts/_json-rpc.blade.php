@@ -111,5 +111,13 @@
       {server_id: serverId, user_id: userId, permission: permission});
   }
 
+  function createNoteApiCall(note, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('notes@create', {note: note}, onSuccess);
+  }
+
+  function deleteNoteApiCall(noteId, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('notes@delete', {note_id: noteId}, onSuccess);
+  }
+
 </script>
 @endonce

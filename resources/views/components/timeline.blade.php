@@ -269,6 +269,27 @@
   </div>
   <div class="card mb-3">
     <div class="card-body">
+      <div id="assets"></div>
+    </div>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body">
+      <ol class="timeline">
+        <li class="timeline-item">
+          <span class="timeline-item-icon | filled-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/>
+              <path d="M13.5 6.5l4 4"/>
+            </svg>
+          </span>
+          <div class="new-comment">
+            <input type="text" placeholder="Saisir une note... (entrée pour valider)"/>
+          </div>
+        </li>
+      </ol>
       @foreach($messages as $date => $times)
       @include('cywise._timeline-separator', ['date' => $date])
       <ol class="timeline">
@@ -280,20 +301,6 @@
       </ol>
       @endforeach
       <!--
-      <ol class="timeline">
-        <li class="timeline-item">
-          <span class="timeline-item-icon | filled-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" d="M0 0h24v24H0z"/>
-              <path fill="currentColor"
-                    d="M6.455 19L2 22.5V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6.455zM7 10v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z"/>
-            </svg>
-          </span>
-          <div class="new-comment">
-            <input type="text" placeholder="Ask CyberBuddy..."/>
-          </div>
-        </li>
-      </ol>
       <div style="display: flex; align-items: center; gap: 15px; margin: 15px 0;">
         <hr style="flex: 1; margin: 0;">
         <div>2 mai 2025</div>
@@ -376,6 +383,75 @@
 @once
 <script>
 
+  /* MISC. */
+  const today = (() => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  })();
+
+  const todaySeparatorHtmlTemplate = '{!! $todaySeparator !!}';
+
+  /* FILTERS */
+  const elAssets = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('assets'),
+    asset => asset.name, asset => `${asset.high} high - ${asset.medium} medium - ${asset.low} low`, null,
+    query => query);
+  elAssets.items = @json($assets);
+  elAssets.onSelectionChange(item => {
+    const url = new URL(window.location);
+    if (item) {
+      url.searchParams.set('asset_id', item.id);
+    } else {
+      url.searchParams.set('asset_id', 0);
+    }
+    window.location.href = url.toString();
+  });
+  elAssets.defaultText = "{{ __('Select an asset...') }}";
+
+  if ('{{ $assetId }}' > 0) {
+    elAssets.selectedItem = elAssets.items.find(asset => asset.id == '{{ $assetId }}');
+  }
+
+  /* NOTES */
+  const elInputField = document.querySelector('.new-comment input');
+  elInputField.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (elInputField.value.trim() !== '') {
+        createNoteApiCall(elInputField.value.trim(), (response) => {
+          elInputField.value = null;
+          const elNote = (new DOMParser()).parseFromString(response.html, 'text/html');
+          let elTodaySeparator = document.querySelector(`#sid-${today}`);
+          if (elTodaySeparator) {
+            const elOl = elTodaySeparator.nextElementSibling;
+            elOl.insertBefore(elNote.body.firstChild, elOl.firstElementChild);
+          } else {
+            elTodaySeparator = (new DOMParser()).parseFromString(todaySeparatorHtmlTemplate, 'text/html');
+            const elTimelines = document.querySelectorAll(`.timeline`);
+            if (elTimelines.length >= 1) {
+
+              // Insert OL
+              const elOl = document.createElement('ol')
+              elOl.classList.add('timeline');
+              elTimelines[0].parentNode.insertBefore(elOl, elTimelines[0].nextElementSibling);
+
+              // Insert separator
+              elTimelines[0].parentNode.insertBefore(elTodaySeparator.body.firstChild,
+                elTimelines[0].nextElementSibling);
+
+              // Fill OL with note
+              elOl.appendChild(elNote.body.firstChild);
+            }
+          }
+          return response;
+        });
+      }
+    }
+  });
+
+  /* API CALLS */
   const apiCall = (method, url, params = {}, body = null) => {
 
     let fullUrl = "{{ app_url() }}/api" + url;
@@ -394,8 +470,8 @@
     };
 
     return fetch(fullUrl, options).catch(error => {
-      toaster.toast(`Error: ${error}`);
-      console.error(`Error: ${error}`);
+      toaster.toastError(error);
+      console.error(error);
     });
   }
 
@@ -429,6 +505,16 @@
       } else {
         toaster.toastError('An error occurred.')
       }
+    });
+  }
+
+  const deleteNote = (noteId) => {
+    deleteNoteApiCall(noteId, (response) => {
+      const elNote = document.querySelector(`#nid-${noteId}`);
+      if (elNote) {
+        elNote.remove();
+      }
+      return response;
     });
   }
 
