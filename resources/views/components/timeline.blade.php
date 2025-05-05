@@ -13,7 +13,7 @@
 
   .timeline {
     width: 85%;
-    max-width: 700px;
+    max-width: 800px;
     margin-left: 100px;
     margin-right: auto;
     display: flex;
@@ -157,7 +157,7 @@
     box-shadow: 0 4px 4px 0 var(--c-grey-100);
     border-radius: 6px;
     padding: 16px;
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 
   .button {
@@ -373,3 +373,64 @@
     </div>
   </div>
 </div>
+@once
+<script>
+
+  const apiCall = (method, url, params = {}, body = null) => {
+
+    let fullUrl = "{{ app_url() }}/api" + url;
+
+    if (method.toUpperCase() === "GET" && Object.keys(params).length > 0) {
+      const queryParams = new URLSearchParams(params).toString();
+      fullUrl += "?" + queryParams;
+    }
+
+    const headers = {
+      'Content-Type': 'application/json', 'Authorization': 'Bearer {{ Auth::user()->sentinelApiToken() }}',
+    };
+
+    const options = {
+      method: method, headers: headers, body: body ? JSON.stringify(body) : null,
+    };
+
+    return fetch(fullUrl, options).catch(error => {
+      toaster.toast(`Error: ${error}`);
+      console.error(`Error: ${error}`);
+    });
+  }
+
+  const startMonitoringAsset = (assetId) => {
+    apiCall('POST', `/inventory/asset/${assetId}/monitoring/begin`)
+    .then((response) => {
+      if (response.ok) {
+        toaster.toastSuccess('The monitoring started.');
+      } else {
+        toaster.toastError('An error occurred.')
+      }
+    });
+  }
+
+  const stopMonitoringAsset = (assetId) => {
+    apiCall('POST', `/inventory/asset/${assetId}/monitoring/end`)
+    .then((response) => {
+      if (response.ok) {
+        toaster.toastSuccess('The monitoring stopped.');
+      } else {
+        toaster.toastError('An error occurred.')
+      }
+    });
+  }
+
+  const deleteAsset = (assetId) => {
+    apiCall('DELETE', `/adversary/assets/${assetId}`)
+    .then((response) => {
+      if (response.ok) {
+        toaster.toastSuccess('The asset will be deleted soon.');
+      } else {
+        toaster.toastError('An error occurred.')
+      }
+    });
+  }
+
+</script>
+@endonce

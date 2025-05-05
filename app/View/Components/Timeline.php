@@ -38,7 +38,9 @@ class Timeline extends Component
                     'html' => \Illuminate\Support\Facades\View::make('cywise._timeline-item-asset', [
                         'date' => $date,
                         'time' => $time,
-                        'title' => "<a href='#'>{$asset->createdBy()->name}</a> a ajouté l'actif <a href='#'>{$asset->asset}</a>",
+                        'title' => "<a id='aid-{$asset->id}' href='#'>{$asset->createdBy()->name}</a> a ajouté l'actif <a href='#'>{$asset->asset}</a>",
+                        'assetId' => $asset->id,
+                        'isMonitored' => $asset->is_monitored,
                     ])->render(),
                 ];
             })
@@ -71,7 +73,7 @@ class Timeline extends Component
                             $level = "(criticité basse)";
                         }
 
-                        $title = empty($alert->cve_id) ? "<a href='#'>{$alert->asset()?->asset}</a> - {$alert->title} $level" : "<a href='#'>{$alert->asset()?->asset}</a> - {$alert->cve_id} / {$alert->title} $level";
+                        $title = empty($alert->cve_id) ? "<a href='aid-{$alert->asset()?->id}'>{$alert->asset()?->asset}</a> - {$alert->title} $level" : "<a href='#'>{$alert->asset()?->asset}</a> - {$alert->cve_id} / {$alert->title} $level";
                         $asset = "<p><b>Actif.</b> L'actif concerné est {$alert->asset()?->asset} pointant vers le serveur {$alert->port()?->ip}. Le port {$alert->port()?->port} de ce serveur est ouvert et expose un service {$alert->port()?->service} ({$alert->port()?->product}).</p>";
                         $vulnerability = "<p><b>Problème</b>. {$alert->vulnerability}</p>";
                         $remediation = "<p><b>Solution</b>. {$alert->remediation}</p>";
@@ -97,6 +99,7 @@ class Timeline extends Component
                                 'remediation' => $remediation,
                                 'cve' => $cve,
                                 'tags' => $tags,
+                                'assetId' => $alert->asset()?->id,
                             ])->render(),
                         ];
                     })
