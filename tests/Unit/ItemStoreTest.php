@@ -2,8 +2,11 @@
 
 namespace Tests\Unit;
 
+use App\Hashing\TwHasher;
 use App\Models\TimelineItem;
+use App\User;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ItemStoreTest extends TestCase
@@ -244,5 +247,116 @@ class ItemStoreTest extends TestCase
         ]);
 
         $this->assertEquals(1, $items->count());
+    }
+
+    public function testSnooze()
+    {
+        $timestamp = Carbon::now();
+        $item = TimelineItem::createItem($this->user->id, 'snoozed_1', $timestamp, 0, [
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ]);
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($timestamp->utc()->timestamp), $item->timestamp);
+        $this->assertFalse($item->isSnoozed());
+
+        // Snooze the event
+        $newTimestamp = $timestamp->copy()->addDays(3);
+        $newItem = $item->snooze($newTimestamp);
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($timestamp->utc()->timestamp), $item->timestamp);
+        $this->assertTrue($item->isSnoozed());
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($newTimestamp->utc()->timestamp), $newItem->timestamp);
+        $this->assertFalse($newItem->isSnoozed());
+
+        // Ensure the snoozed event is properly set
+        $items = TimelineItem::fetchItems($this->user->id, 'snoozed_1', $newTimestamp);
+
+        $this->assertEquals(1, $items->count());
+        $this->assertEquals([
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ], $items->first()->attributes());
+    }
+
+    public function testReschedule()
+    {
+        $timestamp = Carbon::now();
+        $item = TimelineItem::createItem($this->user->id, 'rescheduled_1', $timestamp, 0, [
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ]);
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($timestamp->utc()->timestamp), $item->timestamp);
+        $this->assertFalse($item->isRescheduled());
+
+        // Reschedule the event
+        $newTimestamp = $timestamp->copy()->addDays(3);
+        $newItem = $item->reschedule($newTimestamp);
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($timestamp->utc()->timestamp), $item->timestamp);
+        $this->assertTrue($item->isRescheduled());
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($newTimestamp->utc()->timestamp), $newItem->timestamp);
+        $this->assertFalse($newItem->isRescheduled());
+
+        // Ensure the rescheduled event is properly set
+        $items = TimelineItem::fetchItems($this->user->id, 'rescheduled_1', $newTimestamp);
+
+        $this->assertEquals(1, $items->count());
+        $this->assertEquals([
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ], $items->first()->attributes());
+    }
+
+    public function testShare()
+    {
+        $timestamp = Carbon::now();
+        $item = TimelineItem::createItem($this->user->id, 'shared_1', $timestamp, 0, [
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ]);
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($timestamp->utc()->timestamp), $item->timestamp);
+        $this->assertFalse($item->isShared());
+
+        // Share the event
+        $user = User::updateOrCreate([
+            'email' => 'j.doe@example.com',
+        ], [
+            'name' => 'J. Doe',
+            'email' => 'j.doe@example.com',
+            'password' => TwHasher::hash(Str::random()),
+        ]);
+        $newItem = $item->share($user->id);
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($timestamp->utc()->timestamp), $item->timestamp);
+        $this->assertTrue($item->isShared());
+
+        $this->assertEquals(Carbon::createFromTimestampUTC($timestamp->utc()->timestamp), $newItem->timestamp);
+        $this->assertFalse($newItem->isShared());
+
+        // Ensure the shared event is properly set
+        $items = TimelineItem::fetchItems($user->id, 'shared_1');
+
+        $this->assertEquals(1, $items->count());
+        $this->assertEquals([
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ], $items->first()->attributes());
     }
 }
