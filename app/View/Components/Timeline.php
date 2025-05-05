@@ -80,7 +80,7 @@ class Timeline extends Component
                                 ->tags()
                                 ->get()
                                 ->map(fn(PortTag $tag) => Str::lower($tag->tag))
-                                ->join("</span>&nbsp;<span class='lozenge new'>") . "</span><div>";
+                                ->join("</span>&nbsp;<span class='lozenge new'>") . "</span></div>";
 
                         return [
                             'timestamp' => $alert->updated_at->format('Y-m-d H:i:s'),
