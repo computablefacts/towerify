@@ -282,6 +282,24 @@ class ItemStoreTest extends TestCase
             'title' => 'Google',
             'crawled' => true,
         ], $items->first()->attributes());
+
+        // Ensure deleting the root event does not delete the snoozed one
+        $item->deleteItem();
+        $item->save();
+
+        $items = TimelineItem::fetchItems($this->user->id, 'snoozed_1', null, $timestamp, 0);
+
+        $this->assertEquals(0, $items->count());
+
+        $items = TimelineItem::fetchItems($this->user->id, 'snoozed_1', $newTimestamp, null, 0);
+
+        $this->assertEquals(1, $items->count());
+        $this->assertEquals([
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ], $items->first()->attributes());
     }
 
     public function testReschedule()
@@ -309,6 +327,24 @@ class ItemStoreTest extends TestCase
 
         // Ensure the rescheduled event is properly set
         $items = TimelineItem::fetchItems($this->user->id, 'rescheduled_1', $newTimestamp);
+
+        $this->assertEquals(1, $items->count());
+        $this->assertEquals([
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ], $items->first()->attributes());
+
+        // Ensure deleting the root event does not delete the rescheduled one
+        $item->deleteItem();
+        $item->save();
+
+        $items = TimelineItem::fetchItems($this->user->id, 'rescheduled_1', null, $timestamp, 0);
+
+        $this->assertEquals(0, $items->count());
+
+        $items = TimelineItem::fetchItems($this->user->id, 'rescheduled_1', $newTimestamp, null, 0);
 
         $this->assertEquals(1, $items->count());
         $this->assertEquals([
@@ -350,6 +386,24 @@ class ItemStoreTest extends TestCase
 
         // Ensure the shared event is properly set
         $items = TimelineItem::fetchItems($user->id, 'shared_1');
+
+        $this->assertEquals(1, $items->count());
+        $this->assertEquals([
+            'id' => 1234567890,
+            'url' => 'https://www.google.com',
+            'title' => 'Google',
+            'crawled' => true,
+        ], $items->first()->attributes());
+
+        // Ensure deleting the root event does not delete the shared one
+        $item->deleteItem();
+        $item->save();
+
+        $items = TimelineItem::fetchItems($this->user->id, 'shared_1', $timestamp, null, 0);
+
+        $this->assertEquals(0, $items->count());
+
+        $items = TimelineItem::fetchItems($user->id, 'shared_1', $timestamp, null, 0);
 
         $this->assertEquals(1, $items->count());
         $this->assertEquals([
