@@ -14,8 +14,8 @@ class AtLeastOneDigit implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (ctype_alpha($value)) {
-            $fail('The :attribute must contain at least one digit.');
+        if (!ctype_digit($value)) {
+            $fail(__('validation.password.numbers'));
         }
     }
 }

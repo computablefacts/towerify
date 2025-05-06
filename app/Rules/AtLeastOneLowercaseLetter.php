@@ -15,7 +15,7 @@ class AtLeastOneLowercaseLetter implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (strtoupper($value) === $value) {
-            $fail('The :attribute must contain at least one lowercase letter.');
+            $fail(__('validation.password.at_least_one_lowercase_letter'));
         }
     }
 }

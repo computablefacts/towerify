@@ -143,13 +143,17 @@ class AppServiceProvider extends ServiceProvider
             return new TwHasher();
         });
 
-        Password::defaults(Password::min(12)->max(100)->rules([
-            new OnlyLettersAndDigits,
-            new AtLeastOneLetter,
-            new AtLeastOneDigit,
-            new AtLeastOneUppercaseLetter,
-            new AtLeastOneLowercaseLetter,
-        ]));
+        Password::defaults(
+            Password::min(12)
+                ->max(100)
+                ->rules([
+                    new OnlyLettersAndDigits,
+                    new AtLeastOneLetter,
+                    new AtLeastOneDigit,
+                    new AtLeastOneUppercaseLetter,
+                    new AtLeastOneLowercaseLetter,
+                ])
+        );
 
         $this->app->concord->registerModel(\Konekt\Address\Contracts\Address::class, Address::class);
         $this->app->concord->registerModel(\Vanilo\Adjustments\Contracts\Adjustment::class, Adjustment::class);
