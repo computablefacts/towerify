@@ -14,7 +14,7 @@ class AtLeastOneLowercaseLetter implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (strtoupper($value) === $value) {
+        if (1 !== preg_match('/[a-z]/', $value)) {
             $fail(__('validation.password.at_least_one_lowercase_letter'));
         }
     }

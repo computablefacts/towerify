@@ -14,7 +14,7 @@ class AtLeastOneDigit implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!ctype_digit($value)) {
+        if (1 !== preg_match('/[0-9]/', $value)) {
             $fail(__('validation.password.numbers'));
         }
     }

@@ -14,7 +14,7 @@ class OnlyLettersAndDigits implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!ctype_alnum($value)) {
+        if (1 !== preg_match('/^[0-9a-z]+$/i', $value)) {
             $fail(__('validation.password.only_letters_and_digits'));
         }
     }
