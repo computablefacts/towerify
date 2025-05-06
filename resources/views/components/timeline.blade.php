@@ -269,7 +269,12 @@
   </div>
   <div class="card mb-3">
     <div class="card-body">
-      <div id="assets"></div>
+      <h6 class="card-title">{{ __('Filtrer la timeline par actif...') }}</h6>
+      <div class="row">
+        <div class="col">
+          <div id="assets"></div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="card mb-3">
@@ -396,8 +401,7 @@
 
   /* FILTERS */
   const elAssets = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('assets'),
-    asset => asset.name, asset => `${asset.high} high - ${asset.medium} medium - ${asset.low} low`, null,
-    query => query);
+    asset => asset.name, asset => `${asset.high} high - ${asset.medium} medium - ${asset.low} low`);
   elAssets.items = @json($assets);
   elAssets.onSelectionChange(item => {
     const url = new URL(window.location);
