@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+  .requirement_met {
+    color: green;
+  }
+
+  .requirement_not_met {
+    color: red;
+  }
+</style>
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-md-8">
@@ -54,6 +63,18 @@
                 <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
               </div>
             </div>
+            <div class="mb-3 row">
+              <label class="col-md-4 text-end">
+                {{ __('Password requirements') }}
+              </label>
+              <div class="col-md-6">
+                <ul>
+                  @foreach ($passwordRequirements as $rule => $definition)
+                    <li id="{{ $rule }}">{{ $definition['text'] }}</li>
+                  @endforeach
+                </ul>
+              </div>
+            </div>
             <div class="mb-3 row mb-0">
               <div class="col-md-6 offset-md-4">
                 <button type="submit" class="btn btn-primary">
@@ -67,4 +88,23 @@
     </div>
   </div>
 </div>
+<script>
+  const passwordField = document.getElementById("password");
+  let requirementElement = null;
+
+  passwordField.onkeyup = function () {
+    @foreach ($passwordRequirements as $rule => $definition)
+        @if(key_exists('condition', $definition))
+        requirementElement = document.getElementById("{{ $rule }}");
+    if ({!! $definition['condition'] !!}) {
+      requirementElement.classList.remove("requirement_not_met");
+      requirementElement.classList.add("requirement_met");
+    } else {
+      requirementElement.classList.remove("requirement_met");
+      requirementElement.classList.add("requirement_not_met");
+    }
+    @endif
+    @endforeach
+  }
+</script>
 @endsection
