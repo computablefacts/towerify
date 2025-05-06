@@ -9,6 +9,7 @@ use App\Helpers\OpenAi;
 use App\Http\Requests\ConverseRequest;
 use App\Models\Conversation;
 use App\Models\Prompt;
+use App\Models\TimelineItem;
 use App\Models\YnhServer;
 use App\User;
 use Carbon\Carbon;
@@ -93,12 +94,17 @@ class CyberBuddyNextGenController extends Controller
             $fnOpenPorts = AbstractLlmFunction::handle($user, $threadId, 'query_open_port_database', []);
             $openPorts = $fnOpenPorts->text();
 
+            $notes = TimelineItem::fetchItems($user->id, 'note', null, null, 0)
+                ->map(fn(TimelineItem $note) => "- {$note->timestamp->format('Y-m-d H:i:s')} : {$note->attributes()['content']}")
+                ->join("\n");
+
             // Load the prompt
             /** @var Prompt $prompt */
             $prompt = Prompt::where('name', 'default_assistant')->firstOrfail();
             $prompt->template = Str::replace('{ASSETS}', $assets, $prompt->template);
             $prompt->template = Str::replace('{OPEN_PORTS}', $openPorts, $prompt->template);
             $prompt->template = Str::replace('{VULNERABILITIES}', $vulnerabilities, $prompt->template);
+            $prompt->template = Str::replace('{NOTES}', $notes, $prompt->template);
 
             // Set a conversation-wide prompt
             $conversation->dom = json_encode(array_merge($conversation->thread(), [[
