@@ -15,7 +15,7 @@ class OnlyLettersAndDigits implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (!ctype_alnum($value)) {
-            $fail('The :attribute must contain only letters and digits.');
+            $fail(__('validation.password.only_letters_and_digits'));
         }
     }
 }

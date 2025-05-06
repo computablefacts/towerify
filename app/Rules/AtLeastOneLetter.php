@@ -15,7 +15,7 @@ class AtLeastOneLetter implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (ctype_digit($value)) {
-            $fail('The :attribute must contain at least one letter.');
+            $fail(__('validation.password.letters'));
         }
     }
 }
