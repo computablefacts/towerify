@@ -11,12 +11,6 @@
   cacheDirectory=".phpunit.cache"
   backupStaticProperties="false">
   <testsuites>
-    <testsuite name="AdversaryMeter">
-      <directory suffix="Test.php">./tests/AdversaryMeter</directory>
-    </testsuite>
-    <testsuite name="CyberBuddy">
-      <directory suffix="Test.php">./tests/CyberBuddy</directory>
-    </testsuite>
     <testsuite name="Feature">
       <directory suffix="Test.php">./tests/Feature</directory>
     </testsuite>

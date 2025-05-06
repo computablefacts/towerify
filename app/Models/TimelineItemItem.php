@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property integer id
@@ -27,4 +28,14 @@ class TimelineItemItem extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function from(): HasOne
+    {
+        return $this->hasOne(TimelineItem::class, 'id', 'from_item_id');
+    }
+
+    public function to(): HasOne
+    {
+        return $this->hasOne(TimelineItem::class, 'id', 'to_item_id');
+    }
 }

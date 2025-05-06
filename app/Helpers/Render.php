@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use Illuminate\Support\Facades\Blade;
 
+/** @deprecated */
 class Render
 {
     public static function stringToBlade(string $string, array $data = [])

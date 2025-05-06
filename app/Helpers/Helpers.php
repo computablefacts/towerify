@@ -129,7 +129,7 @@ if (!function_exists('app_sidebar')) {
     {
         if (Auth::check()) {
             return [
-                [
+                /* [
                     'section_name' => __('Home'),
                     'hidden' => !Auth::user()->canViewHome(),
                     'section_items' => [
@@ -171,7 +171,7 @@ if (!function_exists('app_sidebar')) {
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_SERVICE_PROVIDER_DELEGATION),
                         ],
                     ]
-                ], [
+                ], */ [
                     'section_name' => __('Agents'),
                     'hidden' => !Auth::user()->canViewAgents(),
                     'section_items' => [
@@ -187,7 +187,7 @@ if (!function_exists('app_sidebar')) {
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_SECURITY_RULES),
                         ],
                     ]
-                ], [
+                ], /* [
                     'section_name' => __('Honeypots'),
                     'hidden' => !Auth::user()->canViewHoneypots(),
                     'section_items' => [
@@ -208,7 +208,7 @@ if (!function_exists('app_sidebar')) {
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_IP_BLACKLIST),
                         ],
                     ],
-                ], [
+                ], */ [
                     'section_name' => __('ISSP'),
                     'hidden' => !Auth::user()->canViewIssp(),
                     'section_items' => [

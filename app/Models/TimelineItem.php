@@ -297,6 +297,11 @@ class TimelineItem extends Model
         return ($this->flags & self::FLAG_HIDDEN) > 0;
     }
 
+    public function isSnoozed(): bool
+    {
+        return $this->children(self::REF_SNOOZED)->isNotEmpty();
+    }
+
     public function snooze(Carbon $date): TimelineItem
     {
         return DB::transaction(function () use ($date) {
@@ -307,6 +312,11 @@ class TimelineItem extends Model
         });
     }
 
+    public function isRescheduled(): bool
+    {
+        return $this->children(self::REF_RESCHEDULED)->isNotEmpty();
+    }
+
     public function reschedule(Carbon $date): TimelineItem
     {
         return DB::transaction(function () use ($date) {
@@ -315,6 +325,11 @@ class TimelineItem extends Model
             $this->addRelation(self::REF_RESCHEDULED, $item);
             return $item;
         });
+    }
+
+    public function isShared(): bool
+    {
+        return $this->children(self::REF_SHARED)->isNotEmpty();
     }
 
     public function share(int $ownedBy, ?Carbon $date = null): TimelineItem
@@ -342,5 +357,25 @@ class TimelineItem extends Model
             ->where('from_item_id', $this->id)
             ->where('to_item_id', $item->id)
             ->delete();
+    }
+
+    private function parents(?string $type): \Illuminate\Support\Collection
+    {
+        $query = TimelineItemItem::where('to_item_id', $this->id);
+
+        if ($type) {
+            $query = $query->where('type', $type);
+        }
+        return $query->get()->map(fn(TimelineItemItem $itemItem) => $itemItem->from()->first());
+    }
+
+    private function children(?string $type): \Illuminate\Support\Collection
+    {
+        $query = TimelineItemItem::where('from_item_id', $this->id);
+
+        if ($type) {
+            $query = $query->where('type', $type);
+        }
+        return $query->get()->map(fn(TimelineItemItem $itemItem) => $itemItem->to()->first());
     }
 }

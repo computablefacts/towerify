@@ -25,7 +25,7 @@ class HomeController extends Controller
         $user = Auth::user();
         $servers_type = $request->input('servers_type', '');
         $limit = $request->input('limit', 20);
-        $tab = $request->input('tab', 'overview');
+        $tab = $request->input('tab', 'timeline');
 
         if ($user->hasRole(Role::CYBERBUDDY_ONLY)) {
             if (!in_array($tab, ['ama', 'ama2', 'sca', 'frameworks', 'ai_writer', 'conversations'])) {
