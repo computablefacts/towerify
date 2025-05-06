@@ -54,7 +54,7 @@ class RegisterController extends Controller
     public function showRegistrationForm()
     {
         return view('auth.register', [
-            'passwordRequirements' => (new PasswordRequirements(Password::defaults()))->getRequirements(), // Password::default()->appliedRules(),
+            'passwordRequirements' => (new PasswordRequirements(Password::defaults()))->getRequirements(),
         ]);
     }
 
