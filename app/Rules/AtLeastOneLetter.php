@@ -14,7 +14,7 @@ class AtLeastOneLetter implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (ctype_digit($value)) {
+        if (!ctype_alpha($value)) {
             $fail(__('validation.password.letters'));
         }
     }
