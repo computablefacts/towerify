@@ -96,7 +96,7 @@ class Timeline extends Component
                 ->tags()
                 ->get()
                 ->map(fn(PortTag $tag) => Str::lower($tag->tag))
-                ->join("</span>&nbsp;<span class='lozenge new'>") . "</span></div>";
+                ->join("</span>&nbsp;<span class='lozenge new' style='font-size: 0.8rem;'>") . "</span></div>";
 
         return \Illuminate\Support\Facades\View::make('cywise._timeline-item-vulnerability', [
             'date' => $date,
@@ -110,6 +110,9 @@ class Timeline extends Component
             'cve' => $cve,
             'tags' => $tags,
             'assetId' => $alert->asset()?->id,
+            'filterByUid' => $alert->uid,
+            'filterByType' => $alert->type,
+            'filterByTitle' => $alert->title,
         ])->render();
     }
 

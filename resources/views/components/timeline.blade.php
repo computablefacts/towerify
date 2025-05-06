@@ -286,7 +286,7 @@
             </svg>
           </span>
           <div class="new-comment">
-            <input type="text" placeholder="Saisir une note... (entrée pour valider)"/>
+            <input type="text" placeholder="Ajouter une note... (entrée pour valider)"/>
           </div>
         </li>
       </ol>
@@ -450,6 +450,19 @@
       }
     }
   });
+
+  /* VULNERABILITIES */
+  const hideByUid = (uid) => {
+    toggleVulnerabilityVisibilityApiCall(uid, null, null);
+  }
+
+  const hideByType = (type) => {
+    toggleVulnerabilityVisibilityApiCall(null, type, null);
+  }
+
+  const hideByTitle = (title) => {
+    toggleVulnerabilityVisibilityApiCall(null, null, title);
+  }
 
   /* API CALLS */
   const apiCall = (method, url, params = {}, body = null) => {
