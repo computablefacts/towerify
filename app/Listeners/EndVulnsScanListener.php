@@ -6,7 +6,6 @@ use App\Events\EndVulnsScan;
 use App\Helpers\ApiUtilsFacade as ApiUtils2;
 use App\Helpers\JosianneClient;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
-use App\Http\Controllers\AssetController;
 use App\Models\Alert;
 use App\Models\Asset;
 use App\Models\Port;
@@ -152,8 +151,8 @@ class EndVulnsScanListener extends AbstractListener
 
         self::sendEmail($to, $subject, "Bienvenue !", $beforeCta, $ctaLink, $ctaName, $afterCta);
 
-        $controller = new AssetController();
-        $assets->each(fn(Asset $asset) => $controller->assetMonitoringEnds($asset));
+        // $controller = new AssetController();
+        // $assets->each(fn(Asset $asset) => $controller->assetMonitoringEnds($asset));
 
         $trial->completed = true;
         $trial->save();
