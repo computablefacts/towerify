@@ -272,7 +272,7 @@
   {
     "name": "hidden_directories",
     "description": "Lists hidden directories in relevant path.",
-    "query": "SELECT fi.path, fi.filename, datetime(fi.btime, 'unixepoch', 'UTC') AS btime, datetime(fi.atime, 'unixepoch', 'UTC') AS atime, datetime(fi.ctime, 'unixepoch', 'UTC') AS ctime, datetime(fi.mtime, 'unixepoch', 'UTC') AS mtime FROM file fi WHERE ((fi.path LIKE '/home/%%/.%') OR (fi.path LIKE '/root/.%')) AND type='directory';",
+    "query": "SELECT fi.path, fi.filename, datetime(fi.btime, 'unixepoch', 'UTC') AS btime, datetime(fi.atime, 'unixepoch', 'UTC') AS atime, datetime(fi.ctime, 'unixepoch', 'UTC') AS ctime, datetime(fi.mtime, 'unixepoch', 'UTC') AS mtime FROM file fi WHERE fi.filename NOT IN ('.', '..') AND ((fi.path LIKE '/home/%%/.%') OR (fi.path LIKE '/root/.%')) AND type='directory';",
     "version": "1.4.5",
     "interval": 300,
     "snapshot": 0,
