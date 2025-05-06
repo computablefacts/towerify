@@ -2,16 +2,20 @@
 
 namespace App\View\Components;
 
+use App\Helpers\Messages;
 use App\Models\Alert;
 use App\Models\Asset;
 use App\Models\PortTag;
 use App\Models\TimelineItem;
+use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use App\User;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 
@@ -19,8 +23,10 @@ class Timeline extends Component
 {
     public string $todaySeparator;
     public array $assets;
+    public array $dates;
     public array $messages;
     public int $assetId;
+    public string $dateId;
 
     public static function newSeparator(Carbon $date): string
     {
@@ -113,6 +119,31 @@ class Timeline extends Component
             'filterByUid' => $alert->uid,
             'filterByType' => $alert->type,
             'filterByTitle' => $alert->title,
+            'vulnerabilityId' => $alert->id,
+        ])->render();
+    }
+
+    public static function newEvent(User $user, YnhOsquery $event): string
+    {
+        $timestamp = $event->calendar_time->utc()->format('Y-m-d H:i:s');
+        $date = Str::before($timestamp, ' ');
+        $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+        if ($event->score > 50) {
+            $txtColor = "white";
+            $bgColor = "#ff4d4d";
+        } else {
+            $txtColor = "white";
+            $bgColor = "#ffaa00";
+        }
+        return \Illuminate\Support\Facades\View::make('cywise._timeline-item-event', [
+            'date' => $date,
+            'time' => $time,
+            'txtColor' => $txtColor,
+            'bgColor' => $bgColor,
+            'title' => "<a href='#'>{$event->server_name}</a> - {$event->comments}",
+            'data' => $event->columns,
+            'eventId' => $event->id,
         ])->render();
     }
 
@@ -125,6 +156,7 @@ class Timeline extends Component
 
         $params = request()->query();
         $this->assetId = (int)($params['asset_id'] ?? 0);
+        $this->dateId = $params['date'] ?? '';
 
         $this->todaySeparator = self::newSeparator(Carbon::now());
 
@@ -158,6 +190,7 @@ class Timeline extends Component
             })
             ->concat(
                 TimelineItem::fetchItems($user->id, 'note', null, null, 0)
+                    ->filter(fn(TimelineItem $item) => $this->assetId <= 0)
                     ->map(function (TimelineItem $item) use ($user) {
 
                         $timestamp = $item->timestamp->format('Y-m-d H:i:s');
@@ -193,6 +226,46 @@ class Timeline extends Component
                     })
                     ->toArray()
             )
+            ->concat(
+                YnhOsquery::select([
+                    'ynh_osquery.*',
+                    DB::raw('ynh_servers.name AS server_name'),
+                    'ynh_osquery_rules.score',
+                    'ynh_osquery_rules.comments',
+                ])
+                    ->join('ynh_osquery_rules', 'ynh_osquery_rules.name', '=', 'ynh_osquery.name')
+                    ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_osquery.ynh_server_id')
+                    ->join('users', 'users.id', '=', 'ynh_servers.user_id')
+                    ->when($this->assetId, fn($query, $assetId) => $query->whereRaw('1=0'))
+                    ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
+                    ->where('ynh_osquery_rules.enabled', true)
+                    ->where('ynh_osquery_rules.score', '>', 0)
+                    ->where('users.tenant_id', Auth::user()->tenant_id)
+                    ->whereNotExists(function (Builder $query) {
+                        $query->select(DB::raw(1))
+                            ->from('v_dismissed')
+                            ->whereColumn('ynh_server_id', '=', 'ynh_osquery.ynh_server_id')
+                            ->whereColumn('name', '=', 'ynh_osquery.name')
+                            ->whereColumn('action', '=', 'ynh_osquery.action')
+                            ->whereColumn('columns_uid', '=', 'ynh_osquery.columns_uid')
+                            ->havingRaw('count(1) >=' . Messages::HIDE_AFTER_DISMISS_COUNT);
+                    })
+                    ->get()
+                    ->map(function (YnhOsquery $event) use ($user) {
+
+                        $timestamp = $event->calendar_time->format('Y-m-d H:i:s');
+                        $date = Str::before($timestamp, ' ');
+                        $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+                        return [
+                            'timestamp' => $timestamp,
+                            'date' => $date,
+                            'time' => $time,
+                            'html' => self::newEvent($user, $event),
+                        ];
+                    })
+                    ->toArray()
+            )
             ->sortByDesc('timestamp')
             ->groupBy(fn(array $event) => $event['date'])
             ->mapWithKeys(function ($events, $timestamp) {
@@ -201,6 +274,8 @@ class Timeline extends Component
                 ];
             })
             ->toArray();
+
+        $this->dates = array_keys($this->messages);
     }
 
     public function render(): View|Closure|string

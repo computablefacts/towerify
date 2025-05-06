@@ -127,5 +127,9 @@
     executeJsonRpcApiCall('vulnerabilities@toggleVisibility', {uid: uid, type: type, title: title});
   }
 
+  function dismissEventApiCall(eventId) {
+    executeJsonRpcApiCall('events@dismiss', {event_id: eventId});
+  }
+
 </script>
 @endonce

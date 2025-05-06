@@ -269,10 +269,21 @@
   </div>
   <div class="card mb-3">
     <div class="card-body">
-      <h6 class="card-title">{{ __('Filtrer la timeline par actif...') }}</h6>
+      <h6 class="card-title">{{ __('Filtrer la timeline par...') }}</h6>
       <div class="row">
+        <div class="col-2 d-flex align-items-center justify-content-end">
+          <b>Actif</b>
+        </div>
         <div class="col">
           <div id="assets"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 16px;">
+        <div class="col-2 d-flex align-items-center justify-content-end">
+          <b>Date</b>
+        </div>
+        <div class="col">
+          <div id="dates"></div>
         </div>
       </div>
     </div>
@@ -296,6 +307,7 @@
         </li>
       </ol>
       @foreach($messages as $date => $times)
+      @if(empty($dateId) || $date === $dateId)
       @include('cywise._timeline-separator', ['date' => $date])
       <ol class="timeline">
         @foreach($times as $time => $events)
@@ -304,6 +316,7 @@
         @endforeach
         @endforeach
       </ol>
+      @endif
       @endforeach
       <!--
       <div style="display: flex; align-items: center; gap: 15px; margin: 15px 0;">
@@ -400,6 +413,23 @@
   const todaySeparatorHtmlTemplate = '{!! $todaySeparator !!}';
 
   /* FILTERS */
+  const elDates = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('dates'));
+  elDates.items = @json($dates);
+  elDates.onSelectionChange(item => {
+    const url = new URL(window.location);
+    if (item) {
+      url.searchParams.set('date', item);
+    } else {
+      url.searchParams.set('date', '');
+    }
+    window.location.href = url.toString();
+  });
+  elDates.defaultText = "{{ __('Select a date...') }}";
+
+  if ('{{ $dateId }}' !== '') {
+    elDates.selectedItem = elDates.items.find(date => date === '{{ $dateId }}');
+  }
+
   const elAssets = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('assets'),
     asset => asset.name, asset => `${asset.high} high - ${asset.medium} medium - ${asset.low} low`);
   elAssets.items = @json($assets);
@@ -466,6 +496,11 @@
 
   const hideByTitle = (title) => {
     toggleVulnerabilityVisibilityApiCall(null, null, title);
+  }
+
+  /* EVENTS */
+  const dismissEvent = (eventId) => {
+    dismissEventApiCall(eventId);
   }
 
   /* API CALLS */

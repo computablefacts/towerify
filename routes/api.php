@@ -226,6 +226,7 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
 
         Route::rpc('/endpoint', [
             \App\Http\Procedures\ApplicationsProcedure::class,
+            \App\Http\Procedures\EventsProcedure::class,
             \App\Http\Procedures\InvitationsProcedure::class,
             \App\Http\Procedures\NotesProcedure::class,
             \App\Http\Procedures\ServersProcedure::class,
