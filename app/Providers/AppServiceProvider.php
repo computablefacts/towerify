@@ -106,6 +106,10 @@ use App\Observers\YnhServerObserver;
 use App\Observers\YnhSummaryObserver;
 use App\Observers\ZoneMemberObserver;
 use App\Observers\ZoneObserver;
+use App\Rules\AtLeastOneDigit;
+use App\Rules\AtLeastOneLetter;
+use App\Rules\AtLeastOneLowercaseLetter;
+use App\Rules\AtLeastOneUppercaseLetter;
 use App\Rules\OnlyLettersAndDigits;
 use App\User;
 use Illuminate\Support\Facades\Event;
@@ -142,10 +146,12 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(
             Password::min(12)
                 ->max(100)
-                ->mixedCase()
-                ->numbers()
                 ->rules([
                     new OnlyLettersAndDigits,
+                    new AtLeastOneLetter,
+                    new AtLeastOneDigit,
+                    new AtLeastOneUppercaseLetter,
+                    new AtLeastOneLowercaseLetter,
                 ])
         );
 
