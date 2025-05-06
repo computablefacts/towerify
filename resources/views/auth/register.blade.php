@@ -80,6 +80,18 @@
               </div>
             </div>
             <div class="row mb-3">
+              <label class="col-md-4 text-end">
+                {{ __('Password requirements') }}
+              </label>
+              <div class="col-md-6">
+                <ul>
+                  @foreach ($passwordRequirements as $message)
+                    <li>{{ $message }}</li>
+                  @endforeach
+                </ul>
+              </div>
+            </div>
+            <div class="row mb-3">
               <div class="col-md-6 offset-md-4">
                 <div class="form-check">
                   <input class="form-control {{ $errors->has('terms') ? 'is-invalid' : '' }} form-check-input"

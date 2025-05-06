@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Hashing\TwHasher;
+use App\Helpers\PasswordRequirements;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\Tenant;
@@ -43,6 +44,18 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+    }
+
+    /**
+     * Show the application registration form.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function showRegistrationForm()
+    {
+        return view('auth.register', [
+            'passwordRequirements' => (new PasswordRequirements(Password::defaults()))->getRequirements(), // Password::default()->appliedRules(),
+        ]);
     }
 
     /**
