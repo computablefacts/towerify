@@ -24,40 +24,62 @@ class PasswordRequirements
         $requirements = [];
 
         if ($this->hasMin()) {
-            $requirements[] = __('validation.requirement.min', ['min' => $this->min()]);
+            $requirements['min'] = [];
+            $requirements['min']['text'] = __('validation.requirement.min', ['min' => $this->min()]);
+            $requirements['min']['condition'] = 'passwordField.value.length >= ' . $this->min();;
         }
         if ($this->hasMax()) {
-            $requirements[] = __('validation.requirement.max', ['max' => $this->max()]);
+            $requirements['max'] = [];
+            $requirements['max']['text'] = __('validation.requirement.max', ['max' => $this->max()]);
+            $requirements['max']['condition'] = 'passwordField.value.length <= ' . $this->max();
         }
         if ($this->mixedCase()) {
-            $requirements[] = __('validation.requirement.mixed');
+            $requirements['mixed'] = [];
+            $requirements['mixed']['text'] = __('validation.requirement.mixed');
+            $requirements['mixed']['condition'] = 'passwordField.value.match(/(\p{Ll}+.*\p{Lu})|(\p{Lu}+.*\p{Ll})/u)';
         }
         if ($this->letters()) {
-            $requirements[] = __('validation.requirement.letters');
+            $requirements['letters'] = [];
+            $requirements['letters']['text'] = __('validation.requirement.letters');
+            $requirements['letters']['condition'] = 'passwordField.value.match(/\p{L}/u)';
         }
         if ($this->numbers()) {
-            $requirements[] = __('validation.requirement.numbers');
+            $requirements['numbers'] = [];
+            $requirements['numbers']['text'] = __('validation.requirement.numbers');
+            $requirements['numbers']['condition'] = 'passwordField.value.match(/\p{N}/u)';
         }
         if ($this->symbols()) {
-            $requirements[] = __('validation.requirement.symbols');
+            $requirements['symbols'] = [];
+            $requirements['symbols']['text'] = __('validation.requirement.symbols');
+            $requirements['symbols']['condition'] = 'passwordField.value.match(/\p{Z}|\p{S}|\p{P}/u)';
         }
         if ($this->hasCustomRule(OnlyLettersAndDigits::class)) {
-            $requirements[] = __('validation.requirement.only_letters_and_digits');
+            $requirements['only_letters_and_digits'] = [];
+            $requirements['only_letters_and_digits']['text'] = __('validation.requirement.only_letters_and_digits');
+            $requirements['only_letters_and_digits']['condition'] = 'passwordField.value.match(/^[0-9a-z]+$/i)';
         }
         if ($this->hasCustomRule(AtLeastOneLetter::class)) {
-            $requirements[] = __('validation.requirement.letters');
+            $requirements['at_least_one_letter'] = [];
+            $requirements['at_least_one_letter']['text'] = __('validation.requirement.letters');
+            $requirements['at_least_one_letter']['condition'] = 'passwordField.value.match(/[a-z]/i)';
         }
         if ($this->hasCustomRule(AtLeastOneDigit::class)) {
-            $requirements[] = __('validation.requirement.numbers');
+            $requirements['at_least_one_digit'] = [];
+            $requirements['at_least_one_digit']['text'] = __('validation.requirement.numbers');
+            $requirements['at_least_one_digit']['condition'] = 'passwordField.value.match(/[0-9]/)';
         }
         if ($this->hasCustomRule(AtLeastOneUppercaseLetter::class)) {
-            $requirements[] = __('validation.requirement.at_least_one_uppercase_letter');
+            $requirements['at_least_one_uppercase_letter'] = [];
+            $requirements['at_least_one_uppercase_letter']['text'] = __('validation.requirement.at_least_one_uppercase_letter');
+            $requirements['at_least_one_uppercase_letter']['condition'] = 'passwordField.value.match(/[A-Z]/)';
         }
         if ($this->hasCustomRule(AtLeastOneLowercaseLetter::class)) {
-            $requirements[] = __('validation.requirement.at_least_one_lowercase_letter');
+            $requirements['at_least_one_lowercase_letter'] = [];
+            $requirements['at_least_one_lowercase_letter']['text'] = __('validation.requirement.at_least_one_lowercase_letter');
+            $requirements['at_least_one_lowercase_letter']['condition'] = 'passwordField.value.match(/[a-z]/)';
         }
 
-        return array_unique($requirements);
+        return $requirements;
     }
 
     private function hasMin(): bool

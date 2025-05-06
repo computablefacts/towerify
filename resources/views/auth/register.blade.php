@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+  .requirement_met {
+    color: green;
+  }
+
+  .requirement_not_met {
+    color: red;
+  }
+</style>
 <div class="container">
   <div class="row justify-content-center">
     <div class="col-md-8">
@@ -85,8 +94,8 @@
               </label>
               <div class="col-md-6">
                 <ul>
-                  @foreach ($passwordRequirements as $message)
-                    <li>{{ $message }}</li>
+                  @foreach ($passwordRequirements as $rule => $definition)
+                    <li id="{{ $rule }}">{{ $definition['text'] }}</li>
                   @endforeach
                 </ul>
               </div>
@@ -120,4 +129,23 @@
     </div>
   </div>
 </div>
+<script>
+  const passwordField = document.getElementById("password");
+  let requirementElement = null;
+
+  passwordField.onkeyup = function () {
+    @foreach ($passwordRequirements as $rule => $definition)
+        @if(key_exists('condition', $definition))
+        requirementElement = document.getElementById("{{ $rule }}");
+    if ({!! $definition['condition'] !!}) {
+      requirementElement.classList.remove("requirement_not_met");
+      requirementElement.classList.add("requirement_met");
+    } else {
+      requirementElement.classList.remove("requirement_met");
+      requirementElement.classList.add("requirement_not_met");
+    }
+    @endif
+    @endforeach
+  }
+</script>
 @endsection
