@@ -23,12 +23,13 @@ class Timeline extends Component
 {
     public string $todaySeparator;
     public array $messages;
-    
+
     // Filters
     public array $assets;
     public int $assetId;
     public array $dates;
     public string $dateId;
+    public int $minScore;
 
     public static function newSeparator(Carbon $date): string
     {
@@ -156,6 +157,7 @@ class Timeline extends Component
         $params = request()->query();
         $this->assetId = (int)($params['asset_id'] ?? 0);
         $this->dateId = $params['date'] ?? '';
+        $this->minScore = $params['min_score'] ?? 30;
         $this->todaySeparator = self::newSeparator(Carbon::now());
 
         $this->assets = Asset::query()
@@ -269,7 +271,7 @@ class Timeline extends Component
             ->when($this->assetId, fn($query, $assetId) => $query->whereRaw('1=0'))
             ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
             ->where('ynh_osquery_rules.enabled', true)
-            ->where('ynh_osquery_rules.score', '>', 0)
+            ->where('ynh_osquery_rules.score', '>=', $this->minScore)
             ->where('users.tenant_id', Auth::user()->tenant_id)
             ->whereNotExists(function (Builder $query) {
                 $query->select(DB::raw(1))
