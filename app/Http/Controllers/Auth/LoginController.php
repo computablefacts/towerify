@@ -89,8 +89,14 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         if ($uuid = saml_tenant_uuid()) {
-            Log::debug('[SAML2 Authentication] Logout', ['uuid' => $uuid, 'email' => Auth::user()->email]);
-            return redirect(URL::route('saml.logout', ['uuid' => $uuid]));
+            $nameId = session('saml2NameId');
+            Log::debug('[SAML2 Authentication] Logout', [
+                'uuid' => $uuid,
+                'email' => Auth::user()->email,
+                'nameId' => $nameId,
+            ]);
+
+            return redirect(URL::route('saml.logout', ['uuid' => $uuid, 'nameId' => $nameId]));
         }
 
         $this->guard()->logout();
