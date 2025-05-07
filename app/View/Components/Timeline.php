@@ -280,7 +280,7 @@ class Timeline extends Component
 
     private function events(User $user): array
     {
-        $cutOffTime = Carbon::now()->startOfDay()->subDays(3);
+        $cutOffTime = Carbon::now()->startOfDay()->subDay();
         return YnhOsquery::select([
             'ynh_osquery.*',
             DB::raw('ynh_servers.name AS server_name'),
@@ -294,6 +294,8 @@ class Timeline extends Component
             ->where('ynh_osquery_rules.enabled', true)
             ->where('ynh_osquery_rules.score', '>=', $this->minScore)
             ->where('users.tenant_id', Auth::user()->tenant_id)
+            ->when(Auth::user()->tenant_id, fn($query, int $tenantId) => $query->where('users.tenant_id', $tenantId))
+            ->when(Auth::user()->customer_id, fn($query, int $customerId) => $query->where('users.customer_id', $customerId))
             ->whereNotExists(function (Builder $query) {
                 $query->select(DB::raw(1))
                     ->from('v_dismissed')
