@@ -62,6 +62,11 @@ class SamlEventSubscriber
         // Connect the user
         Auth::login($user);
 
+        // Keep NameID to send it back when user logout
+        session([
+            'saml2NameId' => $this->saml2User->getNameId(),
+        ]);
+
         if ($debug) Log::debug('[SAML2 Authentication] handleSignedIn ends');
     }
 
