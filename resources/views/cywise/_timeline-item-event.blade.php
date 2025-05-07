@@ -1,4 +1,4 @@
-<li id="eid-{{ $eventId }}" class="timeline-item">
+<li id="eid-{{ $event->id }}" class="timeline-item">
   <span class="timeline-item-hour">
     <span style="margin-left: -92px">{{ $time }}</span>
   </span>
@@ -16,11 +16,11 @@
   </span>
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
-      <span>{!! $title !!}</span>
+      <span><a href='#'>{{ $event->server_name }}</a> - {{ $event->comments }}</span>
     </div>
-    <pre class="comment" style="margin-bottom: 0;">{{ json_encode($data, JSON_PRETTY_PRINT) }}</pre>
+    <pre class="comment" style="margin-bottom: 0;">{{ json_encode($event->columns, JSON_PRETTY_PRINT) }}</pre>
     <div style="display: flex; gap: 10px;">
-      <button class="show-replies" title="{{ __('Dismiss') }}" onclick="dismissEvent('{{ $eventId }}')">
+      <button class="show-replies" title="{{ __('Dismiss') }}" onclick="dismissEvent('{{ $event->id }}')">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
              class="icon icon-tabler icons-tabler-outline icon-tabler-cancel">

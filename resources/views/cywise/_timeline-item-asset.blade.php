@@ -1,4 +1,4 @@
-<li class="timeline-item">
+<li id='aid-{{ $asset->id }}' class="timeline-item">
   <span class="timeline-item-hour">
     <span style="margin-left: -92px">{{ $time }}</span>
   </span>
@@ -21,12 +21,14 @@
   </span>
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
-      <span>{!! $title !!}</span>
+      <span>
+        <a href='#'>{{ $asset->createdBy()->name }}</a> a ajouté l'actif <a href='#'>{{ $asset->asset }}</a>
+      </span>
     </div>
     <div style="display: flex; gap: 10px;">
-      @if(!$isMonitored)
+      @if(!$asset->is_monitored)
       <button class="show-replies" title="{{ __('Start Monitoring') }}"
-              onclick="startMonitoringAsset('{{ $assetId }}')">
+              onclick="startMonitoringAsset('{{ $asset->id }}')">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
              class="icon icon-tabler icons-tabler-outline icon-tabler-eye">
@@ -35,7 +37,7 @@
           <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/>
         </svg>
       </button>
-      <button class="show-replies" title="{{ __('Delete') }}" onclick="deleteAsset('{{ $assetId }}')">
+      <button class="show-replies" title="{{ __('Delete') }}" onclick="deleteAsset('{{ $asset->id }}')">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
              class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
@@ -48,7 +50,8 @@
         </svg>
       </button>
       @else
-      <button class="show-replies" title="{{ __('Stop Monitoring') }}" onclick="stopMonitoringAsset('{{ $assetId }}')">
+      <button class="show-replies" title="{{ __('Stop Monitoring') }}"
+              onclick="stopMonitoringAsset('{{ $asset->id }}')">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
              class="icon icon-tabler icons-tabler-outline icon-tabler-eye-minus">
