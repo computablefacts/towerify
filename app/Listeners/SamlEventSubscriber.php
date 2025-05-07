@@ -125,9 +125,9 @@ class SamlEventSubscriber
         $debug = config('app.debug');
 
         $saml2UserFriendlyNameAttributes = $this->saml2User->getAttributesWithFriendlyName();
-        Log::debug('[SAML2 Authentication] User Attributes with Friendly Name: ', $saml2UserFriendlyNameAttributes);
+        Log::debug('[SAML2 Authentication] User Attributes with Friendly Name:', $saml2UserFriendlyNameAttributes);
         $saml2UserAttributes = $this->saml2User->getAttributes();
-        Log::debug('[SAML2 Authentication] User Attributes with Name: ', $saml2UserAttributes);
+        Log::debug('[SAML2 Authentication] User Attributes with Name:', $saml2UserAttributes);
 
         if ($debug) Log::debug('SAML2 Attributes', [
             'saml2UserFriendlyNameAttributes' => $saml2UserFriendlyNameAttributes,
@@ -304,21 +304,21 @@ class SamlEventSubscriber
     {
         // Get default roles from settings
         $newRoles = Arr::wrap($this->saml2Tenant->config('roles.default', []));
-        Log::debug('[SAML2 Authentication] Default roles = ', $newRoles);
-        Log::debug('[SAML2 Authentication] SAML roles = ', $this->saml2UserRoles);
+        Log::debug('[SAML2 Authentication] Default roles =', $newRoles);
+        Log::debug('[SAML2 Authentication] SAML roles =', $this->saml2UserRoles);
 
         // Get link between IdP roles and cywise roles
         // Add Cywise roles based on IdP roles the user has
         $idpRoles = Arr::wrap($this->saml2Tenant->config('roles.idp_roles', []));
-        Log::debug('[SAML2 Authentication] IdP roles settings = ', $idpRoles);
+        Log::debug('[SAML2 Authentication] IdP roles settings =', $idpRoles);
         foreach ($idpRoles as $idpRole) {
             if (in_array($idpRole, $this->saml2UserRoles)) {
                 $cywiseRoles = Arr::wrap($this->saml2Tenant->config('roles.' . $idpRole . '_to_cywise', []));
-                Log::debug('[SAML2 Authentication] Cywise roles for ' . $idpRole . ' = ', $cywiseRoles);
+                Log::debug('[SAML2 Authentication] Cywise roles for ' . $idpRole . ' =', $cywiseRoles);
                 $newRoles = array_merge($newRoles, $cywiseRoles);
             }
         }
-        Log::debug('[SAML2 Authentication] New roles = ', $newRoles);
+        Log::debug('[SAML2 Authentication] New roles =', $newRoles);
 
         $userRoles = collect($newRoles)->map(function ($role) {
             try {
@@ -330,10 +330,10 @@ class SamlEventSubscriber
         })->filter(function ($role) {
             return $role <> 'unknown';
         })->toArray();
-        Log::debug('[SAML2 Authentication] User roles', $userRoles);
+        Log::debug('[SAML2 Authentication] User roles IDs =', $userRoles);
 
         $changes = $user->roles()->sync($userRoles);
 
-        Log::debug('[SAML2 Authentication] User roles updated', $changes);
+        Log::debug('[SAML2 Authentication] User roles IDs updated =', $changes);
     }
 }
