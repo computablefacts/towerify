@@ -57,7 +57,7 @@ class CywiseController extends Controller
         // Deal with parameters validation and state management
         if ($step === 2 && $request->get('action') == 'next') {
             $request->validate(['domain' => 'required|string|min:1|max:100']);
-            $trial->domain = Str::between($request->string('domain'), '://', '/');
+            $trial->domain = Str::betweenFirst($request->string('domain'), '://', '/');
             $trial->save();
         }
         if ($step === 3 && $request->get('action') == 'next') {
