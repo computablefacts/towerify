@@ -125,7 +125,9 @@ class SamlEventSubscriber
         $debug = config('app.debug');
 
         $saml2UserFriendlyNameAttributes = $this->saml2User->getAttributesWithFriendlyName();
+        Log::debug('[SAML2 Authentication] User Attributes with Friendly Name: ', $saml2UserFriendlyNameAttributes);
         $saml2UserAttributes = $this->saml2User->getAttributes();
+        Log::debug('[SAML2 Authentication] User Attributes with Name: ', $saml2UserAttributes);
 
         if ($debug) Log::debug('SAML2 Attributes', [
             'saml2UserFriendlyNameAttributes' => $saml2UserFriendlyNameAttributes,
