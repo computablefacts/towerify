@@ -257,8 +257,8 @@
             <div class="row">
               <div class="col align-content-center">
                 <a href="{{ route('home', ['tab' => 'ama2']) }}"
-                   class="form-control btn btn-primary text-white">
-                  {{ __('Démarrer une conversation >') }}
+                   class="btn btn-primary" style="width: 100%;">
+                  {{ __('Start Conversation >') }}
                 </a>
               </div>
             </div>

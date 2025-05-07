@@ -16,7 +16,8 @@
         <div class="col-md-3 align-content-center">
           <button type="button"
                   onclick="createAsset()"
-                  class="form-control btn btn-primary text-white">
+                  class="btn btn-primary"
+                  style="width: 100%;">
             {{ __('Monitor >') }}
           </button>
         </div>
