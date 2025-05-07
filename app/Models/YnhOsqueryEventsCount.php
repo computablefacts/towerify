@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int ynh_server_id
  * @property int count
  * @property array events
+ * @deprecated
  */
 class YnhOsqueryEventsCount extends Model
 {

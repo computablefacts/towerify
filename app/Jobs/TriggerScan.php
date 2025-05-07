@@ -36,7 +36,16 @@ class TriggerScan implements ShouldQueue
         // Begin a new scan
         Asset::whereNull('next_scan_id')
             ->where('is_monitored', true)
+            ->whereNull('ynh_trial_id')
             ->get()
+            ->concat(
+                Asset::select('am_assets.*')
+                    ->join('ynh_trials', 'ynh_trials.id', '=', 'am_assets.ynh_trial_id')
+                    ->whereNull('am_assets.next_scan_id')
+                    ->where('am_assets.is_monitored', true)
+                    ->where('ynh_trials.completed', false)
+                    ->get()
+            )
             ->filter(function (Asset $asset) use ($minDate) {
                 $scans = $asset->scanCompleted();
                 return $scans->isEmpty() || $scans->sortBy('vulns_scan_ends_at')->last()?->vulns_scan_ends_at <= $minDate;

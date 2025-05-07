@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int vulns_medium
  * @property int vulns_low
  * @property int monitored_servers
+ * @deprecated
  */
 class YnhOverview extends Model
 {

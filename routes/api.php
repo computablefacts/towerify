@@ -226,10 +226,12 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
 
         Route::rpc('/endpoint', [
             \App\Http\Procedures\ApplicationsProcedure::class,
+            \App\Http\Procedures\EventsProcedure::class,
             \App\Http\Procedures\InvitationsProcedure::class,
             \App\Http\Procedures\NotesProcedure::class,
             \App\Http\Procedures\ServersProcedure::class,
             \App\Http\Procedures\TheCyberBriefProcedure::class,
+            \App\Http\Procedures\VulnerabilitiesProcedure::class,
         ])
             ->name('rpc.endpoint')
             ->middleware([GzipCompress::class, \App\Http\Middleware\Authenticate::class]);

@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
 
+/** @deprecated */
 class Overview extends Component
 {
     public array $numberOfVulnerabilitiesByLevel;
