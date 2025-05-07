@@ -519,5 +519,22 @@
     });
   }
 
+  const deleteConversation = (conversationId) => {
+
+    const response = confirm("{{ __('Are you sure you want to delete this conversation?') }}");
+
+    if (response) {
+      axios.delete(`/conversations/${conversationId}`).then(function (response) {
+        if (response.data.success) {
+          toaster.toastSuccess(response.data.success);
+        } else if (response.data.error) {
+          toaster.toastError(response.data.error);
+        } else {
+          console.log(response.data);
+        }
+      }).catch(error => toaster.toastAxiosError(error));
+    }
+  }
+
 </script>
 @endonce

@@ -5,6 +5,7 @@ namespace App\View\Components;
 use App\Helpers\Messages;
 use App\Models\Alert;
 use App\Models\Asset;
+use App\Models\Conversation;
 use App\Models\Port;
 use App\Models\PortTag;
 use App\Models\TimelineItem;
@@ -26,6 +27,7 @@ class Timeline extends Component
     const string CATEGORY_ASSETS = 'assets';
     const string CATEGORY_NOTES = 'notes';
     const string CATEGORY_VULNERABILITIES = 'vulnerabilities';
+    const string CATEGORY_CONVERSATIONS = 'conversations';
 
     public string $todaySeparator;
     public array $messages;
@@ -141,6 +143,19 @@ class Timeline extends Component
         ])->render();
     }
 
+    public static function newConversation(User $user, Conversation $conversation): string
+    {
+        $timestamp = $conversation->updated_at->utc()->format('Y-m-d H:i:s');
+        $date = Str::before($timestamp, ' ');
+        $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+        return \Illuminate\Support\Facades\View::make('cywise._timeline-item-conversation', [
+            'date' => $date,
+            'time' => $time,
+            'conversation' => $conversation,
+        ])->render();
+    }
+
     public function __construct()
     {
         /** @var User $user */
@@ -154,6 +169,7 @@ class Timeline extends Component
         $this->categories = [
             self::CATEGORY_ALL,
             self::CATEGORY_ASSETS,
+            self::CATEGORY_CONVERSATIONS,
             self::CATEGORY_EVENTS,
             self::CATEGORY_NOTES,
             self::CATEGORY_VULNERABILITIES,
@@ -172,6 +188,9 @@ class Timeline extends Component
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_VULNERABILITIES) {
             $messages = $messages->concat($this->vulnerabilities($user));
+        }
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_CONVERSATIONS) {
+            $messages = $messages->concat($this->conversations($user));
         }
 
         $this->messages = $messages
@@ -210,6 +229,28 @@ class Timeline extends Component
     public function render(): View|Closure|string
     {
         return view('components.timeline');
+    }
+
+    private function conversations(User $user): array
+    {
+        return Conversation::query()
+            ->where('created_by', $user->id)
+            ->where('dom', '!=', '[]')
+            ->get()
+            ->map(function (Conversation $conversation) use ($user) {
+
+                $timestamp = $conversation->created_at->format('Y-m-d H:i:s');
+                $date = Str::before($timestamp, ' ');
+                $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+                return [
+                    'timestamp' => $timestamp,
+                    'date' => $date,
+                    'time' => $time,
+                    'html' => self::newConversation($user, $conversation),
+                ];
+            })
+            ->toArray();
     }
 
     private function assets(User $user): array
