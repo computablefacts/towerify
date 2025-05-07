@@ -41,13 +41,13 @@ class CywiseController extends Controller
 
         // Deal with the "back" buttons
         if ($step === 3 && $request->get('action') == 'back') {
-            return redirect()->route('public.cywise.onboarding', ['hash' => $hash, 'step' => 1]);
+            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 1]);
         }
         if ($step === 4 && $request->get('action') == 'back') {
-            return redirect()->route('public.cywise.onboarding', ['hash' => $hash, 'step' => 2]);
+            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 2]);
         }
         if ($step === 5 && $request->get('action') == 'back') {
-            return redirect()->route('public.cywise.onboarding', ['hash' => $hash, 'step' => 3]);
+            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 3]);
         }
 
         // Load trial (if any)
