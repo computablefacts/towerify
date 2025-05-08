@@ -28,14 +28,14 @@
   }
 
   .left {
-    width: 50%;
+    width: 40%;
     display: flex;
     align-items: center;
     justify-content: start;
   }
 
   .right {
-    width: 50%;
+    width: 60%;
     display: flex;
     align-items: center;
     justify-content: end;
@@ -368,7 +368,7 @@
             <img src="https://www.svgrepo.com/show/12134/info-circle.svg" width="18" height="18">
           </a>
           <span style="padding-left:var(--spacing-medium)">
-            ${asset.asset.slice(0, 27) + (asset.asset.length > 27 ? '...' : '')}
+            ${asset.asset.slice(0, 20) + (asset.asset.length > 20 ? '...' : '')}
           </span>
         </div>
         <div class="right">
