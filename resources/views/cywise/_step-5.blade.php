@@ -220,7 +220,7 @@
 
     let portsStr = ports.map(port => `
       <tr>
-        <td style="float:right">${port.port}</td>
+        <td style="text-align:right">${port.port}</td>
         <td>${port.services[0] ? port.services[0].slice(0, 7) + (port.services[0].length > 7 ? '...' : '') : 'n/a'}</td>
         <td>${port.products[0] ? port.products[0].slice(0, 7) + (port.products[0].length > 7 ? '...' : '') : 'n/a'}</td>
         <td>
@@ -253,7 +253,7 @@
     let vulnsStr = vulnerabilities.map(vuln => `
       <tr>
         <td style="float:right">${vuln.port}</td>
-        <td><span class="dot ${vuln.level}"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title2}` : vuln.title}</td>
+        <td><span class="dot ${vuln.level}"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title}` : vuln.title}</td>
       </tr>
     `).join("");
 
