@@ -712,3 +712,20 @@ Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illumina
     return response("ok ({$events->count()} events in file)", 200)
         ->header('Content-Type', 'text/plain');
 })->middleware(['auth', 'throttle:240,1']);
+
+/**
+ * We need to add password requirements to invitation form
+ * So we extends Konekt\AppShell\Http\Controllers\PublicInvitationController
+ * Then we need to change the routes to use our controller
+ *
+ * See: vendor/konekt/appshell/src/resources/routes/public.php
+ */
+Route::get('pub/invitation/{hash}', [
+    'uses' => 'PasswordRequirementsPublicInvitationController@show',
+    'as' => 'appshell.public.invitation.show'
+])->where('hash', '[A-Za-z0-9]+');
+
+Route::post('pub/invitation/accept', [
+    'uses' => 'PasswordRequirementsPublicInvitationController@accept',
+    'as' => 'appshell.public.invitation.accept'
+]);
