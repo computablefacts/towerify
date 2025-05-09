@@ -54,7 +54,7 @@ class CyberBuddyNextGenController extends Controller
         return view('modules.cyber-buddy.assistant', ['threadId' => $threadId]);
     }
 
-    public function converse(ConverseRequest $request): JsonResponse
+    public function converse(ConverseRequest $request, bool $fallbackOnNextCollection = false): JsonResponse
     {
         $threadId = Str::trim($request->string('thread_id', ''));
         $question = Str::trim($request->string('directive', ''));
@@ -126,7 +126,7 @@ class CyberBuddyNextGenController extends Controller
         if (Str::startsWith($question, '/')) {
             $answer = $this->processCommand($user, $threadId, Str::after($question, '/'));
         } else {
-            $answer = $this->processQuestion($user, $threadId, $conversation);
+            $answer = $this->processQuestion($user, $threadId, $conversation, $fallbackOnNextCollection);
         }
 
         // Save the LLM's answer
@@ -222,7 +222,7 @@ class CyberBuddyNextGenController extends Controller
         ];
     }
 
-    private function processQuestion(User $user, string $threadId, Conversation $conversation): array
+    private function processQuestion(User $user, string $threadId, Conversation $conversation, bool $fallbackOnNextCollection = false): array
     {
         $model = 'deepseek-chat';
         $temperature = 0.7;
@@ -257,6 +257,7 @@ class CyberBuddyNextGenController extends Controller
 
             if ($name === 'query_issp') {
 
+                $args['fallback_on_next_collection'] = $fallbackOnNextCollection;
                 $messages[] = $response['choices'][0]['message'] ?? [];
                 $response = AbstractLlmFunction::handle($user, $threadId, $name, $args);
                 $answer = $response->html();
@@ -271,7 +272,7 @@ class CyberBuddyNextGenController extends Controller
         }
         while (count($toolCalls) > 0) {
             $messages[] = $response['choices'][0]['message'] ?? [];
-            $messages = array_merge($messages, $this->callTools($user, $threadId, $toolCalls));
+            $messages = array_merge($messages, $this->callTools($user, $threadId, $toolCalls, $fallbackOnNextCollection));
             $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
             $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
         }
@@ -287,7 +288,7 @@ class CyberBuddyNextGenController extends Controller
         ];
     }
 
-    private function callTools(User $user, string $threadId, array $tools): array
+    private function callTools(User $user, string $threadId, array $tools, bool $fallbackOnNextCollection = false): array
     {
         $messages = [];
 
@@ -295,6 +296,7 @@ class CyberBuddyNextGenController extends Controller
             $function = $tool['function'];
             $name = $function['name'] ?? '';
             $args = json_decode($function['arguments'], true) ?? [];
+            $args['fallback_on_next_collection'] = $fallbackOnNextCollection;
             $messages[] = [
                 'role' => RoleEnum::TOOL->value,
                 'tool_call_id' => $tool['id'],

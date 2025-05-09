@@ -4,18 +4,27 @@ namespace App\Jobs;
 
 use App\Http\Controllers\CyberBuddyNextGenController;
 use App\Http\Requests\ConverseRequest;
+use App\Listeners\EndVulnsScanListener;
 use App\Models\Conversation;
+use App\Models\File;
+use App\Models\Invitation;
+use App\Models\Role;
+use App\Models\Tenant;
+use App\Models\YnhFramework;
+use App\Rules\IsValidCollectionName;
 use App\User;
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Mail\Message;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Konekt\User\Models\InvitationProxy;
+use Konekt\User\Models\UserType;
 use Webklex\IMAP\Facades\Client;
 
 class ProcessIncomingEmails implements ShouldQueue
@@ -73,15 +82,64 @@ class ProcessIncomingEmails implements ShouldQueue
                     // Search the user who sent the email in the database
                     /** @var \Webklex\PHPIMAP\Address $address */
                     $address = $from[0];
-                    /** @var User $user */
-                    $user = User::where('email', config('towerify.admin.email') /* $address->mail */)->first();
 
-                    if (!$user) {
-                        Log::error("Unknown user: {$address->mail}");
-                        continue;
+                    // Create shadow profile
+                    /** @var User $user */
+                    $user = User::where('email', $address->mail)->first();
+                    if ($user) {
+                        Auth::login($user); // otherwise the tenant will not be properly set
+                    } else {
+                        /** @var Invitation $invitation */
+                        $invitation = Invitation::where('email', $address->mail)->first();
+
+                        if (!$invitation) {
+                            $invitation = InvitationProxy::createInvitation($address->mail, "J. Doe");
+                        }
+
+                        /** @var Tenant $tenant */
+                        $tenant = Tenant::create(['name' => Str::random()]);
+                        $user = $invitation->createUser([
+                            'password' => Str::random(64),
+                            'tenant_id' => $tenant->id,
+                            'type' => UserType::CLIENT(),
+                            'terms_accepted' => true,
+                        ]);
+
+                        $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
+
+                        Auth::login($user); // otherwise the tenant will not be properly set
+
+                        // Create shadow collections for some frameworks
+                        $frameworks = \App\Models\YnhFramework::all();
+
+                        foreach ($frameworks as $framework) {
+                            if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
+                                $this->importFramework($framework, 20);
+                            } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
+                                $this->importFramework($framework, 10);
+                            } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
+                                $this->importFramework($framework, 30);
+                            } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
+                                $this->importFramework($framework, 50);
+                            } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
+                                $this->importFramework($framework, 40);
+                            }
+                        }
                     }
 
-                    Auth::login($user);
+                    // Ensure all prompts are properly loaded
+                    /* if (Prompt::count() >= 4) {
+                        Log::warning($message->getSubject());
+                        Log::warning("Some prompts are not ready yet. Skipping email processing for now.");
+                        continue;
+                    } */
+
+                    // Ensure all collections are properly loaded
+                    if (File::where('is_deleted', false)->get()->contains(fn(File $file) => !$file->is_embedded)) {
+                        Log::warning($message->getSubject());
+                        Log::warning("Some collections are not ready yet. Skipping email processing for now.");
+                        continue;
+                    }
 
                     // Extract the thread id in order to be able to load the existing conversation
                     // If the thread id cannot be found, a new conversation is created
@@ -127,14 +185,34 @@ class ProcessIncomingEmails implements ShouldQueue
                     ]);
 
                     $controller = new CyberBuddyNextGenController();
-                    $response = $controller->converse($request);
+                    $response = $controller->converse($request, true);
                     $json = json_decode($response->content(), true);
                     $subject = $message->getSubject()[0];
                     $body = $json['answer']['html'] ?? '';
 
-                    Mail::html("{$body}\n\nthread_id={$threadId}", function (Message $msg) use ($message, $address, $subject) {
-                        $msg->to($address->mail)->from(self::SENDER)->subject("Re: {$subject}");
-                    });
+                    EndVulnsScanListener::sendEmail(
+                        self::SENDER,
+                        $address->mail,
+                        "Re: {$subject}",
+                        "CyberBuddy vous répond !",
+                        "
+                            {$body}
+                            <p>Pour importer tes propres documents et profiter pleinement des capacités de CyberBuddy, ton assistant Cyber, finalise ton inscription à Cywise :</p>
+                        ",
+                        route('password.reset', [
+                            'token' => app(PasswordBroker::class)->createToken($user),
+                            'email' => $user->email,
+                            'reason' => 'Finalisez votre inscription en créant un mot de passe',
+                            'action' => 'Créer mon mot de passe',
+                        ]),
+                        "je me connecte à Cywise",
+                        "
+                          <p>Je reste à ta disposition pour toute question ou assistance supplémentaire. Merci encore pour ta confiance en Cywise !</p>
+                          <p>Bien à toi,</p>
+                          <p>CyberBuddy</p>
+                          <span style='color:white'>thread_id={$threadId}</span>
+                        ",
+                    );
 
                     if (!$message->move('CyberBuddy')) {
                         Log::error($message->getSubject());
@@ -148,5 +226,34 @@ class ProcessIncomingEmails implements ShouldQueue
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
         }
+    }
+
+    private function importFramework(YnhFramework $framework, int $priority): void
+    {
+        /** @var \App\Models\Collection $collection */
+        $collection = \App\Models\Collection::where('name', $framework->collectionName())
+            ->where('is_deleted', false)
+            ->first();
+
+        if (!$collection) {
+            if (!IsValidCollectionName::test($framework->collectionName())) {
+                Log::error("Invalid collection name : {$framework->collectionName()}");
+                return;
+            }
+            $collection = \App\Models\Collection::create([
+                'name' => $framework->collectionName(),
+                'priority' => $priority,
+            ]);
+        }
+
+        $path = $framework->path();
+        $file = new UploadedFile(
+            $path,
+            basename($path),
+            mime_content_type($path),
+            null,
+            true
+        );
+        $url = \App\Http\Controllers\CyberBuddyController::saveUploadedFile($collection, $file);
     }
 }

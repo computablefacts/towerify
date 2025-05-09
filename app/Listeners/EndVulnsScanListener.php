@@ -67,6 +67,7 @@ class EndVulnsScanListener extends AbstractListener
         $alertsMedium = $alerts->filter(fn(Alert $alert) => $alert->level === 'Medium');
         $alertsLow = $alerts->filter(fn(Alert $alert) => $alert->level === 'Low');
         $nbServers = $alerts->map(fn(Alert $alert) => $alert->port()->ip)->unique()->count();
+        $from = config('towerify.freshdesk.from_email');
         $to = $user->email;
         $msgHigh = $alertsHigh->isNotEmpty() ? "<li><b>{$alertsHigh->count()}</b> sont des vulnérabilités critiques et <b>doivent</b> être corrigées.</li>" : "";
         $msgMedium = $alertsMedium->isNotEmpty() ? "<li><b>{$alertsMedium->count()}</b> sont des vulnérabilités de criticité moyenne et <b>devraient</b> être corrigées.</li>" : "";
@@ -136,7 +137,7 @@ class EndVulnsScanListener extends AbstractListener
             <p>Je te propose d'effectuer les correctifs suivants :</p>
             {$answer}
             <p>Pour retourner à la liste de tes domaines, cliques <a href='{$onboarding}' target='_blank'>ici</a>.</p>
-            <p>Pour découvrir comment corriger tes vulnérabilités et renforcer la sécurité de ton infrastructure, connecte-toi à Cywise :</p>
+            <p>Pour découvrir comment corriger tes vulnérabilités et renforcer la sécurité de ton infrastructure, finalise ton inscription à Cywise :</p>
         ";
 
         $ctaLink = route('password.reset', ['token' => app(PasswordBroker::class)->createToken($user)]);
@@ -149,7 +150,7 @@ class EndVulnsScanListener extends AbstractListener
             <p>CyberBuddy</p>
         ";
 
-        self::sendEmail($to, $subject, "Bienvenue !", $beforeCta, $ctaLink, $ctaName, $afterCta);
+        self::sendEmail($from, $to, $subject, "Bienvenue !", $beforeCta, $ctaLink, $ctaName, $afterCta);
 
         // $controller = new AssetController();
         // $assets->each(fn(Asset $asset) => $controller->assetMonitoringEnds($asset));
@@ -158,7 +159,7 @@ class EndVulnsScanListener extends AbstractListener
         $trial->save();
     }
 
-    private static function sendEmail(string $to, string $subject, string $title, string $beforeCta, string $ctaLink = "", string $ctaName = "", string $afterCta = ""): ?array
+    public static function sendEmail(string $from, string $to, string $subject, string $title, string $beforeCta, string $ctaLink = "", string $ctaName = "", string $afterCta = ""): ?array
     {
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . config('towerify.sendgrid.api_key'),
@@ -187,7 +188,7 @@ class EndVulnsScanListener extends AbstractListener
                 ]
             ]],
             "from" => [
-                "email" => config('towerify.freshdesk.from_email'),
+                "email" => $from,
             ],
             "template_id" => "d-a7f35a5a052e4ac4b127d6f12034331d"
         ]);

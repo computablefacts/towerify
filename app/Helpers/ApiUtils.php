@@ -163,15 +163,15 @@ class ApiUtils
     }
 
     /** @deprecated */
-    public function chat_manual_demo(string $historyKey, ?string $collection, string $question): array
+    public function chat_manual_demo(string $historyKey, ?string $collection, string $question, bool $fallbackOnNextCollection = false): array
     {
         /** @var Prompt $prompt */
         $prompt = Prompt::where('name', 'default_chat')->firstOrfail();
         $promptHistory = Prompt::where('name', 'default_chat_history')->firstOrfail();
-        return $this->chat_manual($question, $collection, $historyKey, $prompt->template, $promptHistory->template, 10, 'fr');
+        return $this->chat_manual($question, $collection, $historyKey, $prompt->template, $promptHistory->template, 10, 'fr', $fallbackOnNextCollection);
     }
 
-    public function chat_manual(string $question, ?string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 10, string $lang = 'en'): array
+    public function chat_manual(string $question, ?string $collectionName, string $historyKey, string $prompt, string $historyPrompt, int $maxDocsUsed = 10, string $lang = 'en', bool $fallbackOnNextCollection = false): array
     {
         if (empty($collectionName)) {
             $collections = Collection::query()
@@ -198,7 +198,8 @@ class ApiUtils
             'history_prompt' => $historyPrompt,
             'max_docs_used' => $maxDocsUsed,
             'lang' => $lang,
-            'show_context' => true
+            'show_context' => true,
+            'fallback_on_next_collection' => $fallbackOnNextCollection,
         ]);
     }
 

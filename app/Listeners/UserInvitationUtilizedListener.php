@@ -2,9 +2,11 @@
 
 namespace App\Listeners;
 
+use App\Models\Prompt;
 use App\Models\Role;
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Konekt\User\Events\UserInvitationUtilized;
 
 class UserInvitationUtilizedListener extends AbstractListener
@@ -63,7 +65,37 @@ class UserInvitationUtilizedListener extends AbstractListener
                     }
                 }
                 $created->save();
+
+                // Set the user's prompts
+                $this->importPrompt($created, 'default_assistant', 'seeds/prompts/default_assistant.txt');
+                $this->importPrompt($created, 'default_chat', 'seeds/prompts/default_chat.txt');
+                $this->importPrompt($created, 'default_chat_history', 'seeds/prompts/default_chat_history.txt');
+                $this->importPrompt($created, 'default_debugger', 'seeds/prompts/default_debugger.txt');
             }
+        }
+    }
+
+    private function importPrompt(User $user, string $name, string $root)
+    {
+        $prompt = File::get(database_path($root));
+
+        /** @var Prompt $p */
+        $p = Prompt::where('created_by', $user->id)
+            ->where('name', $name)
+            ->first();
+
+        if (isset($p)) {
+            if ($p->created_at->equalTo($p->updated_at)) {
+                $p->update([
+                    'template' => $prompt,
+                ]);
+            }
+        } else {
+            $p = Prompt::create([
+                'created_by' => $user->id,
+                'name' => $name,
+                'template' => $prompt
+            ]);
         }
     }
 }

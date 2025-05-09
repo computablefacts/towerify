@@ -46,8 +46,9 @@ class QueryIssp extends AbstractLlmFunction
 
     protected function handle2(User $user, string $threadId, array $args): AbstractLlmFunction
     {
+        $fallbackOnNextCollection = $args['fallback_on_next_collection'] ?? false;
         $question = htmlspecialchars($args['question'] ?? '', ENT_QUOTES, 'UTF-8');
-        $response = ApiUtils::chat_manual_demo($threadId, null, $question);
+        $response = ApiUtils::chat_manual_demo($threadId, null, $question, $fallbackOnNextCollection);
 
         if ($response['error']) {
             $this->output = [
