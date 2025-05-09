@@ -257,8 +257,8 @@
             <div class="row">
               <div class="col align-content-center">
                 <a href="{{ route('home', ['tab' => 'ama2']) }}"
-                   class="form-control btn btn-primary text-white">
-                  {{ __('Démarrer une conversation >') }}
+                   class="btn btn-primary" style="width: 100%;">
+                  {{ __('Start Conversation >') }}
                 </a>
               </div>
             </div>
@@ -271,16 +271,22 @@
     <div class="card-body">
       <h6 class="card-title">{{ __('Filtrer la timeline par...') }}</h6>
       <div class="row">
-        <div class="col-2 d-flex align-items-center justify-content-end">
-          <b>Actif</b>
+        <div class="col-4">
+          <b>{{ __('Category') }}</b>
+        </div>
+        <div class="col-4">
+          <b>{{ __('Asset') }}</b>
         </div>
         <div class="col">
-          <div id="assets"></div>
+          <b>{{ __('Date') }}</b>
         </div>
       </div>
-      <div class="row" style="margin-top: 16px;">
-        <div class="col-2 d-flex align-items-center justify-content-end">
-          <b>Date</b>
+      <div class="row" style="margin-top: 5px;">
+        <div class="col-4">
+          <div id="categories"></div>
+        </div>
+        <div class="col-4">
+          <div id="assets"></div>
         </div>
         <div class="col">
           <div id="dates"></div>
@@ -318,83 +324,6 @@
       </ol>
       @endif
       @endforeach
-      <!--
-      <div style="display: flex; align-items: center; gap: 15px; margin: 15px 0;">
-        <hr style="flex: 1; margin: 0;">
-        <div>2 mai 2025</div>
-        <hr style="flex: 1; margin: 0;">
-      </div>
-      <ol class="timeline">
-        <li class="timeline-item">
-          <span class="timeline-item-hour">
-            <span style="margin-left: -92px">15h30</span>
-          </span>
-          <span class="timeline-item-icon | faded-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" d="M0 0h24v24H0z"/>
-              <path fill="currentColor"
-                    d="M12.9 6.858l4.242 4.243L7.242 21H3v-4.243l9.9-9.9zm1.414-1.414l2.121-2.122a1 1 0 0 1 1.414 0l2.829 2.829a1 1 0 0 1 0 1.414l-2.122 2.121-4.242-4.242z"/>
-            </svg>
-          </span>
-          <div class="timeline-item-description">
-            <span><a href="#">Pierre</a> a rejoint <a href="#">l'équipe</a></span>
-          </div>
-        </li>
-      </ol>
-      <div style="display: flex; align-items: center; gap: 15px; margin: 15px 0;">
-        <hr style="flex: 1; margin: 0;">
-        <div>1er mai 2025</div>
-        <hr style="flex: 1; margin: 0;">
-      </div>
-      <ol class="timeline">
-        <li class="timeline-item">
-          <span class="timeline-item-hour">
-            <span style="margin-left: -92px">12h30</span>
-          </span>
-          <span class="timeline-item-icon | faded-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" d="M0 0h24v24H0z"/>
-              <path fill="currentColor" d="M12 13H4v-2h8V4l8 8-8 8z"/>
-            </svg>
-          </span>
-          <div class="timeline-item-description">
-            <span><a href="#">Cyrille</a> a invité <a href="#">Pierre</a> à rejoindre <a href="#">l'équipe</a></span>
-          </div>
-        </li>
-        <li class="timeline-item | extra-space">
-          <span class="timeline-item-hour">
-            <span style="margin-left: -92px">9h00</span>
-          </span>
-          <span class="timeline-item-icon | filled-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path fill="none" d="M0 0h24v24H0z"/>
-              <path fill="currentColor"
-                    d="M6.455 19L2 22.5V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6.455zM7 10v2h2v-2H7zm4 0v2h2v-2h-2zm4 0v2h2v-2h-2z"/>
-            </svg>
-          </span>
-          <div class="timeline-item-wrapper">
-            <div class="timeline-item-description">
-              <span><a href="#">CyberBuddy</a> a découvert une nouvelle vulnérabilité</span>
-            </div>
-            <div class="comment">
-              <p><b>File 'api/error_log' accessible (criticité moyenne)</b></p>
-              <p><b>Actif concerné.</b> L'actif concerné est hf5y-rhal-8tr4.cywise.io pointant vers le serveur
-                51.15.140.162. Le port 443 de ce serveur est ouvert et expose un service http (nginx).</p>
-              <p><b>Description détaillée.</b> Le fichier potentiellement dangereux api/error_log (taille : 54) est
-                accessible au public à l'adresse URL : https://hf5y-rhal-8tr4.cywise.io/api/error_log</p>
-            </div>
-            <button class="show-replies">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-arrow-forward" width="44"
-                   height="44" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                   stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M15 11l4 4l-4 4m4 -4h-11a4 4 0 0 1 0 -8h1"/>
-              </svg>
-              Partagé 3 fois
-            </button>
-        </li>
-      </ol>
-      -->
     </div>
   </div>
 </div>
@@ -415,6 +344,7 @@
   /* FILTERS */
   const elDates = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('dates'));
   elDates.items = @json($dates);
+  elDates.disabled = elDates.items.length === 0;
   elDates.onSelectionChange(item => {
     const url = new URL(window.location);
     if (item) {
@@ -433,6 +363,7 @@
   const elAssets = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('assets'),
     asset => asset.name, asset => `${asset.high} high - ${asset.medium} medium - ${asset.low} low`);
   elAssets.items = @json($assets);
+  elAssets.disabled = elAssets.items.length === 0;
   elAssets.onSelectionChange(item => {
     const url = new URL(window.location);
     if (item) {
@@ -446,6 +377,24 @@
 
   if ('{{ $assetId }}' > 0) {
     elAssets.selectedItem = elAssets.items.find(asset => asset.id == '{{ $assetId }}');
+  }
+
+  const elCategories = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('categories'));
+  elCategories.items = @json($categories);
+  elCategories.disabled = elCategories.items.length === 0;
+  elCategories.onSelectionChange(item => {
+    const url = new URL(window.location);
+    if (item) {
+      url.searchParams.set('category', item);
+    } else {
+      url.searchParams.set('category', '');
+    }
+    window.location.href = url.toString();
+  });
+  elCategories.defaultText = "{{ __('Select a category...') }}";
+
+  if ('{{ $categoryId }}' !== '') {
+    elCategories.selectedItem = elCategories.items.find(date => date === '{{ $categoryId }}');
   }
 
   /* NOTES */
@@ -568,6 +517,23 @@
       }
       return response;
     });
+  }
+
+  const deleteConversation = (conversationId) => {
+
+    const response = confirm("{{ __('Are you sure you want to delete this conversation?') }}");
+
+    if (response) {
+      axios.delete(`/conversations/${conversationId}`).then(function (response) {
+        if (response.data.success) {
+          toaster.toastSuccess(response.data.success);
+        } else if (response.data.error) {
+          toaster.toastError(response.data.error);
+        } else {
+          console.log(response.data);
+        }
+      }).catch(error => toaster.toastAxiosError(error));
+    }
   }
 
 </script>

@@ -61,7 +61,7 @@ class EndVulnsScanListener extends AbstractListener
 
         unset($output);
 
-        $onboarding = route('public.cywise.onboarding', ['hash' => $trial->hash, 'step' => 5]);
+        $onboarding = route('cyber-check.cywise.onboarding', ['hash' => $trial->hash, 'step' => 5]);
         $alerts = $assets->flatMap(fn(Asset $asset) => $asset->alerts()->get())->filter(fn(Alert $alert) => $alert->is_hidden === 0);
         $alertsHigh = $alerts->filter(fn(Alert $alert) => $alert->level === 'High');
         $alertsMedium = $alerts->filter(fn(Alert $alert) => $alert->level === 'Medium');
@@ -187,7 +187,7 @@ class EndVulnsScanListener extends AbstractListener
                 ]
             ]],
             "from" => [
-                "email" => Str::replace('computablefacts.com', 'cywise.io', config('towerify.admin.email')),
+                "email" => config('towerify.freshdesk.from_email'),
             ],
             "template_id" => "d-a7f35a5a052e4ac4b127d6f12034331d"
         ]);

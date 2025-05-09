@@ -4,7 +4,7 @@
 <p>Si vous décidez d'aller plus loin, la solution Cywise vous offre la possibilité de configurer des honeypots sur vos
   propres domaines et sous-domaines !</p>
 @include('cywise._loader', [ 'title' => 'La création de vos honeypots est en cours...', 'subtitle' => 'Compter environ 60 secondes' ])
-<form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 4 ]) }}" method="post">
+<form action="{{ route('cyber-check.cywise.onboarding', [ 'hash' => $hash, 'step' => 4 ]) }}" method="post">
   @csrf
   <div class="button-group">
     <button class="back-button" name="action" value="back">

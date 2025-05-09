@@ -5,6 +5,8 @@ namespace App\View\Components;
 use App\Helpers\Messages;
 use App\Models\Alert;
 use App\Models\Asset;
+use App\Models\Conversation;
+use App\Models\Port;
 use App\Models\PortTag;
 use App\Models\TimelineItem;
 use App\Models\YnhOsquery;
@@ -13,7 +15,6 @@ use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -21,6 +22,13 @@ use Illuminate\View\Component;
 
 class Timeline extends Component
 {
+    const string CATEGORY_ALL = 'all';
+    const string CATEGORY_EVENTS = 'events';
+    const string CATEGORY_ASSETS = 'assets';
+    const string CATEGORY_NOTES = 'notes';
+    const string CATEGORY_VULNERABILITIES = 'vulnerabilities';
+    const string CATEGORY_CONVERSATIONS = 'conversations';
+
     public string $todaySeparator;
     public array $messages;
 
@@ -30,6 +38,8 @@ class Timeline extends Component
     public array $dates;
     public string $dateId;
     public int $minScore;
+    public array $categories;
+    public string $categoryId;
 
     public static function newSeparator(Carbon $date): string
     {
@@ -46,14 +56,12 @@ class Timeline extends Component
         $timestamp = $item->timestamp->utc()->format('Y-m-d H:i:s');
         $date = Str::before($timestamp, ' ');
         $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
-        $attributes = $item->attributes();
 
         return \Illuminate\Support\Facades\View::make('cywise._timeline-item-note', [
             'date' => $date,
             'time' => $time,
-            'title' => "<a href='#'>{$user->name}</a> a créé une <a href='#'>note</a>",
-            'note' => $attributes['content'] ?? '',
-            'noteId' => $item->id,
+            'user' => $user,
+            'note' => $item,
         ])->render();
     }
 
@@ -66,21 +74,15 @@ class Timeline extends Component
         return \Illuminate\Support\Facades\View::make('cywise._timeline-item-asset', [
             'date' => $date,
             'time' => $time,
-            'title' => "<a id='aid-{$asset->id}' href='#'>{$asset->createdBy()->name}</a> a ajouté l'actif <a href='#'>{$asset->asset}</a>",
-            'assetId' => $asset->id,
-            'isMonitored' => $asset->is_monitored,
+            'asset' => $asset,
         ])->render();
     }
 
-    public static function newVulnerability(User $user, Alert $alert): string
+    public static function newVulnerability(User $user, Alert $alert, Asset $asset, Port $port): string
     {
         $timestamp = $alert->updated_at->utc()->format('Y-m-d H:i:s');
         $date = Str::before($timestamp, ' ');
         $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
-
-        $txtColor = "var(--c-grey-400)";
-        $bgColor = "rgba(125, 188, 255, 0.6)";
-        $level = "(niveau inconnu)";
 
         if ($alert->level === 'High') {
             $txtColor = "white";
@@ -94,35 +96,28 @@ class Timeline extends Component
             $txtColor = "white";
             $bgColor = "#4bd28f";
             $level = "(criticité basse)";
+        } else {
+            $txtColor = "var(--c-grey-400)";
+            $bgColor = "rgba(125, 188, 255, 0.6)";
+            $level = "(niveau inconnu)";
         }
 
-        $title = empty($alert->cve_id) ? "<a href='#aid-{$alert->asset()?->id}'>{$alert->asset()?->asset}</a> - {$alert->title} $level" : "<a href='#'>{$alert->asset()?->asset}</a> - {$alert->cve_id} / {$alert->title} $level";
-        $asset = "<p><b>Actif.</b> L'actif concerné est {$alert->asset()?->asset} pointant vers le serveur {$alert->port()?->ip}. Le port {$alert->port()?->port} de ce serveur est ouvert et expose un service {$alert->port()?->service} ({$alert->port()?->product}).</p>";
-        $vulnerability = "<p><b>Problème</b>. {$alert->vulnerability}</p>";
-        $remediation = "<p><b>Solution</b>. {$alert->remediation}</p>";
-        $cve = empty($alert->cve_id) ? "" : "<p><b>Note.</b> Cette vulnérabilité a pour identifiant <a href=\"https://nvd.nist.gov/vuln/detail/{$alert->cve_id}\">{$alert->cve_id}</a>.</p>";
-        $tags = "<div><span class='lozenge new'>" . $alert->port()
+        $tags = "<div><span class='lozenge new' style='font-size: 0.8rem;margin-top: 3px;'>" . $port
                 ->tags()
                 ->get()
                 ->map(fn(PortTag $tag) => Str::lower($tag->tag))
-                ->join("</span>&nbsp;<span class='lozenge new' style='font-size: 0.8rem;'>") . "</span></div>";
+                ->join("</span>&nbsp;<span class='lozenge new' style='font-size: 0.8rem;margin-top: 3px;'>") . "</span></div>";
 
         return \Illuminate\Support\Facades\View::make('cywise._timeline-item-vulnerability', [
             'date' => $date,
             'time' => $time,
             'txtColor' => $txtColor,
             'bgColor' => $bgColor,
-            'title' => $title,
-            'asset' => $asset,
-            'vulnerability' => $vulnerability,
-            'remediation' => $remediation,
-            'cve' => $cve,
+            'level' => $level,
             'tags' => $tags,
-            'assetId' => $alert->asset()?->id,
-            'filterByUid' => $alert->uid,
-            'filterByType' => $alert->type,
-            'filterByTitle' => $alert->title,
-            'vulnerabilityId' => $alert->id,
+            'alert' => $alert,
+            'asset' => $asset,
+            'port' => $port,
         ])->render();
     }
 
@@ -144,9 +139,20 @@ class Timeline extends Component
             'time' => $time,
             'txtColor' => $txtColor,
             'bgColor' => $bgColor,
-            'title' => "<a href='#'>{$event->server_name}</a> - {$event->comments}",
-            'data' => $event->columns,
-            'eventId' => $event->id,
+            'event' => $event,
+        ])->render();
+    }
+
+    public static function newConversation(User $user, Conversation $conversation): string
+    {
+        $timestamp = $conversation->updated_at->utc()->format('Y-m-d H:i:s');
+        $date = Str::before($timestamp, ' ');
+        $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+        return \Illuminate\Support\Facades\View::make('cywise._timeline-item-conversation', [
+            'date' => $date,
+            'time' => $time,
+            'conversation' => $conversation,
         ])->render();
     }
 
@@ -157,25 +163,37 @@ class Timeline extends Component
         $params = request()->query();
         $this->assetId = (int)($params['asset_id'] ?? 0);
         $this->dateId = $params['date'] ?? '';
+        $this->categoryId = $params['category'] ?? self::CATEGORY_ALL;
         $this->minScore = $params['min_score'] ?? 30;
         $this->todaySeparator = self::newSeparator(Carbon::now());
+        $this->categories = [
+            self::CATEGORY_ALL,
+            self::CATEGORY_ASSETS,
+            self::CATEGORY_CONVERSATIONS,
+            self::CATEGORY_EVENTS,
+            self::CATEGORY_NOTES,
+            self::CATEGORY_VULNERABILITIES,
+        ];
 
-        $this->assets = Asset::query()
-            ->orderBy('asset')
-            ->get()
-            ->map(fn(Asset $asset) => [
-                'id' => $asset->id,
-                'name' => $asset->asset,
-                'high' => $asset->alerts()->where('level', 'High')->count(),
-                'medium' => $asset->alerts()->where('level', 'Medium')->count(),
-                'low' => $asset->alerts()->where('level', 'Low')->count(),
-            ])
-            ->toArray();
+        $messages = collect();
 
-        $this->messages = $this->assets($user)
-            ->concat($this->notes($user))
-            ->concat($this->vulnerabilities($user))
-            ->concat($this->events($user))
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_ASSETS) {
+            $messages = $messages->concat($this->assets($user));
+        }
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_EVENTS) {
+            $messages = $messages->concat($this->events($user));
+        }
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_NOTES) {
+            $messages = $messages->concat($this->notes($user));
+        }
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_VULNERABILITIES) {
+            $messages = $messages->concat($this->vulnerabilities($user));
+        }
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_CONVERSATIONS) {
+            $messages = $messages->concat($this->conversations($user));
+        }
+
+        $this->messages = $messages
             ->sortByDesc('timestamp')
             ->groupBy(fn(array $event) => $event['date'])
             ->mapWithKeys(function ($events, $timestamp) {
@@ -186,6 +204,26 @@ class Timeline extends Component
             ->toArray();
 
         $this->dates = array_keys($this->messages);
+
+        $this->assets = collect($this->messages)
+            ->values()
+            ->flatMap(fn(array $events) => array_values($events))
+            ->map(fn(array $events) => $events[0])
+            ->filter(fn(array $event) => isset($event['_asset']))
+            ->map(function (array $event) {
+                /** @var Asset $asset */
+                $asset = $event['_asset'];
+                return [
+                    'id' => $asset->id,
+                    'name' => $asset->asset,
+                    'high' => $asset->alerts()->where('level', 'High')->count(),
+                    'medium' => $asset->alerts()->where('level', 'Medium')->count(),
+                    'low' => $asset->alerts()->where('level', 'Low')->count(),
+                ];
+            })
+            ->sortBy('name')
+            ->values()
+            ->toArray();
     }
 
     public function render(): View|Closure|string
@@ -193,7 +231,29 @@ class Timeline extends Component
         return view('components.timeline');
     }
 
-    private function assets(User $user): Collection
+    private function conversations(User $user): array
+    {
+        return Conversation::query()
+            ->where('created_by', $user->id)
+            ->where('dom', '!=', '[]')
+            ->get()
+            ->map(function (Conversation $conversation) use ($user) {
+
+                $timestamp = $conversation->created_at->format('Y-m-d H:i:s');
+                $date = Str::before($timestamp, ' ');
+                $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+                return [
+                    'timestamp' => $timestamp,
+                    'date' => $date,
+                    'time' => $time,
+                    'html' => self::newConversation($user, $conversation),
+                ];
+            })
+            ->toArray();
+    }
+
+    private function assets(User $user): array
     {
         return Asset::query()
             ->when($this->assetId, fn($query, $assetId) => $query->where('id', $assetId))
@@ -209,14 +269,15 @@ class Timeline extends Component
                     'date' => $date,
                     'time' => $time,
                     'html' => self::newAsset($user, $asset),
+                    '_asset' => $asset,
                 ];
-            });
+            })
+            ->toArray();
     }
 
     private function notes(User $user): array
     {
         return TimelineItem::fetchItems($user->id, 'note', null, null, 0)
-            ->filter(fn(TimelineItem $item) => $this->assetId <= 0)
             ->map(function (TimelineItem $item) use ($user) {
 
                 $timestamp = $item->timestamp->format('Y-m-d H:i:s');
@@ -245,12 +306,14 @@ class Timeline extends Component
                 $timestamp = $alert->updated_at->format('Y-m-d H:i:s');
                 $date = Str::before($timestamp, ' ');
                 $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+                $asset = $alert->asset();
 
                 return [
                     'timestamp' => $timestamp,
                     'date' => $date,
                     'time' => $time,
-                    'html' => self::newVulnerability($user, $alert),
+                    'html' => self::newVulnerability($user, $alert, $asset, $alert->port()),
+                    '_asset' => $asset,
                 ];
             })
             ->toArray();
@@ -258,7 +321,7 @@ class Timeline extends Component
 
     private function events(User $user): array
     {
-        $cutOffTime = Carbon::now()->startOfDay()->subDays(3);
+        $cutOffTime = Carbon::now()->startOfDay()->subDay();
         return YnhOsquery::select([
             'ynh_osquery.*',
             DB::raw('ynh_servers.name AS server_name'),
@@ -268,11 +331,12 @@ class Timeline extends Component
             ->join('ynh_osquery_rules', 'ynh_osquery_rules.name', '=', 'ynh_osquery.name')
             ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_osquery.ynh_server_id')
             ->join('users', 'users.id', '=', 'ynh_servers.user_id')
-            ->when($this->assetId, fn($query, $assetId) => $query->whereRaw('1=0'))
             ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
             ->where('ynh_osquery_rules.enabled', true)
             ->where('ynh_osquery_rules.score', '>=', $this->minScore)
             ->where('users.tenant_id', Auth::user()->tenant_id)
+            ->when(Auth::user()->tenant_id, fn($query, int $tenantId) => $query->where('users.tenant_id', $tenantId))
+            ->when(Auth::user()->customer_id, fn($query, int $customerId) => $query->where('users.customer_id', $customerId))
             ->whereNotExists(function (Builder $query) {
                 $query->select(DB::raw(1))
                     ->from('v_dismissed')

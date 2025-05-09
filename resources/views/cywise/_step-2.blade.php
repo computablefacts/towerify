@@ -15,7 +15,7 @@
 </style>
 <h1>Sélection des sous-domaines</h1>
 @include('cywise._loader', [ 'title' => 'La découverte de vos sous-domaines est en cours...', 'subtitle' => 'Compter environ 60 secondes' ])
-<form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 3 ]) }}" method="post" class="hidden">
+<form action="{{ route('cyber-check.cywise.onboarding', [ 'hash' => $hash, 'step' => 3 ]) }}" method="post" class="hidden">
   @csrf
   <p class="msg">
     <!-- FILLED DYNAMICALLY -->
@@ -78,7 +78,7 @@
 
   elTermsCheckbox.addEventListener('change', toggleButtons);
 
-  fetch("{{ route('public.cywise.discovery', [ 'hash' => $hash ]) }}", {
+  fetch("{{ route('cyber-check.cywise.discovery', [ 'hash' => $hash ]) }}", {
     method: 'POST', headers: {
       'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}',
     }, body: JSON.stringify({'domain': '{{ $trial->domain }}'}),

@@ -7,7 +7,7 @@
     sécurité.</b></p>
 <p>Votre adresse e-mail ne sera jamais utilisée à des fins commerciales. Elle sert uniquement à vous transmettre le
   rapport.</p>
-<form action="{{ route('public.cywise.onboarding', [ 'hash' => $hash, 'step' => 5 ]) }}" method="post">
+<form action="{{ route('cyber-check.cywise.onboarding', [ 'hash' => $hash, 'step' => 5 ]) }}" method="post">
   @csrf
   <input type="email" placeholder="Votre adresse email ex. j.doe@cywise.io" name="email" value="{{ $trial->email }}">
   <button class="next-button-100p" name="action" value="next" type="submit">

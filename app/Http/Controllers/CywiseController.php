@@ -41,13 +41,13 @@ class CywiseController extends Controller
 
         // Deal with the "back" buttons
         if ($step === 3 && $request->get('action') == 'back') {
-            return redirect()->route('public.cywise.onboarding', ['hash' => $hash, 'step' => 1]);
+            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 1]);
         }
         if ($step === 4 && $request->get('action') == 'back') {
-            return redirect()->route('public.cywise.onboarding', ['hash' => $hash, 'step' => 2]);
+            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 2]);
         }
         if ($step === 5 && $request->get('action') == 'back') {
-            return redirect()->route('public.cywise.onboarding', ['hash' => $hash, 'step' => 3]);
+            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 3]);
         }
 
         // Load trial (if any)
@@ -57,7 +57,7 @@ class CywiseController extends Controller
         // Deal with parameters validation and state management
         if ($step === 2 && $request->get('action') == 'next') {
             $request->validate(['domain' => 'required|string|min:1|max:100']);
-            $trial->domain = $request->string('domain');
+            $trial->domain = Str::betweenFirst($request->string('domain'), '://', '/');
             $trial->save();
         }
         if ($step === 3 && $request->get('action') == 'next') {
@@ -128,7 +128,7 @@ class CywiseController extends Controller
                     'provider' => $honeypot->cloud_provider,
                     'query' => "UPDATE am_honeypots SET status = 'setup_complete' WHERE id = {$honeypot->id};",
                 ];
-                Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.admin.email'), config('towerify.admin.username'), $subject, $body));
+                Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.freshdesk.from_email'), 'Support', $subject, $body));
 
                 // HTTPS
                 /** @var Honeypot $honeypot */
@@ -145,7 +145,7 @@ class CywiseController extends Controller
                     'provider' => $honeypot->cloud_provider,
                     'query' => "UPDATE am_honeypots SET status = 'setup_complete' WHERE id = {$honeypot->id};",
                 ];
-                Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.admin.email'), config('towerify.admin.username'), $subject, $body));
+                Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.freshdesk.from_email'), 'Support', $subject, $body));
 
                 // SSH
                 /** @var Honeypot $honeypot */
@@ -162,7 +162,7 @@ class CywiseController extends Controller
                     'provider' => $honeypot->cloud_provider,
                     'query' => "UPDATE am_honeypots SET status = 'setup_complete' WHERE id = {$honeypot->id};",
                 ];
-                Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.admin.email'), config('towerify.admin.username'), $subject, $body));
+                Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.freshdesk.from_email'), 'Support', $subject, $body));
 
                 $trial->honeypots = true;
                 $trial->save();

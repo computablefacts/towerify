@@ -527,9 +527,9 @@ Route::get('/subscribe/success/{tx_id}', 'StripeController@subscribed')->name('s
 Route::get('/customer-portal', 'StripeController@customerPortal')->middleware('auth')->name('customer-portal');
 Route::get('/invitation', fn() => new \App\Mail\Invitation(\App\Models\Invitation::query()->latest()->first()))->middleware('auth');
 
-Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
+Route::group(['prefix' => 'cyber-check', 'as' => 'cyber-check.'], function () {
 
-    Route::get('/', fn() => redirect()->route('public.cywise.onboarding', [
+    Route::get('/', fn() => redirect()->route('cyber-check.cywise.onboarding', [
         'hash' => Str::random(128),
         'step' => 1,
     ]));

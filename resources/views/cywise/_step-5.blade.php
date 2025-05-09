@@ -28,14 +28,14 @@
   }
 
   .left {
-    width: 50%;
+    width: 40%;
     display: flex;
     align-items: center;
     justify-content: start;
   }
 
   .right {
-    width: 50%;
+    width: 60%;
     display: flex;
     align-items: center;
     justify-content: end;
@@ -220,7 +220,7 @@
 
     let portsStr = ports.map(port => `
       <tr>
-        <td style="float:right">${port.port}</td>
+        <td style="text-align:right">${port.port}</td>
         <td>${port.services[0] ? port.services[0].slice(0, 7) + (port.services[0].length > 7 ? '...' : '') : 'n/a'}</td>
         <td>${port.products[0] ? port.products[0].slice(0, 7) + (port.products[0].length > 7 ? '...' : '') : 'n/a'}</td>
         <td>
@@ -253,7 +253,7 @@
     let vulnsStr = vulnerabilities.map(vuln => `
       <tr>
         <td style="float:right">${vuln.port}</td>
-        <td><span class="dot ${vuln.level}"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title2}` : vuln.title}</td>
+        <td><span class="dot ${vuln.level}"></span> ${vuln.cve_id ? `${vuln.cve_id} - ${vuln.title}` : vuln.title}</td>
       </tr>
     `).join("");
 
@@ -368,7 +368,7 @@
             <img src="https://www.svgrepo.com/show/12134/info-circle.svg" width="18" height="18">
           </a>
           <span style="padding-left:var(--spacing-medium)">
-            ${asset.asset.slice(0, 27) + (asset.asset.length > 27 ? '...' : '')}
+            ${asset.asset.slice(0, 20) + (asset.asset.length > 20 ? '...' : '')}
           </span>
         </div>
         <div class="right">

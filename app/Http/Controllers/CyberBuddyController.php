@@ -241,7 +241,7 @@ class CyberBuddyController extends Controller
         if (isset($blocks) && count($blocks) > 0) {
             if ($id === 0) {
                 $template = Template::create([
-                    'name' => $name,
+                    'name' => Str::replace('v', '', $name),
                     'template' => $blocks,
                     'readonly' => $model,
                 ]);

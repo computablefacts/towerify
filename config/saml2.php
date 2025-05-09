@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'retrieveParametersFromServer' => false,
+    'retrieveParametersFromServer' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -346,6 +346,20 @@ return [
         */
 
         'requestedAuthnContext' => true,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Lowercase Urlencoding.
+        |--------------------------------------------------------------------------
+        |
+        | ADFS URL-Encodes SAML data as lowercase, and the toolkit by default uses
+        | uppercase.
+        |
+        | Turn it True for ADFS compatibility on signature verification
+        |
+        */
+
+        'lowercaseUrlencoding' => true,
     ],
 
     /*
