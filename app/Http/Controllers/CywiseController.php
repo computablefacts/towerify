@@ -212,4 +212,9 @@ class CywiseController extends Controller
         $controller = new AssetController();
         return $controller->discover($request)['subdomains'];
     }
+
+    public function onboarding2(Request $request)
+    {
+        return view('cywise.cywise2', []);
+    }
 }

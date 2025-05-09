@@ -1,6 +1,3 @@
-<style>
-
-</style>
 <h1>Analyse de votre domaine</h1>
 <p>Bonjour, je suis CyberBuddy, votre assistant en cybersécurité ! C'est moi qui vais vous accompagner tout au long de
   votre analyse. Entrez simplement le nom de domaine que vous souhaitez auditer. Je vais m'occuper du reste pour

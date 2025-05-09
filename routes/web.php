@@ -539,6 +539,12 @@ Route::group(['prefix' => 'cyber-check', 'as' => 'cyber-check.'], function () {
 
 })->middleware(['auth']);
 
+Route::group(['prefix' => 'cyber-advisor', 'as' => 'cyber-advisor.'], function () {
+
+    Route::match(['get', 'post'], '/', 'CywiseController@onboarding2')->name('cywise2.onboarding');
+
+})->middleware(['auth']);
+
 Route::get('/the-cyber-brief', 'TheCyberBriefController@index')->name('the-cyber-brief');
 
 Route::post('/llm1', 'CyberBuddyController@llm1')->middleware('auth');
