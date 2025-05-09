@@ -170,7 +170,7 @@ class EndVulnsScanListener extends AbstractListener
                 ]],
                 "dynamic_template_data" => [
                     "sender" => [
-                        "name" => "ComputableFacts",
+                        "name" => config('app.name'),
                         "address" => "178 boulevard Haussmann",
                         "city" => "Paris",
                         "country" => "France",
