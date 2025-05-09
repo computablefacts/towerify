@@ -464,9 +464,10 @@ Route::get('/home', 'HomeController@index')->name('home')->middleware([RedirectI
 
 Route::get('/terms', 'TermsController@show')->name('terms');
 
-Route::post('/reset-password', function () {
+Route::get('/reset-password', function () {
     $email = \Illuminate\Support\Facades\Auth::user()->email;
-    return view('auth.passwords.email', compact('email'));
+    Auth::logout();
+    return redirect()->route('password.request', ['email' => $email]);
 })->middleware(['auth', RedirectIfNotSubscribed::class])->name('reset-password');
 
 Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {

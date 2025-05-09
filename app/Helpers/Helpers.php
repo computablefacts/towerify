@@ -372,7 +372,6 @@ if (!function_exists('app_sidebar')) {
                             'label' => __('Reset Password'),
                             'route' => route('reset-password'),
                             'active' => request()->route()->named('reset-password'),
-                            'post_form' => true,
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_RESET_PASSWORD),
                         ]
                     ]
