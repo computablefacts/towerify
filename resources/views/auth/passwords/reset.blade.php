@@ -15,7 +15,7 @@
     <div class="col-md-8">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">{{ __('Reset Password') }}</h5>
+          <h5 class="card-title">{{ $reason ?? __('Reset Password') }}</h5>
           <form method="POST" action="{{ route('password.update') }}">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}">
@@ -78,7 +78,7 @@
             <div class="mb-3 row mb-0">
               <div class="col-md-6 offset-md-4">
                 <button type="submit" class="btn btn-primary">
-                  {{ __('Reset Password') }}
+                  {{ $action ?? __('Reset Password') }}
                 </button>
               </div>
             </div>
