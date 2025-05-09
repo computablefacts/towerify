@@ -57,7 +57,7 @@ class EndVulnsScanListener extends AbstractListener
                 ];
             })
             ->values();
-        $msgLeaks = $leaks->isNotEmpty() ? "<li><b>{$leaks->count()}</b> identifiants compromis appartenant au domaine {$assets->first()->tld}.</li>" : "";
+        $msgLeaks = $leaks->isNotEmpty() ? "<li>J'ai trouvé <b>{$leaks->count()}</b> identifiants compromis appartenant au domaine {$assets->first()->tld}.</li>" : "";
 
         unset($output);
 
@@ -69,9 +69,9 @@ class EndVulnsScanListener extends AbstractListener
         $nbServers = $alerts->map(fn(Alert $alert) => $alert->port()->ip)->unique()->count();
         $from = config('towerify.freshdesk.from_email');
         $to = $user->email;
-        $msgHigh = $alertsHigh->isNotEmpty() ? "<li><b>{$alertsHigh->count()}</b> sont des vulnérabilités critiques et <b>doivent</b> être corrigées.</li>" : "";
-        $msgMedium = $alertsMedium->isNotEmpty() ? "<li><b>{$alertsMedium->count()}</b> sont des vulnérabilités de criticité moyenne et <b>devraient</b> être corrigées.</li>" : "";
-        $msgLow = $alertsLow->isNotEmpty() ? "<li><b>{$alertsLow->count()}</b> sont des vulnérabilités de criticité basse et ne posent pas un risque de sécurité immédiat.</li>" : "";
+        $msgHigh = $alertsHigh->isNotEmpty() ? "<li>J'ai trouvé <b>{$alertsHigh->count()}</b> vulnérabilités critiques qui <b>doivent</b> être corrigées.</li>" : "";
+        $msgMedium = $alertsMedium->isNotEmpty() ? "<li>J'ai trouvé <b>{$alertsMedium->count()}</b> vulnérabilités de criticité moyenne qui <b>devraient</b> être corrigées.</li>" : "";
+        $msgLow = $alertsLow->isNotEmpty() ? "<li>J'ai trouvé <b>{$alertsLow->count()}</b> vulnérabilités de criticité basse qui ne posent pas un risque de sécurité immédiat.</li>" : "";
         $answer = $alertsHigh->concat($alertsMedium)
             ->concat($alertsLow)
             ->map(function (Alert $alert) {
@@ -140,7 +140,12 @@ class EndVulnsScanListener extends AbstractListener
             <p>Pour découvrir comment corriger tes vulnérabilités et renforcer la sécurité de ton infrastructure, finalise ton inscription à Cywise :</p>
         ";
 
-        $ctaLink = route('password.reset', ['token' => app(PasswordBroker::class)->createToken($user)]);
+        $ctaLink = route('password.reset', [
+            'token' => app(PasswordBroker::class)->createToken($user),
+            'email' => $user->email,
+            'reason' => 'Finalisez votre inscription en créant un mot de passe',
+            'action' => 'Créer mon mot de passe',
+        ]);
 
         $ctaName = "je me connecte à Cywise";
 
