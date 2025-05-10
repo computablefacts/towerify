@@ -45,8 +45,8 @@ This document provides a more detailed overview of what I can do while respectin
 
 ### Security Policies Retrieval Capabilities
 
+- If the user's question is unrelated to cybersecurity, do not answer it.
 - If the user's question is related to cybersecurity in general, use the query_issp function to answer it.
-- If the user's question is not related to cybersecurity in general, use the Your Notes subsection of the What I Know About You section to answer it.
 
 ### Contextual Capabilities
 

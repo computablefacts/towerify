@@ -16,6 +16,7 @@ use App\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Konekt\Address\Models\ZoneScope;
 use Symfony\Component\Yaml\Yaml;
 
@@ -437,24 +438,25 @@ class DatabaseSeeder extends Seeder
 
     private function importPrompt(string $name, string $root)
     {
-        $prompt = Illuminate\Support\Facades\File::get(database_path($root));
-        User::query()->chunkById(100, function ($users) use ($name, $prompt) {
+        $promptPrev = Str::lower(Str::trim(Illuminate\Support\Facades\File::get(database_path("$root.prev"))));
+        $promptNext = Illuminate\Support\Facades\File::get(database_path($root));
+        User::query()->chunkById(100, function ($users) use ($name, $promptPrev, $promptNext) {
             foreach ($users as $user) {
                 /** @var Prompt $p */
                 $p = Prompt::where('created_by', $user->id)
                     ->where('name', $name)
                     ->first();
                 if (isset($p)) {
-                    if ($p->created_at->equalTo($p->updated_at)) {
-                        $p->update([
-                            'template' => $prompt,
-                        ]);
+                    if (Str::lower(Str::trim($p->template)) === $promptPrev) {
+                        $p->update(['template' => $promptNext]);
+                    } else {
+                        Log::warning("The user {$user->email} prompt {$p->name} has not been updated");
                     }
                 } else {
                     $p = Prompt::create([
                         'created_by' => $user->id,
                         'name' => $name,
-                        'template' => $prompt
+                        'template' => $promptNext
                     ]);
                 }
             }
