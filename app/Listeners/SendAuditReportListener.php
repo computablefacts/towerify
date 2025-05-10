@@ -25,7 +25,7 @@ class SendAuditReportListener extends AbstractListener
         $report = AuditReport::create();
 
         if (!$report['is_empty']) {
-            Mail::to($user->email)->bcc(config('towerify.freshdesk.from_email'))->send($report['report']);
+            Mail::to($user->email)->send($report['report']);
         }
     }
 }
