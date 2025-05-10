@@ -21,7 +21,7 @@
       </span>
     </div>
     <div class="comment">
-      {{ $note->attributes()['content'] ?? '' }}
+      {{ $note->attributes()['body'] ?? '' }}
     </div>
     <div style="display: flex; gap: 10px;">
       <button class="show-replies" title="{{ __('Delete') }}" onclick="deleteNote('{{ $note->id }}')">

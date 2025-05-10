@@ -95,7 +95,7 @@ class CyberBuddyNextGenController extends Controller
             $openPorts = $fnOpenPorts->text();
 
             $notes = TimelineItem::fetchNotes($user->id, null, null, 0)
-                ->map(fn(TimelineItem $note) => "- {$note->timestamp->format('Y-m-d H:i:s')} : {$note->attributes()['content']}")
+                ->map(fn(TimelineItem $note) => "- {$note->timestamp->format('Y-m-d H:i:s')} : {$note->attributes()['body']}")
                 ->join("\n");
 
             // Load the prompt

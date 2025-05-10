@@ -10,6 +10,7 @@ use App\Models\File;
 use App\Models\Invitation;
 use App\Models\Role;
 use App\Models\Tenant;
+use App\Models\TimelineItem;
 use App\Models\YnhFramework;
 use App\Rules\IsValidCollectionName;
 use App\User;
@@ -31,7 +32,8 @@ class ProcessIncomingEmails implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    const string SENDER = 'cyberbuddy@cywise.io';
+    const string SENDER_CYBERBUDDY = 'cyberbuddy@cywise.io';
+    const string SENDER_MEMEX = 'memex@cywise.io';
 
     public $tries = 1;
     public $maxExceptions = 1;
@@ -69,8 +71,10 @@ class ProcessIncomingEmails implements ShouldQueue
                     $from = $message->getFrom()->all();
                     $cc = $message->getCc()->all();
                     $bcc = $message->getBcc()->all();
+                    $isCyberBuddy = collect($to)->contains(self::SENDER_CYBERBUDDY);
+                    $isMemex = collect($to)->contains(self::SENDER_MEMEX);
 
-                    if (!collect($to)->contains(self::SENDER)) {
+                    if (!$isCyberBuddy && !$isMemex) {
                         continue;
                     }
                     if (count($from) !== 1) {
@@ -84,48 +88,7 @@ class ProcessIncomingEmails implements ShouldQueue
                     $address = $from[0];
 
                     // Create shadow profile
-                    /** @var User $user */
-                    $user = User::where('email', $address->mail)->first();
-                    if ($user) {
-                        Auth::login($user); // otherwise the tenant will not be properly set
-                    } else {
-                        /** @var Invitation $invitation */
-                        $invitation = Invitation::where('email', $address->mail)->first();
-
-                        if (!$invitation) {
-                            $invitation = InvitationProxy::createInvitation($address->mail, "J. Doe");
-                        }
-
-                        /** @var Tenant $tenant */
-                        $tenant = Tenant::create(['name' => Str::random()]);
-                        $user = $invitation->createUser([
-                            'password' => Str::random(64),
-                            'tenant_id' => $tenant->id,
-                            'type' => UserType::CLIENT(),
-                            'terms_accepted' => true,
-                        ]);
-
-                        $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
-
-                        Auth::login($user); // otherwise the tenant will not be properly set
-
-                        // Create shadow collections for some frameworks
-                        $frameworks = \App\Models\YnhFramework::all();
-
-                        foreach ($frameworks as $framework) {
-                            if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
-                                $this->importFramework($framework, 20);
-                            } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
-                                $this->importFramework($framework, 10);
-                            } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
-                                $this->importFramework($framework, 30);
-                            } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
-                                $this->importFramework($framework, 50);
-                            } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
-                                $this->importFramework($framework, 40);
-                            }
-                        }
-                    }
+                    $user = $this->getOrCreateUser($address->mail);
 
                     // Ensure all prompts are properly loaded
                     /* if (Prompt::count() >= 4) {
@@ -138,85 +101,10 @@ class ProcessIncomingEmails implements ShouldQueue
                     if (File::where('is_deleted', false)->get()->contains(fn(File $file) => !$file->is_embedded)) {
                         Log::warning($message->getSubject());
                         Log::warning("Some collections are not ready yet. Skipping email processing for now.");
-                        continue;
-                    }
-
-                    // Extract the thread id in order to be able to load the existing conversation
-                    // If the thread id cannot be found, a new conversation is created
-                    $threadId = null;
-                    $matches = [];
-                    preg_match_all("/\s*thread_id=(?<threadid>[a-zA-Z0-9]{10})\s*/i", $message->getTextBody(), $matches, PREG_SET_ORDER);
-
-                    foreach ($matches as $match) {
-                        if (!empty($match['threadid'])) {
-                            $threadId = $match['threadid'];
-                            break;
-                        }
-                    }
-                    if (empty($threadId)) {
-                        $threadId = Str::random(10);
-                    }
-
-                    /** @var Conversation $conversation */
-                    $conversation = Conversation::where('thread_id', $threadId)
-                        ->where('format', Conversation::FORMAT_V1)
-                        ->where('created_by', $user?->id)
-                        ->first();
-
-                    $conversation = $conversation ?? Conversation::create([
-                        'thread_id' => $threadId,
-                        'dom' => json_encode([]),
-                        'autosaved' => true,
-                        'created_by' => $user?->id,
-                        'format' => Conversation::FORMAT_V1,
-                    ]);
-
-                    // Remove previous messages i.e. rows starting with >
-                    $body = trim(preg_replace("/^(>.*)|(On\s+.*\s+wrote:)[\n\r]?$/im", '', $message->getTextBody()));
-
-                    Log::debug('subject=' . $message->getSubject()->all()[0]);
-                    Log::debug('body=' . $body);
-
-                    // Call CyberBuddy
-                    $request = new ConverseRequest();
-                    $request->replace([
-                        'thread_id' => $threadId,
-                        'directive' => $body,
-                    ]);
-
-                    $controller = new CyberBuddyNextGenController();
-                    $response = $controller->converse($request, true);
-                    $json = json_decode($response->content(), true);
-                    $subject = $message->getSubject()[0];
-                    $body = $json['answer']['html'] ?? '';
-
-                    EndVulnsScanListener::sendEmail(
-                        self::SENDER,
-                        $address->mail,
-                        "Re: {$subject}",
-                        "CyberBuddy vous répond !",
-                        "
-                            {$body}
-                            <p>Pour importer tes propres documents et profiter pleinement des capacités de CyberBuddy, ton assistant Cyber, finalise ton inscription à Cywise :</p>
-                        ",
-                        route('password.reset', [
-                            'token' => app(PasswordBroker::class)->createToken($user),
-                            'email' => $user->email,
-                            'reason' => 'Finalisez votre inscription en créant un mot de passe',
-                            'action' => 'Créer mon mot de passe',
-                        ]),
-                        "je me connecte à Cywise",
-                        "
-                          <p>Je reste à ta disposition pour toute question ou assistance supplémentaire. Merci encore pour ta confiance en Cywise !</p>
-                          <p>Bien à toi,</p>
-                          <p>CyberBuddy</p>
-                          <span style='color:white'>thread_id={$threadId}</span>
-                        ",
-                    );
-
-                    if (!$message->move('CyberBuddy')) {
-                        Log::error($message->getSubject());
-                        Log::error('Message could not be moved!');
+                    } else if ($isCyberBuddy) {
+                        $this->cyberBuddy($user, $message);
+                    } else if ($isMemex) {
+                        $this->memex($user, $message);
                     }
                 }
             }
@@ -226,6 +114,54 @@ class ProcessIncomingEmails implements ShouldQueue
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
         }
+    }
+
+    private function getOrCreateUser(string $email): User
+    {
+        /** @var User $user */
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            Auth::login($user); // otherwise the tenant will not be properly set
+        } else {
+
+            /** @var Invitation $invitation */
+            $invitation = Invitation::where('email', $email)->first();
+
+            if (!$invitation) {
+                $invitation = InvitationProxy::createInvitation($email, Str::before($email, '@'));
+            }
+
+            /** @var Tenant $tenant */
+            $tenant = Tenant::create(['name' => Str::random()]);
+            $user = $invitation->createUser([
+                'password' => Str::random(64),
+                'tenant_id' => $tenant->id,
+                'type' => UserType::CLIENT(),
+                'terms_accepted' => true,
+            ]);
+
+            $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
+
+            Auth::login($user); // otherwise the tenant will not be properly set
+
+            // Create shadow collections for some frameworks
+            $frameworks = \App\Models\YnhFramework::all();
+
+            foreach ($frameworks as $framework) {
+                if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
+                    $this->importFramework($framework, 20);
+                } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
+                    $this->importFramework($framework, 10);
+                } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
+                    $this->importFramework($framework, 30);
+                } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
+                    $this->importFramework($framework, 50);
+                } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
+                    $this->importFramework($framework, 40);
+                }
+            }
+        }
+        return $user;
     }
 
     private function importFramework(YnhFramework $framework, int $priority): void
@@ -255,5 +191,95 @@ class ProcessIncomingEmails implements ShouldQueue
             true
         );
         $url = \App\Http\Controllers\CyberBuddyController::saveUploadedFile($collection, $file);
+    }
+
+    private function cyberBuddy(User $user, \Webklex\PHPIMAP\Message $message)
+    {
+        // Extract the thread id in order to be able to load the existing conversation
+        // If the thread id cannot be found, a new conversation is created
+        $threadId = null;
+        $matches = [];
+        preg_match_all("/\s*thread_id=(?<threadid>[a-zA-Z0-9]{10})\s*/i", $message->getTextBody(), $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $match) {
+            if (!empty($match['threadid'])) {
+                $threadId = $match['threadid'];
+                break;
+            }
+        }
+        if (empty($threadId)) {
+            $threadId = Str::random(10);
+        }
+
+        /** @var Conversation $conversation */
+        $conversation = Conversation::where('thread_id', $threadId)
+            ->where('format', Conversation::FORMAT_V1)
+            ->where('created_by', $user->id)
+            ->first();
+
+        $conversation = $conversation ?? Conversation::create([
+            'thread_id' => $threadId,
+            'dom' => json_encode([]),
+            'autosaved' => true,
+            'created_by' => $user->id,
+            'format' => Conversation::FORMAT_V1,
+        ]);
+
+        // Remove previous messages i.e. rows starting with >
+        $body = trim(preg_replace("/^(>.*)|(On\s+.*\s+wrote:)[\n\r]?$/im", '', $message->getTextBody()));
+
+        Log::debug('subject=' . $message->getSubject()[0] ?? '');
+        Log::debug('body=' . $body);
+
+        // Call CyberBuddy
+        $request = new ConverseRequest();
+        $request->replace([
+            'thread_id' => $threadId,
+            'directive' => $body,
+        ]);
+
+        $controller = new CyberBuddyNextGenController();
+        $response = $controller->converse($request, true);
+        $json = json_decode($response->content(), true);
+        $subject = $message->getSubject()[0] ?? '';
+        $body = $json['answer']['html'] ?? '';
+
+        EndVulnsScanListener::sendEmail(
+            self::SENDER_CYBERBUDDY,
+            $user->email,
+            "Re: {$subject}",
+            "CyberBuddy vous répond !",
+            "
+                {$body}
+                <p>Pour importer tes propres documents et profiter pleinement des capacités de CyberBuddy, ton assistant Cyber, finalise ton inscription à Cywise :</p>
+            ",
+            route('password.reset', [
+                'token' => app(PasswordBroker::class)->createToken($user),
+                'email' => $user->email,
+                'reason' => 'Finalisez votre inscription en créant un mot de passe',
+                'action' => 'Créer mon mot de passe',
+            ]),
+            "je me connecte à Cywise",
+            "
+              <p>Je reste à ta disposition pour toute question ou assistance supplémentaire. Merci encore pour ta confiance en Cywise !</p>
+              <p>Bien à toi,</p>
+              <p>CyberBuddy</p>
+              <span style='color:white'>thread_id={$threadId}</span>
+            ",
+        );
+
+        if (!$message->move('CyberBuddy')) {
+            Log::error($message->getSubject());
+            Log::error('Message could not be moved to the CyberBuddy folder!');
+        }
+    }
+
+    private function memex(User $user, \Webklex\PHPIMAP\Message $message)
+    {
+        $item = TimelineItem::createNote($user->id, $message->getTextBody(), $message->getSubject()[0] ?? '');
+        if (!$message->move('Memex')) {
+            Log::error($message->getSubject());
+            Log::error('Message could not be moved to the Memex folder!');
+        }
     }
 }

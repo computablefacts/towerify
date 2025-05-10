@@ -42,10 +42,11 @@ class TimelineItem extends Model
         'updated_at' => 'datetime',
     ];
 
-    public static function createNote(int $ownedBy, string $content): TimelineItem
+    public static function createNote(int $ownedBy, string $body, string $subject = ''): TimelineItem
     {
         return self::createItem($ownedBy, 'note', Carbon::now(), 0, [
-            'content' => Str::limit(trim($content), 1000 - 3, '...'),
+            'body' => Str::limit(trim($body), 1000 - 3, '...'),
+            'subject' => Str::limit(trim($subject), 1000 - 3, '...'),
         ]);
     }
 
