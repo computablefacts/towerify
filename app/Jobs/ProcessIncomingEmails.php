@@ -8,6 +8,7 @@ use App\Listeners\EndVulnsScanListener;
 use App\Models\Conversation;
 use App\Models\File;
 use App\Models\Invitation;
+use App\Models\Prompt;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\TimelineItem;
@@ -144,6 +145,12 @@ class ProcessIncomingEmails implements ShouldQueue
 
             Auth::login($user); // otherwise the tenant will not be properly set
 
+            // Create prompts
+            $this->importPrompt($user, 'default_assistant', 'seeds/prompts/default_assistant.txt');
+            $this->importPrompt($user, 'default_chat', 'seeds/prompts/default_chat.txt');
+            $this->importPrompt($user, 'default_chat_history', 'seeds/prompts/default_chat_history.txt');
+            $this->importPrompt($user, 'default_debugger', 'seeds/prompts/default_debugger.txt');
+
             // Create shadow collections for some frameworks
             $frameworks = \App\Models\YnhFramework::all();
 
@@ -162,6 +169,26 @@ class ProcessIncomingEmails implements ShouldQueue
             }
         }
         return $user;
+    }
+
+    private function importPrompt(User $user, string $name, string $root)
+    {
+        $prompt = \Illuminate\Support\Facades\File::get(database_path($root));
+
+        /** @var Prompt $p */
+        $p = Prompt::where('created_by', $user->id)
+            ->where('name', $name)
+            ->first();
+
+        if (isset($p)) {
+            $p->update(['template' => $prompt]);
+        } else {
+            $p = Prompt::create([
+                'created_by' => $user->id,
+                'name' => $name,
+                'template' => $prompt
+            ]);
+        }
     }
 
     private function importFramework(YnhFramework $framework, int $priority): void

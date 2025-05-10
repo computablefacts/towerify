@@ -66,6 +66,9 @@ class UserInvitationUtilizedListener extends AbstractListener
                 }
                 $created->save();
 
+                Auth::logout();
+                Auth::login($created); // otherwise the tenant will not be properly set
+
                 // Set the user's prompts
                 $this->importPrompt($created, 'default_assistant', 'seeds/prompts/default_assistant.txt');
                 $this->importPrompt($created, 'default_chat', 'seeds/prompts/default_chat.txt');
@@ -85,11 +88,7 @@ class UserInvitationUtilizedListener extends AbstractListener
             ->first();
 
         if (isset($p)) {
-            if ($p->created_at->equalTo($p->updated_at)) {
-                $p->update([
-                    'template' => $prompt,
-                ]);
-            }
+            $p->update(['template' => $prompt]);
         } else {
             $p = Prompt::create([
                 'created_by' => $user->id,
