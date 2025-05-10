@@ -94,7 +94,7 @@ class CyberBuddyNextGenController extends Controller
             $fnOpenPorts = AbstractLlmFunction::handle($user, $threadId, 'query_open_port_database', []);
             $openPorts = $fnOpenPorts->text();
 
-            $notes = TimelineItem::fetchItems($user->id, 'note', null, null, 0)
+            $notes = TimelineItem::fetchNotes($user->id, null, null, 0)
                 ->map(fn(TimelineItem $note) => "- {$note->timestamp->format('Y-m-d H:i:s')} : {$note->attributes()['content']}")
                 ->join("\n");
 

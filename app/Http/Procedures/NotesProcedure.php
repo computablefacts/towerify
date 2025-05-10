@@ -5,7 +5,6 @@ namespace App\Http\Procedures;
 use App\Models\TimelineItem;
 use App\User;
 use App\View\Components\Timeline;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Sajya\Server\Attributes\RpcMethod;
 use Sajya\Server\Procedure;
@@ -31,9 +30,7 @@ class NotesProcedure extends Procedure
 
         /** @var User $user */
         $user = $request->user();
-        $item = TimelineItem::createItem($user->id, 'note', Carbon::now(), 0, [
-            'content' => $params['note'],
-        ]);
+        $item = TimelineItem::createNote($user->id, $params['note']);
 
         return [
             "msg" => "Your note has been saved!",
@@ -59,7 +56,7 @@ class NotesProcedure extends Procedure
         /** @var User $user */
         $user = $request->user();
         /** @var TimelineItem $item */
-        $item = collect(TimelineItem::fetchItems($user->id, 'note', null, null, 0))
+        $item = TimelineItem::fetchNotes($user->id, null, null, 0)
             ->filter(fn(TimelineItem $item) => $item->id == $params['note_id'])
             ->firstOrFail();
         $item->deleteItem();

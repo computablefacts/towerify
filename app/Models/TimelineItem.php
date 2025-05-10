@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * @property integer id
@@ -40,6 +41,18 @@ class TimelineItem extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public static function createNote(int $ownedBy, string $content): TimelineItem
+    {
+        return self::createItem($ownedBy, 'note', Carbon::now(), 0, [
+            'content' => Str::limit(trim($content), 1000 - 3, '...'),
+        ]);
+    }
+
+    public static function fetchNotes(?int $ownedBy = null, ?Carbon $createdAtOrAfter = null, ?Carbon $createdAtOrBefore = null, ?int $flags = null, array $ands = []): \Illuminate\Support\Collection
+    {
+        return self::fetchItems($ownedBy, 'note', $createdAtOrAfter, $createdAtOrBefore, $flags, $ands);
+    }
 
     public static function createItem(int $ownedBy, string $type, Carbon $timestamp, int $flags = 0, array $attributes = []): TimelineItem
     {

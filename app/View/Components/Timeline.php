@@ -277,7 +277,7 @@ class Timeline extends Component
 
     private function notes(User $user): array
     {
-        return TimelineItem::fetchItems($user->id, 'note', null, null, 0)
+        return TimelineItem::fetchNotes($user->id, null, null, 0)
             ->map(function (TimelineItem $item) use ($user) {
 
                 $timestamp = $item->timestamp->format('Y-m-d H:i:s');
