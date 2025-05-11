@@ -20,7 +20,6 @@ use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
@@ -197,15 +196,7 @@ class ProcessIncomingEmails implements ShouldQueue
     {
         $collection = $this->getOrCreateCollection($framework->collectionName(), $priority);
         if ($collection) {
-            $path = $framework->path();
-            $file = new UploadedFile(
-                $path,
-                basename($path),
-                mime_content_type($path),
-                null,
-                true
-            );
-            $url = \App\Http\Controllers\CyberBuddyController::saveUploadedFile($collection, $file);
+            $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $framework->path());
         }
     }
 
@@ -301,15 +292,8 @@ class ProcessIncomingEmails implements ShouldQueue
                         Log::error("Attachment {$attachment->name} could not be saved!");
                     } else {
                         $path = "/tmp/{$attachment->filename}";
-                        $file = new UploadedFile(
-                            $path,
-                            basename($path),
-                            mime_content_type($path),
-                            null,
-                            true
-                        );
                         // TODO : deal with duplicate files using the md5/sha1 file hash
-                        $url = \App\Http\Controllers\CyberBuddyController::saveUploadedFile($collection, $file);
+                        $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $path);
                         unlink($path);
                     }
                 });

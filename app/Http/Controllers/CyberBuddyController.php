@@ -449,15 +449,7 @@ class CyberBuddyController extends Controller
             $collection = \App\Models\Collection::create(['name' => $framework->collectionName()]);
         }
 
-        $path = $framework->path();
-        $file = new UploadedFile(
-            $path,
-            basename($path),
-            mime_content_type($path),
-            null,
-            true
-        );
-        $url = self::saveUploadedFile($collection, $file);
+        $url = self::saveLocalFile($collection, $framework->path());
 
         if ($url) {
             return response()->json([
