@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Http\Controllers\CyberBuddyNextGenController;
 use App\Http\Requests\ConverseRequest;
 use App\Listeners\EndVulnsScanListener;
+use App\Models\Collection;
 use App\Models\Conversation;
 use App\Models\File;
 use App\Models\Invitation;
@@ -28,6 +29,7 @@ use Illuminate\Support\Str;
 use Konekt\User\Models\InvitationProxy;
 use Konekt\User\Models\UserType;
 use Webklex\IMAP\Facades\Client;
+use Webklex\PHPIMAP\Attachment;
 
 class ProcessIncomingEmails implements ShouldQueue
 {
@@ -193,34 +195,21 @@ class ProcessIncomingEmails implements ShouldQueue
 
     private function importFramework(YnhFramework $framework, int $priority): void
     {
-        /** @var \App\Models\Collection $collection */
-        $collection = \App\Models\Collection::where('name', $framework->collectionName())
-            ->where('is_deleted', false)
-            ->first();
-
-        if (!$collection) {
-            if (!IsValidCollectionName::test($framework->collectionName())) {
-                Log::error("Invalid collection name : {$framework->collectionName()}");
-                return;
-            }
-            $collection = \App\Models\Collection::create([
-                'name' => $framework->collectionName(),
-                'priority' => $priority,
-            ]);
+        $collection = $this->getOrCreateCollection($framework->collectionName(), $priority);
+        if ($collection) {
+            $path = $framework->path();
+            $file = new UploadedFile(
+                $path,
+                basename($path),
+                mime_content_type($path),
+                null,
+                true
+            );
+            $url = \App\Http\Controllers\CyberBuddyController::saveUploadedFile($collection, $file);
         }
-
-        $path = $framework->path();
-        $file = new UploadedFile(
-            $path,
-            basename($path),
-            mime_content_type($path),
-            null,
-            true
-        );
-        $url = \App\Http\Controllers\CyberBuddyController::saveUploadedFile($collection, $file);
     }
 
-    private function cyberBuddy(User $user, \Webklex\PHPIMAP\Message $message)
+    private function cyberBuddy(User $user, \Webklex\PHPIMAP\Message $message): void
     {
         // Extract the thread id in order to be able to load the existing conversation
         // If the thread id cannot be found, a new conversation is created
@@ -301,12 +290,53 @@ class ProcessIncomingEmails implements ShouldQueue
         }
     }
 
-    private function memex(User $user, \Webklex\PHPIMAP\Message $message)
+    private function memex(User $user, \Webklex\PHPIMAP\Message $message): void
     {
         $item = TimelineItem::createNote($user->id, $message->getTextBody(), $message->getSubject()[0] ?? '');
+        if ($message->hasAttachments()) {
+            $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
+            if ($collection) {
+                $message->attachments()->each(function (Attachment $attachment) use ($collection) {
+                    if (!$attachment->save("/tmp/")) {
+                        Log::error("Attachment {$attachment->name} could not be saved!");
+                    } else {
+                        $path = "/tmp/{$attachment->filename}";
+                        $file = new UploadedFile(
+                            $path,
+                            basename($path),
+                            mime_content_type($path),
+                            null,
+                            true
+                        );
+                        // TODO : deal with duplicate files using the md5/sha1 file hash
+                        $url = \App\Http\Controllers\CyberBuddyController::saveUploadedFile($collection, $file);
+                        unlink($path);
+                    }
+                });
+            }
+        }
         if (!$message->move('Memex')) {
             Log::error($message->getSubject());
             Log::error('Message could not be moved to the Memex folder!');
         }
+    }
+
+    private function getOrCreateCollection(string $collectionName, int $priority): ?Collection
+    {
+        /** @var \App\Models\Collection $collection */
+        $collection = Collection::where('name', $collectionName)
+            ->where('is_deleted', false)
+            ->first();
+        if (!$collection) {
+            if (!IsValidCollectionName::test($collectionName)) {
+                Log::error("Invalid collection name : {$collectionName}");
+                return null;
+            }
+            $collection = Collection::create([
+                'name' => $collectionName,
+                'priority' => max($priority, 0),
+            ]);
+        }
+        return $collection;
     }
 }
