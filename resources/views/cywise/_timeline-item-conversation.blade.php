@@ -13,7 +13,7 @@
   @if(empty($conversation->description))
   <div class="timeline-item-description">
       <span>
-        <a href='#'>{{ $conversation->createdBy()->name }}</a> a lancé une <a
+        <b>{{ $conversation->createdBy()->name }}</b> a lancé une <a
           href="{{ route('home', ['tab' => 'ama2', 'conversation_id' => $conversation->id]) }}">conversation</a>
       </span>
   </div>
@@ -22,10 +22,10 @@
     <div class="timeline-item-description">
       <span>
         @if($conversation->format === \App\Models\Conversation::FORMAT_V1)
-        <a href='#'>{{ $conversation->createdBy()->name }}</a> a lancé une <a
+        <b>{{ $conversation->createdBy()->name }}</b> a lancé une <a
           href="{{ route('home', ['tab' => 'ama2', 'conversation_id' => $conversation->id]) }}">conversation</a>
         @else
-        <a href='#'>{{ $conversation->createdBy()->name }}</a> a lancé une <a href="#">conversation</a>
+        <b>{{ $conversation->createdBy()->name }}</b> a lancé une <b>conversation</b>
         @endif
       </span>
     </div>

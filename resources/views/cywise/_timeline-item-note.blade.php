@@ -17,7 +17,7 @@
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
       <span>
-        <a href='#'>{{ $user->name }}</a> a créé une <a href='#'>note</a>
+        <b>{{ $user->name }}</b> a créé une <b>note</b>
       </span>
     </div>
     <div class="comment">

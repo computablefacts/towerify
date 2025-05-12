@@ -117,10 +117,17 @@
     flex-shrink: 0;
   }
 
+  .timeline-item-description b {
+    color: var(--c-grey-500);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
   .timeline-item-description a {
     color: var(--c-grey-500);
     font-weight: 500;
     text-decoration: none;
+    border-bottom: 1px dashed;
   }
 
   .timeline-item-description a:hover, .timeline-item-description a:focus {

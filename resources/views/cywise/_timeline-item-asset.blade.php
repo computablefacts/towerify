@@ -22,7 +22,7 @@
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
       <span>
-        <a href='#'>{{ $asset->createdBy()->name }}</a> a ajouté l'actif <a href='#'>{{ $asset->asset }}</a>
+        <b>{{ $asset->createdBy()->name }}</b> a ajouté l'actif <b>{{ $asset->asset }}</b>
       </span>
     </div>
     <div style="display: flex; gap: 10px;">

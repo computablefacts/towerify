@@ -16,7 +16,7 @@
   </span>
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
-      <span><a href='#'>{{ $event->server_name }}</a> - {{ $event->comments }}</span>
+      <span><b>{{ $event->server_name }}</b> - {{ $event->comments }}</span>
     </div>
     <pre class="comment" style="margin-bottom: 0;">{{ json_encode($event->columns, JSON_PRETTY_PRINT) }}</pre>
     <div style="display: flex; gap: 10px;">
