@@ -3,8 +3,10 @@
 namespace Tests\Unit;
 
 use App\Enums\AssetTypesEnum;
+use App\Helpers\ApiUtilsFacade as ApiUtils2;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
 use App\Jobs\TriggerScan;
+use App\Listeners\DeleteAssetListener;
 use App\Models\Asset;
 use App\Models\AssetTag;
 use App\Models\AssetTagHash;
@@ -16,6 +18,7 @@ use App\Models\Port;
 use App\Models\PortTag;
 use App\Models\Scan;
 use App\Models\Screenshot;
+use App\Models\TimelineItem;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -557,7 +560,7 @@ class ScansTest extends TestCase
         });
 
         // Remove the asset
-        $asset->delete();
+        DeleteAssetListener::execute($asset->createdBy(), $asset->asset);
 
         // Ensure removing the asset removes all associated data
         $this->assertEquals(0, Asset::count());
@@ -585,6 +588,7 @@ class ScansTest extends TestCase
         $this->mockStartVulnsScanOnPort443();
         $this->mockGetVulnsScanResultOnPort80();
         $this->mockGetVulnsScanResultOnPort443();
+        $this->mockTranslate();
 
         // Setup the asset and trigger a scan
         $response = $this->addDns();
@@ -809,8 +813,95 @@ class ScansTest extends TestCase
                 ->etc();
         });
 
+        // Check timeline
+        $items = TimelineItem::fetchAlerts(null, null, null, 0, [
+            [['asset_id', '=', $asset->id]],
+        ]);
+
+        $this->assertEquals(2, $items->count());
+
+        $firstAttributes = $items->first()->attributes();
+        $lastAttributes = $items->last()->attributes();
+
+        $port80 = null;
+        $port443 = null;
+
+        if ($firstAttributes['port_number'] == 80) {
+            $port80 = $firstAttributes;
+            $port443 = $lastAttributes;
+        } else {
+            $port80 = $lastAttributes;
+            $port443 = $firstAttributes;
+        }
+
+        // Port 80
+        $this->assertEquals('www.example.com', $port80['asset_name']);
+        $this->assertEquals('DNS', $port80['asset_type']);
+        $this->assertEquals('example.com', $port80['asset_tld']);
+        $this->assertEquals(json_encode(['demo']), $port80['asset_tags']);
+        $this->assertEquals('93.184.215.14', $port80['asset_ip']);
+        $this->assertEquals(80, $port80['port_number']);
+        $this->assertEquals('tcp', $port80['port_protocol']);
+        $this->assertEquals(json_encode(['azure', 'azure cdn', 'demo', 'ecacc (bsb/27ab)', 'http', 'ssl-issuer|digicert inc', 'tls10', 'tls11', 'tls12', 'tls13']), $port80['port_tags']);
+        $this->assertEquals('http', $port80['port_service']);
+        $this->assertEquals('ECAcc (bsb|2789)', $port80['port_product']);
+        $this->assertEquals('EDGECAST, US', $port80['hosting_service_description']);
+        $this->assertEquals('ripencc', $port80['hosting_service_registry']);
+        $this->assertEquals('15133', $port80['hosting_service_asn']);
+        $this->assertEquals('93.184.215.0/24', $port80['hosting_service_cidr']);
+        $this->assertEquals('US', $port80['hosting_service_country_code']);
+        $this->assertEquals('2008-06-02', $port80['hosting_service_date']);
+        $this->assertEquals('weak_cipher_suites_v3_alert', $port80['vuln_type']);
+        $this->assertEquals("A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='http://www.example.com:443' target='_blank'>http://www.example.com:443</a></li></ul>", $port80['vuln_vulnerability_en']);
+        $this->assertEquals("Un chiffrement faible est défini comme un algorithme de chiffrement/déchiffrement qui utilise une clé de longueur insuffisante. Utiliser une longueur insuffisante pour une clé dans un algorithme de chiffrement/déchiffrement ouvre la possibilité (ou la probabilité) que le schéma de chiffrement puisse être compromis.<br>L'URL suivante correspond à la vulnérabilité : <br><ul><li><a href='http://www.example.com:443' target='_blank'>http://www.example.com:443</a></li></ul>", $port80['vuln_vulnerability_fr']);
+        $this->assertEquals("Fix the vulnerability described in this alert", $port80['vuln_remediation_en']);
+        $this->assertEquals("Corrigez la vulnérabilité décrite dans cette alerte.", $port80['vuln_remediation_fr']);
+        $this->assertEquals('Low', $port80['vuln_level']);
+        $this->assertEquals('a2a95bb1311b66abb394ac9015175dcd', $port80['vuln_uid']);
+        $this->assertFalse(isset($port80['vuln_cve_id']));
+        $this->assertFalse(isset($port80['vuln_cve_cvss']));
+        $this->assertFalse(isset($port80['vuln_cve_vendor']));
+        $this->assertFalse(isset($port80['vuln_cve_product']));
+        $this->assertEquals("Weak Cipher Suites Detection", $port80['vuln_title_en']);
+        $this->assertEquals("Détection des suites de chiffrement faibles", $port80['vuln_title_fr']);
+        $this->assertEquals('US', $port80['country']);
+        $this->assertFalse(isset($port80['ssl']));
+
+        // Port 443
+        $this->assertEquals('www.example.com', $port443['asset_name']);
+        $this->assertEquals('DNS', $port443['asset_type']);
+        $this->assertEquals('example.com', $port443['asset_tld']);
+        $this->assertEquals(json_encode(['demo']), $port443['asset_tags']);
+        $this->assertEquals('93.184.215.14', $port443['asset_ip']);
+        $this->assertEquals(443, $port443['port_number']);
+        $this->assertEquals('tcp', $port443['port_protocol']);
+        $this->assertEquals(json_encode(['azure', 'azure cdn', 'demo', 'ecacc (bsb/27bf)', 'http', 'ssl-issuer|digicert inc', 'tls10', 'tls11', 'tls12', 'tls13']), $port443['port_tags']);
+        $this->assertEquals('http', $port443['port_service']);
+        $this->assertEquals('ECAcc (bsb|2789)', $port443['port_product']);
+        $this->assertEquals('EDGECAST, US', $port443['hosting_service_description']);
+        $this->assertEquals('ripencc', $port443['hosting_service_registry']);
+        $this->assertEquals('15133', $port443['hosting_service_asn']);
+        $this->assertEquals('93.184.215.0/24', $port443['hosting_service_cidr']);
+        $this->assertEquals('US', $port443['hosting_service_country_code']);
+        $this->assertEquals('2008-06-02', $port443['hosting_service_date']);
+        $this->assertEquals('weak_cipher_suites_v3_alert', $port443['vuln_type']);
+        $this->assertEquals("A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>", $port443['vuln_vulnerability_en']);
+        $this->assertEquals("Un chiffrement faible est défini comme un algorithme de chiffrement/déchiffrement qui utilise une clé de longueur insuffisante. Utiliser une longueur insuffisante pour une clé dans un algorithme de chiffrement/déchiffrement ouvre la possibilité (ou la probabilité) que le schéma de chiffrement puisse être compromis.<br>L'URL suivante correspond à la vulnérabilité : <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>", $port443['vuln_vulnerability_fr']);
+        $this->assertEquals("Fix the vulnerability described in this alert", $port443['vuln_remediation_en']);
+        $this->assertEquals("Corrigez la vulnérabilité décrite dans cette alerte.", $port443['vuln_remediation_fr']);
+        $this->assertEquals('Low', $port443['vuln_level']);
+        $this->assertEquals('a2a95bb1311b66abb394ac9015175dcd', $port443['vuln_uid']);
+        $this->assertFalse(isset($port443['vuln_cve_id']));
+        $this->assertFalse(isset($port443['vuln_cve_cvss']));
+        $this->assertFalse(isset($port443['vuln_cve_vendor']));
+        $this->assertFalse(isset($port443['vuln_cve_product']));
+        $this->assertEquals("Weak Cipher Suites Detection", $port443['vuln_title_en']);
+        $this->assertEquals("Détection des suites de chiffrement faibles", $port443['vuln_title_fr']);
+        $this->assertEquals('US', $port443['country']);
+        $this->assertTrue($port443['ssl']);
+
         // Remove the asset
-        $asset->delete();
+        DeleteAssetListener::execute($asset->createdBy(), $asset->asset);
 
         // Ensure removing the asset removes all associated data
         $this->assertEquals(0, Asset::count());
@@ -824,6 +915,13 @@ class ScansTest extends TestCase
         $this->assertEquals(0, PortTag::count());
         $this->assertEquals(0, Scan::count());
         $this->assertEquals(0, Screenshot::count());
+
+        // Check timeline
+        $items = TimelineItem::fetchAlerts(null, null, null, 0, [
+            [['asset_id', '=', $asset->id]],
+        ]);
+
+        $this->assertEquals(0, $items->count());
     }
 
     private function addDns(): TestResponse
@@ -953,6 +1051,38 @@ class ScansTest extends TestCase
         ])->delete("/api/facts/{$assetId}/metadata/{$tagId}");
         $response->assertStatus(200);
         return $response;
+    }
+
+    private function mockTranslate()
+    {
+        ApiUtils2::shouldReceive('translate')
+            ->atLeast()
+            ->with("A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='http://www.example.com:443' target='_blank'>http://www.example.com:443</a></li></ul>", 'fr')
+            ->andReturn([
+                'error' => false,
+                'response' => "Un chiffrement faible est défini comme un algorithme de chiffrement/déchiffrement qui utilise une clé de longueur insuffisante. Utiliser une longueur insuffisante pour une clé dans un algorithme de chiffrement/déchiffrement ouvre la possibilité (ou la probabilité) que le schéma de chiffrement puisse être compromis.<br>L'URL suivante correspond à la vulnérabilité : <br><ul><li><a href='http://www.example.com:443' target='_blank'>http://www.example.com:443</a></li></ul>",
+            ]);
+        ApiUtils2::shouldReceive('translate')
+            ->atLeast()
+            ->with("A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>", 'fr')
+            ->andReturn([
+                'error' => false,
+                'response' => "Un chiffrement faible est défini comme un algorithme de chiffrement/déchiffrement qui utilise une clé de longueur insuffisante. Utiliser une longueur insuffisante pour une clé dans un algorithme de chiffrement/déchiffrement ouvre la possibilité (ou la probabilité) que le schéma de chiffrement puisse être compromis.<br>L'URL suivante correspond à la vulnérabilité : <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>",
+            ]);
+        ApiUtils2::shouldReceive('translate')
+            ->atLeast()
+            ->with("Fix the vulnerability described in this alert", 'fr')
+            ->andReturn([
+                'error' => false,
+                'response' => "Corrigez la vulnérabilité décrite dans cette alerte.",
+            ]);
+        ApiUtils2::shouldReceive('translate')
+            ->atLeast()
+            ->with("Weak Cipher Suites Detection", 'fr')
+            ->andReturn([
+                'error' => false,
+                'response' => "Détection des suites de chiffrement faibles",
+            ]);
     }
 
     private function mockStartPortsScan()

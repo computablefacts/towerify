@@ -10,6 +10,7 @@ use App\Models\Alert;
 use App\Models\Asset;
 use App\Models\Port;
 use App\Models\Scan;
+use App\Models\TimelineItem;
 use App\Models\YnhTrial;
 use Carbon\Carbon;
 use Illuminate\Auth\Passwords\PasswordBroker;
@@ -93,10 +94,10 @@ class EndVulnsScanListener extends AbstractListener
 
                 $result = ApiUtils2::translate($alert->vulnerability);
 
-                if ($result ['error'] !== false) {
+                if ($result['error'] !== false) {
                     $vulnerability = $alert->vulnerability;
                 } else {
-                    $vulnerability = $result ['response'];
+                    $vulnerability = $result['response'];
                 }
                 return "
                     <h3>{$alert->title} {$level}</h3>
@@ -224,6 +225,7 @@ class EndVulnsScanListener extends AbstractListener
 
         if ($scan) {
 
+            $this->createTimelineItem($scan);
             /** @var Asset $asset */
             $asset = $scan->asset()->firstOrFail();
             /** @var YnhTrial $trial */
@@ -235,7 +237,7 @@ class EndVulnsScanListener extends AbstractListener
         }
     }
 
-    private function handle3($event): void
+    private function handle3(EndVulnsScan $event): void
     {
         $scan = $event->scan();
         $dropEvent = $event->drop();
@@ -301,6 +303,7 @@ class EndVulnsScanListener extends AbstractListener
         $product = $task['product'] ?? null;
         $ssl = $task['ssl'] ?? null;
 
+        /** @var Port $port */
         $port = $scan->port()->first();
         $port->service = $service;
         $port->product = $product;
@@ -448,5 +451,27 @@ class EndVulnsScanListener extends AbstractListener
     private function taskOutput(string $taskId): array
     {
         return ApiUtils::task_get_scan_public($taskId);
+    }
+
+    // Whatever happens during the ports scan, a vuln scan is triggered!
+    private function createTimelineItem(Scan $scan): void
+    {
+        if (!$scan->portsScanHasEnded() || !$scan->vulnsScanHasEnded()) {
+            Log::warning("Asset is still being scanned for scan {$scan->id}");
+        } else {
+            $scan->asset()
+                ->get()
+                ->map(function (Asset $asset) {
+                    TimelineItem::fetchAlerts($asset->created_by, null, null, 0, [
+                        [['asset_id', '=', $asset->id]],
+                    ])->each(function (TimelineItem $item) {
+                        $item->deleteItem();
+                        $item->save();
+                    });
+                    return $asset;
+                })
+                ->flatMap(fn(Asset $asset) => $asset->alerts()->get())
+                ->each(fn(Alert $alert) => TimelineItem::createAlert($alert->asset()->createdBy(), $scan, $alert));
+        }
     }
 }

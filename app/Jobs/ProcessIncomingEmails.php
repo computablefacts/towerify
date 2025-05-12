@@ -283,7 +283,7 @@ class ProcessIncomingEmails implements ShouldQueue
 
     private function memex(User $user, \Webklex\PHPIMAP\Message $message): void
     {
-        $item = TimelineItem::createNote($user->id, $message->getTextBody(), $message->getSubject()[0] ?? '');
+        $item = TimelineItem::createNote($user, $message->getTextBody(), $message->getSubject()[0] ?? '');
         if ($message->hasAttachments()) {
             $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
             if ($collection) {

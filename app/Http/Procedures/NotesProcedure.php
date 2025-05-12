@@ -30,7 +30,7 @@ class NotesProcedure extends Procedure
 
         /** @var User $user */
         $user = $request->user();
-        $item = TimelineItem::createNote($user->id, $params['note']);
+        $item = TimelineItem::createNote($user, $params['note']);
 
         return [
             "msg" => "Your note has been saved!",

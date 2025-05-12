@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\ApiUtilsFacade as ApiUtils2;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -42,9 +43,113 @@ class TimelineItem extends Model
         'updated_at' => 'datetime',
     ];
 
-    public static function createNote(int $ownedBy, string $body, string $subject = ''): TimelineItem
+    public static function createAlert(User $user, Scan $scan, Alert $alert): TimelineItem
     {
-        return self::createItem($ownedBy, 'note', Carbon::now(), 0, [
+        $asset = $alert->asset();
+        $port = $alert->port();
+
+        if (empty($alert->title)) {
+            $title = '';
+        } else {
+            $result = ApiUtils2::translate($alert->title, 'fr');
+            if ($result['error'] !== false) {
+                $title = $alert->title;
+            } else {
+                $title = $result['response'];
+            }
+        }
+        if (empty($alert->vulnerability)) {
+            $vulnerability = '';
+        } else {
+            $result = ApiUtils2::translate($alert->vulnerability, 'fr');
+            if ($result['error'] !== false) {
+                $vulnerability = $alert->vulnerability;
+            } else {
+                $vulnerability = $result['response'];
+            }
+        }
+        if (empty($alert->remediation)) {
+            $remediation = '';
+        } else {
+            $result = ApiUtils2::translate($alert->remediation, 'fr');
+            if ($result['error'] !== false) {
+                $remediation = $alert->remediation;
+            } else {
+                $remediation = $result['response'];
+            }
+        }
+        return self::createItem($user->id, 'alert', Carbon::now(), 0, [
+
+            // Ids
+            'tenant_id' => $user->tenant_id,
+            'asset_id' => $asset->id,
+            'scan_id' => $scan->id,
+            'port_id' => $port->id,
+            'alert_id' => $alert->id,
+
+            // Asset
+            'asset_name' => $asset->asset,
+            'asset_type' => $asset->type->value,
+            'asset_tld' => $asset->tld() ?? '',
+            'asset_tags' => json_encode($asset->tags()->get()->pluck('tag')->unique()->sort()->values()->toArray()),
+            'asset_ip' => $port->ip,
+
+            // Port
+            'port_number' => $port->port,
+            'port_protocol' => $port->protocol,
+            'port_tags' => json_encode($port->tags()->get()->pluck('tag')->unique()->sort()->values()->toArray()),
+            'port_service' => $port->service ?? '',
+            'port_product' => $port->product ?? '',
+
+            // Hosting provider
+            'hosting_service_description' => $port->hosting_service_description ?? '',
+            'hosting_service_registry' => $port->hosting_service_registry ?? '',
+            'hosting_service_asn' => $port->hosting_service_asn ?? '',
+            'hosting_service_cidr' => $port->hosting_service_cidr ?? '',
+            'hosting_service_country_code' => $port->hosting_service_country_code ?? '',
+            'hosting_service_date' => $port->hosting_service_date ?? '',
+
+            // Vulnerability
+            'vuln_type' => $alert->type,
+            'vuln_vulnerability_en' => $alert->vulnerability ?? '',
+            'vuln_vulnerability_fr' => $vulnerability,
+            'vuln_remediation_en' => $alert->remediation ?? '',
+            'vuln_remediation_fr' => $remediation,
+            'vuln_level' => $alert->level ?? '',
+            'vuln_uid' => $alert->uid ?? '',
+            'vuln_cve_id' => $alert->cve_id ?? '',
+            'vuln_cve_cvss' => $alert->cve_cvss ?? '',
+            'vuln_cve_vendor' => $alert->cve_vendor ?? '',
+            'vuln_cve_product' => $alert->cve_product ?? '',
+            'vuln_title_en' => $alert->title ?? '',
+            'vuln_title_fr' => $title,
+
+            // Misc.
+            'country' => $port->country ?? '',
+            'ssl' => $port->ssl ?? false,
+        ]);
+    }
+
+    public static function fetchAlerts(?int $ownedBy = null, ?Carbon $createdAtOrAfter = null, ?Carbon $createdAtOrBefore = null, ?int $flags = null, array $ands = []): \Illuminate\Support\Collection
+    {
+        return self::fetchItems($ownedBy, 'alert', $createdAtOrAfter, $createdAtOrBefore, $flags, $ands);
+    }
+
+    public static function deleteAlerts(int $ownedBy, string $asset): void
+    {
+        TimelineItem::fetchAlerts($ownedBy, null, null, 0, [
+            [['asset_name', '=', $asset]],
+        ])->each(function (TimelineItem $item) {
+            DB::transaction(function () use ($item) {
+                $item->facts()->delete();
+                $item->delete();
+            });
+        });
+    }
+
+    public static function createNote(User $user, string $body, string $subject = ''): TimelineItem
+    {
+        return self::createItem($user->id, 'note', Carbon::now(), 0, [
             'body' => Str::limit(trim($body), 1000 - 3, '...'),
             'subject' => Str::limit(trim($subject), 1000 - 3, '...'),
         ]);
