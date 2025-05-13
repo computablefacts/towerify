@@ -516,6 +516,17 @@
     });
   }
 
+  const restartScan = (assetId) => {
+    apiCall('POST', `/adversary/assets/restart/${assetId}`)
+    .then((response) => {
+      if (response.ok) {
+        toaster.toastSuccess('The scan has been restarted.');
+      } else {
+        toaster.toastError('An error occurred.')
+      }
+    });
+  }
+
   const deleteNote = (noteId) => {
     deleteNoteApiCall(noteId, (response) => {
       const elNote = document.querySelector(`#nid-${noteId}`);
