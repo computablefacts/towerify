@@ -225,7 +225,7 @@ class EndVulnsScanListener extends AbstractListener
 
         if ($scan) {
 
-            $this->createTimelineItem($scan);
+            // $this->createTimelineItem($scan);
             /** @var Asset $asset */
             $asset = $scan->asset()->firstOrFail();
             /** @var YnhTrial $trial */

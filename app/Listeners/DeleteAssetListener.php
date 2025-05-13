@@ -5,7 +5,6 @@ namespace App\Listeners;
 use App\Enums\AssetTypesEnum;
 use App\Events\DeleteAsset;
 use App\Models\Asset;
-use App\Models\TimelineItem;
 use App\Rules\IsValidAsset;
 use App\Rules\IsValidDomain;
 use App\Rules\IsValidIpAddress;
@@ -29,7 +28,7 @@ class DeleteAssetListener extends AbstractListener
             $assetType = AssetTypesEnum::RANGE;
         }
 
-        TimelineItem::deleteAlerts($user->id, $asset);
+        // TimelineItem::deleteAlerts($user->id, $asset);
 
         Asset::where('asset', $asset)
             ->where('type', $assetType)
