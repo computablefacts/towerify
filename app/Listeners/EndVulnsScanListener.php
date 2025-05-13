@@ -458,7 +458,7 @@ class EndVulnsScanListener extends AbstractListener
     {
         /** @var Asset $asset */
         $asset = $scan->asset()->first();
-        if ($asset->scanInProgress()->isNotEmpty()) {
+        if ($asset->cur_scan_id !== $scan->ports_scan_id || $asset->next_scan_id === $scan->ports_scan_id) {
             Log::warning("Asset is still being scanned for scan {$scan->id}");
         } else {
             TimelineItem::fetchAlerts($asset->created_by, null, null, 0, [
