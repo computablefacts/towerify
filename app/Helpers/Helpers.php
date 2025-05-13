@@ -129,11 +129,47 @@ if (!function_exists('app_sidebar')) {
     {
         if (Auth::check()) {
             return [
-                /* [
+                [
                     'section_name' => __('Home'),
                     'hidden' => !Auth::user()->canViewHome(),
                     'section_items' => [
                         [
+                            'label' => __('Timeline'),
+                            'route' => route('home'),
+                            'active' => request()->route()->named('home') && (!request()->get('category') || request()->get('category') === 'all'),
+                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
+                        ],
+                        [
+                            'label' => __('Assets'),
+                            'route' => route('home', ['category' => 'assets']),
+                            'active' => request()->route()->named('home') && request()->get('category') === 'assets',
+                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
+                        ],
+                        [
+                            'label' => __('Vulnerabilities'),
+                            'route' => route('home', ['category' => 'vulnerabilities']),
+                            'active' => request()->route()->named('home') && request()->get('category') === 'vulnerabilities',
+                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
+                        ],
+                        [
+                            'label' => __('Events'),
+                            'route' => route('home', ['category' => 'events']),
+                            'active' => request()->route()->named('home') && request()->get('category') === 'events',
+                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
+                        ],
+                        [
+                            'label' => __('Notes'),
+                            'route' => route('home', ['category' => 'notes']),
+                            'active' => request()->route()->named('home') && request()->get('category') === 'notes',
+                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
+                        ],
+                        [
+                            'label' => __('Conversations'),
+                            'route' => route('home', ['category' => 'conversations']),
+                            'active' => request()->route()->named('home') && request()->get('category') === 'conversations',
+                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
+                        ],
+                        /* [
                             'label' => __('Overview'),
                             'route' => route('home', ['tab' => 'overview']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'overview',
@@ -148,9 +184,9 @@ if (!function_exists('app_sidebar')) {
                             'route' => config('towerify.reports.url'),
                             'target' => '_blank',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_EVENTS),
-                        ]
+                        ] */
                     ]
-                ], [
+                ], /* [
                     'section_name' => __('Vulnerability Scanner'),
                     'hidden' => !Auth::user()->canViewVulnerabilityScanner(),
                     'section_items' => [
