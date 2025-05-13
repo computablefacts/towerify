@@ -384,10 +384,20 @@
     elDomains.appendChild(elAsset);
   });
 
-  setTimeout(() => {
-    if (!elDialog.open) {
-      window.location.reload();
-    }
-  }, 15000); // update every 15 seconds
+  function schedulePageReload() {
+    setTimeout(() => {
+      if (elDialog.open) {
+        schedulePageReload();
+      } else {
+        if (document.visibilityState === 'visible') {
+          window.location.reload();
+        } else {
+          schedulePageReload();
+        }
+      }
+    }, 40000); // Vérifier toutes les 40 secondes
+  }
+
+  schedulePageReload();
 
 </script>
