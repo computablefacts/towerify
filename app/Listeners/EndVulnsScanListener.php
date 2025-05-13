@@ -456,22 +456,18 @@ class EndVulnsScanListener extends AbstractListener
     // Whatever happens during the ports scan, a vuln scan is triggered!
     private function createTimelineItem(Scan $scan): void
     {
-        if (!$scan->portsScanHasEnded() || !$scan->vulnsScanHasEnded()) {
+        /** @var Asset $asset */
+        $asset = $scan->asset()->first();
+        if ($asset->scanInProgress()->isNotEmpty()) {
             Log::warning("Asset is still being scanned for scan {$scan->id}");
         } else {
-            $scan->asset()
-                ->get()
-                ->map(function (Asset $asset) {
-                    TimelineItem::fetchAlerts($asset->created_by, null, null, 0, [
-                        [['asset_id', '=', $asset->id]],
-                    ])->each(function (TimelineItem $item) {
-                        $item->deleteItem();
-                        $item->save();
-                    });
-                    return $asset;
-                })
-                ->flatMap(fn(Asset $asset) => $asset->alerts()->get())
-                ->each(fn(Alert $alert) => TimelineItem::createAlert($alert->asset()->createdBy(), $scan, $alert));
+            TimelineItem::fetchAlerts($asset->created_by, null, null, 0, [
+                [['asset_id', '=', $asset->id]],
+            ])->each(function (TimelineItem $item) {
+                $item->deleteItem();
+                $item->save();
+            });
+            $asset->alerts()->get()->each(fn(Alert $alert) => TimelineItem::createAlert($alert->asset()->createdBy(), $scan, $alert));
         }
     }
 }
