@@ -2,11 +2,15 @@
 
 namespace App\Listeners;
 
+use App\Models\Collection;
 use App\Models\Prompt;
 use App\Models\Role;
+use App\Models\YnhFramework;
+use App\Rules\IsValidCollectionName;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Konekt\User\Events\UserInvitationUtilized;
 
 class UserInvitationUtilizedListener extends AbstractListener
@@ -74,6 +78,23 @@ class UserInvitationUtilizedListener extends AbstractListener
                 $this->importPrompt($created, 'default_chat', 'seeds/prompts/default_chat.txt');
                 $this->importPrompt($created, 'default_chat_history', 'seeds/prompts/default_chat_history.txt');
                 $this->importPrompt($created, 'default_debugger', 'seeds/prompts/default_debugger.txt');
+
+                // Create shadow collections for some frameworks
+                $frameworks = \App\Models\YnhFramework::all();
+
+                foreach ($frameworks as $framework) {
+                    if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
+                        $this->importFramework($framework, 20);
+                    } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
+                        $this->importFramework($framework, 10);
+                    } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
+                        $this->importFramework($framework, 30);
+                    } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
+                        $this->importFramework($framework, 50);
+                    } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
+                        $this->importFramework($framework, 40);
+                    }
+                }
             }
         }
     }
@@ -96,5 +117,32 @@ class UserInvitationUtilizedListener extends AbstractListener
                 'template' => $prompt
             ]);
         }
+    }
+
+    private function importFramework(YnhFramework $framework, int $priority): void
+    {
+        $collection = $this->getOrCreateCollection($framework->collectionName(), $priority);
+        if ($collection && $collection->files()->count() === 0) {
+            $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $framework->path());
+        }
+    }
+
+    private function getOrCreateCollection(string $collectionName, int $priority): ?Collection
+    {
+        /** @var \App\Models\Collection $collection */
+        $collection = Collection::where('name', $collectionName)
+            ->where('is_deleted', false)
+            ->first();
+        if (!$collection) {
+            if (!IsValidCollectionName::test($collectionName)) {
+                Log::error("Invalid collection name : {$collectionName}");
+                return null;
+            }
+            $collection = Collection::create([
+                'name' => $collectionName,
+                'priority' => max($priority, 0),
+            ]);
+        }
+        return $collection;
     }
 }
