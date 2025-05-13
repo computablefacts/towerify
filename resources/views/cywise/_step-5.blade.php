@@ -390,7 +390,7 @@
         schedulePageReload();
       } else {
         if (document.visibilityState === 'visible') {
-          window.location.reload();
+          window.location.href = window.location.href.split('#')[0];
         } else {
           schedulePageReload();
         }
