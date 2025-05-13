@@ -359,6 +359,7 @@ class ScansTest extends TestCase
         $this->mockStartVulnsScanOnPort443();
         $this->mockGetVulnsScanResultWhenPort80IsClosed();
         $this->mockGetVulnsScanResultOnPort443();
+        $this->mockTranslate();
 
         // Setup the asset and trigger a scan
         $response = $this->addDns();
