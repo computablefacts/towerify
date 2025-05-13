@@ -1056,33 +1056,40 @@ class ScansTest extends TestCase
     private function mockTranslate()
     {
         ApiUtils2::shouldReceive('translate')
-            ->atLeast()
-            ->with("A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='http://www.example.com:443' target='_blank'>http://www.example.com:443</a></li></ul>", 'fr')
-            ->andReturn([
-                'error' => false,
-                'response' => "Un chiffrement faible est défini comme un algorithme de chiffrement/déchiffrement qui utilise une clé de longueur insuffisante. Utiliser une longueur insuffisante pour une clé dans un algorithme de chiffrement/déchiffrement ouvre la possibilité (ou la probabilité) que le schéma de chiffrement puisse être compromis.<br>L'URL suivante correspond à la vulnérabilité : <br><ul><li><a href='http://www.example.com:443' target='_blank'>http://www.example.com:443</a></li></ul>",
-            ]);
-        ApiUtils2::shouldReceive('translate')
-            ->atLeast()
-            ->with("A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>", 'fr')
-            ->andReturn([
-                'error' => false,
-                'response' => "Un chiffrement faible est défini comme un algorithme de chiffrement/déchiffrement qui utilise une clé de longueur insuffisante. Utiliser une longueur insuffisante pour une clé dans un algorithme de chiffrement/déchiffrement ouvre la possibilité (ou la probabilité) que le schéma de chiffrement puisse être compromis.<br>L'URL suivante correspond à la vulnérabilité : <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>",
-            ]);
-        ApiUtils2::shouldReceive('translate')
-            ->atLeast()
-            ->with("Fix the vulnerability described in this alert", 'fr')
-            ->andReturn([
-                'error' => false,
-                'response' => "Corrigez la vulnérabilité décrite dans cette alerte.",
-            ]);
-        ApiUtils2::shouldReceive('translate')
-            ->atLeast()
-            ->with("Weak Cipher Suites Detection", 'fr')
-            ->andReturn([
-                'error' => false,
-                'response' => "Détection des suites de chiffrement faibles",
-            ]);
+            ->withAnyArgs()
+            ->zeroOrMoreTimes()
+            ->andReturnUsing(function (...$args) {
+                if (count($args) > 0) {
+                    if ($args[0] === "Weak Cipher Suites Detection" && $args[1] === 'fr') {
+                        return [
+                            'error' => false,
+                            'response' => "Détection des suites de chiffrement faibles",
+                        ];
+                    }
+                    if ($args[0] === "A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='http://www.example.com:443' target='_blank'>http://www.example.com:443</a></li></ul>" && $args[1] === 'fr') {
+                        return [
+                            'error' => false,
+                            'response' => "Un chiffrement faible est défini comme un algorithme de chiffrement/déchiffrement qui utilise une clé de longueur insuffisante. Utiliser une longueur insuffisante pour une clé dans un algorithme de chiffrement/déchiffrement ouvre la possibilité (ou la probabilité) que le schéma de chiffrement puisse être compromis.<br>L'URL suivante correspond à la vulnérabilité : <br><ul><li><a href='http://www.example.com:443' target='_blank'>http://www.example.com:443</a></li></ul>",
+                        ];
+                    }
+                    if ($args[0] === "A weak cipher is defined as an encryption/decryption algorithm that uses a key of insufficient length. Using an insufficient length for a key in an encryption/decryption algorithm opens up the possibility (or probability) that the encryption scheme could be broken.<br>The following URL matched the vulnerability: <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>" && $args[1] === 'fr') {
+                        return [
+                            'error' => false,
+                            'response' => "Un chiffrement faible est défini comme un algorithme de chiffrement/déchiffrement qui utilise une clé de longueur insuffisante. Utiliser une longueur insuffisante pour une clé dans un algorithme de chiffrement/déchiffrement ouvre la possibilité (ou la probabilité) que le schéma de chiffrement puisse être compromis.<br>L'URL suivante correspond à la vulnérabilité : <br><ul><li><a href='https://www.example.com:443' target='_blank'>https://www.example.com:443</a></li></ul>",
+                        ];
+                    }
+                    if ($args[0] === "Fix the vulnerability described in this alert" && $args[1] === 'fr') {
+                        return [
+                            'error' => false,
+                            'response' => "Corrigez la vulnérabilité décrite dans cette alerte.",
+                        ];
+                    }
+                }
+                return [
+                    'error' => true,
+                    'response' => null,
+                ];
+            });
     }
 
     private function mockStartPortsScan()
