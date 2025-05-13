@@ -8,6 +8,7 @@ use App\Models\Asset;
 use App\Models\Conversation;
 use App\Models\Port;
 use App\Models\PortTag;
+use App\Models\Scan;
 use App\Models\TimelineItem;
 use App\Models\YnhOsquery;
 use App\User;
@@ -156,6 +157,25 @@ class Timeline extends Component
         ])->render();
     }
 
+    public static function newScan(User $user, Asset $asset, Carbon $portsScanBeginsAt, ?Carbon $portsScanEndsAt, ?Carbon $vulnsScanBeginsAt, ?Carbon $vulnsScanEndsAt, int $nbRunningScans, int $nbCompletedScans): string
+    {
+        $timestamp = $portsScanBeginsAt->utc()->format('Y-m-d H:i:s');
+        $date = Str::before($timestamp, ' ');
+        $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+        return \Illuminate\Support\Facades\View::make('cywise._timeline-item-scan', [
+            'date' => $date,
+            'time' => $time,
+            'asset' => $asset,
+            'portsScanBeginsAt' => $portsScanBeginsAt,
+            'portsScanEndsAt' => $portsScanEndsAt,
+            'vulnsScanBeginsAt' => $vulnsScanBeginsAt,
+            'vulnsScanEndsAt' => $vulnsScanEndsAt,
+            'total' => $nbRunningScans + $nbCompletedScans,
+            'remaining' => $nbRunningScans,
+        ])->render();
+    }
+
     public function __construct()
     {
         /** @var User $user */
@@ -187,6 +207,7 @@ class Timeline extends Component
             $messages = $messages->concat($this->notes($user));
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_VULNERABILITIES) {
+            $messages = $messages->concat($this->scans($user));
             $messages = $messages->concat($this->vulnerabilities($user));
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_CONVERSATIONS) {
@@ -239,7 +260,7 @@ class Timeline extends Component
             ->get()
             ->map(function (Conversation $conversation) use ($user) {
 
-                $timestamp = $conversation->created_at->format('Y-m-d H:i:s');
+                $timestamp = $conversation->created_at->utc()->format('Y-m-d H:i:s');
                 $date = Str::before($timestamp, ' ');
                 $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
 
@@ -260,7 +281,7 @@ class Timeline extends Component
             ->get()
             ->map(function (Asset $asset) use ($user) {
 
-                $timestamp = $asset->created_at->format('Y-m-d H:i:s');
+                $timestamp = $asset->created_at->utc()->format('Y-m-d H:i:s');
                 $date = Str::before($timestamp, ' ');
                 $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
 
@@ -280,7 +301,7 @@ class Timeline extends Component
         return TimelineItem::fetchNotes($user->id, null, null, 0)
             ->map(function (TimelineItem $item) use ($user) {
 
-                $timestamp = $item->timestamp->format('Y-m-d H:i:s');
+                $timestamp = $item->timestamp->utc()->format('Y-m-d H:i:s');
                 $date = Str::before($timestamp, ' ');
                 $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
 
@@ -289,6 +310,64 @@ class Timeline extends Component
                     'date' => $date,
                     'time' => $time,
                     'html' => self::newNote($user, $item),
+                ];
+            })
+            ->toArray();
+    }
+
+    private function scans(User $user): array
+    {
+        return Asset::where('is_monitored', true)
+            ->when($this->assetId, fn($query, $assetId) => $query->where('id', $assetId))
+            ->get()
+            ->filter(fn(Asset $asset) => $asset->scanInProgress()->isNotEmpty() || ($asset->scanCompleted()->isNotEmpty() && $asset->alerts()->count() <= 0))
+            ->map(function (Asset $asset) use ($user) {
+
+                // Load the asset's scans
+                $scansInProgress = $asset->scanInProgress();
+
+                if ($scansInProgress->isNotEmpty()) {
+                    $scans = $scansInProgress;
+                } else {
+                    $scans = $asset->scanCompleted();
+                }
+
+                /** @var Carbon $portsScanBeginsAt */
+                $portsScanBeginsAt = $scans
+                    ->filter(fn(Scan $scan) => $scan->ports_scan_begins_at != null)
+                    ->sortBy('ports_scan_begins_at')
+                    ->first()?->ports_scan_begins_at;
+
+                /** @var ?Carbon $portsScanEndsAt */
+                $portsScanEndsAt = $scans->contains(fn(Scan $scan) => $scan->ports_scan_ends_at == null) ?
+                    null :
+                    $scans->sortBy('ports_scan_ends_at')->last()?->ports_scan_ends_at;
+
+                /** @var ?Carbon $vulnsScanBeginsAt */
+                $vulnsScanBeginsAt = $scans
+                    ->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at != null)
+                    ->sortBy('vulns_scan_begins_at')
+                    ->first()?->vulns_scan_begins_at;
+
+                /** @var ?Carbon $vulnsScanEndsAt */
+                $vulnsScanEndsAt = $scans->contains(fn(Scan $scan) => $scan->vulns_scan_ends_at == null) ?
+                    null :
+                    $scans->sortBy('vulns_scan_ends_at')->last()?->vulns_scan_ends_at;
+
+                // Load the number of remaining steps
+                $nbRunningScans = $scans->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at == null)->count();
+                $nbCompletedScans = $scans->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at != null)->count();
+
+                $timestamp = $portsScanBeginsAt->utc()->format('Y-m-d H:i:s');
+                $date = Str::before($timestamp, ' ');
+                $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+                return [
+                    'timestamp' => $timestamp,
+                    'date' => $date,
+                    'time' => $time,
+                    'html' => self::newScan($user, $asset, $portsScanBeginsAt, $portsScanEndsAt, $vulnsScanBeginsAt, $vulnsScanEndsAt, $nbRunningScans, $nbCompletedScans),
+                    '_asset' => $asset,
                 ];
             })
             ->toArray();
@@ -303,7 +382,7 @@ class Timeline extends Component
             ->filter(fn(Alert $alert) => $alert->is_hidden === 0)
             ->map(function (Alert $alert) use ($user) {
 
-                $timestamp = $alert->updated_at->format('Y-m-d H:i:s');
+                $timestamp = $alert->updated_at->utc()->format('Y-m-d H:i:s');
                 $date = Str::before($timestamp, ' ');
                 $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
                 $asset = $alert->asset();
@@ -349,7 +428,7 @@ class Timeline extends Component
             ->get()
             ->map(function (YnhOsquery $event) use ($user) {
 
-                $timestamp = $event->calendar_time->format('Y-m-d H:i:s');
+                $timestamp = $event->calendar_time->utc()->format('Y-m-d H:i:s');
                 $date = Str::before($timestamp, ' ');
                 $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
 

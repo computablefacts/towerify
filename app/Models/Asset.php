@@ -142,6 +142,13 @@ class Asset extends Model
             ->where('am_assets.id', $this->id);
     }
 
+    /**
+     * This method name is misleading because it does not tells you if all running scans on this asset completed.
+     * It tells you what are the Scan objects for the last successful scan of this asset.
+     *
+     * @return Collection a list of scans
+     * @deprecated
+     */
     public function scanCompleted(): Collection
     {
         return Scan::where('asset_id', $this->id)
