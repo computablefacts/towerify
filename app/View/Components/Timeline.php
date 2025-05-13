@@ -169,10 +169,10 @@ class Timeline extends Component
         $this->categories = [
             self::CATEGORY_ALL,
             self::CATEGORY_ASSETS,
-            self::CATEGORY_CONVERSATIONS,
+            self::CATEGORY_VULNERABILITIES,
             self::CATEGORY_EVENTS,
             self::CATEGORY_NOTES,
-            self::CATEGORY_VULNERABILITIES,
+            self::CATEGORY_CONVERSATIONS,
         ];
 
         $messages = collect();
