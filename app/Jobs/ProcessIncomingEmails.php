@@ -71,16 +71,17 @@ class ProcessIncomingEmails implements ShouldQueue
 
                     $to = $message->getTo()->all();
                     $from = $message->getFrom()->all();
-                    $cc = $message->getCc()->all();
-                    $bcc = $message->getBcc()->all();
-                    $isCyberBuddy = collect($to)->contains(self::SENDER_CYBERBUDDY);
-                    $isMemex = collect($to)->contains(self::SENDER_MEMEX);
+                    $subject = $message->getSubject()->toString();
+                    $isCyberBuddy = collect($to)->map(fn(\Webklex\PHPIMAP\Address $address) => $address->mail)->contains(self::SENDER_CYBERBUDDY);
+                    $isMemex = collect($to)->map(fn(\Webklex\PHPIMAP\Address $address) => $address->mail)->contains(self::SENDER_MEMEX);
 
                     if (!$isCyberBuddy && !$isMemex) {
                         continue;
                     }
+
+                    Log::debug("From: {$from[0]->mail}\nTo: {$to[0]->mail}\nSubject: {$subject}");
+
                     if (count($from) !== 1) {
-                        Log::error($message->getSubject());
                         Log::error('Message from multiple addresses!');
                         continue;
                     }
@@ -94,14 +95,13 @@ class ProcessIncomingEmails implements ShouldQueue
 
                     // Ensure all prompts are properly loaded
                     /* if (Prompt::count() >= 4) {
-                        Log::warning($message->getSubject());
+                        Log::warning($subject);
                         Log::warning("Some prompts are not ready yet. Skipping email processing for now.");
                         continue;
                     } */
 
                     // Ensure all collections are properly loaded
                     if (File::where('is_deleted', false)->get()->contains(fn(File $file) => !$file->is_embedded)) {
-                        Log::warning($message->getSubject());
                         Log::warning("Some collections are not ready yet. Skipping email processing for now.");
                     } else if ($isCyberBuddy) {
                         $this->cyberBuddy($user, $message);
@@ -151,22 +151,22 @@ class ProcessIncomingEmails implements ShouldQueue
             $this->importPrompt($user, 'default_chat', 'seeds/prompts/default_chat.txt');
             $this->importPrompt($user, 'default_chat_history', 'seeds/prompts/default_chat_history.txt');
             $this->importPrompt($user, 'default_debugger', 'seeds/prompts/default_debugger.txt');
+        }
 
-            // Create shadow collections for some frameworks
-            $frameworks = \App\Models\YnhFramework::all();
+        // Create shadow collections for some frameworks
+        $frameworks = \App\Models\YnhFramework::all();
 
-            foreach ($frameworks as $framework) {
-                if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
-                    $this->importFramework($framework, 20);
-                } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
-                    $this->importFramework($framework, 10);
-                } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
-                    $this->importFramework($framework, 30);
-                } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
-                    $this->importFramework($framework, 50);
-                } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
-                    $this->importFramework($framework, 40);
-                }
+        foreach ($frameworks as $framework) {
+            if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
+                $this->importFramework($framework, 20);
+            } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
+                $this->importFramework($framework, 10);
+            } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
+                $this->importFramework($framework, 30);
+            } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
+                $this->importFramework($framework, 50);
+            } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
+                $this->importFramework($framework, 40);
             }
         }
         return $user;
@@ -195,7 +195,7 @@ class ProcessIncomingEmails implements ShouldQueue
     private function importFramework(YnhFramework $framework, int $priority): void
     {
         $collection = $this->getOrCreateCollection($framework->collectionName(), $priority);
-        if ($collection) {
+        if ($collection && $collection->files()->count() === 0) {
             $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $framework->path());
         }
     }
@@ -235,8 +235,7 @@ class ProcessIncomingEmails implements ShouldQueue
         // Remove previous messages i.e. rows starting with >
         $body = trim(preg_replace("/^(>.*)|(On\s+.*\s+wrote:)[\n\r]?$/im", '', $message->getTextBody()));
 
-        Log::debug('subject=' . $message->getSubject()[0] ?? '');
-        Log::debug('body=' . $body);
+        Log::debug("body={$body}");
 
         // Call CyberBuddy
         $request = new ConverseRequest();
@@ -248,7 +247,7 @@ class ProcessIncomingEmails implements ShouldQueue
         $controller = new CyberBuddyNextGenController();
         $response = $controller->converse($request, true);
         $json = json_decode($response->content(), true);
-        $subject = $message->getSubject()[0] ?? '';
+        $subject = $message->getSubject()->toString();
         $body = $json['answer']['html'] ?? '';
 
         EndVulnsScanListener::sendEmail(
@@ -276,14 +275,13 @@ class ProcessIncomingEmails implements ShouldQueue
         );
 
         if (!$message->move('CyberBuddy')) {
-            Log::error($message->getSubject());
             Log::error('Message could not be moved to the CyberBuddy folder!');
         }
     }
 
     private function memex(User $user, \Webklex\PHPIMAP\Message $message): void
     {
-        $item = TimelineItem::createNote($user->id, $message->getTextBody(), $message->getSubject()[0] ?? '');
+        $item = TimelineItem::createNote($user->id, $message->getTextBody(), $message->getSubject()->toString());
         if ($message->hasAttachments()) {
             $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
             if ($collection) {
@@ -300,7 +298,6 @@ class ProcessIncomingEmails implements ShouldQueue
             }
         }
         if (!$message->move('Memex')) {
-            Log::error($message->getSubject());
             Log::error('Message could not be moved to the Memex folder!');
         }
     }
