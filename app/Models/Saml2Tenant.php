@@ -2,16 +2,38 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Slides\Saml2\Models\Tenant;
 
 class Saml2Tenant extends Tenant
 {
     public static function firstFromDomain(string $domain)
     {
-        return self::query()
-            ->where('domain', '=', $domain)
-            ->orWhere('alt_domain1', '=', $domain)
-            ->first();
+        return self::all()
+            ->filter(function (Saml2Tenant $saml2Tenant) use ($domain) {
+                $allowedDomains = [
+                    $saml2Tenant->domain,
+                    $saml2Tenant->alt_domain1,
+                ];
+
+                foreach ($allowedDomains as $allowedDomain) {
+                    // If SAML Tenant domain starts with ~, it is a regex
+                    if (Str::startsWith($allowedDomain, '~')) {
+                        if (1 === preg_match($allowedDomain, $domain)) {
+                            Log::debug("[SAML2 Authentication] $domain matches on domain regex $allowedDomain");
+                            return true;
+                        }
+                    } else {
+                        if ($domain === $allowedDomain) {
+                            Log::debug("[SAML2 Authentication] $domain is equal to domain $allowedDomain");
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            })->first();
     }
 
     public function getTenantId()
