@@ -80,7 +80,7 @@ RUN install-php-extensions \
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Max execution time (default=30)
-RUN echo "max_execution_time=15" > $PHP_INI_DIR/conf.d/max-execution-time.ini
+RUN echo "max_execution_time=60" > $PHP_INI_DIR/conf.d/max-execution-time.ini
 # Memory Limit (default=128M)
 RUN echo "memory_limit=4096M" > $PHP_INI_DIR/conf.d/max-limit.ini
 # POST max size (default=8M)
