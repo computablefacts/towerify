@@ -147,6 +147,18 @@ class TimelineItem extends Model
         });
     }
 
+    public static function createLeak(User $user, array $identifiers): TimelineItem
+    {
+        return self::createItem($user->id, 'leak', Carbon::now(), 0, [
+            'credentials' => json_encode($identifiers),
+        ]);
+    }
+
+    public static function fetchLeaks(?int $ownedBy = null, ?Carbon $createdAtOrAfter = null, ?Carbon $createdAtOrBefore = null, ?int $flags = null, array $ands = []): \Illuminate\Support\Collection
+    {
+        return self::fetchItems($ownedBy, 'leak', $createdAtOrAfter, $createdAtOrBefore, $flags, $ands);
+    }
+
     public static function createNote(User $user, string $body, string $subject = ''): TimelineItem
     {
         return self::createItem($user->id, 'note', Carbon::now(), 0, [

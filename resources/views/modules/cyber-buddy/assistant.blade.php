@@ -392,7 +392,6 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
     padding-top: 0.5rem;
   }
 
-
   .tw-answer-table-wrapper {
     background-color: rgb(255, 255, 255);
     width: 100%;

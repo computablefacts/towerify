@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Helpers\JosianneClient;
 use App\Helpers\Messages;
 use App\Models\Alert;
 use App\Models\Asset;
@@ -18,6 +19,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 
@@ -29,6 +31,7 @@ class Timeline extends Component
     const string CATEGORY_NOTES = 'notes';
     const string CATEGORY_VULNERABILITIES = 'vulnerabilities';
     const string CATEGORY_CONVERSATIONS = 'conversations';
+    const string CATEGORY_LEAKS = 'leaks';
 
     public string $todaySeparator;
     public array $messages;
@@ -50,6 +53,20 @@ class Timeline extends Component
         return Str::replace("\n", '', \Illuminate\Support\Facades\View::make('cywise._timeline-separator', [
             'date' => $date,
         ])->render());
+    }
+
+    public static function newLeak(User $user, TimelineItem $item): string
+    {
+        $timestamp = $item->timestamp->utc()->format('Y-m-d H:i:s');
+        $date = Str::before($timestamp, ' ');
+        $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+        return \Illuminate\Support\Facades\View::make('cywise._timeline-item-leak', [
+            'date' => $date,
+            'time' => $time,
+            'user' => $user,
+            'leak' => $item,
+        ])->render();
     }
 
     public static function newNote(User $user, TimelineItem $item): string
@@ -188,6 +205,7 @@ class Timeline extends Component
         $this->todaySeparator = self::newSeparator(Carbon::now());
         $this->categories = [
             self::CATEGORY_ALL,
+            self::CATEGORY_LEAKS,
             self::CATEGORY_ASSETS,
             self::CATEGORY_VULNERABILITIES,
             self::CATEGORY_EVENTS,
@@ -212,6 +230,9 @@ class Timeline extends Component
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_CONVERSATIONS) {
             $messages = $messages->concat($this->conversations($user));
+        }
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_LEAKS) {
+            $messages = $messages->concat($this->leaks($user));
         }
 
         $this->messages = $messages
@@ -291,6 +312,81 @@ class Timeline extends Component
                     'time' => $time,
                     'html' => self::newAsset($user, $asset),
                     '_asset' => $asset,
+                ];
+            })
+            ->toArray();
+    }
+
+    private function leaks(User $user): array
+    {
+        $now = Carbon::now()->utc()->subDays(30);
+        $leaks = TimelineItem::fetchLeaks($user->id, $now, null, 0);
+
+        if ($leaks->isEmpty()) {
+
+            $tlds = "'" . Asset::all()
+                    ->map(fn(Asset $asset) => $asset->tld())
+                    ->filter(fn(?string $tld) => !empty($tld))
+                    ->unique()
+                    ->join("','") . "'";
+
+            $query = "SELECT DISTINCT concat(login, '@', login_email_domain) AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website FROM dumps_login_email_domain WHERE login_email_domain IN ({$tlds}) ORDER BY email ASC";
+
+            Log::info($query);
+
+            $output = JosianneClient::executeQuery($query);
+            $leaks = collect(explode("\n", $output))
+                ->filter(fn(string $line) => !empty($line) && $line !== 'ok')
+                ->map(function (string $line) {
+                    $line = trim($line);
+                    return [
+                        'email' => Str::before($line, "\t"),
+                        'website' => Str::after($line, "\t"),
+                    ];
+                })
+                ->map(function (array $credentials) {
+                    // if (preg_match("/(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(([^\s()<>]+)))*)|[^\s`!()[]{};:'\".,<>?«»“”‘’]))/", $credentials['website'])) {
+                    if (filter_var($credentials['website'], FILTER_VALIDATE_URL)) {
+                        return $credentials;
+                    }
+                    return [
+                        'email' => $credentials['email'],
+                        'website' => '',
+                    ];
+                })
+                ->unique(fn(array $credentials) => $credentials['email'] . $credentials['website']);
+
+            if (count($leaks) > 0) {
+
+                // Get previous leaks
+                $leaksPrev = TimelineItem::fetchLeaks($user->id, null, $now, 0)
+                    ->flatMap(fn(TimelineItem $item) => json_decode($item->attributes()['credentials']));
+
+                $leaks = $leaks->filter(function (array $leak) use ($leaksPrev) {
+                    return !$leaksPrev->contains(function (object $leakPrev) use ($leak) {
+                        return $leakPrev->email === $leak['email'] &&
+                            $leakPrev->website === $leak['website'];
+                    });
+                });
+
+                // Only add the new leaks  
+                if (count($leaks) > 0) {
+                    $leaks->chunk(10)->each(fn(\Illuminate\Support\Collection $leaksChunk) => TimelineItem::createLeak($user, $leaksChunk->values()->toArray()));
+                }
+            }
+        }
+        return TimelineItem::fetchLeaks($user->id, null, null, 0)
+            ->map(function (TimelineItem $item) use ($user) {
+
+                $timestamp = $item->timestamp->utc()->format('Y-m-d H:i:s');
+                $date = Str::before($timestamp, ' ');
+                $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+                return [
+                    'timestamp' => $timestamp,
+                    'date' => $date,
+                    'time' => $time,
+                    'html' => self::newLeak($user, $item),
                 ];
             })
             ->toArray();

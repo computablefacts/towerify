@@ -57,6 +57,16 @@ class EndVulnsScanListener extends AbstractListener
                     'website' => Str::after($line, "\t"),
                 ];
             })
+            ->map(function (array $credentials) {
+                if (preg_match("/(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(([^\s()<>]+)))*)|[^\s`!()[]{};:'\".,<>?«»“”‘’]))/", $credentials['website'])) {
+                    return $credentials;
+                }
+                return [
+                    'email' => $credentials['email'],
+                    'website' => '',
+                ];
+            })
+            ->unique(fn(array $credentials) => $credentials['email'] . $credentials['website'])
             ->values();
         $msgLeaks = $leaks->isNotEmpty() ? "<li>J'ai trouvé <b>{$leaks->count()}</b> identifiants compromis appartenant au domaine {$assets->first()->tld}.</li>" : "";
 

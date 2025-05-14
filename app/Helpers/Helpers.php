@@ -136,7 +136,13 @@ if (!function_exists('app_sidebar')) {
                         [
                             'label' => __('Timeline'),
                             'route' => route('home'),
-                            'active' => request()->route()->named('home') && (!request()->get('category') || request()->get('category') === 'all'),
+                            'active' => request()->route()->named('home') && ((!request()->get('category') && !request()->get('tab')) || request()->get('category') === 'all'),
+                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
+                        ],
+                        [
+                            'label' => __('Leaks'),
+                            'route' => route('home', ['category' => 'leaks']),
+                            'active' => request()->route()->named('home') && request()->get('category') === 'leaks',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
                         ],
                         [
