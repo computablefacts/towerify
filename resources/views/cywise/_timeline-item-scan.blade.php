@@ -18,7 +18,7 @@
   <div class="timeline-item-description">
     <span>
     @if(!$vulnsScanEndsAt)
-    Le scan de <a href="aid-{{ $asset->id }}">{{ $asset->asset }}</a> est en cours.&nbsp;
+    Le scan de <a href="#aid-{{ $asset->id }}">{{ $asset->asset }}</a> est en cours.&nbsp;
     @if(!$vulnsScanBeginsAt)
     Recherche de <b>ports ouverts</b>...
     @else
@@ -26,7 +26,7 @@
     @endif
     @else
     Le scan de <a
-        href="aid-{{ $asset->id }}">{{ $asset->asset }}</a> s'est terminé <b>sans découvrir de vulnérabilités</b>.
+        href="#aid-{{ $asset->id }}">{{ $asset->asset }}</a> s'est terminé <b>sans découvrir de vulnérabilités</b>.
     @endif
     </span>
   </div>
