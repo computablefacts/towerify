@@ -29,8 +29,8 @@
                        class="form-control {{ $errors->has('email') ? 'is-invalid' : '' }}"
                        name="email"
                        value="{{ $email ?? old('email') }}"
-                       required
-                       autofocus>
+                       tabindex="-1"
+                       readonly>
                 @if ($errors->has('email'))
                 <div class="form-text" role="alert">
                   {{ $errors->first('email') }}
@@ -47,7 +47,8 @@
                        type="password"
                        class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}"
                        name="password"
-                       required>
+                       required
+                       autofocus>
                 @if ($errors->has('password'))
                 <div class="form-text" role="alert">
                   {{ $errors->first('password') }}
