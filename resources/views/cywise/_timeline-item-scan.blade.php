@@ -16,16 +16,18 @@
     </svg>
   </span>
   <div class="timeline-item-description">
+    <span>
     @if(!$vulnsScanEndsAt)
-    <span>Le scan de <a href="aid-{{ $asset->id }}">{{ $asset->asset }}</a> est en cours.</span>
+    Le scan de <a href="aid-{{ $asset->id }}">{{ $asset->asset }}</a> est en cours.&nbsp;
     @if(!$vulnsScanBeginsAt)
-    <span>Recherche de <b>ports ouverts</b>...</span>
-    @endif
-    @if($vulnsScanBeginsAt)
-    <span>Recherche de <b>vulnérabilités</b>... ({{ $remaining }}/{{ $total }})</span>
+    Recherche de <b>ports ouverts</b>...
+    @else
+    Recherche de <b>vulnérabilités</b>... ({{ $remaining }}/{{ $total }})
     @endif
     @else
-    <span>Le scan de <a href="aid-{{ $asset->id }}">{{ $asset->asset }}</a> s'est terminé <b>sans découvrir de vulnérabilités</b>.</span>
+    Le scan de <a
+        href="aid-{{ $asset->id }}">{{ $asset->asset }}</a> s'est terminé <b>sans découvrir de vulnérabilités</b>.
     @endif
+    </span>
   </div>
 </li>
