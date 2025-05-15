@@ -6,6 +6,7 @@
     display: table;
     width: 100%;
     margin-top: 10px;
+    font-size: 0.8rem;
   }
 
   .timeline-item-wrapper table thead {
