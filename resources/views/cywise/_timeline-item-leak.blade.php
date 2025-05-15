@@ -85,7 +85,7 @@
         <td>{{ empty($l->website) ? '-' : $l->website }}</td>
         <td>{{ empty($l->password) ? '-' : $l->password }}</td>
         <td>
-          <span class="lozenge new">
+          <span class="lozenge new" style="font-size: 0.8rem;">
             {{ empty($l->website) ? __('fuite de données') : __('possible compromission') }}
           </span>
         </td>
