@@ -54,7 +54,7 @@ class EndVulnsScanListener extends AbstractListener
                 return [
                     'email' => Str::trim(Str::before($line, "\t")),
                     'website' => Str::trim(Str::between($line, "\t", "\t")),
-                    'password' => $this->maskPassword(Str::trim(Str::afterLast($line, "\t"))),
+                    'password' => self::maskPassword(Str::trim(Str::afterLast($line, "\t"))),
                 ];
             })
             ->map(function (array $credentials) {
@@ -219,12 +219,15 @@ class EndVulnsScanListener extends AbstractListener
         return [];
     }
 
-    private static function maskPassword(string $password): string
+    private static function maskPassword(string $password, int $size = 3): string
     {
         if (Str::length($password) <= 2) {
             return Str::repeat('*', Str::length($password));
         }
-        return Str::substr($password, 0, 1) . Str::repeat('*', Str::length($password) - 2) . Str::substr($password, -1, 1);
+        if (Str::length($password) <= 2 * $size) {
+            return self::maskPassword($password, 1);
+        }
+        return Str::substr($password, 0, $size) . Str::repeat('*', Str::length($password) - 2 * $size) . Str::substr($password, -$size, $size);
     }
 
     public function viaQueue(): string

@@ -540,11 +540,14 @@ class Timeline extends Component
             ->toArray();
     }
 
-    private function maskPassword(string $password): string
+    private function maskPassword(string $password, int $size = 3): string
     {
         if (Str::length($password) <= 2) {
             return Str::repeat('*', Str::length($password));
         }
-        return Str::substr($password, 0, 1) . Str::repeat('*', Str::length($password) - 2) . Str::substr($password, -1, 1);
+        if (Str::length($password) <= 2 * $size) {
+            return $this->maskPassword($password, 1);
+        }
+        return Str::substr($password, 0, $size) . Str::repeat('*', Str::length($password) - 2 * $size) . Str::substr($password, -$size, $size);
     }
 }
