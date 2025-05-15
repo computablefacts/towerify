@@ -75,8 +75,10 @@ class SamlEventSubscriber
         $debug = config('app.debug');
         if ($debug) Log::debug('[SAML2 Authentication] handleSignedOut begins');
 
+        // See LoginController::logout
         Auth::logout();
-        Session::save();
+        Session::invalidate();
+        Session::regenerateToken();
 
         if ($debug) Log::debug('[SAML2 Authentication] handleSignedOut ends');
     }
