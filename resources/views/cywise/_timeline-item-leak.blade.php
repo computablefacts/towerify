@@ -5,13 +5,16 @@
     caption-side: bottom;
     display: table;
     width: 100%;
-    margin-top: 10px;
     font-size: 0.8rem;
+    margin-top: 0;
   }
 
   .timeline-item-wrapper table thead {
+    border-top-width: 1px;
     display: table-header-group;
-    font-weight: 500
+    font-weight: 500;
+    border-color: rgb(226, 232, 240);
+    border-style: solid;
   }
 
   .timeline-item-wrapper table tr {
@@ -26,16 +29,14 @@
   }
 
   .timeline-item-wrapper table thead tr th {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding: 0.5rem;
     vertical-align: middle;
     display: table-cell;
     height: 2rem;
   }
 
   .timeline-item-wrapper table tbody tr td {
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding: 0.5rem;
     vertical-align: middle;
     display: table-cell;
   }
@@ -69,6 +70,7 @@
     <div class="timeline-item-description">
       <span>Nous avons trouvé <b>{{ count(json_decode($leak->attributes()['credentials'])) }} identifiants fuités ou compromis</b>. Si aucune action n'a encore été entreprise, demandez aux utilisateurs concernés de modifier leur mot de passe.</span>
     </div>
+    <div class="comment" style="margin-bottom: 0;">
     <table>
       <thead>
       <tr>
@@ -93,5 +95,6 @@
       @endforeach
       </tbody>
     </table>
+    </div>
   </div>
 </li>
