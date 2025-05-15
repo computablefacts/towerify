@@ -43,7 +43,7 @@ class EndVulnsScanListener extends AbstractListener
             return;
         }
 
-        $query = "SELECT DISTINCT concat(login, '@', login_email_domain) AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website FROM dumps_login_email_domain WHERE login_email_domain = '{$assets->first()->tld}' ORDER BY email ASC";
+        $query = "SELECT DISTINCT concat(login, '@', login_email_domain) AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website, password FROM dumps_login_email_domain WHERE login_email_domain = '{$assets->first()->tld}' ORDER BY email, website ASC";
 
         Log::info($query);
 
@@ -51,24 +51,26 @@ class EndVulnsScanListener extends AbstractListener
         $leaks = collect(explode("\n", $output))
             ->filter(fn(string $line) => !empty($line) && $line !== 'ok')
             ->map(function (string $line) {
-                $line = trim($line);
                 return [
-                    'email' => Str::before($line, "\t"),
-                    'website' => Str::after($line, "\t"),
+                    'email' => Str::trim(Str::before($line, "\t")),
+                    'website' => Str::trim(Str::between($line, "\t", "\t")),
+                    'password' => $this->maskPassword(Str::trim(Str::afterLast($line, "\t"))),
                 ];
             })
             ->map(function (array $credentials) {
-                if (preg_match("/(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(([^\s()<>]+)))*)|[^\s`!()[]{};:'\".,<>?«»“”‘’]))/", $credentials['website'])) {
+                // if (preg_match("/(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(([^\s()<>]+)))*)|[^\s`!()[]{};:'\".,<>?«»“”‘’]))/", $credentials['website'])) {
+                if (filter_var($credentials['website'], FILTER_VALIDATE_URL)) {
                     return $credentials;
                 }
                 return [
                     'email' => $credentials['email'],
                     'website' => '',
+                    'password' => $credentials['password'],
                 ];
             })
-            ->unique(fn(array $credentials) => $credentials['email'] . $credentials['website'])
+            ->unique(fn(array $credentials) => $credentials['email'] . $credentials['website'] . $credentials['password'])
             ->values();
-        $msgLeaks = $leaks->isNotEmpty() ? "<li>J'ai trouvé <b>{$leaks->count()}</b> identifiants compromis appartenant au domaine {$assets->first()->tld}.</li>" : "";
+        $msgLeaks = $leaks->isNotEmpty() ? "<li>J'ai trouvé <b>{$leaks->count()}</b> identifiants fuités ou compromis appartenant au domaine {$assets->first()->tld}.</li>" : "";
 
         unset($output);
 
@@ -120,10 +122,10 @@ class EndVulnsScanListener extends AbstractListener
             })->join("");
 
         if ($leaks->isNotEmpty()) {
-            $website = $leaks->map(fn(array $leak) => "<li>L'identifiant <b>{$leak['email']}</b> donnant accès à <b>{$leak['website']}</b> a été compromis.</li>")->join("\n");
+            $website = $leaks->map(fn(array $leak) => "<li>L'identifiant <b>{$leak['email']}</b> donnant accès à <b>{$leak['website']}</b> a été fuité ou compromis.</li>")->join("\n");
             $answer .= "
-            <h3>Identifiants compromis</h3>
-            <p>Cywise surveille également les fuites de données !<p>
+            <h3>Identifiants fuités ou compromis</h3>
+            <p>Cywise surveille également les fuites de données et compromissions !<p>
             <ul>
               {$website}
             </ul>
@@ -215,6 +217,14 @@ class EndVulnsScanListener extends AbstractListener
         }
         Log::error($response->body());
         return [];
+    }
+
+    private static function maskPassword(string $password): string
+    {
+        if (Str::length($password) <= 2) {
+            return Str::repeat('*', Str::length($password));
+        }
+        return Str::substr($password, 0, 1) . Str::repeat('*', Str::length($password) - 2) . Str::substr($password, -1, 1);
     }
 
     public function viaQueue(): string

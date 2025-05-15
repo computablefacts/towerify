@@ -330,7 +330,7 @@ class Timeline extends Component
                     ->unique()
                     ->join("','") . "'";
 
-            $query = "SELECT DISTINCT concat(login, '@', login_email_domain) AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website FROM dumps_login_email_domain WHERE login_email_domain IN ({$tlds}) ORDER BY email ASC";
+            $query = "SELECT DISTINCT concat(login, '@', login_email_domain) AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website, password FROM dumps_login_email_domain WHERE login_email_domain IN ({$tlds}) ORDER BY email, website ASC";
 
             Log::info($query);
 
@@ -338,10 +338,10 @@ class Timeline extends Component
             $leaks = collect(explode("\n", $output))
                 ->filter(fn(string $line) => !empty($line) && $line !== 'ok')
                 ->map(function (string $line) {
-                    $line = trim($line);
                     return [
-                        'email' => Str::before($line, "\t"),
-                        'website' => Str::after($line, "\t"),
+                        'email' => Str::trim(Str::before($line, "\t")),
+                        'website' => Str::trim(Str::between($line, "\t", "\t")),
+                        'password' => $this->maskPassword(Str::trim(Str::afterLast($line, "\t"))),
                     ];
                 })
                 ->map(function (array $credentials) {
@@ -352,9 +352,10 @@ class Timeline extends Component
                     return [
                         'email' => $credentials['email'],
                         'website' => '',
+                        'password' => $credentials['password'],
                     ];
                 })
-                ->unique(fn(array $credentials) => $credentials['email'] . $credentials['website']);
+                ->unique(fn(array $credentials) => $credentials['email'] . $credentials['website'] . $credentials['password']);
 
             if (count($leaks) > 0) {
 
@@ -365,7 +366,8 @@ class Timeline extends Component
                 $leaks = $leaks->filter(function (array $leak) use ($leaksPrev) {
                     return !$leaksPrev->contains(function (object $leakPrev) use ($leak) {
                         return $leakPrev->email === $leak['email'] &&
-                            $leakPrev->website === $leak['website'];
+                            $leakPrev->website === $leak['website'] &&
+                            $leakPrev->password === $leak['password'];
                     });
                 });
 
@@ -536,5 +538,13 @@ class Timeline extends Component
                 ];
             })
             ->toArray();
+    }
+
+    private function maskPassword(string $password): string
+    {
+        if (Str::length($password) <= 2) {
+            return Str::repeat('*', Str::length($password));
+        }
+        return Str::substr($password, 0, 1) . Str::repeat('*', Str::length($password) - 2) . Str::substr($password, -1, 1);
     }
 }

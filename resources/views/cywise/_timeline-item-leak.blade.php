@@ -66,13 +66,15 @@
   </span>
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
-      <span>Nous avons trouvé <b>{{ count(json_decode($leak->attributes()['credentials'])) }} identifiants compromis</b>. Si aucune action n'a encore été entreprise, demandez aux utilisateurs concernés de modifier leur mot de passe.</span>
+      <span>Nous avons trouvé <b>{{ count(json_decode($leak->attributes()['credentials'])) }} identifiants fuités ou compromis</b>. Si aucune action n'a encore été entreprise, demandez aux utilisateurs concernés de modifier leur mot de passe.</span>
     </div>
     <table>
       <thead>
       <tr>
         <th>{{ __('Email') }}</th>
         <th>{{ __('Website') }}</th>
+        <th>{{ __('Password') }}</th>
+        <th></th>
       </tr>
       </thead>
       <tbody>
@@ -80,6 +82,12 @@
       <tr>
         <td>{{ $l->email }}</td>
         <td>{{ empty($l->website) ? '-' : $l->website }}</td>
+        <td>{{ empty($l->password) ? '-' : $l->password }}</td>
+        <td>
+          <span class="lozenge new">
+            {{ empty($l->website) ? __('fuite de données') : __('possible compromission') }}
+          </span>
+        </td>
       </tr>
       @endforeach
       </tbody>
