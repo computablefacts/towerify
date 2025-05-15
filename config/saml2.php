@@ -345,7 +345,12 @@ return [
         |
         */
 
-        'requestedAuthnContext' => true,
+        'requestedAuthnContext' => [
+            'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport',
+            'urn:oasis:names:tc:SAML:2.0:ac:classes:X509',
+            'urn:federation:authentication:windows',
+            'urn:oasis:names:tc:SAML:2.0:ac:classes:Unspecified',
+        ],
 
         /*
         |--------------------------------------------------------------------------
