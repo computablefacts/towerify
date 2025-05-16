@@ -19,14 +19,15 @@ class Invitation extends InvitationBase
 
     public function createUser(array $furtherAttributes = [], string $userClass = null, bool $dontEncryptPassword = false): UserContract
     {
-        $creator = $this->createdBy();
+        /** @var User $creator */
+        $creator = User::where('id', $this->created_by)->first();
 
         $attributes = array_merge([
             'email' => $this->email,
             'name' => $this->name,
             'type' => $this->type,
-            'tenant_id' => $creator->tenant_id ?? null,
-            'customer_id' => $creator->customer_id ?? null,
+            'tenant_id' => $creator?->tenant_id ?? null,
+            'customer_id' => $creator?->customer_id ?? null,
         ], $furtherAttributes);
 
         if (!$dontEncryptPassword && isset($attributes['password'])) {
