@@ -3,10 +3,21 @@
 namespace App;
 
 use App\Hashing\TwHasher;
+use App\Models\Collection;
+use App\Models\Invitation;
 use App\Models\Permission;
+use App\Models\Prompt;
+use App\Models\Role;
 use App\Models\Tenant;
+use App\Models\YnhFramework;
+use App\Rules\IsValidCollectionName;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Konekt\User\Models\InvitationProxy;
+use Konekt\User\Models\UserType;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -30,6 +41,126 @@ class User extends \Konekt\AppShell\Models\User
     protected $fillable = [
         'name', 'email', 'password', 'type', 'is_active', 'customer_id', 'tenant_id'
     ];
+
+    public static function getOrCreate(string $email, string $name = '', string $password = ''): User
+    {
+        /** @var User $user */
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+
+            /** @var Invitation $invitation */
+            $invitation = Invitation::where('email', $email)->first();
+
+            if (!$invitation) {
+                $invitation = InvitationProxy::createInvitation($email, empty($name) ? Str::before($email, '@') : $name);
+            }
+
+            /** @var Tenant $tenant */
+            $tenant = Tenant::create(['name' => Str::random()]);
+
+            $user = $invitation->createUser([
+                'password' => empty($password) ? Str::random(64) : $password,
+                'tenant_id' => $tenant->id,
+                'type' => UserType::CLIENT(),
+                'terms_accepted' => true,
+            ]);
+
+            $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
+        }
+        return $user;
+    }
+
+    public static function init(User $user): void
+    {
+        $userOld = Auth::user();
+        Auth::login($user); // otherwise the tenant will not be properly set
+
+        try {
+            // Set the user's prompts
+            self::setupPrompts($user, 'default_assistant', 'seeds/prompts/default_assistant.txt');
+            self::setupPrompts($user, 'default_chat', 'seeds/prompts/default_chat.txt');
+            self::setupPrompts($user, 'default_chat_history', 'seeds/prompts/default_chat_history.txt');
+            self::setupPrompts($user, 'default_debugger', 'seeds/prompts/default_debugger.txt');
+
+            // Create shadow collections for some frameworks
+            $frameworks = \App\Models\YnhFramework::all();
+
+            foreach ($frameworks as $framework) {
+                if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
+                    self::setupFrameworks($framework, 20);
+                } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
+                    self::setupFrameworks($framework, 10);
+                } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
+                    self::setupFrameworks($framework, 30);
+                } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
+                    self::setupFrameworks($framework, 50);
+                } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
+                    self::setupFrameworks($framework, 40);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Error while initializing user {$user->email} : {$e->getMessage()}");
+        }
+
+        Auth::logout();
+
+        if ($userOld) {
+            Auth::login($userOld);
+        }
+    }
+
+    private static function setupPrompts(User $user, string $name, string $root)
+    {
+        $promptPrev = Str::lower(Str::trim(File::get(database_path("$root.prev"))));
+        $promptNext = File::get(database_path($root));
+
+        /** @var Prompt $p */
+        $p = Prompt::where('created_by', $user->id)
+            ->where('name', $name)
+            ->first();
+
+        if (isset($p)) {
+            if (Str::lower(Str::trim($p->template)) === $promptPrev) {
+                $p->update(['template' => $promptNext]);
+            } else {
+                Log::warning("The user {$user->email} prompt {$p->name} has not been updated");
+            }
+        } else {
+            $p = Prompt::create([
+                'created_by' => $user->id,
+                'name' => $name,
+                'template' => $promptNext
+            ]);
+        }
+    }
+
+    private static function setupFrameworks(YnhFramework $framework, int $priority): void
+    {
+        $collection = self::getOrCreateCollection($framework->collectionName(), $priority);
+        if ($collection && $collection->files()->count() === 0) {
+            $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $framework->path());
+        }
+    }
+
+    private static function getOrCreateCollection(string $collectionName, int $priority): ?Collection
+    {
+        /** @var \App\Models\Collection $collection */
+        $collection = Collection::where('name', $collectionName)
+            ->where('is_deleted', false)
+            ->first();
+
+        if (!$collection) {
+            if (!IsValidCollectionName::test($collectionName)) {
+                Log::error("Invalid collection name : {$collectionName}");
+                return null;
+            }
+            $collection = Collection::create([
+                'name' => $collectionName,
+                'priority' => max($priority, 0),
+            ]);
+        }
+        return $collection;
+    }
 
     public function tenant(): ?Tenant
     {

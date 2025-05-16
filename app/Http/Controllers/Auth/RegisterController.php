@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Hashing\TwHasher;
 use App\Helpers\PasswordRequirements;
 use App\Http\Controllers\Controller;
-use App\Models\Role;
-use App\Models\Tenant;
 use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
-use Konekt\User\Models\UserType;
 
 class RegisterController extends Controller
 {
@@ -82,17 +77,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => TwHasher::hash($data['password']),
-        ]);
-
-        $tenant = Tenant::create(['name' => Str::random()]);
-
-        $user->tenant_id = $tenant->id;
-        $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
-        $user->type = UserType::CLIENT();
+        $user = User::getOrCreate($data['email'], $data['name'], $data['password']);
         $user->terms_accepted = $data['terms'] === 'on';
         $user->save();
 

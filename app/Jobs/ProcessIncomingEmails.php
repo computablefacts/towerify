@@ -8,12 +8,7 @@ use App\Listeners\EndVulnsScanListener;
 use App\Models\Collection;
 use App\Models\Conversation;
 use App\Models\File;
-use App\Models\Invitation;
-use App\Models\Prompt;
-use App\Models\Role;
-use App\Models\Tenant;
 use App\Models\TimelineItem;
-use App\Models\YnhFramework;
 use App\Rules\IsValidCollectionName;
 use App\User;
 use Illuminate\Auth\Passwords\PasswordBroker;
@@ -25,8 +20,6 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Konekt\User\Models\InvitationProxy;
-use Konekt\User\Models\UserType;
 use Webklex\IMAP\Facades\Client;
 use Webklex\PHPIMAP\Attachment;
 
@@ -91,7 +84,9 @@ class ProcessIncomingEmails implements ShouldQueue
                     $address = $from[0];
 
                     // Create shadow profile
-                    $user = $this->getOrCreateUser($address->mail);
+                    $user = User::getOrCreate($address->mail);
+
+                    Auth::login($user); // otherwise the tenant will not be properly set
 
                     // Ensure all prompts are properly loaded
                     /* if (Prompt::count() >= 4) {
@@ -115,88 +110,6 @@ class ProcessIncomingEmails implements ShouldQueue
 
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
-        }
-    }
-
-    private function getOrCreateUser(string $email): User
-    {
-        /** @var User $user */
-        $user = User::where('email', $email)->first();
-        if ($user) {
-            Auth::login($user); // otherwise the tenant will not be properly set
-        } else {
-
-            /** @var Invitation $invitation */
-            $invitation = Invitation::where('email', $email)->first();
-
-            if (!$invitation) {
-                $invitation = InvitationProxy::createInvitation($email, Str::before($email, '@'));
-            }
-
-            /** @var Tenant $tenant */
-            $tenant = Tenant::create(['name' => Str::random()]);
-            $user = $invitation->createUser([
-                'password' => Str::random(64),
-                'tenant_id' => $tenant->id,
-                'type' => UserType::CLIENT(),
-                'terms_accepted' => true,
-            ]);
-
-            $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
-
-            Auth::login($user); // otherwise the tenant will not be properly set
-
-            // Create prompts
-            $this->importPrompt($user, 'default_assistant', 'seeds/prompts/default_assistant.txt');
-            $this->importPrompt($user, 'default_chat', 'seeds/prompts/default_chat.txt');
-            $this->importPrompt($user, 'default_chat_history', 'seeds/prompts/default_chat_history.txt');
-            $this->importPrompt($user, 'default_debugger', 'seeds/prompts/default_debugger.txt');
-        }
-
-        // Create shadow collections for some frameworks
-        $frameworks = \App\Models\YnhFramework::all();
-
-        foreach ($frameworks as $framework) {
-            if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
-                $this->importFramework($framework, 20);
-            } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
-                $this->importFramework($framework, 10);
-            } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
-                $this->importFramework($framework, 30);
-            } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
-                $this->importFramework($framework, 50);
-            } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
-                $this->importFramework($framework, 40);
-            }
-        }
-        return $user;
-    }
-
-    private function importPrompt(User $user, string $name, string $root)
-    {
-        $prompt = \Illuminate\Support\Facades\File::get(database_path($root));
-
-        /** @var Prompt $p */
-        $p = Prompt::where('created_by', $user->id)
-            ->where('name', $name)
-            ->first();
-
-        if (isset($p)) {
-            $p->update(['template' => $prompt]);
-        } else {
-            $p = Prompt::create([
-                'created_by' => $user->id,
-                'name' => $name,
-                'template' => $prompt
-            ]);
-        }
-    }
-
-    private function importFramework(YnhFramework $framework, int $priority): void
-    {
-        $collection = $this->getOrCreateCollection($framework->collectionName(), $priority);
-        if ($collection && $collection->files()->count() === 0) {
-            $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $framework->path());
         }
     }
 

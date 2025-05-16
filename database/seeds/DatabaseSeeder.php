@@ -4,7 +4,6 @@ use App\Hashing\TwHasher;
 use App\Helpers\AppStore;
 use App\Models\Permission;
 use App\Models\Product;
-use App\Models\Prompt;
 use App\Models\Property;
 use App\Models\Role;
 use App\Models\TaxCategory;
@@ -16,7 +15,6 @@ use App\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Konekt\Address\Models\ZoneScope;
 use Symfony\Component\Yaml\Yaml;
 
@@ -44,7 +42,7 @@ class DatabaseSeeder extends Seeder
         $this->setupOsqueryRules();
         $this->fillMissingOsqueryUids();
         $this->setupFrameworks();
-        $this->setupPrompts();
+        $this->setupUserPromptsAndFrameworks();
     }
 
     private function setupTenants(): void
@@ -428,37 +426,11 @@ class DatabaseSeeder extends Seeder
             });
     }
 
-    private function setupPrompts(): void
+    private function setupUserPromptsAndFrameworks(): void
     {
-        $this->importPrompt('default_assistant', 'seeds/prompts/default_assistant.txt');
-        $this->importPrompt('default_chat', 'seeds/prompts/default_chat.txt');
-        $this->importPrompt('default_chat_history', 'seeds/prompts/default_chat_history.txt');
-        $this->importPrompt('default_debugger', 'seeds/prompts/default_debugger.txt');
-    }
-
-    private function importPrompt(string $name, string $root)
-    {
-        $promptPrev = Str::lower(Str::trim(Illuminate\Support\Facades\File::get(database_path("$root.prev"))));
-        $promptNext = Illuminate\Support\Facades\File::get(database_path($root));
-        User::query()->chunkById(100, function ($users) use ($name, $promptPrev, $promptNext) {
+        User::query()->chunkById(100, function ($users) {
             foreach ($users as $user) {
-                /** @var Prompt $p */
-                $p = Prompt::where('created_by', $user->id)
-                    ->where('name', $name)
-                    ->first();
-                if (isset($p)) {
-                    if (Str::lower(Str::trim($p->template)) === $promptPrev) {
-                        $p->update(['template' => $promptNext]);
-                    } else {
-                        Log::warning("The user {$user->email} prompt {$p->name} has not been updated");
-                    }
-                } else {
-                    $p = Prompt::create([
-                        'created_by' => $user->id,
-                        'name' => $name,
-                        'template' => $promptNext
-                    ]);
-                }
+                User::init($user);
             }
         });
     }

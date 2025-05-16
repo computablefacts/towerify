@@ -55,12 +55,8 @@ use App\Listeners\SendInvitationListener;
 use App\Listeners\StripeEventListener;
 use App\Listeners\UninstallAppListener;
 use App\Listeners\UpdateServerInfosListener;
-use App\Listeners\UserInvitationUtilizedListener;
-use App\Listeners\UserWasCreatedListener;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Konekt\User\Events\UserInvitationUtilized;
-use Konekt\User\Events\UserWasCreated;
 use Laravel\Cashier\Events\WebhookReceived;
 use Vanilo\Order\Events\OrderWasCreated;
 
@@ -95,12 +91,6 @@ class EventServiceProvider extends ServiceProvider
         ],
         OrderWasCreated::class => [
             OrderCreatedListener::class,
-        ],
-        UserInvitationUtilized::class => [
-            UserInvitationUtilizedListener::class,
-        ],
-        UserWasCreated::class => [
-            UserWasCreatedListener::class,
         ],
         CreateBackup::class => [
             CreateBackupListener::class,

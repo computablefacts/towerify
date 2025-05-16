@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Hashing\TwHasher;
 use App\Traits\HasTenant;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Konekt\AppShell\Models\Invitation as InvitationBase;
@@ -18,10 +19,14 @@ class Invitation extends InvitationBase
 
     public function createUser(array $furtherAttributes = [], string $userClass = null, bool $dontEncryptPassword = false): UserContract
     {
+        $creator = $this->createdBy();
+
         $attributes = array_merge([
             'email' => $this->email,
             'name' => $this->name,
             'type' => $this->type,
+            'tenant_id' => $creator->tenant_id ?? null,
+            'customer_id' => $creator->customer_id ?? null,
         ], $furtherAttributes);
 
         if (!$dontEncryptPassword && isset($attributes['password'])) {
@@ -36,6 +41,33 @@ class Invitation extends InvitationBase
         event(new UserIsBeingCreatedFromInvitation($this, $user));
 
         $user->push();
+
+        // Add the 'cyberbuddy only' role to some user
+        if ($user->tenant_id === 18 && $user->customer_id === 9) {
+
+            $cyberBuddyEndUser = Role::where('name', Role::CYBERBUDDY_ONLY)->first();
+
+            if ($cyberBuddyEndUser) {
+                $user->roles()->syncWithoutDetaching($cyberBuddyEndUser);
+            }
+        } else {
+
+            // Add the 'basic end user' role to the user
+            $basicEndUser = Role::where('name', Role::BASIC_END_USER)->first();
+
+            if ($basicEndUser) {
+                $user->roles()->syncWithoutDetaching($basicEndUser);
+            }
+
+            // Add the 'limited administrator' role to the user
+            $limitedAdministrator = Role::where('name', Role::LIMITED_ADMINISTRATOR)->first();
+
+            if ($limitedAdministrator) {
+                $user->roles()->syncWithoutDetaching($limitedAdministrator);
+            }
+        }
+
+        User::init($user);
 
         $this->user_id = $user->id;
         $this->utilized_at = Carbon::now();
