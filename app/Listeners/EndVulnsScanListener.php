@@ -45,7 +45,7 @@ class EndVulnsScanListener extends AbstractListener
 
         $query = "SELECT DISTINCT lower(concat(login, '@', login_email_domain)) AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website, password FROM dumps_login_email_domain WHERE login_email_domain = '{$assets->first()->tld}' ORDER BY email, website ASC";
 
-        Log::info($query);
+        Log::debug($query);
 
         $output = JosianneClient::executeQuery($query);
         $leaks = collect(explode("\n", $output))
