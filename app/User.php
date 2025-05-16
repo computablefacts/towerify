@@ -137,7 +137,7 @@ class User extends \Konekt\AppShell\Models\User
     private static function setupFrameworks(YnhFramework $framework, int $priority): void
     {
         $collection = self::getOrCreateCollection($framework->collectionName(), $priority);
-        if ($collection && $collection->files()->count() === 0) {
+        if ($collection /* && $collection->files()->count() === 0 */) {
             $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $framework->path());
         }
     }
