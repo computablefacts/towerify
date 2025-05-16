@@ -330,33 +330,36 @@ class Timeline extends Component
                     ->unique()
                     ->join("','") . "'";
 
-            $query = "SELECT DISTINCT lower(concat(login, '@', login_email_domain)) AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website, password FROM dumps_login_email_domain WHERE login_email_domain IN ({$tlds}) ORDER BY email, website ASC";
+            if ($tlds === '') {
+                $leaks = collect();
+            } else {
+                $query = "SELECT DISTINCT lower(concat(login, '@', login_email_domain)) AS email, concat(url_scheme, '://', url_subdomain, '.', url_domain) AS website, password FROM dumps_login_email_domain WHERE login_email_domain IN ({$tlds}) ORDER BY email, website ASC";
 
-            Log::info($query);
+                Log::info($query);
 
-            $output = JosianneClient::executeQuery($query);
-            $leaks = collect(explode("\n", $output))
-                ->filter(fn(string $line) => !empty($line) && $line !== 'ok')
-                ->map(function (string $line) {
-                    return [
-                        'email' => Str::trim(Str::before($line, "\t")),
-                        'website' => Str::trim(Str::between($line, "\t", "\t")),
-                        'password' => $this->maskPassword(Str::trim(Str::afterLast($line, "\t"))),
-                    ];
-                })
-                ->map(function (array $credentials) {
-                    // if (preg_match("/(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(([^\s()<>]+)))*)|[^\s`!()[]{};:'\".,<>?«»“”‘’]))/", $credentials['website'])) {
-                    if (filter_var($credentials['website'], FILTER_VALIDATE_URL)) {
-                        return $credentials;
-                    }
-                    return [
-                        'email' => $credentials['email'],
-                        'website' => '',
-                        'password' => $credentials['password'],
-                    ];
-                })
-                ->unique(fn(array $credentials) => $credentials['email'] . $credentials['website'] . $credentials['password']);
-
+                $output = JosianneClient::executeQuery($query);
+                $leaks = collect(explode("\n", $output))
+                    ->filter(fn(string $line) => !empty($line) && $line !== 'ok')
+                    ->map(function (string $line) {
+                        return [
+                            'email' => Str::trim(Str::before($line, "\t")),
+                            'website' => Str::trim(Str::between($line, "\t", "\t")),
+                            'password' => $this->maskPassword(Str::trim(Str::afterLast($line, "\t"))),
+                        ];
+                    })
+                    ->map(function (array $credentials) {
+                        // if (preg_match("/(?i)\b((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(([^\s()<>]+)))*)|[^\s`!()[]{};:'\".,<>?«»“”‘’]))/", $credentials['website'])) {
+                        if (filter_var($credentials['website'], FILTER_VALIDATE_URL)) {
+                            return $credentials;
+                        }
+                        return [
+                            'email' => $credentials['email'],
+                            'website' => '',
+                            'password' => $credentials['password'],
+                        ];
+                    })
+                    ->unique(fn(array $credentials) => $credentials['email'] . $credentials['website'] . $credentials['password']);
+            }
             if (count($leaks) > 0) {
 
                 // Get previous leaks
@@ -371,7 +374,7 @@ class Timeline extends Component
                     });
                 });
 
-                // Only add the new leaks  
+                // Only add the new leaks
                 if (count($leaks) > 0) {
                     $leaks->chunk(10)->each(fn(\Illuminate\Support\Collection $leaksChunk) => TimelineItem::createLeak($user, $leaksChunk->values()->toArray()));
                 }
