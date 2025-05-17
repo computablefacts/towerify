@@ -88,7 +88,7 @@ class User extends \Konekt\AppShell\Models\User
             foreach ($frameworks as $framework) {
                 if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
                     self::setupFrameworks($framework, 20);
-                } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene-detail.jsonl') {
+                } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene.jsonl') {
                     self::setupFrameworks($framework, 10);
                 } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
                     self::setupFrameworks($framework, 30);
@@ -138,11 +138,22 @@ class User extends \Konekt\AppShell\Models\User
     {
         $collection = self::getOrCreateCollection($framework->collectionName(), $priority);
         if ($collection /* && $collection->files()->count() === 0 */) {
+
+            // Cleanup legacy documents
             $name = \Illuminate\Support\Facades\File::name($framework->file);
             $extension = \Illuminate\Support\Facades\File::extension($framework->file);
+
+            if ("{$name}.{$extension}" === "anssi-guide-hygiene.jsonl") {
+                $collection->files()
+                    ->where('path', "anssi-guide-hygiene-detail.2.jsonl")
+                    ->update(['is_deleted' => true]);
+            }
+
             $collection->files()
                 ->where('path', "{$name}.{$extension}")
                 ->update(['is_deleted' => true]);
+
+            // Import new documents
             $path = Str::replace('.jsonl', '.2.jsonl', $framework->path());
             $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $path);
         }
