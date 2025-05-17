@@ -157,12 +157,16 @@ class YnhFramework extends Model
         $text = '';
         $blocks = [];
         $tree = $this->tree();
-        $generateIndentedText = function (array $tree, int $level = 0) use (&$generateIndentedText, &$text, &$blocks) {
+        $generateIndentedText = function (array $tree, int $level = 0, &$titles = []) use (&$generateIndentedText, &$text, &$blocks) {
             foreach ($tree as $key => $value) {
                 $indentation = str_repeat('#', $level + 1);
                 if (is_array($value)) {
-                    $text .= "\n{$indentation} {$key}\n";
-                    $generateIndentedText($value, $level + 1);
+                    $titles[] = "\n{$indentation} {$key}\n";
+                    if (array_is_list($value)) {
+                        $text = implode('', $titles) . $text;
+                    }
+                    $generateIndentedText($value, $level + 1, $titles);
+                    array_pop($titles);
                 } else {
                     $value = Str::replace("\n", "\n\n", $value);
                     $text .= "\n{$value}\n";
