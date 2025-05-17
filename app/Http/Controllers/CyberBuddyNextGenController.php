@@ -100,7 +100,7 @@ class CyberBuddyNextGenController extends Controller
 
             // Load the prompt
             /** @var Prompt $prompt */
-            $prompt = Prompt::where('name', 'default_assistant')->firstOrfail();
+            $prompt = Prompt::where('created_by', $user->id)->where('name', 'default_assistant')->firstOrfail();
             $prompt->template = Str::replace('{ASSETS}', $assets, $prompt->template);
             $prompt->template = Str::replace('{OPEN_PORTS}', $openPorts, $prompt->template);
             $prompt->template = Str::replace('{VULNERABILITIES}', $vulnerabilities, $prompt->template);

@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Collection;
 use App\Models\Prompt;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -165,9 +166,17 @@ class ApiUtils
     /** @deprecated */
     public function chat_manual_demo(string $historyKey, ?string $collection, string $question, bool $fallbackOnNextCollection = false): array
     {
-        /** @var Prompt $prompt */
-        $prompt = Prompt::where('name', 'default_chat')->firstOrfail();
-        $promptHistory = Prompt::where('name', 'default_chat_history')->firstOrfail();
+        if (Auth::user()) {
+            /** @var Prompt $prompt */
+            $prompt = Prompt::where('created_by', Auth::user()->id)->where('name', 'default_chat')->firstOrfail();
+            /** @var Prompt $promptHistory */
+            $promptHistory = Prompt::where('created_by', Auth::user()->id)->where('name', 'default_chat_history')->firstOrfail();
+        } else {
+            /** @var Prompt $prompt */
+            $prompt = Prompt::where('name', 'default_chat')->firstOrfail();
+            /** @var Prompt $promptHistory */
+            $promptHistory = Prompt::where('name', 'default_chat_history')->firstOrfail();
+        }
         return $this->chat_manual($question, $collection, $historyKey, $prompt->template, $promptHistory->template, 10, 'fr', $fallbackOnNextCollection);
     }
 
