@@ -29,7 +29,7 @@ class HomeController extends Controller
 
         if ($user->hasRole(Role::CYBERBUDDY_ONLY)) {
             if (!in_array($tab, ['ama', 'ama2', 'sca', 'frameworks', 'ai_writer', 'conversations'])) {
-                return redirect()->route('home', ['tab' => 'ama']);
+                return redirect()->route('home', ['tab' => 'ama2']);
             }
         }
 

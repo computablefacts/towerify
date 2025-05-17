@@ -269,13 +269,13 @@ if (!function_exists('app_sidebar')) {
                             'route' => route('home', ['tab' => 'ai_writer']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ai_writer',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_AI_WRITER),
-                        ], [
+                        ], /* [
                             'label' => __('CyberBuddy'),
                             'route' => route('home', ['tab' => 'ama']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ama',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_CYBERBUDDY),
-                        ], [
-                            'label' => __('CyberBuddy (nextgen)'),
+                        ], */ [
+                            'label' => __('CyberBuddy'),
                             'route' => route('home', ['tab' => 'ama2']),
                             'active' => request()->route()->named('home') && request()->get('tab') === 'ama2',
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_CYBERBUDDY),
