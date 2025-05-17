@@ -188,18 +188,64 @@ class IngestFileListener extends AbstractListener
                             }
                         }
                     } else { // {"page":11,"tags":["titre","section","sous-section"], "text": "Bonjour monde."}
+                        if (Str::length($obj['text']) < 5000 /* database column size */) {
 
-                        /** @var Chunk $chunk */
-                        $chunk = $collection->chunks()->create([
-                            'file_id' => $file->id,
-                            'url' => $file->downloadUrl(),
-                            'page' => $obj['page'],
-                            'text' => $obj['text'],
-                        ]);
+                            /** @var Chunk $chunk */
+                            $chunk = $collection->chunks()->create([
+                                'file_id' => $file->id,
+                                'url' => $file->downloadUrl(),
+                                'page' => $obj['page'],
+                                'text' => $obj['text'],
+                            ]);
 
-                        if (isset($obj['tags'])) {
-                            foreach ($obj['tags'] as $tag) {
-                                $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                            if (isset($obj['tags'])) {
+                                foreach ($obj['tags'] as $tag) {
+                                    $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                                }
+                            }
+                        } else {
+
+                            $parts = explode("\n\n", $obj['text']);
+                            $currentChunk = '';
+
+                            foreach ($parts as $part) {
+                                if (Str::length($currentChunk . "\n\n" . $part) < 5000 /* database column size */) {
+                                    $currentChunk .= ($currentChunk ? "\n\n" : '') . $part;
+                                } else {
+                                    if ($currentChunk) {
+
+                                        /** @var Chunk $chunk */
+                                        $chunk = $collection->chunks()->create([
+                                            'file_id' => $file->id,
+                                            'url' => $file->downloadUrl(),
+                                            'page' => $obj['page'],
+                                            'text' => $currentChunk,
+                                        ]);
+
+                                        if (isset($obj['tags'])) {
+                                            foreach ($obj['tags'] as $tag) {
+                                                $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                                            }
+                                        }
+                                    }
+                                    $currentChunk = $part;
+                                }
+                            }
+                            if ($currentChunk) {
+
+                                /** @var Chunk $chunk */
+                                $chunk = $collection->chunks()->create([
+                                    'file_id' => $file->id,
+                                    'url' => $file->downloadUrl(),
+                                    'page' => $obj['page'],
+                                    'text' => $currentChunk,
+                                ]);
+
+                                if (isset($obj['tags'])) {
+                                    foreach ($obj['tags'] as $tag) {
+                                        $chunk->tags()->create(['tag' => Str::lower($tag)]);
+                                    }
+                                }
                             }
                         }
                     }
