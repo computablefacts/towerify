@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\YnhFramework;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -14,7 +15,7 @@ class PrepareFramework extends Command
      *
      * @var string
      */
-    protected $signature = 'framework:prepare {input}';
+    protected $signature = 'framework:prepare {input} {output}';
 
     /**
      * The console command description.
@@ -29,15 +30,15 @@ class PrepareFramework extends Command
     public function handle()
     {
         if (is_dir($this->argument('input'))) {
-            $this->processDirectory($this->argument('input'));
+            $this->processDirectory($this->argument('input'), $this->argument('output'));
         } elseif (is_file($this->argument('input'))) {
-            $this->processFile($this->argument('input'));
+            $this->processFile($this->argument('input'), $this->argument('output'));
         } else {
             throw new \Exception('Invalid input path : ' . $this->argument('input'));
         }
     }
 
-    private function processDirectory(string $dir): void
+    private function processDirectory(string $dir, string $output): void
     {
         $ffs = scandir($dir);
 
@@ -49,14 +50,14 @@ class PrepareFramework extends Command
         }
         foreach ($ffs as $ff) {
             if (is_dir($dir . '/' . $ff)) {
-                $this->processDirectory($dir . '/' . $ff);
+                $this->processDirectory($dir . '/' . $ff, $output);
             } else if (is_file($dir . '/' . $ff)) {
-                $this->processFile($dir . '/' . $ff);
+                $this->processFile($dir . '/' . $ff, $output);
             }
         }
     }
 
-    private function processFile(string $file): void
+    private function processFile(string $file, string $output): void
     {
         if (!Str::endsWith($file, '.yaml')) {
             return;
@@ -79,7 +80,7 @@ class PrepareFramework extends Command
             'file' => Str::replace('.yaml', '.jsonl', basename($file)),
         ];
 
-        file_put_contents(Str::replace('.yaml', '.json', $file), json_encode($infos) . PHP_EOL, FILE_APPEND);
+        file_put_contents($output . Str::replace('.yaml', '.json', basename($file)), json_encode($infos) . PHP_EOL, FILE_APPEND);
 
         $framework = $json['objects']['framework'];
         $requirements = $framework['requirement_nodes'];
@@ -100,11 +101,32 @@ class PrepareFramework extends Command
                 }
             }
         }
+
+        $filename = $output . Str::replace('.yaml', '.jsonl', basename($file));
+
         foreach ($tree as $node) {
+
             $chunks = [];
             $this->generateChunk($node, [], $chunks);
+
             foreach ($chunks as $chunk) {
-                file_put_contents(Str::replace('.yaml', '.jsonl', $file), json_encode($chunk) . PHP_EOL, FILE_APPEND);
+                file_put_contents($filename, json_encode($chunk) . PHP_EOL, FILE_APPEND);
+            }
+        }
+        if (file_exists($filename)) {
+
+            $filename = $output . Str::replace('.yaml', '.2.jsonl', basename($file));
+            $framework = new YnhFramework();
+            $framework->fill($infos);
+            $framework->file = Str::after($output, '/database/') . $framework->file;
+
+            foreach ($framework->blocks() as $block) {
+                $chunk = [
+                    'page' => 1,
+                    'tags' => $this->extractTitlesFromMarkdown($block),
+                    'text' => trim($this->removeTitlesFromMarkdown($block)),
+                ];
+                file_put_contents($filename, json_encode($chunk) . PHP_EOL, FILE_APPEND);
             }
         }
     }
@@ -127,5 +149,24 @@ class PrepareFramework extends Command
                 $this->generateChunk($childNode, $currentTags, $chunks);
             }
         }
+    }
+
+    private function extractTitlesFromMarkdown(string $markdown): array
+    {
+        $titles = [];
+        $lines = explode("\n", $markdown);
+
+        foreach ($lines as $line) {
+            if (preg_match('/^#{1,6}\s+(.+)$/', trim($line), $matches)) {
+                $titles[] = trim($matches[1]);
+            }
+        }
+        return $titles;
+    }
+
+    private function removeTitlesFromMarkdown(string $markdown): string
+    {
+        $lines = explode("\n", $markdown);
+        return implode("\n", array_filter($lines, fn(string $line) => !preg_match('/^#{1,6}\s+(.+)$/', trim($line))));
     }
 }

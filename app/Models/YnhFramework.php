@@ -152,7 +152,7 @@ class YnhFramework extends Model
         return "<ul class=\"ul-small-padding\">$text</ul>";
     }
 
-    private function blocks(): array
+    public function blocks(): array
     {
         $text = '';
         $blocks = [];

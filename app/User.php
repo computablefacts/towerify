@@ -138,7 +138,13 @@ class User extends \Konekt\AppShell\Models\User
     {
         $collection = self::getOrCreateCollection($framework->collectionName(), $priority);
         if ($collection /* && $collection->files()->count() === 0 */) {
-            $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $framework->path());
+            $name = \Illuminate\Support\Facades\File::name($framework->file);
+            $extension = \Illuminate\Support\Facades\File::extension($framework->file);
+            $collection->files()
+                ->where('path', "{$name}.{$extension}")
+                ->update(['is_deleted' => true]);
+            $path = Str::replace('.jsonl', '.2.jsonl', $framework->path());
+            $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $path);
         }
     }
 
