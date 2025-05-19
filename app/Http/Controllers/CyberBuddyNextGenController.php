@@ -54,7 +54,7 @@ class CyberBuddyNextGenController extends Controller
         return view('modules.cyber-buddy.assistant', ['threadId' => $threadId]);
     }
 
-    public function converse(ConverseRequest $request, bool $fallbackOnNextCollection = false): JsonResponse
+    public function converse(ConverseRequest $request, bool $fallbackOnNextCollection = true): JsonResponse
     {
         $threadId = Str::trim($request->string('thread_id', ''));
         $question = Str::trim($request->string('directive', ''));
@@ -86,13 +86,13 @@ class CyberBuddyNextGenController extends Controller
         if (count($conversation->thread()) <= 0) {
 
             $fnAssets = AbstractLlmFunction::handle($user, $threadId, 'query_asset_database', []);
-            $assets = $fnAssets->text();
+            $assets = $fnAssets->markdown();
 
             $fnVulnerabilities = AbstractLlmFunction::handle($user, $threadId, 'query_vulnerability_database', []);
-            $vulnerabilities = $fnVulnerabilities->text();
+            $vulnerabilities = $fnVulnerabilities->markdown();
 
             $fnOpenPorts = AbstractLlmFunction::handle($user, $threadId, 'query_open_port_database', []);
-            $openPorts = $fnOpenPorts->text();
+            $openPorts = $fnOpenPorts->markdown();
 
             $notes = TimelineItem::fetchNotes($user->id, null, null, 0)
                 ->map(fn(TimelineItem $note) => "- {$note->timestamp->format('Y-m-d H:i:s')} : {$note->attributes()['body']}")
@@ -246,6 +246,31 @@ class CyberBuddyNextGenController extends Controller
             })
             ->values()
             ->toArray();
+
+        $thread = $conversation->thread();
+        $lastQuestion = end($thread);
+
+        // Always check the internal KB first
+        if ($lastQuestion) {
+
+            $fnKb = AbstractLlmFunction::handle($user, $threadId, 'query_issp', [
+                'question' => $lastQuestion['content'],
+                'fallback_on_next_collection' => $fallbackOnNextCollection,
+            ]);
+
+            // If an answer has been found in the internal KB, bypass the LLM
+            if ($fnKb->output()['sources']->isNotEmpty()) {
+
+                $answer = $fnKb->html();
+
+                return [
+                    'messages' => $messages,
+                    'response' => [],
+                    'html' => $answer,
+                    'raw_answer' => $answer,
+                ];
+            }
+        }
 
         $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
         $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];

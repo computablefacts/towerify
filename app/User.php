@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Hashing\TwHasher;
+use App\Jobs\DeleteEmbeddedChunks;
 use App\Models\Collection;
 use App\Models\Invitation;
 use App\Models\Permission;
@@ -70,7 +71,7 @@ class User extends \Konekt\AppShell\Models\User
         return $user;
     }
 
-    public static function init(User $user): void
+    public static function init(User $user, bool $forceUpdate = false): void
     {
         $userOld = Auth::user();
         Auth::login($user); // otherwise the tenant will not be properly set
@@ -84,18 +85,59 @@ class User extends \Konekt\AppShell\Models\User
 
             // Create shadow collections for some frameworks
             $frameworks = \App\Models\YnhFramework::all();
+            $updated = [];
 
             foreach ($frameworks as $framework) {
+                $collection = $framework->collectionName();
                 if ($framework->file === 'seeds/frameworks/anssi/anssi-genai-security-recommendations-1.0.jsonl') {
-                    self::setupFrameworks($framework, 20);
+                    if ($forceUpdate && !in_array($collection, $updated)) {
+                        self::getOrCreateCollection($collection, 101)->files()->update(['is_deleted' => true]);
+                        (new DeleteEmbeddedChunks())->handle();
+                        $updated[] = $collection;
+                    }
+                    self::setupFrameworks($framework, 101);
                 } else if ($framework->file === 'seeds/frameworks/anssi/anssi-guide-hygiene.jsonl') {
-                    self::setupFrameworks($framework, 10);
+                    if ($forceUpdate && !in_array($collection, $updated)) {
+                        self::getOrCreateCollection($collection, 100)->files()->update(['is_deleted' => true]);
+                        (new DeleteEmbeddedChunks())->handle();
+                        $updated[] = $collection;
+                    }
+                    self::setupFrameworks($framework, 100);
                 } else if ($framework->file === 'seeds/frameworks/gdpr/gdpr.jsonl') {
-                    self::setupFrameworks($framework, 30);
+                    if ($forceUpdate && !in_array($collection, $updated)) {
+                        self::getOrCreateCollection($collection, 110)->files()->update(['is_deleted' => true]);
+                        (new DeleteEmbeddedChunks())->handle();
+                        $updated[] = $collection;
+                    }
+                    self::setupFrameworks($framework, 110);
                 } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
-                    self::setupFrameworks($framework, 50);
+                    if ($forceUpdate && !in_array($collection, $updated)) {
+                        self::getOrCreateCollection($collection, 140)->files()->update(['is_deleted' => true]);
+                        (new DeleteEmbeddedChunks())->handle();
+                        $updated[] = $collection;
+                    }
+                    self::setupFrameworks($framework, 140);
+                } else if ($framework->file === 'seeds/frameworks/nis/nis1-rules-fr.jsonl') {
+                    if ($forceUpdate && !in_array($collection, $updated)) {
+                        self::getOrCreateCollection($collection, 120)->files()->update(['is_deleted' => true]);
+                        (new DeleteEmbeddedChunks())->handle();
+                        $updated[] = $collection;
+                    }
+                    self::setupFrameworks($framework, 120);
                 } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
-                    self::setupFrameworks($framework, 40);
+                    if ($forceUpdate && !in_array($collection, $updated)) {
+                        self::getOrCreateCollection($collection, 130)->files()->update(['is_deleted' => true]);
+                        (new DeleteEmbeddedChunks())->handle();
+                        $updated[] = $collection;
+                    }
+                    self::setupFrameworks($framework, 130);
+                } else if ($framework->file === 'seeds/frameworks/nis2/annex-implementing-regulation-of-nis2-on-t-m.jsonl') {
+                    if ($forceUpdate && !in_array($collection, $updated)) {
+                        self::getOrCreateCollection($collection, 131)->files()->update(['is_deleted' => true]);
+                        (new DeleteEmbeddedChunks())->handle();
+                        $updated[] = $collection;
+                    }
+                    self::setupFrameworks($framework, 131);
                 }
             }
         } catch (\Exception $e) {
@@ -123,7 +165,7 @@ class User extends \Konekt\AppShell\Models\User
             if (Str::lower(Str::trim($p->template)) === $promptPrev) {
                 $p->update(['template' => $promptNext]);
             } else {
-                Log::warning("The user {$user->email} prompt {$p->name} has not been updated");
+                Log::debug("The user {$user->email} prompt {$p->name} has not been updated");
             }
         } else {
             $p = Prompt::create([
@@ -137,23 +179,7 @@ class User extends \Konekt\AppShell\Models\User
     private static function setupFrameworks(YnhFramework $framework, int $priority): void
     {
         $collection = self::getOrCreateCollection($framework->collectionName(), $priority);
-        if ($collection /* && $collection->files()->count() === 0 */) {
-
-            // Cleanup legacy documents
-            $name = \Illuminate\Support\Facades\File::name($framework->file);
-            $extension = \Illuminate\Support\Facades\File::extension($framework->file);
-
-            if ("{$name}.{$extension}" === "anssi-guide-hygiene.jsonl") {
-                $collection->files()
-                    ->where('path', "anssi-guide-hygiene-detail.2.jsonl")
-                    ->update(['is_deleted' => true]);
-            }
-
-            $collection->files()
-                ->where('path', "{$name}.{$extension}")
-                ->update(['is_deleted' => true]);
-
-            // Import new documents
+        if ($collection /* && $collection->files()->count() === 0 */) { // Import new documents
             $path = Str::replace('.jsonl', '.2.jsonl', $framework->path());
             $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $path);
         }

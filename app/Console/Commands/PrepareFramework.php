@@ -76,7 +76,7 @@ class PrepareFramework extends Command
             'description' => $json['description'],
             'copyright' => $json['copyright'],
             'version' => $json['version'],
-            'provider' => $json['provider'],
+            'provider' => $json['provider'] === 'EUROPEAN COMMISSION' ? 'EU' : ($json['provider'] === 'Gouvernement français' ? 'FR' : ($json['provider'] === 'GDPR.EU' ? 'EU' : $json['provider'])),
             'file' => Str::replace('.yaml', '.jsonl', basename($file)),
         ];
 
@@ -124,7 +124,7 @@ class PrepareFramework extends Command
                 $chunk = [
                     'page' => 1,
                     'tags' => $this->extractTitlesFromMarkdown($block),
-                    'text' => trim($this->removeTitlesFromMarkdown($block)),
+                    'text' => "**Provider.** {$framework->provider}\n**Title.** {$framework->name}\n**Description.** {$framework->description}\n\n" . trim($block),
                 ];
                 file_put_contents($filename, json_encode($chunk) . PHP_EOL, FILE_APPEND);
             }
