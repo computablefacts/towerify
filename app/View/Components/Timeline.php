@@ -509,7 +509,7 @@ class Timeline extends Component
             'ynh_osquery_rules.comments',
         ])
             ->join('ynh_osquery_latest_events', 'ynh_osquery_latest_events.ynh_osquery_id', '=', 'ynh_osquery.id')
-            ->join('ynh_osquery_rules', 'ynh_osquery_rules.name', '=', 'ynh_osquery_latest_events.server_name')
+            ->join('ynh_osquery_rules', 'ynh_osquery_rules.name', '=', 'ynh_osquery_latest_events.event_name')
             ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_osquery_latest_events.ynh_server_id')
             ->join('users', 'users.id', '=', 'ynh_servers.user_id')
             ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)

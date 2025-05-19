@@ -22,7 +22,6 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        Log::debug(TwHasher::unhash("8lvzh0PAa&gUF5I6_yZg8g6J5SzmP/rGhmhEepbQxHrAgnKOrBekwxMvgHo3H6hkhiHZPbz7yQVzIm7dzntnlq6z4HDd9nJ2oGRVLvSbhfk614hwMbxyaD50FaEc="));
         /** @var User $user */
         $user = Auth::user();
         $servers_type = $request->input('servers_type', '');

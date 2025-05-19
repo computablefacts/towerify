@@ -852,7 +852,7 @@
     "attck": "T1053/003",
     "is_ioc": 1,
     "score": 30,
-    "comments": "A new scheduled task ha been detected, thisis often used by hacker to provide persistence."
+    "comments": "A new scheduled task has been detected, this is often used by hacker to provide persistence."
   },
   {
     "name": "scp_secure_copy",
