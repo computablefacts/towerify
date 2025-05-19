@@ -57,6 +57,11 @@ class QueryAssetDatabase extends AbstractLlmFunction
 
     public function text(): string
     {
+        return $this->markdown();
+    }
+
+    public function markdown(): string
+    {
         $output = $this->output();
         return $output->isEmpty() ? 'No assets to monitor. Please add one.'
             : $output->map(function (Asset $asset) {

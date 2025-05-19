@@ -21,6 +21,11 @@ class QueryIssp extends AbstractLlmFunction
         return $this->output['answer'];
     }
 
+    public function markdown(): string
+    {
+        return $this->enhanceAnswerWithSources2($this->output['answer'], $this->output['sources']);
+    }
+
     protected function schema2(): array
     {
         return [
@@ -111,5 +116,35 @@ class QueryIssp extends AbstractLlmFunction
         ksort($references);
         $answer = "{$answer}<br><br><b>Sources :</b><ul>" . collect($references)->values()->join("") . "</ul>";
         return Str::replace(["\n\n", "\n-"], "<br>", $answer);
+    }
+
+    private function enhanceAnswerWithSources2(string $answer, Collection $sources): string
+    {
+        $matches = [];
+        // Extract: [12] from [[12]] or [[12] and [13]] from [[12],[13]]
+        $isOk = preg_match_all("/\[\[\d+]]|\[\[\d+]|\[\d+]]/", $answer, $matches);
+        if (!$isOk) {
+            return Str::replace(["\n\n", "\n-"], "<br>", $answer);
+        }
+        $references = [];
+        /** @var array $refs */
+        $refs = $matches[0];
+        foreach ($refs as $ref) {
+            $id = Str::replace(['[', ']'], '', $ref);
+            /** @var array $tooltip */
+            $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
+            /** @var Chunk $chunk */
+            $chunk = Chunk::find($id);
+            /** @var File $file */
+            $file = $chunk?->file()->first();
+            $src = $file ? "({$file->name_normalized}.{$file->extension})[{$file->downloadUrl()}], p. {$chunk->page}" : "";
+            if ($tooltip) {
+                $answer = Str::replace($ref, "**[{$id}]**", $answer);
+                $references[$id] = "<li>**[{$id}]** {$src}: {$tooltip['text']}</li>";
+            }
+        }
+        ksort($references);
+        $answer = "{$answer}\n\n**Sources:**\n<ul>" . collect($references)->values()->join("") . "</ul>";
+        return Str::replace(["\n\n", "\n-"], "\n", $answer);
     }
 }

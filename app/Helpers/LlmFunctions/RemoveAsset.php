@@ -18,6 +18,11 @@ class RemoveAsset extends AbstractLlmFunction
         return $this->output;
     }
 
+    public function markdown(): string
+    {
+        return $this->output;
+    }
+
     protected function schema2(): array
     {
         return [

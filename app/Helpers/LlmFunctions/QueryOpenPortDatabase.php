@@ -47,6 +47,11 @@ class QueryOpenPortDatabase extends AbstractLlmFunction
 
     public function text(): string
     {
+        return $this->markdown();
+    }
+    
+    public function markdown(): string
+    {
         $output = $this->output();
         return $output->isEmpty() ? 'No open ports were found.'
             : $output->map(function (Port $port) {

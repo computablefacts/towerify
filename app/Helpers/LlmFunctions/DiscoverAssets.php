@@ -20,6 +20,11 @@ class DiscoverAssets extends AbstractLlmFunction
         return "{$this->output()['message']} The assets are : {$this->output()['assets']->join(", ")}.";
     }
 
+    public function markdown(): string
+    {
+        return $this->text();
+    }
+
     protected function schema2(): array
     {
         return [

@@ -69,6 +69,8 @@ abstract class AbstractLlmFunction
 
     public abstract function text(): string;
 
+    public abstract function markdown(): string;
+
     protected abstract function schema2(): array;
 
     protected abstract function handle2(User $user, string $threadId, array $args): AbstractLlmFunction;
