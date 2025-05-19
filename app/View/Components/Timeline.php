@@ -515,7 +515,6 @@ class Timeline extends Component
             ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
             ->where('ynh_osquery_rules.enabled', true)
             ->where('ynh_osquery_rules.score', '>=', $this->minScore)
-            ->where('users.tenant_id', Auth::user()->tenant_id)
             ->when(Auth::user()->tenant_id, fn($query, int $tenantId) => $query->where('users.tenant_id', $tenantId))
             ->when(Auth::user()->customer_id, fn($query, int $customerId) => $query->where('users.customer_id', $customerId))
             ->whereNotExists(function (Builder $query) {
