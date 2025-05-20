@@ -104,6 +104,15 @@ class Messages
     {
         return VProcess::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_processes.server_id')
+                    ->whereColumn('name', '=', 'v_processes.name2')
+                    ->whereColumn('action', '=', 'v_processes.action')
+                    ->whereColumn('columns_uid', '=', 'v_processes.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VProcess $event) {
@@ -124,6 +133,15 @@ class Messages
     {
         return VShellHistory::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_shell_history.server_id')
+                    ->whereColumn('name', '=', 'v_shell_history.name')
+                    ->whereColumn('action', '=', 'v_shell_history.action')
+                    ->whereColumn('columns_uid', '=', 'v_shell_history.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VShellHistory $event) {
@@ -140,6 +158,15 @@ class Messages
     {
         return VProcessWithBoundNetworkSockets::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_processes_with_bound_network_sockets.server_id')
+                    ->whereColumn('name', '=', 'v_processes_with_bound_network_sockets.name')
+                    ->whereColumn('action', '=', 'v_processes_with_bound_network_sockets.action')
+                    ->whereColumn('columns_uid', '=', 'v_processes_with_bound_network_sockets.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VProcessWithBoundNetworkSockets $event) {
@@ -156,6 +183,15 @@ class Messages
             ->concat(
                 VProcessWithOpenNetworkSockets::where('timestamp', '>=', $cutOffTime)
                     ->whereIn('server_id', $servers->pluck('id'))
+                    ->whereNotExists(function (Builder $query) {
+                        $query->select(DB::raw(1))
+                            ->from('v_dismissed')
+                            ->whereColumn('ynh_server_id', '=', 'v_processes_with_open_network_sockets.server_id')
+                            ->whereColumn('name', '=', 'v_processes_with_open_network_sockets.name2')
+                            ->whereColumn('action', '=', 'v_processes_with_open_network_sockets.action')
+                            ->whereColumn('columns_uid', '=', 'v_processes_with_open_network_sockets.columns_uid')
+                            ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+                    })
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VProcessWithOpenNetworkSockets $event) {
@@ -262,6 +298,15 @@ class Messages
     {
         return VEtcService::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_etc_services.server_id')
+                    ->whereColumn('name', '=', 'v_etc_services.name2')
+                    ->whereColumn('action', '=', 'v_etc_services.action')
+                    ->whereColumn('columns_uid', '=', 'v_etc_services.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VEtcService $event) {
@@ -278,6 +323,15 @@ class Messages
             ->concat(
                 VEtcHost::where('timestamp', '>=', $cutOffTime)
                     ->whereIn('server_id', $servers->pluck('id'))
+                    ->whereNotExists(function (Builder $query) {
+                        $query->select(DB::raw(1))
+                            ->from('v_dismissed')
+                            ->whereColumn('ynh_server_id', '=', 'v_etc_hosts.server_id')
+                            ->whereColumn('name', '=', 'v_etc_hosts.name')
+                            ->whereColumn('action', '=', 'v_etc_hosts.action')
+                            ->whereColumn('columns_uid', '=', 'v_etc_hosts.columns_uid')
+                            ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+                    })
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VEtcHost $event) {
@@ -295,6 +349,15 @@ class Messages
             ->concat(
                 VNetworkInterface::where('timestamp', '>=', $cutOffTime)
                     ->whereIn('server_id', $servers->pluck('id'))
+                    ->whereNotExists(function (Builder $query) {
+                        $query->select(DB::raw(1))
+                            ->from('v_dismissed')
+                            ->whereColumn('ynh_server_id', '=', 'v_network_interfaces.server_id')
+                            ->whereColumn('name', '=', 'v_network_interfaces.name')
+                            ->whereColumn('action', '=', 'v_network_interfaces.action')
+                            ->whereColumn('columns_uid', '=', 'v_network_interfaces.columns_uid')
+                            ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+                    })
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VNetworkInterface $event) {
@@ -317,6 +380,15 @@ class Messages
     {
         return VService::where('timestamp', '>=', $cutOffTime)
             ->whereIn('server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'v_services.server_id')
+                    ->whereColumn('name', '=', 'v_services.name2')
+                    ->whereColumn('action', '=', 'v_services.action')
+                    ->whereColumn('columns_uid', '=', 'v_services.columns_uid')
+                    ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+            })
             ->orderBy('timestamp', 'desc')
             ->get()
             ->map(function (VService $event) {
@@ -333,6 +405,15 @@ class Messages
             ->concat(
                 VScheduledTask::where('timestamp', '>=', $cutOffTime)
                     ->whereIn('server_id', $servers->pluck('id'))
+                    ->whereNotExists(function (Builder $query) {
+                        $query->select(DB::raw(1))
+                            ->from('v_dismissed')
+                            ->whereColumn('ynh_server_id', '=', 'v_scheduled_tasks.server_id')
+                            ->whereColumn('name', '=', 'v_scheduled_tasks.name')
+                            ->whereColumn('action', '=', 'v_scheduled_tasks.action')
+                            ->whereColumn('columns_uid', '=', 'v_scheduled_tasks.columns_uid')
+                            ->havingRaw('count(1) >=' . self::HIDE_AFTER_DISMISS_COUNT);
+                    })
                     ->orderBy('timestamp', 'desc')
                     ->get()
                     ->map(function (VScheduledTask $event) {
@@ -563,7 +644,7 @@ class Messages
     {
         return [
             'id' => $id,
-            'timestamp' => $timestamp->format('Y-m-d H:i:s'),
+            'timestamp' => $timestamp->utc()->format('Y-m-d H:i:s'),
             'server' => $serverName,
             'ip' => $serverIpAddress,
             'category' => $category,

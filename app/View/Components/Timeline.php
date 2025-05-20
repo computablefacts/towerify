@@ -13,14 +13,13 @@ use App\Models\Port;
 use App\Models\PortTag;
 use App\Models\Scan;
 use App\Models\TimelineItem;
-use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use App\User;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -28,13 +27,10 @@ use Illuminate\View\Component;
 
 class Timeline extends Component
 {
-    const string CATEGORY_ALL = 'all';
     const string CATEGORY_EVENTS = 'events';
-    const string CATEGORY_ASSETS = 'assets';
     const string CATEGORY_NOTES = 'notes';
     const string CATEGORY_VULNERABILITIES = 'vulnerabilities';
     const string CATEGORY_CONVERSATIONS = 'conversations';
-    const string CATEGORY_LEAKS = 'leaks';
 
     public string $todaySeparator;
     public array $messages;
@@ -48,7 +44,6 @@ class Timeline extends Component
     public int $serverId;
     public array $dates;
     public string $dateId;
-    public int $minScore;
     public array $categories;
     public string $categoryId;
 
@@ -146,25 +141,16 @@ class Timeline extends Component
         ])->render();
     }
 
-    public static function newEvent(User $user, YnhOsquery $event): string
+    public static function newEvent(User $user, array $msg): string
     {
-        $timestamp = $event->calendar_time->utc()->format('Y-m-d H:i:s');
+        $timestamp = $msg['timestamp'];
         $date = Str::before($timestamp, ' ');
         $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
 
-        if ($event->score > 50) {
-            $txtColor = "white";
-            $bgColor = "#ff4d4d";
-        } else {
-            $txtColor = "white";
-            $bgColor = "#ffaa00";
-        }
         return \Illuminate\Support\Facades\View::make('cywise._timeline-item-event', [
             'date' => $date,
             'time' => $time,
-            'txtColor' => $txtColor,
-            'bgColor' => $bgColor,
-            'event' => $event,
+            'msg' => $msg,
         ])->render();
     }
 
@@ -208,13 +194,9 @@ class Timeline extends Component
         $this->assetId = (int)($params['asset_id'] ?? 0);
         $this->serverId = (int)($params['server_id'] ?? 0);
         $this->dateId = $params['date'] ?? '';
-        $this->categoryId = $params['category'] ?? self::CATEGORY_ALL;
-        $this->minScore = $params['min_score'] ?? 30;
+        $this->categoryId = $params['category'] ?? self::CATEGORY_VULNERABILITIES;
         $this->todaySeparator = self::newSeparator(Carbon::now());
         $this->categories = [
-            self::CATEGORY_ALL,
-            self::CATEGORY_LEAKS,
-            self::CATEGORY_ASSETS,
             self::CATEGORY_VULNERABILITIES,
             self::CATEGORY_EVENTS,
             self::CATEGORY_NOTES,
@@ -223,24 +205,20 @@ class Timeline extends Component
 
         $messages = collect();
 
-        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_ASSETS) {
-            $messages = $messages->concat($this->assets($user));
-        }
-        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_EVENTS) {
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_EVENTS) {
             $messages = $messages->concat($this->events($user));
         }
-        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_NOTES) {
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_VULNERABILITIES) {
+            $messages = $messages->concat($this->assets($user))
+                ->concat($this->scans($user))
+                ->concat($this->vulnerabilities($user))
+                ->concat($this->leaks($user));
+        }
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_NOTES) {
             $messages = $messages->concat($this->notes($user));
         }
-        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_VULNERABILITIES) {
-            $messages = $messages->concat($this->scans($user));
-            $messages = $messages->concat($this->vulnerabilities($user));
-        }
-        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_CONVERSATIONS) {
+        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_CONVERSATIONS) {
             $messages = $messages->concat($this->conversations($user));
-        }
-        if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_ALL || $this->categoryId === self::CATEGORY_LEAKS) {
-            $messages = $messages->concat($this->leaks($user));
         }
 
         $this->messages = $messages
@@ -551,35 +529,17 @@ class Timeline extends Component
     private function events(User $user): array
     {
         $cutOffTime = Carbon::now()->startOfDay()->subDay();
-        return YnhOsquery::select([
-            'ynh_osquery.*',
-            DB::raw('ynh_servers.name AS server_name'),
-            'ynh_osquery_rules.score',
-            'ynh_osquery_rules.comments',
+        $servers = YnhServer::query()->when($this->serverId, fn($query, $serverId) => $query->where('id', $serverId))->get();
+        return Messages::get($servers, $cutOffTime, [
+            Messages::AUTHENTICATION_AND_SSH_ACTIVITY,
+            Messages::SERVICES_AND_SCHEDULED_TASKS,
+            Messages::SHELL_HISTORY_AND_ROOT_COMMANDS,
+            Messages::PACKAGES,
+            Messages::USERS_AND_GROUPS,
         ])
-            ->join('ynh_osquery_latest_events', 'ynh_osquery_latest_events.ynh_osquery_id', '=', 'ynh_osquery.id')
-            ->join('ynh_osquery_rules', 'ynh_osquery_rules.name', '=', 'ynh_osquery_latest_events.event_name')
-            ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_osquery_latest_events.ynh_server_id')
-            ->join('users', 'users.id', '=', 'ynh_servers.user_id')
-            ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
-            ->where('ynh_osquery_rules.enabled', true)
-            ->where('ynh_osquery_rules.score', '>=', $this->minScore)
-            ->when($this->serverId, fn($query, int $serverId) => $query->where('ynh_osquery_latest_events.ynh_server_id', $serverId))
-            ->when(Auth::user()->tenant_id, fn($query, int $tenantId) => $query->where('users.tenant_id', $tenantId))
-            ->when(Auth::user()->customer_id, fn($query, int $customerId) => $query->where('users.customer_id', $customerId))
-            ->whereNotExists(function (Builder $query) {
-                $query->select(DB::raw(1))
-                    ->from('v_dismissed')
-                    ->whereColumn('ynh_server_id', '=', 'ynh_osquery.ynh_server_id')
-                    ->whereColumn('name', '=', 'ynh_osquery.name')
-                    ->whereColumn('action', '=', 'ynh_osquery.action')
-                    ->whereColumn('columns_uid', '=', 'ynh_osquery.columns_uid')
-                    ->havingRaw('count(1) >=' . Messages::HIDE_AFTER_DISMISS_COUNT);
-            })
-            ->get()
-            ->map(function (YnhOsquery $event) use ($user) {
+            ->map(function (array $msg) use ($user) {
 
-                $timestamp = $event->calendar_time->utc()->format('Y-m-d H:i:s');
+                $timestamp = $msg['timestamp'];
                 $date = Str::before($timestamp, ' ');
                 $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
 
@@ -587,8 +547,12 @@ class Timeline extends Component
                     'timestamp' => $timestamp,
                     'date' => $date,
                     'time' => $time,
-                    'html' => self::newEvent($user, $event),
-                    '_server' => $event->server()->first(),
+                    'html' => self::newEvent($user, $msg),
+                    '_server' => Cache::remember("server_{$msg['ip']}_{$msg['server']}", now()->addHours(3), function () use ($msg) {
+                        return YnhServer::where('name', $msg['server'])
+                            ->where('ip_address', $msg['ip'])
+                            ->first();
+                    }),
                 ];
             })
             ->toArray();

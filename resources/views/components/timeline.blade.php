@@ -363,7 +363,7 @@
           </h6>
           <div class="card-text mb-3">
             @if(count($honeypot['counts']) <= 0)
-            {{ __('Votre honeypot est en cours de configuration...') }}
+            {{ __('Aucun événement récent.') }}
             @else
             <table
               class="charts-css column hide-data show-labels show-primary-axis show-3-secondary-axes data-spacing-3 multiple stacked">
@@ -476,7 +476,9 @@
     if (item) {
       if (item.type === 'server') {
         url.searchParams.set('server_id', item.id);
+        url.searchParams.set('asset_id', 0);
       } else {
+        url.searchParams.set('server_id', 0);
         url.searchParams.set('asset_id', item.id);
       }
     } else {
@@ -504,6 +506,8 @@
     } else {
       url.searchParams.set('category', '');
     }
+    url.searchParams.set('server_id', 0);
+    url.searchParams.set('asset_id', 0);
     window.location.href = url.toString();
   });
   elCategories.defaultText = "{{ __('Select a category...') }}";

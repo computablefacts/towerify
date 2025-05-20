@@ -140,18 +140,6 @@ if (!function_exists('app_sidebar')) {
                             'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
                         ],
                         [
-                            'label' => __('Leaks'),
-                            'route' => route('home', ['category' => 'leaks']),
-                            'active' => request()->route()->named('home') && request()->get('category') === 'leaks',
-                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
-                        ],
-                        [
-                            'label' => __('Assets'),
-                            'route' => route('home', ['category' => 'assets']),
-                            'active' => request()->route()->named('home') && request()->get('category') === 'assets',
-                            'hidden' => !Auth::user()->hasPermissionTo(\App\Models\Permission::VIEW_OVERVIEW),
-                        ],
-                        [
                             'label' => __('Vulnerabilities'),
                             'route' => route('home', ['category' => 'vulnerabilities']),
                             'active' => request()->route()->named('home') && request()->get('category') === 'vulnerabilities',
