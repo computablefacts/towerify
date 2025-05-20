@@ -6,14 +6,16 @@
     </div>
     <form>
       <div class="row">
-        <div class="col-md-9">
+        <div class="col">
           <input type="text"
                  class="form-control"
                  id="asset"
                  placeholder="example.com ou 93.184.215.14"
                  autofocus>
         </div>
-        <div class="col-md-3 align-content-center">
+      </div>
+      <div class="row mt-3">
+        <div class="col align-content-center">
           <button type="button"
                   onclick="createAsset()"
                   class="btn btn-primary"

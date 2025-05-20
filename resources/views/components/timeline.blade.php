@@ -13,8 +13,8 @@
 
   .timeline {
     width: 85%;
-    max-width: 800px;
-    margin-left: 100px;
+    max-width: 100%;
+    margin-left: 80px;
     margin-right: auto;
     display: flex;
     flex-direction: column;
@@ -250,13 +250,73 @@
   </div>
   @endif
   <div class="row">
-    <div class="col">
-      <x-onboarding-monitor-asset2/>
-    </div>
-    <div class="col-5">
+    <div class="col-8">
       <div class="card mb-3">
         <div class="card-body">
-          <h6 class="card-title">{{ __('Vous souhaitez poser une question à CyberBuddy ?') }}</h6>
+          <h6 class="card-title">{{ __('Filtrer la timeline par...') }}</h6>
+          <div class="row">
+            <div class="col-4">
+              <b>{{ __('Category') }}</b>
+            </div>
+            <div class="col-4">
+              <b>{{ __('Asset') }}</b>
+            </div>
+            <div class="col">
+              <b>{{ __('Date') }}</b>
+            </div>
+          </div>
+          <div class="row" style="margin-top: 5px;">
+            <div class="col-4">
+              <div id="categories"></div>
+            </div>
+            <div class="col-4">
+              <div id="assets"></div>
+            </div>
+            <div class="col">
+              <div id="dates"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <div class="card-body">
+          <ol class="timeline">
+            <li class="timeline-item">
+              <span class="timeline-item-icon | filled-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/>
+                  <path d="M13.5 6.5l4 4"/>
+                </svg>
+              </span>
+              <div class="new-comment">
+                <input type="text" placeholder="Ajouter une note... (entrée pour valider)"/>
+              </div>
+            </li>
+          </ol>
+          @foreach($messages as $date => $times)
+          @if(empty($dateId) || $date === $dateId)
+          @include('cywise._timeline-separator', ['date' => $date])
+          <ol class="timeline">
+            @foreach($times as $time => $events)
+            @foreach($events as $event)
+            {!! $event['html'] !!}
+            @endforeach
+            @endforeach
+          </ol>
+          @endif
+          @endforeach
+        </div>
+      </div>
+    </div>
+    <div class="col" style="padding-left: 0;">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title">
+            {{ __('Vous souhaitez poser une question à CyberBuddy ?') }}
+          </h6>
           <div class="card-text mb-3">
             {{ __('Cliquez ici pour lancer CyberBuddy :') }}
           </div>
@@ -272,65 +332,7 @@
           </form>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="card mb-3">
-    <div class="card-body">
-      <h6 class="card-title">{{ __('Filtrer la timeline par...') }}</h6>
-      <div class="row">
-        <div class="col-4">
-          <b>{{ __('Category') }}</b>
-        </div>
-        <div class="col-4">
-          <b>{{ __('Asset') }}</b>
-        </div>
-        <div class="col">
-          <b>{{ __('Date') }}</b>
-        </div>
-      </div>
-      <div class="row" style="margin-top: 5px;">
-        <div class="col-4">
-          <div id="categories"></div>
-        </div>
-        <div class="col-4">
-          <div id="assets"></div>
-        </div>
-        <div class="col">
-          <div id="dates"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="card mb-3">
-    <div class="card-body">
-      <ol class="timeline">
-        <li class="timeline-item">
-          <span class="timeline-item-icon | filled-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                 class="icon icon-tabler icons-tabler-outline icon-tabler-pencil">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-              <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/>
-              <path d="M13.5 6.5l4 4"/>
-            </svg>
-          </span>
-          <div class="new-comment">
-            <input type="text" placeholder="Ajouter une note... (entrée pour valider)"/>
-          </div>
-        </li>
-      </ol>
-      @foreach($messages as $date => $times)
-      @if(empty($dateId) || $date === $dateId)
-      @include('cywise._timeline-separator', ['date' => $date])
-      <ol class="timeline">
-        @foreach($times as $time => $events)
-        @foreach($events as $event)
-        {!! $event['html'] !!}
-        @endforeach
-        @endforeach
-      </ol>
-      @endif
-      @endforeach
+      <x-onboarding-monitor-asset2/>
     </div>
   </div>
 </div>
