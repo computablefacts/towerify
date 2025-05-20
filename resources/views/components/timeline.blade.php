@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
 <style>
 
   @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap");
@@ -250,7 +251,7 @@
   </div>
   @endif
   <div class="row">
-    <div class="col-8">
+    <div class="col">
       <div class="card mb-3">
         <div class="card-body">
           <h6 class="card-title">{{ __('Filtrer la timeline par...') }}</h6>
@@ -311,7 +312,7 @@
         </div>
       </div>
     </div>
-    <div class="col" style="padding-left: 0;">
+    <div class="col-xl-4" style="padding-left: 0;">
       <div class="card mb-3">
         <div class="card-body">
           <h6 class="card-title">
@@ -333,6 +334,69 @@
         </div>
       </div>
       <x-onboarding-monitor-asset2/>
+      @if(count($blacklist) > 0)
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title">
+            {{ __('Vous souhaitez réduire vos risques ?') }}
+          </h6>
+          <div class="card-text mb-3">
+            {{ __('Cliquez ici pour télécharger une blacklist d\'IP suspectes ciblant votre infrastructure :') }}
+          </div>
+          <form>
+            <div class="row">
+              <div class="col align-content-center">
+                <a href="#" class="btn btn-primary" style="width: 100%;" onclick="downloadBlacklist()">
+                  {{ __('Download!') }}
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      @endif
+      @foreach($honeypots as $honeypot)
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title">
+            {{ $honeypot['name'] }}
+          </h6>
+          <div class="card-text mb-3">
+            @if(count($honeypot['counts']) <= 0)
+            {{ __('Votre honeypot est en cours de configuration...') }}
+            @else
+            <table
+              class="charts-css column hide-data show-labels show-primary-axis show-3-secondary-axes data-spacing-3 multiple stacked">
+              <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Human or Targeted</th>
+                <th scope="col">Bots</th>
+              </tr>
+              </thead>
+              <tbody>
+              @foreach($honeypot['counts'] as $count)
+              <tr>
+                <th scope="row">{{ \Illuminate\Support\Str::after($count['date'], '-') }}</th>
+                <td
+                  style="--size: calc({{ $count['human_or_targeted'] }} / {{ $honeypot['max'] }});">
+                  <span class="data">{{ $count['human_or_targeted'] }}</span>
+                  <span class="tooltip">Human or Targeted: {{ $count['human_or_targeted'] }}</span>
+                </td>
+                <td
+                  style="--size: calc({{ $count['not_human_or_targeted'] }} / {{ $honeypot['max'] }});">
+                  <span class="data">{{ $count['not_human_or_targeted'] }}</span>
+                  <span class="tooltip">Bots: {{ $count['not_human_or_targeted'] }}</span>
+                </td>
+              </tr>
+              @endforeach
+              </tbody>
+            </table>
+            @endif
+          </div>
+        </div>
+      </div>
+      @endforeach
     </div>
   </div>
 </div>
@@ -340,6 +404,33 @@
 <script>
 
   /* MISC. */
+  const downloadCsv = (filename, csv) => {
+
+    // Here, filename = "my_file.csv"
+    // Here, csv = [["asset","creation_date","type"], ["www.computablefacts.com","2020-09-07T12:34:29Z","DNS"], ["127.0.0.1","2020-09-07T12:34:29Z","IP"], ...]
+
+    const rows = csv.map((row) => row.join(","));
+    const blob = new Blob([rows.join("\n")], {type: "text/csv;charset=utf-8"});
+    const isIE = false || !!document.documentMode;
+
+    if (isIE) {
+      window.navigator.msSaveBlob(blob, filename);
+    } else {
+      const url = window.URL || window.webkitURL;
+      const link = url.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.download = filename;
+      a.href = link;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+
+  const downloadBlacklist = () => downloadCsv(`blacklist_${today}.csv`,
+    [['IP', 'Premier contact', 'Dernier contact', 'Pays', 'Fournisseur']].concat(
+      @json($blacklist).map(item => [item.ip, item.firstContact, item.lastContact, item.countryCode, item.provider])));
+
   const today = (() => {
     const date = new Date();
     const year = date.getFullYear();
@@ -369,15 +460,27 @@
     elDates.selectedItem = elDates.items.find(date => date === '{{ $dateId }}');
   }
 
+  const assets = @json($assets);
+  const servers = @json($servers);
   const elAssets = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('assets'),
-    asset => asset.name, asset => `${asset.high} high - ${asset.medium} medium - ${asset.low} low`);
-  elAssets.items = @json($assets);
+    asset => asset.name, asset => {
+      if (asset.type === 'server') {
+        return `${asset.ip_address}`;
+      }
+      return `${asset.high} high - ${asset.medium} medium - ${asset.low} low`;
+    });
+  elAssets.items = assets.concat(servers).sort((a, b) => a.name.localeCompare(b.name));
   elAssets.disabled = elAssets.items.length === 0;
   elAssets.onSelectionChange(item => {
     const url = new URL(window.location);
     if (item) {
-      url.searchParams.set('asset_id', item.id);
+      if (item.type === 'server') {
+        url.searchParams.set('server_id', item.id);
+      } else {
+        url.searchParams.set('asset_id', item.id);
+      }
     } else {
+      url.searchParams.set('server_id', 0);
       url.searchParams.set('asset_id', 0);
     }
     window.location.href = url.toString();
@@ -385,7 +488,10 @@
   elAssets.defaultText = "{{ __('Select an asset...') }}";
 
   if ('{{ $assetId }}' > 0) {
-    elAssets.selectedItem = elAssets.items.find(asset => asset.id == '{{ $assetId }}');
+    elAssets.selectedItem = elAssets.items.find(asset => asset.type === 'asset' && asset.id == '{{ $assetId }}');
+  }
+  if ('{{ $serverId }}' > 0) {
+    elAssets.selectedItem = elAssets.items.find(asset => asset.type === 'server' && asset.id == '{{ $serverId }}');
   }
 
   const elCategories = new com.computablefacts.blueprintjs.MinimalSelect(document.getElementById('categories'));

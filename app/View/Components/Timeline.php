@@ -7,11 +7,14 @@ use App\Helpers\Messages;
 use App\Models\Alert;
 use App\Models\Asset;
 use App\Models\Conversation;
+use App\Models\Honeypot;
+use App\Models\HoneypotEvent;
 use App\Models\Port;
 use App\Models\PortTag;
 use App\Models\Scan;
 use App\Models\TimelineItem;
 use App\Models\YnhOsquery;
+use App\Models\YnhServer;
 use App\User;
 use Carbon\Carbon;
 use Closure;
@@ -35,10 +38,14 @@ class Timeline extends Component
 
     public string $todaySeparator;
     public array $messages;
+    public array $blacklist;
+    public array $honeypots;
 
     // Filters
     public array $assets;
     public int $assetId;
+    public array $servers;
+    public int $serverId;
     public array $dates;
     public string $dateId;
     public int $minScore;
@@ -199,6 +206,7 @@ class Timeline extends Component
         $user = Auth::user();
         $params = request()->query();
         $this->assetId = (int)($params['asset_id'] ?? 0);
+        $this->serverId = (int)($params['server_id'] ?? 0);
         $this->dateId = $params['date'] ?? '';
         $this->categoryId = $params['category'] ?? self::CATEGORY_ALL;
         $this->minScore = $params['min_score'] ?? 30;
@@ -252,10 +260,12 @@ class Timeline extends Component
             ->flatMap(fn(array $events) => array_values($events))
             ->map(fn(array $events) => $events[0])
             ->filter(fn(array $event) => isset($event['_asset']))
+            ->unique(fn(array $event) => $event['_asset']->id)
             ->map(function (array $event) {
                 /** @var Asset $asset */
                 $asset = $event['_asset'];
                 return [
+                    'type' => 'asset',
                     'id' => $asset->id,
                     'name' => $asset->asset,
                     'high' => $asset->alerts()->where('level', 'High')->count(),
@@ -265,6 +275,45 @@ class Timeline extends Component
             })
             ->sortBy('name')
             ->values()
+            ->toArray();
+
+        $this->servers = collect($this->messages)
+            ->values()
+            ->flatMap(fn(array $events) => array_values($events))
+            ->map(fn(array $events) => $events[0])
+            ->filter(fn(array $event) => isset($event['_server']))
+            ->unique(fn(array $event) => $event['_server']->id)
+            ->map(function (array $event) {
+                /** @var YnhServer $server */
+                $server = $event['_server'];
+                return [
+                    'type' => 'server',
+                    'id' => $server->id,
+                    'name' => $server->name,
+                    'ip_address' => $server->ip_address,
+                ];
+            })
+            ->sortBy('name')
+            ->values()
+            ->toArray();
+
+        $this->blacklist = $this->blacklist();
+
+        $this->honeypots = Honeypot::all()
+            ->map(function (Honeypot $honeypot) {
+                $counts = $this->honeypotEventCounts($honeypot);
+                $max = collect($counts)->max(fn($count) => $count['human_or_targeted'] + $count['not_human_or_targeted']);
+                $sum = collect($counts)->sum(fn($count) => $count['human_or_targeted'] + $count['not_human_or_targeted']);
+                return [
+                    'name' => $honeypot->dns,
+                    'counts' => $counts,
+                    'max' => $max,
+                    'sum' => $sum,
+                ];
+            })
+            ->sortBy(fn(array $honeypot) => [-$honeypot['sum'], $honeypot['name']])
+            ->values()
+            ->take(3)
             ->toArray();
     }
 
@@ -515,6 +564,7 @@ class Timeline extends Component
             ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
             ->where('ynh_osquery_rules.enabled', true)
             ->where('ynh_osquery_rules.score', '>=', $this->minScore)
+            ->when($this->serverId, fn($query, int $serverId) => $query->where('ynh_osquery_latest_events.ynh_server_id', $serverId))
             ->when(Auth::user()->tenant_id, fn($query, int $tenantId) => $query->where('users.tenant_id', $tenantId))
             ->when(Auth::user()->customer_id, fn($query, int $customerId) => $query->where('users.customer_id', $customerId))
             ->whereNotExists(function (Builder $query) {
@@ -538,6 +588,7 @@ class Timeline extends Component
                     'date' => $date,
                     'time' => $time,
                     'html' => self::newEvent($user, $event),
+                    '_server' => $event->server()->first(),
                 ];
             })
             ->toArray();
@@ -552,5 +603,43 @@ class Timeline extends Component
             return $this->maskPassword($password, 1);
         }
         return Str::substr($password, 0, $size) . Str::repeat('*', Str::length($password) - 2 * $size) . Str::substr($password, -$size, $size);
+    }
+
+    private function blacklist(?int $attackerId = null)
+    {
+        /** @var array $ips */
+        $ips = config('towerify.adversarymeter.ip_addresses');
+        $events = HoneypotEvent::select(
+            'am_honeypots_events.ip',
+            DB::raw('MIN(am_honeypots_events.timestamp) AS first_contact'),
+            DB::raw('MAX(am_honeypots_events.timestamp) AS last_contact'),
+            DB::raw("MAX(am_honeypots_events.hosting_service_description) AS isp_name"),
+            DB::raw("MAX(am_honeypots_events.hosting_service_country_code) AS country_code"),
+        )
+            ->whereIn('honeypot_id', Honeypot::all()->pluck('id'))
+            ->whereNotIn('am_honeypots_events.ip', $ips)
+            ->join('am_attackers', 'am_attackers.id', '=', 'am_honeypots_events.attacker_id');
+        if ($attackerId) {
+            $events->where('am_honeypots_events.attacker_id', $attackerId);
+        }
+        return $events->groupBy('ip')->distinct()->get()->toArray();
+    }
+
+    private function honeypotEventCounts(Honeypot $honeypot): array
+    {
+        $cutOffTime = Carbon::now()->startOfDay()->subMonth();
+        return HoneypotEvent::select(
+            DB::raw("DATE_FORMAT(timestamp, '%Y-%m-%d') AS date"),
+            DB::raw("SUM(CASE WHEN human = 1 OR targeted = 1 THEN 1 ELSE 0 END) AS human_or_targeted"),
+            DB::raw("SUM(CASE WHEN human = 0 AND targeted = 0 THEN 1 ELSE 0 END) AS not_human_or_targeted")
+        )
+            ->where('timestamp', '>=', $cutOffTime)
+            ->where('honeypot_id', $honeypot->id)
+            ->groupBy('date')
+            ->orderBy('date', 'desc') // keep only the most recent ones
+            ->limit(10)
+            ->get()
+            ->sortBy('date') // most recent date at the end
+            ->toArray();
     }
 }
