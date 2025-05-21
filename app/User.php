@@ -109,35 +109,35 @@ class User extends \Konekt\AppShell\Models\User
                         (new DeleteEmbeddedChunks())->handle();
                         $updated[] = $collection;
                     }
-                    self::setupFrameworks($framework, 110);
+                    // self::setupFrameworks($framework, 110);
                 } else if ($framework->file === 'seeds/frameworks/dora/dora.jsonl') {
                     if ($forceUpdate && !in_array($collection, $updated)) {
                         self::getOrCreateCollection($collection, 140)->files()->update(['is_deleted' => true]);
                         (new DeleteEmbeddedChunks())->handle();
                         $updated[] = $collection;
                     }
-                    self::setupFrameworks($framework, 140);
+                    // self::setupFrameworks($framework, 140);
                 } else if ($framework->file === 'seeds/frameworks/nis/nis1-rules-fr.jsonl') {
                     if ($forceUpdate && !in_array($collection, $updated)) {
                         self::getOrCreateCollection($collection, 120)->files()->update(['is_deleted' => true]);
                         (new DeleteEmbeddedChunks())->handle();
                         $updated[] = $collection;
                     }
-                    self::setupFrameworks($framework, 120);
+                    // self::setupFrameworks($framework, 120);
                 } else if ($framework->file === 'seeds/frameworks/nis2/nis2-directive.jsonl') {
                     if ($forceUpdate && !in_array($collection, $updated)) {
                         self::getOrCreateCollection($collection, 130)->files()->update(['is_deleted' => true]);
                         (new DeleteEmbeddedChunks())->handle();
                         $updated[] = $collection;
                     }
-                    self::setupFrameworks($framework, 130);
+                    // self::setupFrameworks($framework, 130);
                 } else if ($framework->file === 'seeds/frameworks/nis2/annex-implementing-regulation-of-nis2-on-t-m.jsonl') {
                     if ($forceUpdate && !in_array($collection, $updated)) {
                         self::getOrCreateCollection($collection, 131)->files()->update(['is_deleted' => true]);
                         (new DeleteEmbeddedChunks())->handle();
                         $updated[] = $collection;
                     }
-                    self::setupFrameworks($framework, 131);
+                    // self::setupFrameworks($framework, 131);
                 }
             }
         } catch (\Exception $e) {

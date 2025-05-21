@@ -456,7 +456,8 @@ class CyberBuddyController extends Controller
             $collection = \App\Models\Collection::create(['name' => $framework->collectionName()]);
         }
 
-        $url = self::saveLocalFile($collection, $framework->path());
+        $path = Str::replace('.jsonl', '.2.jsonl', $framework->path());
+        $url = self::saveLocalFile($collection, $path);
 
         if ($url) {
             return response()->json([
