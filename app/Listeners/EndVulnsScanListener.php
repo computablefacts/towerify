@@ -122,7 +122,9 @@ class EndVulnsScanListener extends AbstractListener
             })->join("");
 
         if ($leaks->isNotEmpty()) {
-            $website = $leaks->map(fn(array $leak) => "<li>L'identifiant <b>{$leak['email']}</b> donnant accès à <b>{$leak['website']}</b> a été fuité ou compromis.</li>")->join("\n");
+            $website = $leaks->map(fn(array $leak) => "<li>L'identifiant <b>{$leak['email']}</b> donnant accès à <b>{$leak['website']}</b> a été fuité ou compromis.</li>")
+                ->unique()
+                ->join("\n");
             $answer .= "
             <h3>Identifiants fuités ou compromis</h3>
             <p>Cywise surveille également les fuites de données et compromissions !<p>
