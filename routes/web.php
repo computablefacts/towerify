@@ -658,7 +658,7 @@ Route::post('am/api/v2/public/ports-scan/{uuid}', function (string $uuid, \Illum
     }
     return response("ok", 200)
         ->header('Content-Type', 'text/plain');
-})->middleware(['auth', 'throttle:240,1']);
+})->middleware(['throttle:240,1']);
 
 /** @deprecated */
 Route::post('am/api/v2/public/vulns-scan/{uuid}', function (string $uuid, \Illuminate\Http\Request $request) {
@@ -680,7 +680,7 @@ Route::post('am/api/v2/public/vulns-scan/{uuid}', function (string $uuid, \Illum
 
     return response("ok", 200)
         ->header('Content-Type', 'text/plain');
-})->middleware(['auth', 'throttle:240,1']);
+})->middleware(['throttle:240,1']);
 
 /** @deprecated */
 Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illuminate\Http\Request $request) {
@@ -718,7 +718,7 @@ Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illumina
 
     return response("ok ({$events->count()} events in file)", 200)
         ->header('Content-Type', 'text/plain');
-})->middleware(['auth', 'throttle:240,1']);
+})->middleware(['throttle:240,1']);
 
 /**
  * We need to add password requirements to invitation form
