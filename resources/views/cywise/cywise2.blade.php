@@ -197,8 +197,19 @@
 <body>
 <div class="outer-wrapper">
   <div class="inner-wrapper">
-    <h1></h1>
-    <p></p>
+    <h1 style="margin-top: var(--spacing-medium);margin-bottom: 1rem;">Découvrez CyberBuddy, votre partenaire
+      intelligent en cybersécurité !</h1>
+    <p>CyberBuddy est votre assistant dédié en cybersécurité, conçu pour vous accompagner au quotidien. Pré-packagé avec
+      des référentiels de confiance tels que l'ANSSI, CyberBuddy vous offre un accès immédiat à des ressources fiables
+      et constamment mises à jour.</p>
+    <p>Vous pouvez <b>interroger CyberBuddy</b> en envoyant vos questions par email à <b style="color: var(--color-cywise)">cyberbuddy@cywise.io</b>,
+      et obtenir des réponses précises et rapides.</p>
+    <p>Pour <b>enrichir les connaissances de CyberBuddy</b>, vous avez la possibilité de stocker des informations liées à la
+      cybersécurité dans sa mémoire. Il vous suffit d'envoyer un email à <b style="color: var(--color-cywise)">memex@cywise.io</b>,
+      avec ou sans pièces-jointes au format PDF.</p>
+    <p>Tous vos échanges et documents restent accessibles en un seul endroit : connectez-vous à la plateforme Cywise
+      pour un accès rapide et sécurisé à toutes vos données. Avec CyberBuddy, bénéficiez d'un assistant intelligent et
+      évolutif, toujours à vos côtés pour renforcer votre sécurité.</p>
   </div>
 </div>
 </body>
