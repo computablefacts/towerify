@@ -179,7 +179,7 @@ class User extends \Konekt\AppShell\Models\User
     private static function setupFrameworks(YnhFramework $framework, int $priority): void
     {
         $collection = self::getOrCreateCollection($framework->collectionName(), $priority);
-        if ($collection /* && $collection->files()->count() === 0 */) { // Import new documents
+        if ($collection && $collection->files()->count() === 0) { // Import new documents iif the collection is empty
             $path = Str::replace('.jsonl', '.2.jsonl', $framework->path());
             $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $path);
         }
