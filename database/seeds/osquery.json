@@ -752,7 +752,7 @@
   {
     "name": "python_server",
     "description": "Python server",
-    "query": "SELECT * FROM processes WHERE name = 'python' OR name = 'python3' AND cmdline LIKE '%http.server%' OR cmdline LIKE '%SimpleHTTPServer%' ",
+    "query": "SELECT * FROM processes WHERE (name = 'python' OR name = 'python3') AND (cmdline LIKE '%http.server%' OR cmdline LIKE '%SimpleHTTPServer%')",
     "version": "1.4.5",
     "interval": 30,
     "snapshot": 0,
