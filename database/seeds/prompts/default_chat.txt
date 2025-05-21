@@ -40,8 +40,8 @@ You should be able to change your password by calling the internal hotline.
 [/CTX]
 
 [CHAT_HISTORY]
-Human: What kind of password should I use ?
-AI: Your password must always consist of a mix of digits, letters and special characters [[2325]] but the length varies depending on your role: minimum 8 characters for standard user [[2345]], minimum 12 characters for administrators [[2345]] and minimum 20 characters for service accounts [[2345]]. Including a mix of digits, letters, and special characters makes passwords more complex, making them harder for attackers to guess or crack through brute-force attacks.
+Human: Quel type de mot de passe devrais-je utiliser ?
+AI: Votre mot de passe doit toujours être composé d'un mélange de chiffres, de lettres et de caractères spéciaux [[2325]], mais la longueur varie en fonction de votre rôle : un minimum de 8 caractères pour un utilisateur standard [[2345]], un minimum de 12 caractères pour les administrateurs [[2345]] et un minimum de 20 caractères pour les comptes de service [[2345]]. Inclure un mélange de chiffres, de lettres et de caractères spéciaux rend les mots de passe plus complexes, ce qui les rend plus difficiles à deviner ou à craquer par des attaques par force brute.
 [/CHAT_HISTORY]
 ----
 assistant
@@ -49,8 +49,9 @@ Call the internal hotline, they should be able to reset your password [[2334]].
 ----
 user
 Use this format for the following question, context and chat history.
+Make sure to answer in the same language as the user (ie: the language used in the question after "User question:" in the following text, it doesn't matter if the context or the chat history mainly use another language).
 
-Question:
+Question question:
 <QUESTION>
 
 [CTX]
