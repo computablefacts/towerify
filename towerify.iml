@@ -176,6 +176,10 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/laravel-lang/publisher" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-php81" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/24slides/laravel-saml2" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/onelogin/php-saml" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/robrichards/xmlseclibs" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/league/html-to-markdown" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

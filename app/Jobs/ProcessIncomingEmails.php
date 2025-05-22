@@ -22,6 +22,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use League\HTMLToMarkdown\HtmlConverter;
 use Webklex\IMAP\Facades\Client;
 use Webklex\PHPIMAP\Attachment;
 
@@ -181,11 +182,20 @@ class ProcessIncomingEmails implements ShouldQueue
 
     private function cyberBuddy(User $user, \Webklex\PHPIMAP\Message $message): void
     {
+        if ($message->hasTextBody()) {
+            $body = $message->getTextBody();
+        } else if ($message->hasHTMLBody()) {
+            $body = $message->getHTMLBody();
+        } else {
+            $body = "";
+        }
+
         // Extract the thread id in order to be able to load the existing conversation
         // If the thread id cannot be found, a new conversation is created
         $threadId = null;
         $matches = [];
-        preg_match_all("/\s*thread_id=(?<threadid>[a-zA-Z0-9]{10})\s*/i", $message->getTextBody(), $matches, PREG_SET_ORDER);
+
+        preg_match_all("/\s*thread_id=(?<threadid>[a-zA-Z0-9]{10})\s*/i", $body, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
             if (!empty($match['threadid'])) {
@@ -211,8 +221,14 @@ class ProcessIncomingEmails implements ShouldQueue
             'format' => Conversation::FORMAT_V1,
         ]);
 
-        // Remove previous messages i.e. rows starting with >
-        $body = trim(preg_replace("/^(>.*)|(On\s+.*\s+wrote:)[\n\r]?$/im", '', $message->getTextBody()));
+        if ($message->hasTextBody()) {
+            // Remove previous messages i.e. rows starting with >
+            $body = trim(preg_replace("/^(>.*)|(On\s+.*\s+wrote:)[\n\r]?$/im", '', $message->getTextBody()));
+        } else if ($message->hasHTMLBody()) {
+            $body = trim((new HtmlConverter())->convert($message->getHTMLBody()));
+        } else {
+            $body = "";
+        }
 
         Log::debug("body={$body}");
 
@@ -260,24 +276,38 @@ class ProcessIncomingEmails implements ShouldQueue
 
     private function memex(User $user, \Webklex\PHPIMAP\Message $message): void
     {
-        $item = TimelineItem::createNote($user, $message->getTextBody(), $message->getSubject()->toString());
-        $summaries = self::extractAndSummarizeHyperlinks($message->getTextBody());
-        foreach ($summaries as $summary) {
-            TimelineItem::createNote($user, $summary['summary'], $summary['url']);
+        if ($message->hasTextBody()) {
+            // Remove previous messages i.e. rows starting with >
+            $body = trim(preg_replace("/^(>.*)|(On\s+.*\s+wrote:)[\n\r]?$/im", '', $message->getTextBody()));
+        } else if ($message->hasHTMLBody()) {
+            $body = trim((new HtmlConverter())->convert($message->getHTMLBody()));
+        } else {
+            $body = "";
         }
-        if ($message->hasAttachments()) {
-            $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
-            if ($collection) {
-                $message->attachments()->each(function (Attachment $attachment) use ($collection) {
-                    if (!$attachment->save("/tmp/")) {
-                        Log::error("Attachment {$attachment->name} could not be saved!");
-                    } else {
-                        $path = "/tmp/{$attachment->filename}";
-                        // TODO : deal with duplicate files using the md5/sha1 file hash
-                        $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $path);
-                        unlink($path);
-                    }
-                });
+        if (!empty($body)) {
+
+            $item = TimelineItem::createNote($user, $body, $message->getSubject()->toString());
+            $summaries = self::extractAndSummarizeHyperlinks($body);
+
+            foreach ($summaries as $summary) {
+                TimelineItem::createNote($user, $summary['summary'], $summary['url']);
+            }
+            if ($message->hasAttachments()) {
+
+                $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
+
+                if ($collection) {
+                    $message->attachments()->each(function (Attachment $attachment) use ($collection) {
+                        if (!$attachment->save("/tmp/")) {
+                            Log::error("Attachment {$attachment->name} could not be saved!");
+                        } else {
+                            $path = "/tmp/{$attachment->filename}";
+                            // TODO : deal with duplicate files using the md5/sha1 file hash
+                            $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $path);
+                            unlink($path);
+                        }
+                    });
+                }
             }
         }
         if (!$message->move('Memex')) {

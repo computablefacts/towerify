@@ -25,6 +25,7 @@
         "laravel/ui": "^4.0",
         "league/flysystem-aws-s3-v3": "^3.0",
         "league/flysystem-path-prefixing": "^3.0",
+        "league/html-to-markdown": "^5.1",
         "phpseclib/phpseclib": "^3.0",
         "sajya/server": "^7.0",
         "spatie/laravel-package-tools": "^1.18",
