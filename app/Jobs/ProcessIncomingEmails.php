@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Http\Controllers\CyberBuddyNextGenController;
+use App\Http\Procedures\TheCyberBriefProcedure;
 use App\Http\Requests\ConverseRequest;
 use App\Listeners\EndVulnsScanListener;
 use App\Models\Collection;
@@ -15,6 +16,7 @@ use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\Request;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Auth;
@@ -29,10 +31,71 @@ class ProcessIncomingEmails implements ShouldQueue
 
     const string SENDER_CYBERBUDDY = 'cyberbuddy@cywise.io';
     const string SENDER_MEMEX = 'memex@cywise.io';
+    const string URL_PATTERN = "/(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!10(?:\.\d{1,3}){3})(?!127(?:\.\d{1,3}){3})(?!169\.254(?:\.\d{1,3}){2})(?!192\.168(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\x{00a1}-\x{ffff}0-9]+-?)*[a-z\x{00a1}-\x{ffff}0-9]+)(?:\.(?:[a-z\x{00a1}-\x{ffff}0-9]+-?)*[a-z\x{00a1}-\x{ffff}0-9]+)*(?:\.(?:[a-z\x{00a1}-\x{ffff}]{2,})))(?::\d{2,5})?(?:\/[^\"\'\s]*)?/uix";
 
     public $tries = 1;
     public $maxExceptions = 1;
     public $timeout = 3 * 180; // 9mn
+
+    /**
+     * Based on WordPress' _extract_urls function (https://github.com/WordPress/WordPress/blob/master/wp-includes/functions.php),
+     * but using the regular expression by @diegoperini (https://gist.github.com/dperini/729294) – which is close to the perfect
+     * URL validation regex (https://mathiasbynens.be/demo/url-regex)
+     */
+    public static function extractAndSummarizeHyperlinks(string $text): array
+    {
+        preg_match_all(self::URL_PATTERN, $text, $matches);
+        $urls = array_values(array_unique(array_map('html_entity_decode', $matches[0])));
+
+        $prompt = "
+             You are a summarizer. You write a summary of the input using following steps: 
+             
+             1. **Analyze the input text and generate 5 essential questions** that, when answered, comprehensively capture 
+               the main points and core meaning of the text. Aim for questions that dig deeper into the content and avoid 
+               redundancy.
+             2. **Guidelines for Formulating Questions:**
+               2.1. Address the central theme or argument.
+               2.2. Identify key supporting ideas.
+               2.3. Highlight important facts or evidence.
+               2.4. Reveal the author’s purpose or perspective.
+               2.5. Explore any significant implications or conclusions.
+             3. **Answer Each Question in Detail:** Provide thorough, clear answers, maintaining a balance between depth 
+                and clarity.
+             4. **Final Summary:** Conclude with a short summary that encapsulates the core message of the text. Include 
+                a specific example to illustrate your point.
+
+             [TEXT]
+        ";
+        $tcb = new TheCyberBriefProcedure();
+        $result = [];
+
+        foreach ($urls as $url) {
+
+            $url = trim($url);
+
+            if (!empty($url)) {
+                try {
+                    $request = new Request();
+                    $request->replace([
+                        'url_or_text' => $url,
+                        'prompt' => $prompt,
+                    ]);
+                    $summary = $tcb->summarize($request)['summary'] ?? '';
+                    $result[] = [
+                        'url' => $url,
+                        'summary' => empty($summary) ? "{$url} could not be accessed or summarized." : $summary,
+                    ];
+                } catch (\Exception $exception) {
+                    Log::error($exception->getMessage());
+                    $result[] = [
+                        'url' => $url,
+                        'summary' => "{$url} could not be accessed or summarized.",
+                    ];
+                }
+            }
+        }
+        return $result;
+    }
 
     public function __construct()
     {
@@ -195,6 +258,10 @@ class ProcessIncomingEmails implements ShouldQueue
     private function memex(User $user, \Webklex\PHPIMAP\Message $message): void
     {
         $item = TimelineItem::createNote($user, $message->getTextBody(), $message->getSubject()->toString());
+        $summaries = self::extractAndSummarizeHyperlinks($message->getTextBody());
+        foreach ($summaries as $summary) {
+            TimelineItem::createNote($user, $summary['summary'], $summary['url']);
+        }
         if ($message->hasAttachments()) {
             $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
             if ($collection) {

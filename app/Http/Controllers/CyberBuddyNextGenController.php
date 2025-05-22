@@ -7,6 +7,7 @@ use App\Helpers\DeepSeek;
 use App\Helpers\LlmFunctions\AbstractLlmFunction;
 use App\Helpers\OpenAi;
 use App\Http\Requests\ConverseRequest;
+use App\Jobs\ProcessIncomingEmails;
 use App\Models\Conversation;
 use App\Models\Prompt;
 use App\Models\TimelineItem;
@@ -110,6 +111,20 @@ class CyberBuddyNextGenController extends Controller
             $conversation->dom = json_encode(array_merge($conversation->thread(), [[
                 'role' => RoleEnum::DEVELOPER->value,
                 'content' => $prompt->template,
+                'timestamp' => Carbon::now()->toIso8601ZuluString(),
+            ]]));
+        }
+
+        // Extract URLs provided by the user
+        $summaries = collect(ProcessIncomingEmails::extractAndSummarizeHyperlinks($question))
+            ->map(fn(array $summary) => TimelineItem::createNote($user, $summary['summary'], $summary['url']))
+            ->map(fn(TimelineItem $note) => "# Summary of {$note->attributes()['subject']}\n\n{$note->attributes()['body']}")
+            ->join("\n\n");
+
+        if (!empty($summaries)) {
+            $conversation->dom = json_encode(array_merge($conversation->thread(), [[
+                'role' => RoleEnum::DEVELOPER->value,
+                'content' => $summaries,
                 'timestamp' => Carbon::now()->toIso8601ZuluString(),
             ]]));
         }
