@@ -13,11 +13,11 @@ class OpenAi
         return Str::startsWith(Str::lower($text), ["https://", "http://"]);
     }
 
-    public static function download(string $text): string
+    public static function download(string $text, string $country = 'fr'): string
     {
         if (self::isHyperlink($text)) {
             if (config('towerify.scrapfly.api_key')) {
-                $news = Http::get('https://api.scrapfly.io/scrape?render_js=true&key=' . config('towerify.scrapfly.api_key') . '&url=' . $text);
+                $news = Http::get('https://api.scrapfly.io/scrape?render_js=true&asp=true&cache=true&cache_ttl=86400&key=' . config('towerify.scrapfly.api_key') . "&country={$country}&url={$text}");
                 return json_decode($news, true)['result']['content'];
             }
             if (config('towerify.scraperapi.api_key')) {
