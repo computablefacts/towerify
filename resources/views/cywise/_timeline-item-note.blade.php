@@ -28,7 +28,7 @@
       <b>{{ $attributes['subject'] ?? '' }}</b>
       <br><br>
       @endif
-      {{ $attributes['body'] ?? '' }}
+      {!! (new Parsedown)->text($attributes['body'] ?? '') !!}
     </div>
     <div style="display: flex; gap: 10px;">
       <button class="show-replies" title="{{ __('Delete') }}" onclick="deleteNote('{{ $note->id }}')">

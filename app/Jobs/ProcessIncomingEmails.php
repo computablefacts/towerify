@@ -92,6 +92,9 @@ class ProcessIncomingEmails implements ShouldQueue
                         'summary' => "{$url} could not be accessed or summarized.",
                     ];
                 }
+                if (count($result) > 0) {
+                    Log::debug($result[count($result) - 1]);
+                }
             }
         }
         return $result;

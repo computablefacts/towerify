@@ -162,8 +162,8 @@ class TimelineItem extends Model
     public static function createNote(User $user, string $body, string $subject = ''): TimelineItem
     {
         return self::createItem($user->id, 'note', Carbon::now(), 0, [
-            'body' => Str::limit(trim($body), 1000 - 3, '...'),
-            'subject' => Str::limit(trim($subject), 1000 - 3, '...'),
+            'body' => Str::limit(trim($body), 10000 - 3, '...'),
+            'subject' => Str::limit(trim($subject), 10000 - 3, '...'),
         ]);
     }
 
