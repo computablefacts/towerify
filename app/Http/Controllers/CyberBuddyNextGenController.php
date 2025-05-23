@@ -289,10 +289,13 @@ class CyberBuddyNextGenController extends Controller
             ->toArray();
 
         $thread = $conversation->thread();
-        $lastQuestion = end($thread);
+        // $lastQuestion = end($thread);
+        // $lastQuestionLowercased = Str::lower($lastQuestion['content'] ?? '');
 
         // Always check the internal KB first
-        if ($lastQuestion) {
+        /* if ($lastQuestion && !empty($lastQuestionLowercased) &&
+            $lastQuestionLowercased !== 'oui' && $lastQuestionLowercased !== 'non' &&
+            $lastQuestionLowercased !== 'yes' && $lastQuestionLowercased !== 'no') {
 
             $fnKb = AbstractLlmFunction::handle($user, $threadId, 'query_issp', [
                 'question' => $lastQuestion['content'],
@@ -301,17 +304,14 @@ class CyberBuddyNextGenController extends Controller
 
             // If an answer has been found in the internal KB, bypass the LLM
             if ($fnKb->output()['sources']->isNotEmpty()) {
-
-                $answer = $fnKb->html();
-
                 return [
                     'messages' => $messages,
                     'response' => [],
-                    'html' => $answer,
-                    'raw_answer' => $answer,
+                    'html' => $fnKb->html(),
+                    'raw_answer' => $fnKb->markdown(),
                 ];
             }
-        }
+        } */
 
         $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
         $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
@@ -326,13 +326,12 @@ class CyberBuddyNextGenController extends Controller
                 $args['fallback_on_next_collection'] = $fallbackOnNextCollection;
                 $messages[] = $response['choices'][0]['message'] ?? [];
                 $response = AbstractLlmFunction::handle($user, $threadId, $name, $args);
-                $answer = $response->html();
 
                 return [
                     'messages' => $messages,
                     'response' => [],
-                    'html' => $answer,
-                    'raw_answer' => $answer,
+                    'html' => $response->html(),
+                    'raw_answer' => $response->markdown(),
                 ];
             }
         }

@@ -21,6 +21,7 @@ abstract class AbstractLlmFunction
             (new RemoveAsset())->schema2(),
             (new DiscoverAssets())->schema2(),
             // (new QueryOpenPortDatabase())->schema2(),
+            (new ScheduleTask())->schema2(),
         ];
     }
 
@@ -35,6 +36,7 @@ abstract class AbstractLlmFunction
             'remove_asset' => (new RemoveAsset())->handle2($user, $threadId, $args),
             'discover_assets' => (new DiscoverAssets())->handle2($user, $threadId, $args),
             'query_open_port_database' => (new QueryOpenPortDatabase())->handle2($user, $threadId, $args),
+            'schedule_task' => (new ScheduleTask())->handle2($user, $threadId, $args),
             default => throw new \Exception("Unknown function: {$function}"),
         };
     }

@@ -8,6 +8,7 @@ use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Jobs\EmbedChunks;
 use App\Jobs\ProcessIncomingEmails;
 use App\Jobs\PullServersInfos;
+use App\Jobs\RunScheduledTasks;
 use App\Jobs\Summarize;
 use App\Jobs\TriggerDiscoveryShallow;
 use App\Jobs\TriggerScan;
@@ -52,6 +53,7 @@ class Kernel extends ConsoleKernel
         $schedule->job(new DeleteEmbeddedChunks())->everyMinute();
         $schedule->job(new ProcessIncomingEmails())->everyMinute();
         $schedule->job(new UpdateTables())->everyMinute();
+        $schedule->job(new RunScheduledTasks())->everyMinute();
     }
 
     /**

@@ -866,7 +866,7 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
   document.addEventListener('DOMContentLoaded', () => {
 
     const elActions = document.querySelector('.tw-actions');
-    const messages = @json($conversation->thread());
+    const messages = @json($conversation->lightThread());
     if (elActions && messages.length <= 0) {
       elActions.style.display = 'unset';
     }
