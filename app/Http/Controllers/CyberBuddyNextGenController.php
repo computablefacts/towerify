@@ -95,17 +95,12 @@ class CyberBuddyNextGenController extends Controller
             $fnOpenPorts = AbstractLlmFunction::handle($user, $threadId, 'query_open_port_database', []);
             $openPorts = $fnOpenPorts->markdown();
 
-            $notes = TimelineItem::fetchNotes($user->id, null, null, 0)
-                ->map(fn(TimelineItem $note) => "- {$note->timestamp->format('Y-m-d H:i:s')} : {$note->attributes()['body']}")
-                ->join("\n");
-
             // Load the prompt
             /** @var Prompt $prompt */
             $prompt = Prompt::where('created_by', $user->id)->where('name', 'default_assistant')->firstOrfail();
             $prompt->template = Str::replace('{ASSETS}', $assets, $prompt->template);
             $prompt->template = Str::replace('{OPEN_PORTS}', $openPorts, $prompt->template);
             $prompt->template = Str::replace('{VULNERABILITIES}', $vulnerabilities, $prompt->template);
-            $prompt->template = Str::replace('{NOTES}', $notes, $prompt->template);
 
             // Set a conversation-wide prompt
             $conversation->dom = json_encode(array_merge($conversation->thread(), [[
@@ -113,18 +108,49 @@ class CyberBuddyNextGenController extends Controller
                 'content' => $prompt->template,
                 'timestamp' => Carbon::now()->toIso8601ZuluString(),
             ]]));
+
+            // Extract historical notes
+            $notes = "# Notes\n\n" . TimelineItem::fetchNotes($user->id, null, null, 0)
+                    ->map(function (TimelineItem $note) {
+                        $attributes = $note->attributes();
+                        return "## {$note->timestamp->format('Y-m-d H:i:s')}\n\n### {$attributes['subject']}\n\n{$attributes['body']}";
+                    })
+                    ->join("\n\n");
+
+            if (!empty($notes)) {
+                $conversation->dom = json_encode(array_merge($conversation->thread(), [[
+                    'role' => RoleEnum::DEVELOPER->value,
+                    'content' => $notes,
+                    'timestamp' => Carbon::now()->toIso8601ZuluString(),
+                ]]));
+            }
         }
 
-        // Extract URLs provided by the user
-        $summaries = collect(ProcessIncomingEmails::extractAndSummarizeHyperlinks($question))
-            ->map(fn(array $summary) => TimelineItem::createNote($user, $summary['summary'], $summary['url']))
-            ->map(fn(TimelineItem $note) => "# Summary of {$note->attributes()['subject']}\n\n{$note->attributes()['body']}")
-            ->join("\n\n");
+        $timestamp = Carbon::now();
+        $thread = $conversation->thread();
 
-        if (!empty($summaries)) {
+        if (count($thread) > 0) {
+            $last = end($thread);
+            if (isset($last['timestamp'])) {
+                $timestamp = Carbon::parse($last['timestamp']);
+            }
+        }
+
+        // Transform URLs provided by the user to notes
+        collect(ProcessIncomingEmails::extractAndSummarizeHyperlinks($question))->each(fn(array $summary) => TimelineItem::createNote($user, $summary['summary'], $summary['url']));
+
+        // Extract newly created notes
+        $notes = "# Notes\n\n" . TimelineItem::fetchNotes($user->id, $timestamp, null, 0)
+                ->map(function (TimelineItem $note) {
+                    $attributes = $note->attributes();
+                    return "## {$note->timestamp->format('Y-m-d H:i:s')}\n\n### {$attributes['subject']}\n\n{$attributes['body']}";
+                })
+                ->join("\n\n");
+
+        if (!empty($notes)) {
             $conversation->dom = json_encode(array_merge($conversation->thread(), [[
                 'role' => RoleEnum::DEVELOPER->value,
-                'content' => $summaries,
+                'content' => $notes,
                 'timestamp' => Carbon::now()->toIso8601ZuluString(),
             ]]));
         }
