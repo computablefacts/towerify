@@ -636,7 +636,7 @@ class CyberBuddyController extends Controller
     public function savePrompt(int $id, Request $request)
     {
         $this->validate($request, [
-            'template' => 'required|string|min:0|max:5000',
+            'template' => 'required|string|min:0|max:10000',
         ]);
         $text = $request->string('template');
         Prompt::where('id', $id)->update(['template' => $text]);

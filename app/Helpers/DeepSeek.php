@@ -12,7 +12,7 @@ class DeepSeek
         //
     }
 
-    public static function execute(string $prompt, string $model = 'deepseek-chat', float $temperature = 0.7, array $tools = [])
+    public static function execute(string $prompt, string $model = 'deepseek-chat', float $temperature = 0.7, array $tools = []): array
     {
         return self::executeEx([[
             'role' => 'user',
@@ -20,7 +20,7 @@ class DeepSeek
         ]], $model, $temperature, $tools);
     }
 
-    public static function executeEx(array $messages, string $model = 'deepseek-chat', float $temperature = 0.7, array $tools = [])
+    public static function executeEx(array $messages, string $model = 'deepseek-chat', float $temperature = 0.7, array $tools = []): array
     {
         $payload = [
             'model' => $model,

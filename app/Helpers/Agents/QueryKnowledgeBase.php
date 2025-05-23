@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers\LlmFunctions;
+namespace App\Helpers\Agents;
 
 use App\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Models\Chunk;
@@ -9,36 +9,21 @@ use App\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-class QueryIssp extends AbstractLlmFunction
+class QueryKnowledgeBase extends AbstractAction
 {
-    public function html(): string
-    {
-        return $this->enhanceAnswerWithSources($this->output['answer'], $this->output['sources']);
-    }
-
-    public function text(): string
-    {
-        return $this->output['answer'];
-    }
-
-    public function markdown(): string
-    {
-        return $this->enhanceAnswerWithSources2($this->output['answer'], $this->output['sources']);
-    }
-
-    protected function schema2(): array
+    static function schema(): array
     {
         return [
             "type" => "function",
             "function" => [
-                "name" => "query_issp",
-                "description" => "Query the Information Systems Security Policy (ISSP) database.",
+                "name" => "query_knowledge_base",
+                "description" => "Answer questions related to cybersecurity guidelines or procedures. This includes inquiries about best practices, frameworks (such as ANSSI, NIST, OWASP, NIS2, DORA), or the Information Systems Security Policy (ISSP).",
                 "parameters" => [
                     "type" => "object",
                     "properties" => [
                         "question" => [
                             "type" => "string",
-                            "description" => "A user question related to information security, e.g. How to safely share documents?",
+                            "description" => "A user question related to information security.",
                         ],
                     ],
                     "required" => ["question"],
@@ -49,11 +34,16 @@ class QueryIssp extends AbstractLlmFunction
         ];
     }
 
-    protected function handle2(User $user, string $threadId, array $args): AbstractLlmFunction
+    public function __construct(User $user, string $threadId, array $args = [])
     {
-        $fallbackOnNextCollection = $args['fallback_on_next_collection'] ?? false;
-        $question = htmlspecialchars($args['question'] ?? '', ENT_QUOTES, 'UTF-8');
-        $response = ApiUtils::chat_manual_demo($threadId, null, $question, $fallbackOnNextCollection);
+        parent::__construct($user, $threadId, $args);
+    }
+
+    function execute(): AbstractAction
+    {
+        $fallbackOnNextCollection = $this->args['fallback_on_next_collection'] ?? false;
+        $question = htmlspecialchars($this->args['question'] ?? '', ENT_QUOTES, 'UTF-8');
+        $response = ApiUtils::chat_manual_demo($this->threadId, null, $question, $fallbackOnNextCollection);
 
         if ($response['error']) {
             $this->output = [
@@ -67,6 +57,21 @@ class QueryIssp extends AbstractLlmFunction
             ];
         }
         return $this;
+    }
+
+    public function html(): string
+    {
+        return $this->enhanceAnswerWithSources($this->output['answer'], $this->output['sources']);
+    }
+
+    public function text(): string
+    {
+        return $this->output['answer'];
+    }
+
+    public function markdown(): string
+    {
+        return $this->enhanceAnswerWithSources2($this->output['answer'], $this->output['sources']);
     }
 
     private function enhanceAnswerWithSources(string $answer, Collection $sources): string

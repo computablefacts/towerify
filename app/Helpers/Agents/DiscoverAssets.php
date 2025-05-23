@@ -1,48 +1,29 @@
 <?php
 
-namespace App\Helpers\LlmFunctions;
+namespace App\Helpers\Agents;
 
 use App\Http\Controllers\AssetController;
 use App\User;
 use Illuminate\Http\Request;
 
-class DiscoverAssets extends AbstractLlmFunction
+class DiscoverAssets extends AbstractAction
 {
-    public function html(): string
-    {
-        $header = "<th>Asset</th>";
-        $rows = $this->output()['assets']->map(fn(string $domain) => "<tr><td>{$domain}</td></tr>")->join("\n");
-        return self::htmlTable($header, $rows, 1);
-    }
-
-    public function text(): string
-    {
-        return "{$this->output()['message']} The assets are : {$this->output()['assets']->join(", ")}.";
-    }
-
-    public function markdown(): string
-    {
-        return $this->text();
-    }
-
-    protected function schema2(): array
+    static function schema(): array
     {
         return [
             "type" => "function",
             "function" => [
                 "name" => "discover_assets",
-                "description" => "Discover subdomains of a root domain.",
+                "description" => "Discover assets related to a domain.",
                 "parameters" => [
                     "type" => "object",
                     "properties" => [
                         "domain" => [
                             "type" => ["string"],
-                            "description" => "The root domain.",
+                            "description" => "A domain or subdomain.",
                         ],
                     ],
-                    "required" => [
-                        "domain"
-                    ],
+                    "required" => ["domain"],
                     "additionalProperties" => false,
                 ],
                 "strict" => true,
@@ -50,18 +31,22 @@ class DiscoverAssets extends AbstractLlmFunction
         ];
     }
 
-    protected function handle2(User $user, string $threadId, array $args): AbstractLlmFunction
+    public function __construct(User $user, string $threadId, array $args = [])
+    {
+        parent::__construct($user, $threadId, $args);
+    }
+
+    function execute(): AbstractAction
     {
         try {
-            $domain = $args['domain'] ?? null;
+            $domain = $this->args['domain'] ?? null;
 
             $request = new Request();
             $request->replace([
                 'domain' => $domain,
             ]);
 
-            $controller = new AssetController();
-            $response = $controller->discover($request);
+            $response = (new AssetController())->discover($request);
             $count = count($response['subdomains']);
 
             $this->output = [
@@ -76,5 +61,22 @@ class DiscoverAssets extends AbstractLlmFunction
             ];
         }
         return $this;
+    }
+
+    public function html(): string
+    {
+        $header = "<th>Asset</th>";
+        $rows = $this->output['assets']->map(fn(string $domain) => "<tr><td>{$domain}</td></tr>")->join("\n");
+        return self::htmlTable($header, $rows, 1);
+    }
+
+    public function text(): string
+    {
+        return "{$this->output['message']}\n\nThe assets are : {$this->output['assets']->join(", ")}.";
+    }
+
+    public function markdown(): string
+    {
+        return $this->text();
     }
 }

@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoleEnum;
-use App\Helpers\DeepSeek;
-use App\Helpers\LlmFunctions\AbstractLlmFunction;
+use App\Enums\TextTypeEnum;
+use App\Helpers\Agents\AbstractAction;
+use App\Helpers\Agents\Agent;
 use App\Helpers\OpenAi;
 use App\Http\Requests\ConverseRequest;
 use App\Jobs\ProcessIncomingEmails;
@@ -86,21 +87,13 @@ class CyberBuddyNextGenController extends Controller
         }
         if (count($conversation->thread()) <= 0) {
 
-            $fnAssets = AbstractLlmFunction::handle($user, $threadId, 'query_asset_database', []);
-            $assets = $fnAssets->markdown();
-
-            $fnVulnerabilities = AbstractLlmFunction::handle($user, $threadId, 'query_vulnerability_database', []);
-            $vulnerabilities = $fnVulnerabilities->markdown();
-
-            $fnOpenPorts = AbstractLlmFunction::handle($user, $threadId, 'query_open_port_database', []);
-            $openPorts = $fnOpenPorts->markdown();
+            $timestamp = Carbon::now();
 
             // Load the prompt
             /** @var Prompt $prompt */
             $prompt = Prompt::where('created_by', $user->id)->where('name', 'default_assistant')->firstOrfail();
-            $prompt->template = Str::replace('{ASSETS}', $assets, $prompt->template);
-            $prompt->template = Str::replace('{OPEN_PORTS}', $openPorts, $prompt->template);
-            $prompt->template = Str::replace('{VULNERABILITIES}', $vulnerabilities, $prompt->template);
+            $prompt->template = Str::replace('{DATE}', $timestamp->format('Y-m-d'), $prompt->template);
+            $prompt->template = Str::replace('{TIME}', $timestamp->format('H:i'), $prompt->template);
 
             // Set a conversation-wide prompt
             $conversation->dom = json_encode(array_merge($conversation->thread(), [[
@@ -248,127 +241,41 @@ class CyberBuddyNextGenController extends Controller
                 <th class='left'>Users</th>
             ";
 
-            $table = AbstractLlmFunction::htmlTable($header, $rows, 6);
+            $table = AbstractAction::htmlTable($header, $rows, 6);
 
             return [
                 'response' => ['Here are the servers you have instrumented :'],
                 'html' => $table,
                 'raw_answer' => "Here are the servers you have instrumented :\n{$table}",
+                'memoize' => false,
             ];
         }
         return [
             'response' => ['Sorry, I did not understand your request.'],
             'html' => '',
             'raw_answer' => 'Sorry, I did not understand your request.',
+            'memoize' => false,
         ];
     }
 
     private function processQuestion(User $user, string $threadId, Conversation $conversation, bool $fallbackOnNextCollection = false): array
     {
-        $model = 'deepseek-chat';
-        $temperature = 0.7;
-        $tools = AbstractLlmFunction::schema();
-
-        $messages = collect($conversation->thread())
-            ->filter(fn(array $message) => $message['role'] === RoleEnum::USER->value || $message['role'] === RoleEnum::ASSISTANT->value || $message['role'] === RoleEnum::DEVELOPER->value)
-            ->map(function (array $message) {
-                if ($message['role'] === RoleEnum::USER->value || $message['role'] === RoleEnum::DEVELOPER->value) {
-                    return [
-                        // Map 'developer' to 'system' because DeepInfra is not up-to-date with the OpenAi API specification
-                        // See https://deepinfra.com/docs/openai_api for details
-                        'role' => $message['role'] === RoleEnum::DEVELOPER->value ? RoleEnum::SYSTEM->value : $message['role'],
-                        'content' => $message['content'] ?? '',
-                    ];
-                }
-                return [
-                    'role' => RoleEnum::ASSISTANT->value,
-                    'content' => $message['answer']['raw_answer'] ?? '',
-                ];
-            })
-            ->values()
-            ->toArray();
-
-        $thread = $conversation->thread();
-        $lastQuestion = end($thread);
-
-        // Always check the internal KB first
-        if ($lastQuestion) {
-
-            $fnKb = AbstractLlmFunction::handle($user, $threadId, 'query_issp', [
-                'question' => $lastQuestion['content'],
-                'fallback_on_next_collection' => $fallbackOnNextCollection,
-            ]);
-
-            // If an answer has been found in the internal KB, bypass the LLM
-            if ($fnKb->output()['sources']->isNotEmpty()) {
-
-                $answer = $fnKb->html();
-
-                return [
-                    'messages' => $messages,
-                    'response' => [],
-                    'html' => $answer,
-                    'raw_answer' => $answer,
-                ];
-            }
-        }
-
-        $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
-        $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
-
-        if (count($toolCalls) === 1) {
-
-            $name = $toolCalls[0]['function']['name'] ?? '';
-            $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
-
-            if ($name === 'query_issp') {
-
-                $args['fallback_on_next_collection'] = $fallbackOnNextCollection;
-                $messages[] = $response['choices'][0]['message'] ?? [];
-                $response = AbstractLlmFunction::handle($user, $threadId, $name, $args);
-                $answer = $response->html();
-
-                return [
-                    'messages' => $messages,
-                    'response' => [],
-                    'html' => $answer,
-                    'raw_answer' => $answer,
-                ];
-            }
-        }
-        while (count($toolCalls) > 0) {
-            $messages[] = $response['choices'][0]['message'] ?? [];
-            $messages = array_merge($messages, $this->callTools($user, $threadId, $toolCalls, $fallbackOnNextCollection));
-            $response = DeepSeek::executeEx($messages, $model, $temperature, $tools);
-            $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
-        }
-
-        $answer = $response['choices'][0]['message']['content'] ?? '';
-        $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
-
-        return [
-            'messages' => $messages,
-            'response' => [],
-            'html' => (new Parsedown)->text($answer),
-            'raw_answer' => $answer,
-        ];
-    }
-
-    private function callTools(User $user, string $threadId, array $tools, bool $fallbackOnNextCollection = false): array
-    {
-        $messages = [];
-
-        foreach ($tools as $tool) {
-            $function = $tool['function'];
-            $name = $function['name'] ?? '';
-            $args = json_decode($function['arguments'], true) ?? [];
-            $args['fallback_on_next_collection'] = $fallbackOnNextCollection;
-            $messages[] = [
-                'role' => RoleEnum::TOOL->value,
-                'tool_call_id' => $tool['id'],
-                'content' => AbstractLlmFunction::handle($user, $threadId, $name, $args)->text(),
+        $agent = (new Agent($fallbackOnNextCollection))->run($conversation);
+        $markdown = $agent->markdown();
+        if ($agent->name() === 'query_knowledge_base' || $agent->name() === 'list_assets' ||
+            $agent->name() === 'list_open_ports' || $agent->name() === 'list_vulnerabilities') {
+            return [
+                'response' => [],
+                'html' => $agent->html(),
+                'raw_answer' => $markdown,
+                'memoize' => $agent->memoize(),
             ];
         }
-        return $messages;
+        return [
+            'response' => [],
+            'html' => (new Parsedown)->text($markdown),
+            'raw_answer' => $markdown,
+            'memoize' => $agent->memoize(),
+        ];
     }
 }

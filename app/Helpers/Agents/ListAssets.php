@@ -1,12 +1,74 @@
 <?php
 
-namespace App\Helpers\LlmFunctions;
+namespace App\Helpers\Agents;
 
 use App\Models\Asset;
 use App\User;
 
-class QueryAssetDatabase extends AbstractLlmFunction
+class ListAssets extends AbstractAction
 {
+    static function schema(): array
+    {
+        return [
+            "type" => "function",
+            "function" => [
+                "name" => "list_assets",
+                "description" => "Find the user's assets.",
+                "parameters" => [
+                    "type" => "object",
+                    "properties" => [
+                        "is_vulnerable" => [
+                            "type" => ["boolean", "null"],
+                            "description" => "True if the asset must have at least one vulnerability. False if it must have none. Null to list all assets.",
+                        ],
+                        "scan_in_progress" => [
+                            "type" => ["boolean", "null"],
+                            "description" => "True if the asset is being scanned. False if the scan has completed. Null to list all assets.",
+                        ],
+                    ],
+                    "required" => [],
+                    "additionalProperties" => false,
+                ],
+                "strict" => true,
+            ],
+        ];
+    }
+
+    public function __construct(User $user, string $threadId, array $args = [])
+    {
+        parent::__construct($user, $threadId, $args);
+    }
+
+    function execute(): AbstractAction
+    {
+        $isVulnerable = $this->args['is_vulnerable'] ?? null;
+        if ($isVulnerable === 'null') {
+            $isVulnerable = null;
+        }
+        $scanInProgress = $this->args['scan_in_progress'] ?? null;
+        if ($scanInProgress === 'null') {
+            $scanInProgress = null;
+        }
+        $this->output = Asset::all()
+            ->sortBy('asset')
+            ->filter(fn(Asset $asset) => !isset($isVulnerable) ||
+                !is_bool($isVulnerable) ||
+                ($isVulnerable && $asset->alerts()->count() > 0) ||
+                (!$isVulnerable && $asset->alerts()->count() <= 0)
+            )
+            ->filter(fn(Asset $asset) => !isset($isVulnerable) ||
+                !is_bool($scanInProgress) ||
+                ($scanInProgress && $asset->scanInProgress()->isNotEmpty()) ||
+                (!$scanInProgress && $asset->scanInProgress()->isEmpty())
+            );
+        return $this;
+    }
+
+    public function memoize(): bool
+    {
+        return false;
+    }
+
     public function html(): string
     {
         $header = "
@@ -18,8 +80,9 @@ class QueryAssetDatabase extends AbstractLlmFunction
             <th>Tags</th>
         ";
 
-        $rows = $this->output()
+        $rows = $this->output
             ->map(function (Asset $asset) {
+
                 if ($asset->is_monitored) {
                     if ($asset->scanInProgress()->isEmpty()) {
                         $scanInProgress = "<span class='lozenge success'>completed</span>";
@@ -62,9 +125,8 @@ class QueryAssetDatabase extends AbstractLlmFunction
 
     public function markdown(): string
     {
-        $output = $this->output();
-        return $output->isEmpty() ? 'No assets to monitor. Please add one.'
-            : $output->map(function (Asset $asset) {
+        return $this->output->isEmpty() ? 'No assets to monitor. Please add one.'
+            : $this->output->map(function (Asset $asset) {
 
                 if ($asset->is_monitored) {
                     if ($asset->scanInProgress()->isEmpty()) {
@@ -89,51 +151,5 @@ class QueryAssetDatabase extends AbstractLlmFunction
                 ->prepend("| Asset | Number of Open Ports | Number of Vulnerabilities | Monitored? | Scan in progress? | Tags |")
                 ->prepend("|---|---|---|---|---|---|")
                 ->join("\n");
-    }
-
-    protected function schema2(): array
-    {
-        return [
-            "type" => "function",
-            "function" => [
-                "name" => "query_asset_database",
-                "description" => "Query the asset database.",
-                "parameters" => [
-                    "type" => "object",
-                    "properties" => [
-                        "is_vulnerable" => [
-                            "type" => ["boolean", "null"],
-                            "description" => "True if the asset must have at least one vulnerability. False if it must have none. Null to list all assets.",
-                        ],
-                        "scan_in_progress" => [
-                            "type" => ["boolean", "null"],
-                            "description" => "True if the asset is being scanned. False if the scan has completed. Null to list all assets.",
-                        ],
-                    ],
-                    "required" => [],
-                    "additionalProperties" => false,
-                ],
-                "strict" => true,
-            ],
-        ];
-    }
-
-    protected function handle2(User $user, string $threadId, array $args): AbstractLlmFunction
-    {
-        $isVulnerable = $args['is_vulnerable'] ?? null;
-        $scanInProgress = $args['scan_in_progress'] ?? null;
-        $this->output = Asset::all()
-            ->sortBy('asset')
-            ->filter(fn(Asset $asset) => !isset($isVulnerable) ||
-                !is_bool($isVulnerable) ||
-                ($isVulnerable && $asset->alerts()->count() > 0) ||
-                (!$isVulnerable && $asset->alerts()->count() <= 0)
-            )
-            ->filter(fn(Asset $asset) => !isset($isVulnerable) ||
-                !is_bool($scanInProgress) ||
-                ($scanInProgress && $asset->scanInProgress()->isNotEmpty()) ||
-                (!$scanInProgress && $asset->scanInProgress()->isEmpty())
-            );
-        return $this;
     }
 }

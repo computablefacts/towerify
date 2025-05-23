@@ -388,7 +388,7 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
   .tw-answer-timestamp {
     color: rgb(107, 114, 128);
     font-size: 12px;
-    padding-left: 48px;
+    padding-left: calc(48px + 0.75rem);
     padding-top: 0.5rem;
   }
 
@@ -866,7 +866,7 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
   document.addEventListener('DOMContentLoaded', () => {
 
     const elActions = document.querySelector('.tw-actions');
-    const messages = @json($conversation->thread());
+    const messages = @json($conversation->lightThread());
     if (elActions && messages.length <= 0) {
       elActions.style.display = 'unset';
     }

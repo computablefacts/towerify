@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RoleEnum;
 use App\Traits\HasTenant;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,6 +48,17 @@ class Conversation extends Model
     {
         return match ($this->format) {
             self::FORMAT_V1 => json_decode($this->dom, true),
+            default => $this->dom,
+        };
+    }
+
+    public function lightThread(): string|array
+    {
+        return match ($this->format) {
+            self::FORMAT_V1 => collect(json_decode($this->dom, true))
+                ->filter(fn(array $message) => $message['role'] === RoleEnum::USER->value || $message['role'] === RoleEnum::ASSISTANT->value)
+                ->values()
+                ->toArray(),
             default => $this->dom,
         };
     }
