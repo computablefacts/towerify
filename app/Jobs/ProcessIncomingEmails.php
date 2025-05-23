@@ -296,7 +296,7 @@ class ProcessIncomingEmails implements ShouldQueue
 
                 $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
 
-                if ($collection) {
+                if ($collection) { // TODO : move to privcol{user_id} ?
                     $message->attachments()->each(function (Attachment $attachment) use ($user, $collection) {
                         if (!$attachment->save("/tmp/")) {
                             TimelineItem::createNote($user, "Attachment {$attachment->filename} could not be added to {$collection->name}.", "An error occurred.");
