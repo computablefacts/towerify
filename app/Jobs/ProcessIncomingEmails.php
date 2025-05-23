@@ -297,14 +297,16 @@ class ProcessIncomingEmails implements ShouldQueue
                 $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
 
                 if ($collection) {
-                    $message->attachments()->each(function (Attachment $attachment) use ($collection) {
+                    $message->attachments()->each(function (Attachment $attachment) use ($user, $collection) {
                         if (!$attachment->save("/tmp/")) {
+                            TimelineItem::createNote($user, "Attachment {$attachment->filename} could not be added to {$collection->name}.", "An error occurred.");
                             Log::error("Attachment {$attachment->name} could not be saved!");
                         } else {
                             $path = "/tmp/{$attachment->filename}";
                             // TODO : deal with duplicate files using the md5/sha1 file hash
                             $url = \App\Http\Controllers\CyberBuddyController::saveLocalFile($collection, $path);
                             unlink($path);
+                            TimelineItem::createNote($user, "{$attachment->filename} has been added to {$collection->name}.", "Attachment saved!");
                         }
                     });
                 }
