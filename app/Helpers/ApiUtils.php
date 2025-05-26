@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Collection;
 use App\Models\Prompt;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -72,16 +73,23 @@ class ApiUtils
     {
         if (empty($collectionName)) {
             $collections = Collection::query()
+                ->where('is_deleted', '=', false)
+                ->whereNotLike('name', "privcol%")
                 ->orderBy('priority')
                 ->orderBy('name')
                 ->get()
+                ->filter(fn(Collection $collection) => $collection->files()->exists())
                 ->pluck('name')
                 ->toArray();
         } else {
-            $collections = Collection::where('name', '<>', $collectionName)
+            $collections = Collection::query()
+                ->where('is_deleted', '=', false)
+                ->where('name', '<>', $collectionName)
+                ->whereNotLike('name', "privcol%")
                 ->orderBy('priority')
                 ->orderBy('name')
                 ->get()
+                ->filter(fn(Collection $collection) => $collection->files()->exists())
                 ->pluck('name')
                 ->toArray();
             array_unshift($collections, $collectionName);
@@ -103,16 +111,23 @@ class ApiUtils
     {
         if (empty($collectionName)) {
             $collections = Collection::query()
+                ->where('is_deleted', '=', false)
+                ->whereNotLike('name', "privcol%")
                 ->orderBy('priority')
                 ->orderBy('name')
                 ->get()
+                ->filter(fn(Collection $collection) => $collection->files()->exists())
                 ->pluck('name')
                 ->toArray();
         } else {
-            $collections = Collection::where('name', '<>', $collectionName)
+            $collections = Collection::query()
+                ->where('is_deleted', '=', false)
+                ->where('name', '<>', $collectionName)
+                ->whereNotLike('name', "privcol%")
                 ->orderBy('priority')
                 ->orderBy('name')
                 ->get()
+                ->filter(fn(Collection $collection) => $collection->files()->exists())
                 ->pluck('name')
                 ->toArray();
             array_unshift($collections, $collectionName);
@@ -166,11 +181,13 @@ class ApiUtils
     /** @deprecated */
     public function chat_manual_demo(string $historyKey, ?string $collection, string $question, bool $fallbackOnNextCollection = false): array
     {
-        if (Auth::user()) {
+        /** @var User $user */
+        $user = Auth::user();
+        if ($user) {
             /** @var Prompt $prompt */
-            $prompt = Prompt::where('created_by', Auth::user()->id)->where('name', 'default_chat')->firstOrfail();
+            $prompt = Prompt::where('created_by', $user->id)->where('name', 'default_chat')->firstOrfail();
             /** @var Prompt $promptHistory */
-            $promptHistory = Prompt::where('created_by', Auth::user()->id)->where('name', 'default_chat_history')->firstOrfail();
+            $promptHistory = Prompt::where('created_by', $user->id)->where('name', 'default_chat_history')->firstOrfail();
         } else {
             /** @var Prompt $prompt */
             $prompt = Prompt::where('name', 'default_chat')->firstOrfail();
@@ -184,19 +201,40 @@ class ApiUtils
     {
         if (empty($collectionName)) {
             $collections = Collection::query()
+                ->where('is_deleted', '=', false)
+                ->whereNotLike('name', "privcol%")
                 ->orderBy('priority')
                 ->orderBy('name')
                 ->get()
+                ->filter(fn(Collection $collection) => $collection->files()->exists())
                 ->pluck('name')
                 ->toArray();
         } else {
-            $collections = Collection::where('name', '<>', $collectionName)
+            $collections = Collection::query()
+                ->where('is_deleted', '=', false)
+                ->where('name', '<>', $collectionName)
+                ->whereNotLike('name', "privcol%")
                 ->orderBy('priority')
                 ->orderBy('name')
                 ->get()
+                ->filter(fn(Collection $collection) => $collection->files()->exists())
                 ->pluck('name')
                 ->toArray();
             array_unshift($collections, $collectionName);
+        }
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($user) {
+            /** @var ?Collection $private */
+            $private = Collection::query()
+                ->where('is_deleted', '=', false)
+                ->where('name', '=', "privcol{$user->id}")
+                ->first();
+            if ($private) {
+                array_unshift($collections, $private->name);
+            }
         }
         return $this->post('/chat_manual', [
             'question' => $question,

@@ -7,6 +7,7 @@ use App\Models\Chunk;
 use App\Models\File;
 use App\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class QueryKnowledgeBase extends AbstractAction
@@ -46,6 +47,7 @@ class QueryKnowledgeBase extends AbstractAction
         $response = ApiUtils::chat_manual_demo($this->threadId, null, $question, $fallbackOnNextCollection);
 
         if ($response['error']) {
+            Log::error($response);
             $this->output = [
                 'answer' => 'Sorry, an error occurred. Please try again later.',
                 'sources' => collect(),

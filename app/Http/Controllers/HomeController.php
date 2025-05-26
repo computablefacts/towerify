@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Hashing\TwHasher;
 use App\Helpers\SupersetApiUtilsFacade as ApiUtils;
 use App\Http\Middleware\RedirectIfNotSubscribed;
 use App\Models\Role;
