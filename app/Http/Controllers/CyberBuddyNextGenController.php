@@ -103,14 +103,14 @@ class CyberBuddyNextGenController extends Controller
             ]]));
 
             // Extract historical notes
-            $notes = "# Notes\n\n" . TimelineItem::fetchNotes($user->id, null, null, 0)
+            $notes = "# User's Notes\n\n" . TimelineItem::fetchNotes($user->id, null, null, 0)
                     ->map(function (TimelineItem $note) {
                         $attributes = $note->attributes();
                         return "## {$note->timestamp->format('Y-m-d H:i:s')}\n\n### {$attributes['subject']}\n\n{$attributes['body']}";
                     })
                     ->join("\n\n");
 
-            if (!empty($notes)) {
+            if (!empty($notes) && $notes !== "# User's Notes\n\n") {
                 $conversation->dom = json_encode(array_merge($conversation->thread(), [[
                     'role' => RoleEnum::DEVELOPER->value,
                     'content' => $notes,
@@ -133,14 +133,14 @@ class CyberBuddyNextGenController extends Controller
         collect(ProcessIncomingEmails::extractAndSummarizeHyperlinks($question))->each(fn(array $summary) => TimelineItem::createNote($user, $summary['summary'], $summary['url']));
 
         // Extract newly created notes
-        $notes = "# Notes\n\n" . TimelineItem::fetchNotes($user->id, $timestamp, null, 0)
+        $notes = "# User's Notes\n\n" . TimelineItem::fetchNotes($user->id, $timestamp, null, 0)
                 ->map(function (TimelineItem $note) {
                     $attributes = $note->attributes();
                     return "## {$note->timestamp->format('Y-m-d H:i:s')}\n\n### {$attributes['subject']}\n\n{$attributes['body']}";
                 })
                 ->join("\n\n");
 
-        if (!empty($notes)) {
+        if (!empty($notes) && $notes !== "# User's Notes\n\n") {
             $conversation->dom = json_encode(array_merge($conversation->thread(), [[
                 'role' => RoleEnum::DEVELOPER->value,
                 'content' => $notes,

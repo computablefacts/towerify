@@ -67,6 +67,7 @@ class Agent
     protected function tools(): array
     {
         return [
+            // AnswerQuestion::schema(),
             BeginAssetMonitoring::schema(),
             ClarifyRequest::schema(),
             DiscoverAssets::schema(),
@@ -84,6 +85,7 @@ class Agent
     {
         $args['fallback_on_next_collection'] = $this->fallbackOnNextCollection;
         return match ($name) {
+            // 'answer_question' => new AnswerQuestion($user, $threadId, $args),
             'begin_asset_monitoring' => new BeginAssetMonitoring($user, $threadId, $args),
             'discover_assets' => new DiscoverAssets($user, $threadId, $args),
             'end_asset_monitoring' => new EndAssetMonitoring($user, $threadId, $args),
