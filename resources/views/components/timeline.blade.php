@@ -358,13 +358,16 @@
       @foreach($honeypots as $honeypot)
       <div class="card mb-3">
         <div class="card-body">
-          <h6 class="card-title">
-            {{ $honeypot['name'] }}
+          <h6 class="card-title text-truncate">
+            {{ $honeypot['type'] }}&nbsp;<span style="color: #ffaa00;">/</span>&nbsp;{{ $honeypot['name'] }}
           </h6>
+          @if(\Illuminate\Support\Str::endsWith($honeypot['name'], '.cywise.io'))
+          <p>{{ __('Vous souhaitez rediriger un de vos domaines vers ce honeypot ? Contactez le support !') }}</p>
+          @endif
+          @if(count($honeypot['counts']) <= 0)
+          <p>{{ __('Aucun événement récent.') }}</p>
+          @else
           <div class="card-text mb-3">
-            @if(count($honeypot['counts']) <= 0)
-            {{ __('Aucun événement récent.') }}
-            @else
             <table
               class="charts-css column hide-data show-labels show-primary-axis show-3-secondary-axes data-spacing-3 multiple stacked">
               <thead>
@@ -392,10 +395,58 @@
               @endforeach
               </tbody>
             </table>
-            @endif
           </div>
-          @if(\Illuminate\Support\Str::endsWith($honeypot['name'], '.cywise.io'))
-          <p>{{ __('Vous souhaitez rediriger un de vos domaines vers ce honeypot ? Contactez le support !') }}</p>
+          @endif
+          @if(isset($mostRecentHoneypotEvents[$honeypot['name']]))
+          <div class="card-text mb-3">
+            <table class="table">
+              <thead>
+              <tr>
+                <th colspan="3">
+                  {!! __('The&nbsp;<span style="color: #ffaa00;">5</span>&nbsp;most recent attacks') !!}
+                </th>
+              </tr>
+              </thead>
+              <tbody>
+              @foreach($mostRecentHoneypotEvents[$honeypot['name']]['events'] as $event)
+              <tr title="{{ $event['event_details'] }}">
+                <td style="color: var(--c-blue-500);">
+                  @if($event['attacker_name'] !== '-')
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                       class="icon icon-tabler icons-tabler-outline icon-tabler-user">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
+                    <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+                  </svg>
+                  @else
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                       class="icon icon-tabler icons-tabler-outline icon-tabler-robot">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M6 4m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z"/>
+                    <path d="M12 2v2"/>
+                    <path d="M9 12v9"/>
+                    <path d="M15 12v9"/>
+                    <path d="M5 16l4 -2"/>
+                    <path d="M15 14l4 2"/>
+                    <path d="M9 18h6"/>
+                    <path d="M10 8v.01"/>
+                    <path d="M14 8v.01"/>
+                  </svg>
+                  @endif
+                </td>
+                <td>
+                  {{ $event['timestamp'] }}
+                </td>
+                <td>
+                  {{ $event['event_type'] }}
+                </td>
+              </tr>
+              @endforeach
+              </tbody>
+            </table>
+          </div>
           @endif
         </div>
       </div>

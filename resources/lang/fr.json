@@ -295,6 +295,7 @@
     "Terms": "Mentions Légales",
     "Test SSH Connection": "Tester la connexion SSH",
     "Text successfully copied to clipboard.": "Le texte a été copié dans le presse-papiers.",
+    "The&nbsp;<span style=\"color: #ffaa00;\">5</span>&nbsp;most recent attacks": "Les&nbsp;<span style=\"color: #ffaa00;\">5</span>&nbsp;attaques les plus récentes",
     "The chunk will be deleted soon!": "Le chunk sera supprimé sous peu!",
     "The command is idempotent, meaning you can run it multiple times, but it will produce the same result each time without creating additional changes or effects beyond the initial execution. This ensures consistency and prevents duplication of settings or data each time it is run.": "La commande est idempotente, ce qui signifie que vous pouvez l'exécuter plusieurs fois, mais elle produira le même résultat à chaque fois sans créer de changements ou d'effets supplémentaires au-delà de l'exécution initiale. Cela garantit la cohérence et évite la duplication des paramètres ou des données à chaque exécution.",
     "The document has been saved!": "Le document a été sauvegardé!",
