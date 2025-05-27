@@ -18,6 +18,7 @@ use App\User;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,7 @@ class Timeline extends Component
     public array $blacklist;
     public array $honeypots;
     public array $mostRecentHoneypotEvents;
+    public Collection $todo;
 
     // Filters
     public array $assets;
@@ -308,6 +310,22 @@ class Timeline extends Component
             ->map(fn($group) => $group->first())
             ->take(3)
             ->toArray();
+
+        $this->todo = $this->alerts($user)
+            ->sortBy(function (Alert $alert) {
+                if ($alert->level === 'High') {
+                    return 1;
+                }
+                if ($alert->level === 'Medium') {
+                    return 2;
+                }
+                if ($alert->level === 'Low') {
+                    return 3;
+                }
+                return 4;
+            })
+            ->values()
+            ->take(5);
     }
 
     public function render(): View|Closure|string
@@ -516,13 +534,18 @@ class Timeline extends Component
             ->toArray();
     }
 
-    private function vulnerabilities(User $user): array
+    private function alerts(User $user): Collection
     {
         return Asset::where('is_monitored', true)
             ->when($this->assetId, fn($query, $assetId) => $query->where('id', $assetId))
             ->get()
             ->flatMap(fn(Asset $asset) => $asset->alerts()->get())
-            ->filter(fn(Alert $alert) => $alert->is_hidden === 0)
+            ->filter(fn(Alert $alert) => $alert->is_hidden === 0);
+    }
+
+    private function vulnerabilities(User $user): array
+    {
+        return $this->alerts($user)
             ->map(function (Alert $alert) use ($user) {
 
                 $timestamp = $alert->updated_at->utc()->format('Y-m-d H:i:s');

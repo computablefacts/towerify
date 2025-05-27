@@ -242,6 +242,78 @@
     box-shadow: 0 0 0 2px #fff;
     margin-right: -8px;
   }
+
+  .tw-dot-red {
+    height: 10px;
+    width: 10px;
+    background-color: #ff4d4d;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .tw-dot-green {
+    height: 10px;
+    width: 10px;
+    background-color: #4bd28f;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .tw-dot-blue {
+    height: 10px;
+    width: 10px;
+    background-color: #0194ff;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .tw-dot-orange {
+    height: 10px;
+    width: 10px;
+    background-color: #ffaa00;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .todo-item a:hover, .todo-item a:focus {
+    outline: 0;
+    color: var(--c-blue-500);
+  }
+
+  .todo-item a {
+    color: var(--c-grey-500);
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px dashed;
+  }
+
+  .scroll-to-top {
+    position: fixed;
+    top: calc(56px + 20px);
+    right: 20px;
+    background-color: var(--c-blue-500);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.3s ease;
+  }
+
+  .scroll-to-top:hover {
+    background-color: var(--c-grey-500);
+    transform: translateY(-1px);
+  }
+
+  .scroll-to-top.show {
+    display: flex;
+  }
+
 </style>
 <div class="container p-0">
   @if(Auth::user()->isInTrial())
@@ -313,27 +385,38 @@
       </div>
     </div>
     <div class="col" style="padding-left: 0;">
+      @if(count($todo) > 0)
       <div class="card mb-3">
         <div class="card-body">
           <h6 class="card-title">
-            {{ __('Vous souhaitez poser une question à CyberBuddy ?') }}
+            {!! __('Your 5 most critical vulnerabilities to fix!') !!}
           </h6>
           <div class="card-text mb-3">
-            {{ __('Cliquez ici pour lancer CyberBuddy :') }}
-          </div>
-          <form>
-            <div class="row">
-              <div class="col align-content-center">
-                <a href="{{ route('home', ['tab' => 'ama2']) }}"
-                   class="btn btn-primary" style="width: 100%;">
-                  {{ __('Start Conversation >') }}
-                </a>
-              </div>
+            @foreach($todo as $item)
+            <div class="d-flex justify-content-start align-items-center text-truncate mb-2 todo-item">
+              @if($item->level === 'High')
+              <span class="tw-dot-red"></span>
+              @elseif ($item->level === 'Medium')
+              <span class="tw-dot-orange"></span>
+              @elseif($item->level === 'Low')
+              <span class="tw-dot-green"></span>
+              @else
+              <span class="tw-dot-blue"></span>
+              @endif
+              &nbsp;<a href="#vid-{{ $item->id }}">{{ $item->asset()->asset }}</a>
             </div>
-          </form>
+            <div class="d-flex justify-content-start align-items-center text-truncate mb-3">
+              @if(empty($item->cve_id))
+              {{ $item->title }}
+              @else
+              {{ $alert->cve_id }}&nbsp;/&nbsp;{{ $item->title }}
+              @endif
+            </div>
+            @endforeach
+          </div>
         </div>
       </div>
-      <x-onboarding-monitor-asset2/>
+      @endif
       @if(count($blacklist) > 0)
       <div class="card mb-3">
         <div class="card-body">
@@ -355,6 +438,27 @@
         </div>
       </div>
       @endif
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title">
+            {{ __('Vous souhaitez poser une question à CyberBuddy ?') }}
+          </h6>
+          <div class="card-text mb-3">
+            {{ __('Cliquez ici pour lancer CyberBuddy :') }}
+          </div>
+          <form>
+            <div class="row">
+              <div class="col align-content-center">
+                <a href="{{ route('home', ['tab' => 'ama2']) }}"
+                   class="btn btn-primary" style="width: 100%;">
+                  {{ __('Start Conversation >') }}
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <x-onboarding-monitor-asset2/>
       @foreach($honeypots as $honeypot)
       <div class="card mb-3">
         <div class="card-body">
@@ -453,6 +557,12 @@
       @endforeach
     </div>
   </div>
+  <button id="scrollToTopBtn" class="scroll-to-top" title="Go to top">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+  </button>
 </div>
 @once
 <script>
@@ -624,6 +734,22 @@
   const dismissEvent = (eventId) => {
     dismissEventApiCall(eventId);
   }
+
+  /* SCROLL TO TOP */
+  const elScrollBtn = document.getElementById("scrollToTopBtn");
+
+  window.onscroll = () => {
+    if (document.body.scrollTop > (56 + 20) || document.documentElement.scrollTop > (56 + 20)) {
+      elScrollBtn.classList.add("show");
+    } else {
+      elScrollBtn.classList.remove("show");
+    }
+  };
+
+  elScrollBtn.onclick = () => {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  };
 
   /* API CALLS */
   const apiCall = (method, url, params = {}, body = null) => {
