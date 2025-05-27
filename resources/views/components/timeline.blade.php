@@ -394,6 +394,9 @@
             </table>
             @endif
           </div>
+          @if(\Illuminate\Support\Str::endsWith($honeypot['name'], '.cywise.io'))
+          <p>{{ __('Vous souhaitez rediriger un de vos domaines vers ce honeypot ? Contactez le support !') }}</p>
+          @endif
         </div>
       </div>
       @endforeach
