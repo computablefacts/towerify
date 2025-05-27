@@ -291,7 +291,14 @@ class EndVulnsScanListener extends AbstractListener
             }
 
             $taskId = $scan->vulns_scan_id;
-            $task = $this->taskOutput($taskId);
+
+            try {
+                $task = $this->taskOutput($taskId);
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+                $event->sink();
+                return;
+            }
         }
 
         $currentTaskName = $task['current_task'] ?? null;

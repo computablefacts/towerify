@@ -55,7 +55,15 @@ class EndPortsScanListener extends AbstractListener
             }
 
             $taskId = $scan->ports_scan_id;
-            $task = $this->taskStatus($taskId);
+
+            try {
+                $task = $this->taskStatus($taskId);
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+                $event->sink();
+                return;
+            }
+
             $taskStatus = $task['task_status'] ?? null;
 
             // The task is running: try again later
@@ -71,7 +79,14 @@ class EndPortsScanListener extends AbstractListener
                 return;
             }
 
-            $taskOutput = $this->taskOutput($taskId);
+            try {
+                $taskOutput = $this->taskOutput($taskId);
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+                $event->sink();
+                return;
+            }
+
             $ports = collect($taskOutput['task_result'] ?? []);
         }
         if ($ports->isEmpty()) {
