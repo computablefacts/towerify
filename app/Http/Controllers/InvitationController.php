@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SendInvitationRequest;
 use App\Models\Invitation;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Konekt\User\Models\UserType;
 
@@ -24,12 +24,16 @@ class InvitationController extends Controller
         ]);
     }
 
-    public function send(SendInvitationRequest $request)
+    public function send(Request $request)
     {
         try {
+            $params = $request->validate([
+                'email' => 'required|email',
+                'username' => 'required|string|min:1|max:191',
+            ]);
             $invitation = Invitation::createInvitation(
-                $request->string('email'),
-                $request->string('username'),
+                $params['email'],
+                $params['username'],
                 UserType::CLIENT(),
                 [
                     'client_id' => Auth::user()->tenant()->id,
