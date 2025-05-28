@@ -20,7 +20,7 @@ class CyberTodoController extends Controller
     public function show(string $hash)
     {
         $request = new Request([
-            'hash' => $hash,
+            'group' => $hash,
         ]);
         return view('cyber-todo', [
             'hash' => (new AssetsProcedure())->getGroup($request)['group']
@@ -30,6 +30,7 @@ class CyberTodoController extends Controller
     public function markAsResolved(Alert $alert, Request $request)
     {
         $request->merge([
+            'group' => $request->string('hash'),
             'vulnerability_id' => $alert->id,
         ]);
         (new AssetsProcedure())->resolveVulnerabilityInGroup($request);

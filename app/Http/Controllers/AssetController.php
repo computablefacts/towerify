@@ -41,7 +41,7 @@ class AssetController extends Controller
 
     public function userAssets(Request $request): array
     {
-        $request->replace([
+        $request->merge([
             'is_monitored' => $request->string('valid'),
             'created_the_last_x_hours' => $request->integer('hours'),
         ]);
@@ -50,19 +50,15 @@ class AssetController extends Controller
 
     public function assetMonitoringBegins(Asset $asset): array
     {
-        $request = new Request();
-        $request->replace([
-            'asset_id' => $asset->id,
-        ]);
+        $request = new Request(['asset_id' => $asset->id]);
+        $request->setUserResolver(fn() => auth()->user());
         return (new AssetsProcedure())->monitor($request);
     }
 
     public function assetMonitoringEnds(Asset $asset): array
     {
-        $request = new Request();
-        $request->replace([
-            'asset_id' => $asset->id,
-        ]);
+        $request = new Request(['asset_id' => $asset->id]);
+        $request->setUserResolver(fn() => auth()->user());
         return (new AssetsProcedure())->unmonitor($request);
     }
 
@@ -75,7 +71,7 @@ class AssetController extends Controller
 
     public function addTag(Asset $asset, Request $request): Collection
     {
-        $request->replace([
+        $request->merge([
             'asset_id' => $asset->id,
             'tag' => $request->string('key', ''),
         ]);
@@ -88,11 +84,11 @@ class AssetController extends Controller
 
     public function removeTag(Asset $asset, AssetTag $assetTag): void
     {
-        $request = new Request();
-        $request->replace([
+        $request = new Request([
             'asset_id' => $asset->id,
             'tag_id' => $assetTag->id,
         ]);
+        $request->setUserResolver(fn() => auth()->user());
         (new AssetsProcedure())->untag($request);
     }
 
@@ -102,24 +98,21 @@ class AssetController extends Controller
             'asset' => base64_decode($assetBase64),
             'trial_id' => $trialId,
         ]);
+        $request->setUserResolver(fn() => auth()->user());
         return (new AssetsProcedure())->get($request);
     }
 
     public function deleteAsset(Asset $asset): void
     {
-        $request = new Request();
-        $request->replace([
-            'asset_id' => $asset->id,
-        ]);
+        $request = new Request(['asset_id' => $asset->id]);
+        $request->setUserResolver(fn() => auth()->user());
         (new AssetsProcedure())->delete($request);
     }
 
     public function restartScan(Asset $asset): array
     {
-        $request = new Request();
-        $request->replace([
-            'asset_id' => $asset->id,
-        ]);
+        $request = new Request(['asset_id' => $asset->id]);
+        $request->setUserResolver(fn() => auth()->user());
         return (new AssetsProcedure())->restartScan($request);
     }
 }

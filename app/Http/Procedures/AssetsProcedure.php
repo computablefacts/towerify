@@ -594,7 +594,7 @@ class AssetsProcedure extends Procedure
             "tag" => "The tag.",
         ],
         result: [
-            "hash" => "The hash object.",
+            "group" => "The group object.",
         ]
     )]
     public function group(Request $request): array
@@ -606,22 +606,18 @@ class AssetsProcedure extends Procedure
         $params = $request->validate([
             'tag' => 'required|string|exists:am_assets_tags,tag',
         ]);
-
-        /** @var AssetTagHash $hash */
-        $hash = AssetTagHash::create([
-            'tag' => $params['tag'],
-            'hash' => Str::random(32),
-        ]);
-
         return [
-            'hash' => $hash,
+            'group' => AssetTagHash::create([
+                'tag' => $params['tag'],
+                'hash' => Str::random(32),
+            ]),
         ];
     }
 
     #[RpcMethod(
         description: "Degroup previously grouped assets.",
         params: [
-            "hash" => "The group hash.",
+            "group" => "The group hash.",
         ],
         result: [
             "msg" => "A success message.",
@@ -634,15 +630,15 @@ class AssetsProcedure extends Procedure
         }
 
         $params = $request->validate([
-            'hash' => 'required|string|exists:am_assets_tags_hashes,hash',
+            'group' => 'required|string|exists:am_assets_tags_hashes,hash',
         ]);
 
-        /** @var AssetTagHash $hash */
-        $hash = AssetTagHash::query()->where('hash', '=', $params['hash'])->firstOrFail();
-        $hash->delete();
+        /** @var AssetTagHash $group */
+        $group = AssetTagHash::query()->where('hash', '=', $params['group'])->firstOrFail();
+        $group->delete();
 
         return [
-            'msg' => "The group {$params['hash']} has been disbanded!",
+            'msg' => "The group {$params['group']} has been disbanded!",
         ];
     }
 
@@ -664,9 +660,9 @@ class AssetsProcedure extends Procedure
     }
 
     #[RpcMethod(
-        description: "Get a group by its hash.",
+        description: "Get a specific group.",
         params: [
-            "hash" => "The group hash.",
+            "group" => "The group hash.",
         ],
         result: [
             "group" => "The group.",
@@ -679,11 +675,11 @@ class AssetsProcedure extends Procedure
         }
 
         $params = $request->validate([
-            'hash' => 'required|string|exists:am_assets_tags_hashes,hash',
+            'group' => 'required|string|exists:am_assets_tags_hashes,hash',
         ]);
         return [
             'group' => AssetTagHash::query()
-                ->where('hash', '=', $params['hash'])
+                ->where('hash', '=', $params['group'])
                 ->firstOrFail(),
         ];
     }
@@ -691,7 +687,7 @@ class AssetsProcedure extends Procedure
     #[RpcMethod(
         description: "Mark a vulnerability that belongs to a given group as resolved.",
         params: [
-            "hash" => "The group hash.",
+            "group" => "The group hash.",
             "vulnerability_id" => "The vulnerability id.",
         ],
         result: [
@@ -705,12 +701,12 @@ class AssetsProcedure extends Procedure
         }
 
         $params = $request->validate([
-            'hash' => 'required|string|exists:am_assets_tags_hashes,hash',
+            'group' => 'required|string|exists:am_assets_tags_hashes,hash',
             'vulnerability_id' => 'required|integer|exists:am_alerts,id',
         ]);
 
-        /** @var AssetTagHash $hash */
-        $hash = AssetTagHash::query()->where('hash', '=', $params['hash'])->firstOrFail();
+        /** @var AssetTagHash $group */
+        $group = AssetTagHash::query()->where('hash', '=', $params['group'])->firstOrFail();
         /** @var Alert $alert */
         $alert = Alert::find($params['vulnerability_id']);
 
