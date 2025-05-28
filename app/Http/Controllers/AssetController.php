@@ -2,42 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\BeginPortsScan;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
-use App\Listeners\CreateAssetListener;
-use App\Listeners\DeleteAssetListener;
-use App\Models\Alert;
+use App\Http\Procedures\AssetsProcedure;
 use App\Models\Asset;
 use App\Models\AssetTag;
-use App\Models\HiddenAlert;
-use App\Models\Port;
-use App\Models\PortTag;
-use App\Models\Scan;
 use App\Models\Screenshot;
-use App\Rules\IsValidAsset;
-use App\Rules\IsValidDomain;
 use App\Rules\IsValidIpAddress;
-use App\Rules\IsValidTag;
-use App\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
+/** @deprecated */
 class AssetController extends Controller
 {
-    private const BLACKLIST = [
-        "amazonaws.com",
-        "microsoft.com",
-        "azure.net",
-        "wordpress.com",
-        "google.com",
-        "co.uk",
-        "co.jp",
-        "com.au"
-    ];
-
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -45,15 +21,7 @@ class AssetController extends Controller
 
     public function discover(Request $request): array
     {
-        $domain = trim($request->string('domain', ''));
-
-        if (!IsValidDomain::test($domain)) {
-            return [];
-        }
-        if (in_array($domain, self::BLACKLIST)) {
-            abort(500, "The domain is blacklisted : {$domain}");
-        }
-        return ApiUtils::discover_public($domain);
+        return (new AssetsProcedure())->discover($request);
     }
 
     public function discoverFromIp(Request $request): array
@@ -68,127 +36,34 @@ class AssetController extends Controller
 
     public function saveAsset(Request $request): array
     {
-        $asset = $request->string('asset');
-        $watch = $request->boolean('watch');
-        $trialId = $request->integer('trial_id', 0);
-
-        if (!IsValidAsset::test($asset)) {
-            abort(500, "Invalid asset : {$asset}");
-        }
-
-        /** @var User $user */
-        $user = Auth::user();
-        $obj = CreateAssetListener::execute($user, $asset, is_bool($watch) && $watch, [], $trialId);
-
-        if (!$obj) {
-            abort(500, "The asset could not be created : {$asset}");
-        }
-        return [
-            'asset' => $this->convertAsset($obj->refresh()),
-        ];
+        return (new AssetsProcedure())->create($request);
     }
 
     public function userAssets(Request $request): array
     {
-        $valid = Str::lower($request->string('valid'));
-        $hours = $request->integer('hours');
-        $query = Asset::query();
-
-        if ($valid === 'true') {
-            $query->where('is_monitored', true);
-        }
-        if ($valid === 'false') {
-            $query->where('is_monitored', false);
-        }
-        if ($hours && is_integer($hours)) {
-            $cutOffTime = now()->subHours($hours);
-            $query->where('created_at', '>=', $cutOffTime);
-        }
-
-        $assets = $query->orderBy('asset')
-            ->get()
-            ->map(function (Asset $asset) {
-                $tags = $asset->ports()
-                    ->where('closed', false)
-                    ->orderBy('port')
-                    ->get()
-                    ->flatMap(function (Port $port) use ($asset) {
-                        return $port->tags()
-                            ->orderBy('tag')
-                            ->get()
-                            ->map(function (PortTag $tag) use ($port, $asset) {
-                                if ($asset->isRange()) {
-                                    return [
-                                        'asset' => $port->ip,
-                                        'port' => $port->port,
-                                        'tag' => Str::lower($tag->tag),
-                                        'is_range' => true,
-                                    ];
-                                }
-                                return [
-                                    'asset' => $asset->asset,
-                                    'port' => $port->port,
-                                    'tag' => Str::lower($tag->tag),
-                                    'is_range' => false,
-                                ];
-                            });
-                    })
-                    ->toArray();
-                return array_merge($this->convertAsset($asset), [
-                    'tags_from_ports' => $tags
-                ]);
-            })
-            ->all();
-
-        return [
-            'assets' => $assets,
-        ];
+        $request->replace([
+            'is_monitored' => $request->string('valid'),
+            'created_the_last_x_hours' => $request->integer('hours'),
+        ]);
+        return (new AssetsProcedure())->list($request);
     }
 
     public function assetMonitoringBegins(Asset $asset): array
     {
-        if ($asset->is_monitored) {
-            abort(500, "Asset is already monitored : {$asset->asset}");
-        }
-
-        $asset->is_monitored = true;
-        $asset->save();
-
-        return [
-            'asset' => $this->convertAsset($asset),
-        ];
+        $request = new Request();
+        $request->replace([
+            'asset_id' => $asset->id,
+        ]);
+        return (new AssetsProcedure())->monitor($request);
     }
 
     public function assetMonitoringEnds(Asset $asset): array
     {
-        if (!$asset->is_monitored) {
-            abort(500, "Asset is not monitored : {$asset->asset}");
-        }
-
-        $asset->is_monitored = false;
-        $asset->save();
-
-        return [
-            'asset' => $this->convertAsset($asset),
-        ];
-    }
-
-    private function convertAsset(Asset $asset): array
-    {
-        return [
-            'uid' => $asset->id,
-            'asset' => $asset->asset,
-            'tld' => $asset->tld(),
-            'type' => $asset->type->name,
-            'status' => $asset->is_monitored ? 'valid' : 'invalid',
-            'tags' => $asset->tags()
-                ->get()
-                ->map(fn(AssetTag $tag) => [
-                    'id' => $tag->id,
-                    'name' => $tag->tag,
-                ])
-                ->all(),
-        ];
+        $request = new Request();
+        $request->replace([
+            'asset_id' => $asset->id,
+        ]);
+        return (new AssetsProcedure())->unmonitor($request);
     }
 
     public function screenshot(Screenshot $screenshot): array
@@ -200,204 +75,51 @@ class AssetController extends Controller
 
     public function addTag(Asset $asset, Request $request): Collection
     {
-        $tag = Str::lower($request->string('key', ''));
-
-        if (!IsValidTag::test($tag)) {
-            abort(500, "Invalid tag : {$tag}");
-        }
-
-        $obj = $asset->tags()->where('tag', $tag)->first();
-
-        if (!$obj) {
-            /** @var AssetTag $obj */
-            $obj = $asset->tags()->create(['tag' => $tag]);
-            if (!$obj) {
-                abort(500, "The tag could not be created : {$tag}");
-            }
-        }
+        $request->replace([
+            'asset_id' => $asset->id,
+            'tag' => $request->string('key', ''),
+        ]);
+        $tag = (new AssetsProcedure())->tag($request);
         return collect([[
-            'id' => $obj->id,
-            'key' => $obj->tag,
+            'id' => $tag['tag']->id,
+            'key' => $tag['tag']->tag,
         ]]);
     }
 
     public function removeTag(Asset $asset, AssetTag $assetTag): void
     {
-        if ($asset->id === $assetTag->asset_id) {
-            $assetTag->delete();
-        }
+        $request = new Request();
+        $request->replace([
+            'asset_id' => $asset->id,
+            'tag_id' => $assetTag->id,
+        ]);
+        (new AssetsProcedure())->untag($request);
     }
 
     public function infosFromAsset(string $assetBase64, int $trialId = 0): array
     {
-        $domainOrIpOrRange = base64_decode($assetBase64);
-        if ($trialId > 0) {
-            /** @var Asset $asset */
-            $asset = Asset::where('asset', $domainOrIpOrRange)->where('ynh_trial_id', $trialId)->first();
-        } else {
-            /** @var Asset $asset */
-            $asset = Asset::where('asset', $domainOrIpOrRange)->first();
-        }
-        if (!$asset) {
-
-            // The asset cannot be identified: check if it is an IP address from a known range
-            if (IsValidIpAddress::test($domainOrIpOrRange)) {
-                $asset = Asset::select('am_assets.*')
-                    ->join('am_scans', 'am_scans.ports_scan_id', '=', 'am_assets.cur_scan_id')
-                    ->join('am_ports', 'am_ports.scan_id', '=', 'am_scans.id')
-                    ->where('am_ports.ip', $domainOrIpOrRange)
-                    ->first();
-                if ($asset) {
-                    return $this->infosFromAsset(base64_encode($asset->asset), $trialId);
-                }
-            }
-            return [];
-        }
-
-        // Load the asset's tags
-        $tags = $asset->tags()->orderBy('tag')->get()->pluck('tag')->toArray();
-
-        // Load the asset's open ports
-        $ports = $asset->ports()
-            ->where('closed', false)
-            ->orderBy('port')
-            ->get()
-            ->map(function (Port $port) {
-                return [
-                    'ip' => $port->ip,
-                    'port' => $port->port,
-                    'protocol' => $port->protocol,
-                    'products' => [$port->product],
-                    'services' => [$port->service],
-                    'tags' => $port->tags()->orderBy('tag')->get()->pluck('tag')->toArray(),
-                    'screenshotId' => $port->screenshot()->first()?->id,
-                ];
-            })
-            ->toArray();
-
-        // Load the asset's alerts
-        $alerts = $asset->alerts()
-            ->get()
-            ->map(function (Alert $alert) use ($asset) {
-
-                $port = $alert->port();
-
-                return [
-                    'id' => $alert->id,
-                    'ip' => $port->ip,
-                    'port' => $port->port,
-                    'protocol' => $port->protocol,
-                    'type' => $alert->type,
-                    'tested' => $alert->events()->exists(),
-                    'vulnerability' => $alert->vulnerability,
-                    'remediation' => $alert->remediation,
-                    'level' => Str::lower($alert->level),
-                    'uid' => $alert->uid,
-                    'cve_id' => $alert->cve_id,
-                    'cve_cvss' => $alert->cve_cvss,
-                    'cve_vendor' => $alert->cve_vendor,
-                    'cve_product' => $alert->cve_product,
-                    'title' => $alert->title,
-                    'flarum_url' => null,
-                    'start_date' => $alert->created_at,
-                    'is_hidden' => $alert->is_hidden === 1,
-                ];
-            })
-            ->sortBy([
-                ['ip', 'asc'],
-                ['port', 'asc'],
-                ['protocol', 'asc'],
-            ])
-            ->values();
-
-        // Load the asset's scans
-        $scansInProgress = $asset->scanInProgress();
-
-        if ($scansInProgress->isNotEmpty()) {
-            $scans = $scansInProgress;
-        } else {
-            $scans = $asset->scanCompleted();
-        }
-
-        $portsScanBeginsAt = $scans
-            ->filter(fn(Scan $scan) => $scan->ports_scan_begins_at != null)
-            ->sortBy('ports_scan_begins_at')
-            ->first()?->ports_scan_begins_at;
-
-        $portsScanEndsAt = $scans->contains(fn(Scan $scan) => $scan->ports_scan_ends_at == null) ?
-            null :
-            $scans->sortBy('ports_scan_ends_at')->last()?->ports_scan_ends_at;
-
-        $vulnsScanBeginsAt = $scans
-            ->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at != null)
-            ->sortBy('vulns_scan_begins_at')
-            ->first()?->vulns_scan_begins_at;
-
-        $vulnsScanEndsAt = $scans->contains(fn(Scan $scan) => $scan->vulns_scan_ends_at == null) ?
-            null :
-            $scans->sortBy('vulns_scan_ends_at')->last()?->vulns_scan_ends_at;
-
-        $frequency = config('towerify.adversarymeter.days_between_scans');
-        $nextScanDate = $asset->is_monitored ?
-            $vulnsScanEndsAt ?
-                Carbon::create($vulnsScanEndsAt)->addDays((int)$frequency) :
-                ($vulnsScanBeginsAt ? Carbon::create($vulnsScanBeginsAt)->addDays((int)$frequency) : Carbon::now()) :
-            null;
-
-        // Load the identity of the user who created the asset
-        $user = $asset->createdBy();
-
-        return [
-            'asset' => $asset->asset,
-            'modifications' => [[
-                'asset_id' => $asset->id,
-                'asset_name' => $asset->asset,
-                'timestamp' => $asset->updated_at,
-                'user' => $user ? $user->email : 'unknown',
-            ]],
-            'tags' => $tags,
-            'ports' => $ports,
-            'vulnerabilities' => $alerts->toArray(),
-            'timeline' => [
-                'nmap' => [
-                    'id' => $scans->first()?->ports_scan_id,
-                    'start' => $portsScanBeginsAt,
-                    'end' => $portsScanEndsAt,
-                ],
-                'sentinel' => [
-                    'id' => $vulnsScanBeginsAt ? '000000000000000000000000' : null,
-                    'start' => $vulnsScanBeginsAt,
-                    'end' => $vulnsScanEndsAt,
-                ],
-                'next_scan' => $nextScanDate,
-                'nb_vulns_scans_running' => $scans->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at == null)->count(),
-                'nb_vulns_scans_completed' => $scans->filter(fn(Scan $scan) => $scan->vulns_scan_ends_at != null)->count(),
-            ],
-            'hiddenAlerts' => HiddenAlert::all()->toArray(),
-        ];
+        $request = new Request([
+            'asset' => base64_decode($assetBase64),
+            'trial_id' => $trialId,
+        ]);
+        return (new AssetsProcedure())->get($request);
     }
 
     public function deleteAsset(Asset $asset): void
     {
-        if ($asset->is_monitored) {
-            abort(500, 'Deletion not allowed, asset is monitored.');
-        }
-
-        /** @var User $user */
-        $user = Auth::user();
-        DeleteAssetListener::execute($user, $asset->asset);
+        $request = new Request();
+        $request->replace([
+            'asset_id' => $asset->id,
+        ]);
+        (new AssetsProcedure())->delete($request);
     }
 
     public function restartScan(Asset $asset): array
     {
-        if (!$asset->is_monitored) {
-            abort(500, 'Restart scan not allowed, asset is not monitored.');
-        }
-        if ($asset->scanInProgress()->isEmpty()) {
-            BeginPortsScan::dispatch($asset);
-        }
-        return [
-            'asset' => $this->convertAsset($asset),
-        ];
+        $request = new Request();
+        $request->replace([
+            'asset_id' => $asset->id,
+        ]);
+        return (new AssetsProcedure())->restartScan($request);
     }
 }

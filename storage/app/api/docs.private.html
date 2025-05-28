@@ -270,6 +270,450 @@
         <div class="row mb-3">
             <div class="col-4">
                 <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@discover</span>
+                </h4>
+                <p>
+                    Discover subdomains of a given domain.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@discover</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">domain</span>": "<span style="color:#9ECE6A;">The seed domain.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">subdomains</span>": "<span style="color:#9ECE6A;">An array of subdomains.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@get</span>
+                </h4>
+                <p>
+                    Get everything known about a single asset.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@get</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">asset</span>": "<span style="color:#9ECE6A;">The asset name.</span>",
+        "<span style="color:#A0AEC0;">trial_id</span>": "<span style="color:#9ECE6A;">The trial id this asset belongs to (if any).</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">asset</span>": "<span style="color:#9ECE6A;">The asset name. May be different from the one given in the request on ranges.</span>",
+        "<span style="color:#A0AEC0;">modifications</span>": "<span style="color:#9ECE6A;">The asset's creation and modification history.</span>",
+        "<span style="color:#A0AEC0;">tags</span>": "<span style="color:#9ECE6A;">The asset's tags.</span>",
+        "<span style="color:#A0AEC0;">ports</span>": "<span style="color:#9ECE6A;">The asset's open ports.</span>",
+        "<span style="color:#A0AEC0;">vulnerabilities</span>": "<span style="color:#9ECE6A;">The asset's vulnerabilities.</span>",
+        "<span style="color:#A0AEC0;">timeline</span>": {
+            "<span style="color:#A0AEC0;">nmap</span>": {
+                "<span style="color:#A0AEC0;">start</span>": "<span style="color:#9ECE6A;">When the port scan started.</span>",
+                "<span style="color:#A0AEC0;">end</span>": "<span style="color:#9ECE6A;">When the port scan ended.</span>"
+            },
+            "<span style="color:#A0AEC0;">sentinel</span>": {
+                "<span style="color:#A0AEC0;">start</span>": "<span style="color:#9ECE6A;">When the vuln. scan started.</span>",
+                "<span style="color:#A0AEC0;">end</span>": "<span style="color:#9ECE6A;">When the vuln. scan ended.</span>"
+            },
+            "<span style="color:#A0AEC0;">next_scan</span>": "<span style="color:#9ECE6A;">When the next scans will start.</span>",
+            "<span style="color:#A0AEC0;">nb_vulns_scans_running</span>": "<span style="color:#9ECE6A;">The number of running scans.</span>",
+            "<span style="color:#A0AEC0;">nb_vulns_scans_completed</span>": "<span style="color:#9ECE6A;">The number of completed scans.</span>"
+        },
+        "<span style="color:#A0AEC0;">hiddenAlerts</span>": "<span style="color:#9ECE6A;">The asset's hidden vulnerabilities (if any).</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@create</span>
+                </h4>
+                <p>
+                    Create a single asset.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@create</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">asset</span>": "<span style="color:#9ECE6A;">The asset as an IP address or a DNS.</span>",
+        "<span style="color:#A0AEC0;">watch</span>": "<span style="color:#9ECE6A;">True if the asset should be monitored directly after the creation. False otherwise.</span>",
+        "<span style="color:#A0AEC0;">trial_id</span>": "<span style="color:#9ECE6A;">The trial id this asset belongs to (if any).</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">asset</span>": "<span style="color:#9ECE6A;">An asset object.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@delete</span>
+                </h4>
+                <p>
+                    Delete an asset.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@delete</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">asset_id</span>": "<span style="color:#9ECE6A;">The asset id.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">msg</span>": "<span style="color:#9ECE6A;">A success message.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@list</span>
+                </h4>
+                <p>
+                    List the user&#039;s assets.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@list</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">is_monitored</span>": "<span style="color:#9ECE6A;">The asset status: true to get only monitored assets, false to get only unmonitored assets, null to get all assets.</span>",
+        "<span style="color:#A0AEC0;">created_the_last_x_hours</span>": "<span style="color:#9ECE6A;">Keep only assets created after (now - x hours).</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">assets</span>": "<span style="color:#9ECE6A;">A list of assets.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@monitor</span>
+                </h4>
+                <p>
+                    Start monitoring an asset.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@monitor</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">asset_id</span>": "<span style="color:#9ECE6A;">The asset id.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">asset</span>": "<span style="color:#9ECE6A;">The monitored asset.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@unmonitor</span>
+                </h4>
+                <p>
+                    Stop monitoring an asset.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@unmonitor</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">asset_id</span>": "<span style="color:#9ECE6A;">The asset id.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">asset</span>": "<span style="color:#9ECE6A;">The unmonitored asset.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@tag</span>
+                </h4>
+                <p>
+                    Tag an asset.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@tag</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">asset_id</span>": "<span style="color:#9ECE6A;">The asset id.</span>",
+        "<span style="color:#A0AEC0;">tag</span>": "<span style="color:#9ECE6A;">The tag to add.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">tag</span>": "<span style="color:#9ECE6A;">The added tag.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@untag</span>
+                </h4>
+                <p>
+                    Untag an asset.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@untag</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">asset_id</span>": "<span style="color:#9ECE6A;">The asset id.</span>",
+        "<span style="color:#A0AEC0;">tag_id</span>": "<span style="color:#9ECE6A;">The tag id of the tag to remove.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">msg</span>": "<span style="color:#9ECE6A;">A success message.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@restartScan</span>
+                </h4>
+                <p>
+                    Force-scan a given asset.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@restartScan</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">asset_id</span>": "<span style="color:#9ECE6A;">The asset id.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">asset</span>": "<span style="color:#9ECE6A;">The scanned asset.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
                     events
                     <span class="d-block text-muted">@dismiss</span>
                 </h4>
@@ -913,7 +1357,7 @@
 
     <footer class="pt-5 my-5 text-muted d-flex align-items-center">
         <div class="mx-auto">
-            <abbr title="2025-05-06T15:16:02+00:00">Created</abbr> by the <a href="http://sajya.github.io" class="text-dark" target="_blank">Sajya</a>.
+            <abbr title="2025-05-28T08:59:35+00:00">Created</abbr> by the <a href="http://sajya.github.io" class="text-dark" target="_blank">Sajya</a>.
         </div>
     </footer>
 </div>
