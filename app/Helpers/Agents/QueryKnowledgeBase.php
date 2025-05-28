@@ -2,7 +2,6 @@
 
 namespace App\Helpers\Agents;
 
-use App\Enums\RoleEnum;
 use App\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Helpers\DeepInfra;
 use App\Models\Chunk;
@@ -72,12 +71,13 @@ class QueryKnowledgeBase extends AbstractAction
                 {$question}
             ";
 
-            $messages = $this->messages;
+            /* $messages = $this->messages;
             $messages[] = [
                 'role' => RoleEnum::USER->value,
                 'content' => $prompt,
             ];
-            $response = DeepInfra::executeEx($messages, 'Qwen/Qwen3-30B-A3B');
+            $response = DeepInfra::executeEx($messages, 'Qwen/Qwen3-30B-A3B'); */
+            $response = DeepInfra::execute($prompt, 'Qwen/Qwen3-30B-A3B');
             $answer = $response['choices'][0]['message']['content'] ?? '';
             Log::debug("answer : {$answer}");
             $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
