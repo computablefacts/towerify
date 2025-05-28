@@ -232,6 +232,7 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
             \App\Http\Procedures\NotesProcedure::class,
             \App\Http\Procedures\ServersProcedure::class,
             \App\Http\Procedures\TheCyberBriefProcedure::class,
+            \App\Http\Procedures\UsersProcedure::class,
             \App\Http\Procedures\VulnerabilitiesProcedure::class,
         ])
             ->name('rpc.endpoint')

@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Procedures\UsersProcedure;
 use App\User;
+use Illuminate\Http\Request;
 
+/** @deprecated */
 class UserController extends Controller
 {
     public function toggleGetsAuditReport(User $user)
     {
-        $user->gets_audit_report = !$user->gets_audit_report;
-        $user->save();
-        return response()->json(['success' => "Your settings have been updated."]);
+        return response()->json([
+            'success' => (new UsersProcedure())->toggleGetsAuditReport(new Request([
+                'user_id' => $user->id,
+            ]))['msg'],
+        ]);
     }
 }
