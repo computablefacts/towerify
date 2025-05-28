@@ -25,12 +25,12 @@ class Agent
         $messages = $this->messages($conversation);
         try {
             if ($this->isIntentMalicious($user, $threadId, $messages)) {
-                $action = new ClarifyRequest($user, $threadId, [], "Sorry! I cannot process this request.");
+                $action = new ClarifyRequest($user, $threadId, $messages, [], "Sorry! I cannot process this request.");
             } else {
                 $action = $this->decideNextAction($user, $threadId, $messages);
             }
         } catch (\Exception $e) {
-            $action = new ClarifyRequest($user, $threadId, [], "An error occurred, please try again later ({$e->getMessage()})");
+            $action = new ClarifyRequest($user, $threadId, $messages, [], "An error occurred, please try again later ({$e->getMessage()})");
         }
         return $action->execute();
     }
@@ -44,10 +44,10 @@ class Agent
             $answer = $response['choices'][0]['message']['content'] ?? '';
             Log::debug("answer : {$answer}");
             $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
-            return new ClarifyRequest($user, $threadId, [], $answer);
+            return new ClarifyRequest($user, $threadId, $messages, [], $answer);
         }
         if (count($toolCalls) > 1) {
-            return new ClarifyRequest($user, $threadId);
+            return new ClarifyRequest($user, $threadId, $messages);
         }
 
         $name = $toolCalls[0]['function']['name'] ?? '';
@@ -55,7 +55,7 @@ class Agent
 
         Log::debug("$name(" . $toolCalls[0]['function']['arguments'] . ")");
 
-        return $this->findTool($user, $threadId, $name, $args);
+        return $this->findTool($user, $threadId, $messages, $name, $args);
     }
 
     protected function llm(array $messages): array
@@ -67,9 +67,8 @@ class Agent
     protected function tools(): array
     {
         return [
-            // AnswerQuestion::schema(),
             BeginAssetMonitoring::schema(),
-            ClarifyRequest::schema(),
+            // ClarifyRequest::schema(),
             DiscoverAssets::schema(),
             EndAssetMonitoring::schema(),
             ListAssets::schema(),
@@ -81,21 +80,20 @@ class Agent
         ];
     }
 
-    protected function findTool(User $user, string $threadId, string $name, array $args): AbstractAction
+    protected function findTool(User $user, string $threadId, array $messages, string $name, array $args): AbstractAction
     {
         $args['fallback_on_next_collection'] = $this->fallbackOnNextCollection;
         return match ($name) {
-            // 'answer_question' => new AnswerQuestion($user, $threadId, $args),
-            'begin_asset_monitoring' => new BeginAssetMonitoring($user, $threadId, $args),
-            'discover_assets' => new DiscoverAssets($user, $threadId, $args),
-            'end_asset_monitoring' => new EndAssetMonitoring($user, $threadId, $args),
-            'list_assets' => new ListAssets($user, $threadId, $args),
-            'list_open_ports' => new ListOpenPorts($user, $threadId, $args),
-            'list_vulnerabilities' => new ListVulnerabilities($user, $threadId, $args),
-            'query_knowledge_base' => new QueryKnowledgeBase($user, $threadId, $args),
-            'remove_asset' => new RemoveAsset($user, $threadId, $args),
-            'schedule_task' => new ScheduleTask($user, $threadId, $args),
-            default => new ClarifyRequest($user, $threadId, $args),
+            'begin_asset_monitoring' => new BeginAssetMonitoring($user, $threadId, $messages, $args),
+            'discover_assets' => new DiscoverAssets($user, $threadId, $messages, $args),
+            'end_asset_monitoring' => new EndAssetMonitoring($user, $threadId, $messages, $args),
+            'list_assets' => new ListAssets($user, $threadId, $messages, $args),
+            'list_open_ports' => new ListOpenPorts($user, $threadId, $messages, $args),
+            'list_vulnerabilities' => new ListVulnerabilities($user, $threadId, $messages, $args),
+            'query_knowledge_base' => new QueryKnowledgeBase($user, $threadId, $messages, $args),
+            'remove_asset' => new RemoveAsset($user, $threadId, $messages, $args),
+            'schedule_task' => new ScheduleTask($user, $threadId, $messages, $args),
+            default => new ClarifyRequest($user, $threadId, $messages, $args),
         };
     }
 
@@ -118,6 +116,10 @@ class Agent
                     'content' => $memoize ? ($message['answer']['raw_answer'] ?? '') : 'This message has been hidden.',
                 ];
             })
+            ->map(fn(array $message) => [
+                'role' => $message['role'],
+                'content' => Str::before($message['content'], "\n\n**Sources:**\n"), // Remove sources. See QueryKnowledgeBase::enhanceAnswerWithSources2 for details.
+            ])
             ->values()
             ->toArray();
     }

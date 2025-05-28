@@ -31,9 +31,9 @@ class BeginAssetMonitoring extends AbstractAction
         ];
     }
 
-    public function __construct(User $user, string $threadId, array $args = [])
+    public function __construct(User $user, string $threadId, array $messages, array $args = [])
     {
-        parent::__construct($user, $threadId, $args);
+        parent::__construct($user, $threadId, $messages, $args);
     }
 
     function execute(): AbstractAction

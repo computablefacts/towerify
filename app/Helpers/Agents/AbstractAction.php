@@ -8,6 +8,7 @@ abstract class AbstractAction
 {
     protected User $user;
     protected string $threadId;
+    protected array $messages;
     protected array $args;
     protected mixed $output;
 
@@ -34,11 +35,12 @@ abstract class AbstractAction
         ";
     }
 
-    public function __construct(User $user, string $threadId, array $args = [])
+    public function __construct(User $user, string $threadId, array $messages, array $args = [])
     {
         $this->user = $user;
-        $this->args = $args;
         $this->threadId = $threadId;
+        $this->messages = $messages;
+        $this->args = $args;
     }
 
     public function name(): string

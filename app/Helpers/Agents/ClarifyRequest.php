@@ -31,9 +31,9 @@ class ClarifyRequest extends AbstractAction
         ];
     }
 
-    public function __construct(User $user, string $threadId, array $args = [], string $message = "I'm sorry, but I didn't understand your request. Could you please provide more details or rephrase your question?")
+    public function __construct(User $user, string $threadId, array $messages, array $args = [], string $message = "I'm sorry, but I didn't understand your request. Could you please provide more details or rephrase your question?")
     {
-        parent::__construct($user, $threadId, $args);
+        parent::__construct($user, $threadId, $messages, $args);
         $this->message = $message;
     }
 

@@ -2,9 +2,12 @@
 
 namespace App\Helpers\Agents;
 
+use App\Enums\RoleEnum;
 use App\Helpers\ApiUtilsFacade as ApiUtils;
+use App\Helpers\DeepInfra;
 use App\Models\Chunk;
 use App\Models\File;
+use App\Models\TimelineItem;
 use App\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -35,15 +38,59 @@ class QueryKnowledgeBase extends AbstractAction
         ];
     }
 
-    public function __construct(User $user, string $threadId, array $args = [])
+    public function __construct(User $user, string $threadId, array $messages, array $args = [])
     {
-        parent::__construct($user, $threadId, $args);
+        parent::__construct($user, $threadId, $messages, $args);
     }
 
     function execute(): AbstractAction
     {
         $fallbackOnNextCollection = $this->args['fallback_on_next_collection'] ?? false;
         $question = htmlspecialchars($this->args['question'] ?? '', ENT_QUOTES, 'UTF-8');
+        $notes = TimelineItem::fetchNotes($this->user->id, null, null, 0)
+            ->map(function (TimelineItem $note) {
+                $attributes = $note->attributes();
+                $subject = $attributes['subject'] ?? 'Unknown subject';
+                $body = $attributes['body'] ?? '';
+                return "## {$note->timestamp->format('Y-m-d H:i:s')}\n\n### {$subject}\n\n{$body}";
+            })
+            ->join("\n\n");
+
+        if (!empty($notes)) {
+
+            $prompt = "
+                Use the user's notes below to answer the user's question.
+                If the information in the notes is insufficient to determine the answer, respond with 'I_DONT_KNOW'.
+                Ensure your answer is in plain text format without any Markdown or HTML formatting.
+
+                # User's Notes
+                
+                {$notes}
+                
+                # User's Question
+                
+                {$question}
+            ";
+
+            $messages = $this->messages;
+            $messages[] = [
+                'role' => RoleEnum::USER->value,
+                'content' => $prompt,
+            ];
+            $response = DeepInfra::executeEx($messages, 'Qwen/Qwen3-30B-A3B');
+            $answer = $response['choices'][0]['message']['content'] ?? '';
+            Log::debug("answer : {$answer}");
+            $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
+
+            if (!empty($answer) && !Str::contains($answer, 'I_DONT_KNOW')) {
+                $this->output = [
+                    'answer' => $answer,
+                    'sources' => collect(),
+                ];
+                return $this;
+            }
+        }
+
         $response = ApiUtils::chat_manual_demo($this->threadId, null, $question, $fallbackOnNextCollection);
 
         if ($response['error']) {

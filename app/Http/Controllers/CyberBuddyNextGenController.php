@@ -100,22 +100,6 @@ class CyberBuddyNextGenController extends Controller
                 'content' => $prompt->template,
                 'timestamp' => Carbon::now()->toIso8601ZuluString(),
             ]]));
-
-            // Extract historical notes
-            $notes = "# User's Notes\n\n" . TimelineItem::fetchNotes($user->id, null, null, 0)
-                    ->map(function (TimelineItem $note) {
-                        $attributes = $note->attributes();
-                        return "## {$note->timestamp->format('Y-m-d H:i:s')}\n\n### {$attributes['subject']}\n\n{$attributes['body']}";
-                    })
-                    ->join("\n\n");
-
-            if (!empty($notes) && $notes !== "# User's Notes\n\n") {
-                $conversation->dom = json_encode(array_merge($conversation->thread(), [[
-                    'role' => RoleEnum::DEVELOPER->value,
-                    'content' => $notes,
-                    'timestamp' => Carbon::now()->toIso8601ZuluString(),
-                ]]));
-            }
         }
 
         $timestamp = Carbon::now();
@@ -130,22 +114,6 @@ class CyberBuddyNextGenController extends Controller
 
         // Transform URLs provided by the user to notes
         collect(ProcessIncomingEmails::extractAndSummarizeHyperlinks($question))->each(fn(array $summary) => TimelineItem::createNote($user, $summary['summary'], $summary['url']));
-
-        // Extract newly created notes
-        $notes = "# User's Notes\n\n" . TimelineItem::fetchNotes($user->id, $timestamp, null, 0)
-                ->map(function (TimelineItem $note) {
-                    $attributes = $note->attributes();
-                    return "## {$note->timestamp->format('Y-m-d H:i:s')}\n\n### {$attributes['subject']}\n\n{$attributes['body']}";
-                })
-                ->join("\n\n");
-
-        if (!empty($notes) && $notes !== "# User's Notes\n\n") {
-            $conversation->dom = json_encode(array_merge($conversation->thread(), [[
-                'role' => RoleEnum::DEVELOPER->value,
-                'content' => $notes,
-                'timestamp' => Carbon::now()->toIso8601ZuluString(),
-            ]]));
-        }
 
         // Save the user's question
         $conversation->dom = json_encode(array_merge($conversation->thread(), [[
