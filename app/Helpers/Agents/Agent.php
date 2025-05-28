@@ -41,9 +41,29 @@ class Agent
         $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
 
         if (count($toolCalls) === 0) {
+
             $answer = $response['choices'][0]['message']['content'] ?? '';
             Log::debug("answer : {$answer}");
             $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
+
+            if (preg_match('/^<function=([a-zA-Z0-9_]+)>([{].*[}])$/i', trim($answer), $matches)) {
+
+                $name = trim($matches[1]);
+                $args = json_decode(trim($matches[2]), true) ?? [];
+
+                Log::debug("[1] $name(" . $matches[2] . ")");
+
+                return $this->findTool($user, $threadId, $messages, $name, $args);
+            }
+            if (preg_match('/^[{]"function":"([a-zA-Z0-9_]+)","parameters":([{].*[}])[}]$/i', trim($answer), $matches)) {
+
+                $name = trim($matches[1]);
+                $args = json_decode(trim($matches[2]), true) ?? [];
+
+                Log::debug("[2] $name(" . $matches[2] . ")");
+
+                return $this->findTool($user, $threadId, $messages, $name, $args);
+            }
             return new ClarifyRequest($user, $threadId, $messages, [], $answer);
         }
         if (count($toolCalls) > 1) {
@@ -53,14 +73,14 @@ class Agent
         $name = $toolCalls[0]['function']['name'] ?? '';
         $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
 
-        Log::debug("$name(" . $toolCalls[0]['function']['arguments'] . ")");
+        Log::debug("[3] $name(" . $toolCalls[0]['function']['arguments'] . ")");
 
         return $this->findTool($user, $threadId, $messages, $name, $args);
     }
 
     protected function llm(array $messages): array
     {
-        return DeepInfra::executeEx($messages, 'meta-llama/Meta-Llama-3.1-8B-Instruct', 0.7, $this->tools());
+        return DeepInfra::executeEx($messages, 'meta-llama/Llama-4-Scout-17B-16E-Instruct', 0.7, $this->tools());
         // return DeepSeek::executeEx($messages, 'deepseek-chat', 0.7, $this->tools());
     }
 
