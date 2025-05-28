@@ -119,10 +119,6 @@
     executeJsonRpcApiCall('notes@delete', {note_id: noteId}, onSuccess);
   }
 
-  function deleteNoteApiCall(noteId, onSuccess = onSuccessDefault) {
-    executeJsonRpcApiCall('notes@delete', {note_id: noteId}, onSuccess);
-  }
-
   function toggleVulnerabilityVisibilityApiCall(uid, type, title) {
     executeJsonRpcApiCall('vulnerabilities@toggleVisibility', {uid: uid, type: type, title: title});
   }

@@ -10,7 +10,6 @@ use App\Jobs\Summarize;
 use App\Mail\HoneypotRequested;
 use App\Models\Alert;
 use App\Models\Asset;
-use App\Models\AssetTag;
 use App\Models\AssetTagHash;
 use App\Models\Attacker;
 use App\Models\HiddenAlert;
@@ -23,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
+/** @deprecated */
 class HoneypotController extends Controller
 {
     public function __construct()
@@ -369,15 +369,7 @@ class HoneypotController extends Controller
 
     public function assetTags(): array
     {
-        return [
-            'tags' => AssetTag::query()
-                ->orderBy('tag')
-                ->get()
-                ->pluck('tag')
-                ->unique()
-                ->values()
-                ->toArray(),
-        ];
+        return (new AssetsProcedure())->listTags(new Request());
     }
 
     public function getHashes(): array

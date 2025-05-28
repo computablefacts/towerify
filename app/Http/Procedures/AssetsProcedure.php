@@ -556,6 +556,29 @@ class AssetsProcedure extends Procedure
     }
 
     #[RpcMethod(
+        description: "List all tags that belong to the current user.",
+        params: [],
+        result: [
+            "tags" => "The list of tags.",
+        ]
+    )]
+    public function listTags(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+        return [
+            'tags' => AssetTag::query()
+                ->orderBy('tag')
+                ->get()
+                ->pluck('tag')
+                ->unique()
+                ->values()
+                ->toArray(),
+        ];
+    }
+
+    #[RpcMethod(
         description: "Force-scan a given asset.",
         params: [
             "asset_id" => "The asset id.",
