@@ -73,7 +73,7 @@ class AssetController extends Controller
     {
         $request->merge([
             'asset_id' => $asset->id,
-            'tag' => $request->string('key', ''),
+            'tag' => $request->input('key', ''),
         ]);
         $tag = (new AssetsProcedure())->tag($request);
         return collect([[

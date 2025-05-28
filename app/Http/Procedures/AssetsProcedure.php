@@ -469,7 +469,7 @@ class AssetsProcedure extends Procedure
         /** @var Asset $asset */
         $asset = Asset::find($params['asset_id']);
 
-        if (!$asset->is_monitored) {
+        if ($asset->is_monitored) {
             $asset->is_monitored = false;
             $asset->save();
         }

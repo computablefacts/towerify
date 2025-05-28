@@ -76,11 +76,11 @@ class ProcessIncomingEmails implements ShouldQueue
 
             if (!empty($url)) {
                 try {
-                    $request = new Request();
-                    $request->replace([
+                    $request = new Request([
                         'url_or_text' => $url,
                         'prompt' => $prompt,
                     ]);
+                    $request->setUserResolver(fn() => auth()->user());
                     $summary = $tcb->summarize($request)['summary'] ?? '';
                     $result[] = [
                         'url' => $url,

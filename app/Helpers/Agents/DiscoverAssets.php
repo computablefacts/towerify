@@ -40,12 +40,8 @@ class DiscoverAssets extends AbstractAction
     {
         try {
             $domain = $this->args['domain'] ?? null;
-
-            $request = new Request();
-            $request->replace([
-                'domain' => $domain,
-            ]);
-
+            $request = new Request(['domain' => $domain]);
+            $request->setUserResolver(fn() => auth()->user());
             $response = (new AssetController())->discover($request);
             $count = count($response['subdomains']);
 

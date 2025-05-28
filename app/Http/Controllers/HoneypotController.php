@@ -392,10 +392,8 @@ class HoneypotController extends Controller
 
     public function deleteHash(AssetTagHash $hash): JsonResponse
     {
-        $request = new Request();
-        $request->replace([
-            'group' => $hash->hash,
-        ]);
+        $request = new Request(['group' => $hash->hash]);
+        $request->setUserResolver(fn() => auth()->user());
         return response()->json([
             'message' => (new AssetsProcedure())->degroup($request)['msg']
         ]);

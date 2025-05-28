@@ -39,11 +39,11 @@ class BeginAssetMonitoring extends AbstractAction
     function execute(): AbstractAction
     {
         $asset = $this->args['asset'] ?? null;
-        $request = new Request();
-        $request->replace([
+        $request = new Request([
             'asset' => $asset,
             'watch' => true,
         ]);
+        $request->setUserResolver(fn() => auth()->user());
         $response = (new AssetController())->saveAsset($request);
         $this->output = "Congratulation! The monitoring of $asset started.";
         return $this;

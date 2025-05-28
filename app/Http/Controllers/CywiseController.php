@@ -148,9 +148,12 @@ class CywiseController extends Controller
 
             foreach ($trial->subdomains as $subdomain) {
 
-                $request = new Request();
-                $request->replace(['asset' => $subdomain, 'watch' => true, 'trial_id' => $trial->id]);
-
+                $request = new Request([
+                    'asset' => $subdomain,
+                    'watch' => true,
+                    'trial_id' => $trial->id,
+                ]);
+                $request->setUserResolver(fn() => auth()->user());
                 $controller = new AssetController();
                 $controller->saveAsset($request);
 
