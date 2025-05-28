@@ -107,7 +107,7 @@ class AssetsProcedure extends Procedure
         ]);
 
         $domainOrIpOrRange = $params['asset'];
-        $trialId = $params['trial_id'];
+        $trialId = $params['trial_id'] ?? 0;
 
         if ($trialId > 0) {
             /** @var Asset $asset */
@@ -290,9 +290,12 @@ class AssetsProcedure extends Procedure
             throw new \Exception("Invalid asset : {$params['asset']}");
         }
 
+        $asset = $params['asset'];
+        $watch = is_bool($params['watch']) && $params['watch'];
+        $trialId = $params['trial_id'] ?? 0;
         /** @var User $user */
         $user = Auth::user();
-        $obj = CreateAssetListener::execute($user, $params['asset'], is_bool($params['watch']) && $params['watch'], [], $params['trial_id']);
+        $obj = CreateAssetListener::execute($user, $asset, $watch, [], $trialId);
 
         if (!$obj) {
             throw new \Exception("The asset could not be created : {$params['asset']}");
