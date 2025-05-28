@@ -409,7 +409,7 @@
               @if(empty($item->cve_id))
               {{ $item->title }}
               @else
-              {{ $alert->cve_id }}&nbsp;/&nbsp;{{ $item->title }}
+              {{ $item->cve_id }}&nbsp;/&nbsp;{{ $item->title }}
               @endif
             </div>
             @endforeach
