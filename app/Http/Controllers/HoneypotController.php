@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\HoneypotCloudProvidersEnum;
 use App\Enums\HoneypotCloudSensorsEnum;
 use App\Enums\HoneypotStatusesEnum;
+use App\Http\Procedures\AssetsProcedure;
 use App\Jobs\Summarize;
 use App\Mail\HoneypotRequested;
 use App\Models\Alert;
@@ -21,7 +22,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class HoneypotController extends Controller
 {
@@ -382,24 +382,23 @@ class HoneypotController extends Controller
 
     public function getHashes(): array
     {
-        return AssetTagHash::all()->toArray();
+        return (new AssetsProcedure())->listGroups(new Request())['groups'];
     }
 
     public function createHash(Request $request): AssetTagHash
     {
-        $tag = $request->validate([
-            'tag' => 'string|required',
-        ])['tag'];
-        return AssetTagHash::create([
-            'tag' => $tag,
-            'hash' => Str::random(32),
-        ]);
+        return (new AssetsProcedure())->group($request)['hash'];
     }
 
     public function deleteHash(AssetTagHash $hash): JsonResponse
     {
-        $hash->delete();
-        return response()->json(['message' => 'Hash successfully deleted']);
+        $request = new Request();
+        $request->replace([
+            'hash' => $hash->hash,
+        ]);
+        return response()->json([
+            'message' => (new AssetsProcedure())->degroup($request)['msg']
+        ]);
     }
 
     public function createHiddenAlert(Request $request): HiddenAlert

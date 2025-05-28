@@ -714,6 +714,215 @@
         <div class="row mb-3">
             <div class="col-4">
                 <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@group</span>
+                </h4>
+                <p>
+                    Group together assets sharing a given tag.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@group</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">tag</span>": "<span style="color:#9ECE6A;">The tag.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">hash</span>": "<span style="color:#9ECE6A;">The hash object.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@degroup</span>
+                </h4>
+                <p>
+                    Degroup previously grouped assets.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@degroup</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">hash</span>": "<span style="color:#9ECE6A;">The group hash.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">msg</span>": "<span style="color:#9ECE6A;">A success message.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@listGroups</span>
+                </h4>
+                <p>
+                    List all groups that belong to the current user.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@listGroups</span>",
+    "<span style="color:#A0AEC0;">params</span>": []
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">groups</span>": "<span style="color:#9ECE6A;">The list of groups.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@getGroup</span>
+                </h4>
+                <p>
+                    Get a group by its hash.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@getGroup</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">hash</span>": "<span style="color:#9ECE6A;">The group hash.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">group</span>": "<span style="color:#9ECE6A;">The group.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
+                    assets
+                    <span class="d-block text-muted">@resolveVulnerabilityInGroup</span>
+                </h4>
+                <p>
+                    Mark a vulnerability that belongs to a given group as resolved.
+                </p>
+            </div>
+
+
+            <div class="col-8">
+                <div class="p-4 rounded-top rounded-bottom rounded-top rounded-bottom" style="background: rgb(37 42 55)">
+                <div class="row">
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Request:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">method</span>": "<span style="color:#9ECE6A;">assets@resolveVulnerabilityInGroup</span>",
+    "<span style="color:#A0AEC0;">params</span>": {
+        "<span style="color:#A0AEC0;">hash</span>": "<span style="color:#9ECE6A;">The group hash.</span>",
+        "<span style="color:#A0AEC0;">vulnerability_id</span>": "<span style="color:#9ECE6A;">The vulnerability id.</span>"
+    }
+}</pre>
+                    </div>
+
+                    <div class="col">
+                        <p class="user-select-none fw-light text-white opacity-50 mb-1 small">Response:</p>
+                        <pre style="color:rgba(212,212,212,0.75);">{
+    "<span style="color:#A0AEC0;">jsonrpc</span>": "<span style="color:#9ECE6A;">2.0</span>",
+    "<span style="color:#A0AEC0;">id</span>": <span style="color:#E0AF68;">1</span>,
+    "<span style="color:#A0AEC0;">result</span>": {
+        "<span style="color:#A0AEC0;">msg</span>": "<span style="color:#9ECE6A;">A success message.</span>"
+    }
+}</pre>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row mb-3">
+            <div class="col-4">
+                <h4 class="user-select-all mb-3">
                     events
                     <span class="d-block text-muted">@dismiss</span>
                 </h4>
@@ -1399,7 +1608,7 @@
 
     <footer class="pt-5 my-5 text-muted d-flex align-items-center">
         <div class="mx-auto">
-            <abbr title="2025-05-28T10:07:37+00:00">Created</abbr> by the <a href="http://sajya.github.io" class="text-dark" target="_blank">Sajya</a>.
+            <abbr title="2025-05-28T10:52:04+00:00">Created</abbr> by the <a href="http://sajya.github.io" class="text-dark" target="_blank">Sajya</a>.
         </div>
     </footer>
 </div>

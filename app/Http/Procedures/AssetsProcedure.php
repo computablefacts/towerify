@@ -9,6 +9,7 @@ use App\Listeners\DeleteAssetListener;
 use App\Models\Alert;
 use App\Models\Asset;
 use App\Models\AssetTag;
+use App\Models\AssetTagHash;
 use App\Models\HiddenAlert;
 use App\Models\Port;
 use App\Models\PortTag;
@@ -581,6 +582,141 @@ class AssetsProcedure extends Procedure
         }
         return [
             'asset' => $this->convertAsset($asset),
+        ];
+    }
+
+    #[RpcMethod(
+        description: "Group together assets sharing a given tag.",
+        params: [
+            "tag" => "The tag.",
+        ],
+        result: [
+            "hash" => "The hash object.",
+        ]
+    )]
+    public function group(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+
+        $params = $request->validate([
+            'tag' => 'required|string|exists:am_assets_tags,tag',
+        ]);
+
+        /** @var AssetTagHash $hash */
+        $hash = AssetTagHash::create([
+            'tag' => $params['tag'],
+            'hash' => Str::random(32),
+        ]);
+
+        return [
+            'hash' => $hash,
+        ];
+    }
+
+    #[RpcMethod(
+        description: "Degroup previously grouped assets.",
+        params: [
+            "hash" => "The group hash.",
+        ],
+        result: [
+            "msg" => "A success message.",
+        ]
+    )]
+    public function degroup(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+
+        $params = $request->validate([
+            'hash' => 'required|string|exists:am_assets_tags_hashes,hash',
+        ]);
+
+        /** @var AssetTagHash $hash */
+        $hash = AssetTagHash::query()->where('hash', '=', $params['hash'])->firstOrFail();
+        $hash->delete();
+
+        return [
+            'msg' => "The group {$params['hash']} has been disbanded!",
+        ];
+    }
+
+    #[RpcMethod(
+        description: "List all groups that belong to the current user.",
+        params: [],
+        result: [
+            "groups" => "The list of groups.",
+        ]
+    )]
+    public function listGroups(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+        return [
+            'groups' => AssetTagHash::all()->toArray(),
+        ];
+    }
+
+    #[RpcMethod(
+        description: "Get a group by its hash.",
+        params: [
+            "hash" => "The group hash.",
+        ],
+        result: [
+            "group" => "The group.",
+        ]
+    )]
+    public function getGroup(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+
+        $params = $request->validate([
+            'hash' => 'required|string|exists:am_assets_tags_hashes,hash',
+        ]);
+        return [
+            'group' => AssetTagHash::query()
+                ->where('hash', '=', $params['hash'])
+                ->firstOrFail(),
+        ];
+    }
+
+    #[RpcMethod(
+        description: "Mark a vulnerability that belongs to a given group as resolved.",
+        params: [
+            "hash" => "The group hash.",
+            "vulnerability_id" => "The vulnerability id.",
+        ],
+        result: [
+            "msg" => "A success message.",
+        ]
+    )]
+    public function resolveVulnerabilityInGroup(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+
+        $params = $request->validate([
+            'hash' => 'required|string|exists:am_assets_tags_hashes,hash',
+            'vulnerability_id' => 'required|integer|exists:am_alerts,id',
+        ]);
+
+        /** @var AssetTagHash $hash */
+        $hash = AssetTagHash::query()->where('hash', '=', $params['hash'])->firstOrFail();
+        /** @var Alert $alert */
+        $alert = Alert::find($params['vulnerability_id']);
+
+        $this->restartScan(new Request([
+            'asset_id' => $alert->asset()->id,
+        ]));
+
+        return [
+            'msg' => "The vulnerability has been marked as resolved and will be re-scanned soon.",
         ];
     }
 

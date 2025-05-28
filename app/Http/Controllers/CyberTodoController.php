@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\BeginPortsScan;
+use App\Http\Procedures\AssetsProcedure;
 use App\Models\Alert;
 use App\Models\Asset;
 use App\Models\AssetTagHash;
@@ -19,39 +19,20 @@ class CyberTodoController extends Controller
 
     public function show(string $hash)
     {
-        $hash = AssetTagHash::where('hash', $hash)->first();
-        if (!$hash) {
-            abort(404, 'Hash not found');
-        }
-        return view('cyber-todo', ['hash' => $hash]);
+        $request = new Request([
+            'hash' => $hash,
+        ]);
+        return view('cyber-todo', [
+            'hash' => (new AssetsProcedure())->getGroup($request)['group']
+        ]);
     }
 
     public function markAsResolved(Alert $alert, Request $request)
     {
-        $hash = $request->validate([
-            'hash' => 'required|string',
-        ])['hash'];
-
-        $hash = AssetTagHash::where('hash', $hash)->first();
-
-        if ($hash === null) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Hash not found'
-            ], 404);
-        }
-
-        $asset = $alert->asset();
-
-        if (!$asset) {
-            abort(500, "Unknown asset : {$asset}");
-        }
-        if (!$asset->is_monitored) {
-            abort(500, 'Restart scan not allowed, asset is not monitored.');
-        }
-        if ($asset->scanInProgress()->isEmpty()) {
-            BeginPortsScan::dispatch($asset);
-        }
+        $request->merge([
+            'vulnerability_id' => $alert->id,
+        ]);
+        (new AssetsProcedure())->resolveVulnerabilityInGroup($request);
         return [];
     }
 
