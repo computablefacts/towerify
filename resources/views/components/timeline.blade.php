@@ -323,7 +323,7 @@
   </div>
   @endif
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-xl-8">
       <div class="card mb-3">
         <div class="card-body">
           <h6 class="card-title">{{ __('Filtrer la timeline par...') }}</h6>
@@ -384,7 +384,7 @@
         </div>
       </div>
     </div>
-    <div class="col" style="padding-left: 0;">
+    <div class="col-xl-4" style="padding-left: 0;">
       @if(count($todo) > 0)
       <div class="card mb-3">
         <div class="card-body">
