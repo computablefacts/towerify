@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoleEnum;
-use App\Enums\TextTypeEnum;
 use App\Helpers\Agents\AbstractAction;
 use App\Helpers\Agents\Agent;
 use App\Helpers\OpenAi;
