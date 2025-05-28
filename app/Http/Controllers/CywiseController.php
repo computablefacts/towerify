@@ -187,8 +187,7 @@ class CywiseController extends Controller
         $trial = YnhTrial::where('hash', $hash)->firstOrFail();
         $request->replace(['domain' => $trial->domain]);
 
-        $controller = new AssetController();
-        return $controller->discover($request)['subdomains'];
+        return (new AssetController())->discover($request)['subdomains'];
     }
 
     public function onboarding2(Request $request)

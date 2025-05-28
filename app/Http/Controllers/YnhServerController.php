@@ -35,7 +35,7 @@ class YnhServerController extends Controller
 
     public function create(CreateHostRequest $request)
     {
-        $request->replace([
+        $request->merge([
             'order_id' => $request->input('order', 0),
         ]);
         $server = (new ServersProcedure())->create($request);
@@ -45,9 +45,7 @@ class YnhServerController extends Controller
 
     public function createBackup(YnhServer $server, CreateBackupRequest $request)
     {
-        $request->replace([
-            'server_id' => $server->id,
-        ]);
+        $request->merge(['server_id' => $server->id]);
         return response()->json(['success' => (new ServersProcedure())->createBackup($request)]);
     }
 

@@ -44,13 +44,11 @@ class RunScheduledTasks implements ShouldQueue
                         'created_by' => $task->createdBy()->id,
                         'format' => Conversation::FORMAT_V1,
                     ]);
-                    $request = new ConverseRequest();
-                    $request->replace([
+                    $request = new ConverseRequest([
                         'thread_id' => $threadId,
                         'directive' => $task->task,
                     ]);
-                    $controller = new CyberBuddyNextGenController();
-                    $response = $controller->converse($request, true);
+                    $response = (new CyberBuddyNextGenController())->converse($request, true);
                     $json = json_decode($response->content(), true);
                     $subject = $task->name;
                     $body = $json['answer']['html'] ?? '';

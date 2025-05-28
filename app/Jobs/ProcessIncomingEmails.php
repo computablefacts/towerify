@@ -233,14 +233,11 @@ class ProcessIncomingEmails implements ShouldQueue
         Log::debug("body={$body}");
 
         // Call CyberBuddy
-        $request = new ConverseRequest();
-        $request->replace([
+        $request = new ConverseRequest([
             'thread_id' => $threadId,
             'directive' => $body,
         ]);
-
-        $controller = new CyberBuddyNextGenController();
-        $response = $controller->converse($request, true);
+        $response = (new CyberBuddyNextGenController())->converse($request, true);
         $json = json_decode($response->content(), true);
         $subject = $message->getSubject()->toString();
         $body = $json['answer']['html'] ?? '';
