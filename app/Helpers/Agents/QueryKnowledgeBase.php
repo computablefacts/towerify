@@ -5,10 +5,12 @@ namespace App\Helpers\Agents;
 use App\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Helpers\DeepInfra;
 use App\Models\Chunk;
+use App\Models\ChunkTag;
 use App\Models\File;
 use App\Models\TimelineItem;
 use App\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -79,7 +81,204 @@ class QueryKnowledgeBase extends AbstractAction
             $response = DeepInfra::executeEx($messages, 'Qwen/Qwen3-30B-A3B'); */
             $response = DeepInfra::execute($prompt, 'Qwen/Qwen3-30B-A3B');
             $answer = $response['choices'][0]['message']['content'] ?? '';
-            Log::debug("answer : {$answer}");
+            // Log::debug("[1] answer : {$answer}");
+            $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
+
+            if (!empty($answer) && !Str::contains($answer, 'I_DONT_KNOW')) {
+                $this->output = [
+                    'answer' => $answer,
+                    'sources' => collect(),
+                ];
+                return $this;
+            }
+        }
+
+        $prompt = "
+            You are tasked with creating an effective list of alternative questions from the user's question.
+            
+            To create an effective list of questions, follow these steps:
+            1. Expand the user input, considering the context.
+            2. Generate paraphrased versions of the expanded questions.
+            
+            The output should be a JSON with the following attributes:
+            - question: the user's original question.
+            - question_fr: the user's question in French.
+            - question_en: the user's question in English.
+            - paraphrased_fr: a list of paraphrased questions in French.
+            - paraphrased_en: a list of paraphrased questions in English.
+            - expanded_fr: a list of expanded questions in French.
+            - expanded_en: a list of expanded questions in English.
+            
+            For example, if the user's question is \"How to create a complex password?\", a possible output could be:
+            {
+                \"question\": \"How to create a complex password?\",
+                \"question_en\": \"How to create a complex password?\",
+                \"question_fr\": \"Comment créer un mot de passe complexe ?\",
+                \"paraphrased_en\": [
+                    \"What are the steps to generate a strong password?\",
+                    \"Can you guide me on making a secure password?\",
+                    \"How do I come up with a hard-to-crack password?\"
+                ],
+                \"paraphrased_fr\": [
+                    \"Quelles sont les étapes pour générer un mot de passe robuste ?\",
+                    \"Pouvez-vous me guider pour créer un mot de passe sécurisé ?\",
+                    \"Comment puis-je concevoir un mot de passe difficile à pirater ?\"
+                ],
+                \"expanded_en\": [
+                    \"What are the best practices for creating a password that is difficult to guess?\",
+                    \"How can I ensure my password is secure against hacking attempts?\",
+                    \"What tools or methods can assist in generating a complex password?\",
+                    \"Why is it important to have a complex password for online security?\"
+                ],
+                \"expanded_fr\": [
+                    \"Quelles sont les meilleures pratiques pour créer un mot de passe difficile à deviner ?\",
+                    \"Comment puis-je m'assurer que mon mot de passe est sécurisé contre les tentatives de piratage ?\",
+                    \"Quels outils ou méthodes peuvent aider à générer un mot de passe complexe ?\",
+                    \"Pourquoi est-il important d'avoir un mot de passe complexe pour la sécurité en ligne ?\"
+                ]
+            }
+
+            Ensure your answer is in plain text format without any Markdown or HTML formatting.
+            The user's question is:
+            
+            {$question}       
+        ";
+
+        $response = DeepInfra::execute($prompt, 'Qwen/Qwen3-30B-A3B');
+        $answer = $response['choices'][0]['message']['content'] ?? '';
+        // Log::debug("[2] answer : {$answer}");
+        $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
+        $json = json_decode($answer, true);
+        Log::debug($json);
+
+        if (!empty($json) && (!empty($json['paraphrased_fr']) || !empty($json['paraphrased_en'])) && (!empty($json['expanded_fr']) || !empty($json['expanded_en']))) {
+
+            $mode = "IN NATURAL LANGUAGE MODE"; // or WITH QUERY EXPANSION
+
+            $exprFr = collect($json['paraphrased_fr'])
+                ->concat($json['expanded_fr'])
+                ->map(fn(string $paraphrased) => Str::replace("'", "\'", $paraphrased))
+                ->map(fn(string $paraphrased) => "MATCH(cb_chunks.text) AGAINST ('{$paraphrased}' {$mode})")
+                ->join(" OR ");
+
+            $scoreFr = collect($json['paraphrased_fr'])
+                ->concat($json['expanded_fr'])
+                ->map(fn(string $paraphrased) => Str::replace("'", "\'", $paraphrased))
+                ->map(fn(string $paraphrased) => "MATCH(cb_chunks.text) AGAINST ('{$paraphrased}' {$mode})")
+                ->join(" + ");
+
+            $exprEn = collect($json['paraphrased_en'])
+                ->concat($json['expanded_en'])
+                ->map(fn(string $paraphrased) => Str::replace("'", "\'", $paraphrased))
+                ->map(fn(string $paraphrased) => "MATCH(cb_chunks.text) AGAINST ('{$paraphrased}' {$mode})")
+                ->join(" OR ");
+
+            $scoreEn = collect($json['paraphrased_en'])
+                ->concat($json['expanded_en'])
+                ->map(fn(string $paraphrased) => Str::replace("'", "\'", $paraphrased))
+                ->map(fn(string $paraphrased) => "MATCH(cb_chunks.text) AGAINST ('{$paraphrased}' {$mode})")
+                ->join(" + ");
+
+            $filterByTenantId = $this->user->tenant_id ? "AND (users.tenant_id IS NULL OR users.tenant_id = {$this->user->tenant_id})" : "";
+            $filterByCustomerId = $this->user->customer_id ? "AND (users.customer_id IS NULL OR users.customer_id = {$this->user->customer_id})" : "";
+
+            $query = "
+                SELECT * 
+                FROM (
+                    SELECT
+                      'fr' AS lang,
+                      MAX(({$scoreFr}) / (cb_collections.priority + 0.01)) AS score,
+                      MAX(cb_chunks.id) AS id,
+                      cb_chunks.text
+                    FROM cb_chunks
+                    INNER JOIN cb_files ON cb_chunks.file_id = cb_files.id
+                    INNER JOIN cb_collections ON cb_files.collection_id = cb_collections.id
+                    INNER JOIN users ON cb_collections.created_by = users.id
+                    WHERE cb_chunks.is_deleted = 0
+                    AND cb_files.is_deleted = 0
+                    AND cb_collections.is_deleted = 0
+                    AND (cb_collections.name LIKE '%lgfr' OR cb_collections.name NOT LIKE '%lg%')
+                    AND ({$exprFr})
+                    {$filterByTenantId}
+                    {$filterByCustomerId}
+                    GROUP BY lang, text
+                    
+                    UNION
+                    
+                    SELECT
+                      'en' AS lang,
+                      MAX(({$scoreEn}) / (cb_collections.priority + 0.01)) AS score,
+                      MAX(cb_chunks.id) AS id,
+                      cb_chunks.text
+                    FROM cb_chunks
+                    INNER JOIN cb_files ON cb_chunks.file_id = cb_files.id
+                    INNER JOIN cb_collections ON cb_files.collection_id = cb_collections.id
+                    INNER JOIN users ON cb_collections.created_by = users.id
+                    WHERE cb_chunks.is_deleted = 0 
+                    AND cb_files.is_deleted = 0
+                    AND cb_collections.is_deleted = 0
+                    AND (cb_collections.name LIKE '%lgen' OR cb_collections.name NOT LIKE '%lg%')
+                    AND ({$exprEn})
+                    {$filterByTenantId}
+                    {$filterByCustomerId}
+                    GROUP BY lang, text
+                ) AS t
+                ORDER BY t.score DESC
+                LIMIT 10
+            ";
+
+            // Log::debug($query);
+
+            $idx = 0;
+            $notes = collect(DB::select($query))
+                ->map(function (object $chunk) use (&$idx) {
+
+                    ++$idx;
+                    $tags = ChunkTag::where('chunk_id', '=', $chunk->id)
+                        ->orderBy('id')
+                        ->get()
+                        ->map(fn(ChunkTag $tag) => $tag->tag)
+                        ->join("\n- ");
+
+                    return "
+                        ## Note {$idx}
+                        
+                        ### Metadata
+                        
+                        Id: {$chunk->id}
+                        Score: {$chunk->score}
+                        Lang: {$chunk->lang}
+                        Tags:
+                        - {$tags}
+                        
+                        ### Content
+                        
+                        {$chunk->text}
+                    ";
+                })
+                ->join("\n\n");
+
+            $prompt = "
+                Use the user's notes below to answer the user's question.
+                The user's notes are listed below in order of relevance, from most (Note 1) to least relevant (Note {$idx}).
+                When writing, insert the 'Id' of a note in double square brackets (e.g., [[Id]]) immediately after the text it refers to, but only on its first use.
+                If the information in the notes is insufficient to determine the answer, respond with 'I_DONT_KNOW'.
+                Ensure your answer is in plain text format without any Markdown or HTML formatting.
+                
+                # User's Notes
+                
+                {$notes}
+                
+                # User's Question
+                
+                {$json['question']}
+            ";
+
+            Log::debug($prompt);
+
+            $response = DeepInfra::execute($prompt, 'Qwen/Qwen3-30B-A3B');
+            $answer = $response['choices'][0]['message']['content'] ?? '';
+            Log::debug("[3] answer : {$answer}");
             $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
 
             if (!empty($answer) && !Str::contains($answer, 'I_DONT_KNOW')) {

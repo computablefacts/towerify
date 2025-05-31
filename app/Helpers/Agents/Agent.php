@@ -43,7 +43,7 @@ class Agent
         if (count($toolCalls) === 0) {
 
             $answer = $response['choices'][0]['message']['content'] ?? '';
-            Log::debug("answer : {$answer}");
+            // Log::debug("[0] answer : {$answer}");
             $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
 
             if (preg_match('/^<function=([a-zA-Z0-9_]+)>([{].*[}])$/i', trim($answer), $matches)) {
