@@ -101,9 +101,10 @@ class QueryKnowledgeBase extends AbstractAction
             2. Generate paraphrased versions of the expanded questions.
             
             The output should be a JSON with the following attributes:
-            - question: the user's original question.
-            - question_fr: the user's question in French.
-            - question_en: the user's question in English.
+            - lang: the language of the user's original query e.g., english or french.
+            - question: the user's original query.
+            - question_fr: the user's original query as a question in French.
+            - question_en: the user's original query as a question in English.
             - paraphrased_fr: a list of paraphrased questions in French.
             - paraphrased_en: a list of paraphrased questions in English.
             - expanded_fr: a list of expanded questions in French.
@@ -111,7 +112,8 @@ class QueryKnowledgeBase extends AbstractAction
             
             For example, if the user's question is \"How to create a complex password?\", a possible output could be:
             {
-                \"question\": \"How to create a complex password?\",
+                \"lang\": \"english\",
+                \"question\": \"create a complex password\",
                 \"question_en\": \"How to create a complex password?\",
                 \"question_fr\": \"Comment créer un mot de passe complexe ?\",
                 \"paraphrased_en\": [
@@ -139,7 +141,7 @@ class QueryKnowledgeBase extends AbstractAction
             }
 
             Ensure your answer is in plain text format without any Markdown or HTML formatting.
-            The user's question is:
+            The user's query is:
             
             {$question}       
         ";
@@ -264,6 +266,7 @@ class QueryKnowledgeBase extends AbstractAction
                 When writing, insert the 'Id' of a note in double square brackets (e.g., [[Id]]) immediately after the text it refers to, but only on its first use.
                 If the information in the notes is insufficient to determine the answer, respond with 'I_DONT_KNOW'.
                 Ensure your answer is in plain text format without any Markdown or HTML formatting.
+                Ensure the language of the answer is {$json['lang']}.
                 
                 # User's Notes
                 
@@ -271,7 +274,7 @@ class QueryKnowledgeBase extends AbstractAction
                 
                 # User's Question
                 
-                {$json['question']}
+                {$json['question_en']}
             ";
 
             Log::debug($prompt);
