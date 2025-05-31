@@ -96,10 +96,12 @@ class QueryKnowledgeBase extends AbstractAction
         $prompt = "
             You are tasked with creating an effective list of alternative questions from the user's question.
             
-            To create an effective list of questions, follow these steps:
+            To create an effective list of questions and keywords, follow these steps:
             1. Expand the user input, considering the context.
             2. Generate paraphrased versions of the expanded questions.
-            
+            3. Extract key entities and keywords, considering their importance.
+            4. Obtain synonyms for each extracted keyword.
+
             The output should be a JSON with the following attributes:
             - lang: the language of the user's original query e.g., english or french.
             - question: the user's original query.
@@ -109,6 +111,8 @@ class QueryKnowledgeBase extends AbstractAction
             - paraphrased_en: a list of paraphrased questions in English.
             - expanded_fr: a list of expanded questions in French.
             - expanded_en: a list of expanded questions in English.
+            - keywords_fr: a list of French keywords and synonyms.
+            - keywords_en: a list of English keywords and synonyms.
             
             For example, if the user's question is \"How to create a complex password?\", a possible output could be:
             {
@@ -137,6 +141,34 @@ class QueryKnowledgeBase extends AbstractAction
                     \"Comment puis-je m'assurer que mon mot de passe est sécurisé contre les tentatives de piratage ?\",
                     \"Quels outils ou méthodes peuvent aider à générer un mot de passe complexe ?\",
                     \"Pourquoi est-il important d'avoir un mot de passe complexe pour la sécurité en ligne ?\"
+                ],
+                \"keywords_en\": [
+                    \"create\",
+                    \"generate\",
+                    \"make\",
+                    \"strong\",
+                    \"secure\",
+                    \"hard-to-crack\",
+                    \"difficult\",
+                    \"passwords\",
+                    \"passcodes\",
+                    \"secret code\",
+                    \"login credentials\",
+                    \"security code\"
+                ],
+                \"keywords_fr\": [
+                    \"créer\",
+                    \"générer\",
+                    \"fabriquer\",
+                    \"fort\",
+                    \"sécurisé\",
+                    \"difficile à craquer\",
+                    \"difficile\",
+                    \"mots de passes\",
+                    \"codes d'accès\",
+                    \"code secret\",
+                    \"identifiants de connexion\",
+                    \"code de sécurité\"
                 ]
             }
 
@@ -169,6 +201,34 @@ class QueryKnowledgeBase extends AbstractAction
                 ->map(fn(string $paraphrased) => "MATCH(cb_chunks.text) AGAINST ('{$paraphrased}' {$mode})")
                 ->join(" + ");
 
+            $exprKeywordsFr = collect($json['keywords_fr'])
+                ->map(fn(string $keyword) => collect(explode(' ', $keyword))
+                    ->map(function (string $word) {
+                        if (Str::length($word) > 5) {
+                            $len = Str::length($word);
+                            return Str::substr($word, 0, (int)($len * 0.75)) . '*';
+                        }
+                        return $word;
+                    })
+                    ->join(' '))
+                ->map(fn(string $keyword) => Str::replace("'", "\'", $keyword))
+                ->map(fn(string $keyword) => "MATCH(cb_chunks.text) AGAINST ('{$keyword}' IN BOOLEAN MODE)")
+                ->join(" OR ");
+
+            $scoreKeywordsFr = collect($json['keywords_fr'])
+                ->map(fn(string $keyword) => collect(explode(' ', $keyword))
+                    ->map(function (string $word) {
+                        if (Str::length($word) > 5) {
+                            $len = Str::length($word);
+                            return Str::substr($word, 0, (int)($len * 0.75)) . '*';
+                        }
+                        return $word;
+                    })
+                    ->join(' '))
+                ->map(fn(string $keyword) => Str::replace("'", "\'", $keyword))
+                ->map(fn(string $keyword) => "MATCH(cb_chunks.text) AGAINST ('{$keyword}' IN BOOLEAN MODE)")
+                ->join(" + ");
+
             $exprEn = collect($json['paraphrased_en'])
                 ->concat($json['expanded_en'])
                 ->map(fn(string $paraphrased) => Str::replace("'", "\'", $paraphrased))
@@ -181,6 +241,34 @@ class QueryKnowledgeBase extends AbstractAction
                 ->map(fn(string $paraphrased) => "MATCH(cb_chunks.text) AGAINST ('{$paraphrased}' {$mode})")
                 ->join(" + ");
 
+            $exprKeywordsEn = collect($json['keywords_en'])
+                ->map(fn(string $keyword) => collect(explode(' ', $keyword))
+                    ->map(function (string $word) {
+                        if (Str::length($word) > 5) {
+                            $len = Str::length($word);
+                            return Str::substr($word, 0, (int)($len * 0.75)) . '*';
+                        }
+                        return $word;
+                    })
+                    ->join(' '))
+                ->map(fn(string $keyword) => Str::replace("'", "\'", $keyword))
+                ->map(fn(string $keyword) => "MATCH(cb_chunks.text) AGAINST ('{$keyword}' IN BOOLEAN MODE)")
+                ->join(" OR ");
+
+            $scoreKeywordsEn = collect($json['keywords_en'])
+                ->map(fn(string $keyword) => collect(explode(' ', $keyword))
+                    ->map(function (string $word) {
+                        if (Str::length($word) > 5) {
+                            $len = Str::length($word);
+                            return Str::substr($word, 0, (int)($len * 0.75)) . '*';
+                        }
+                        return $word;
+                    })
+                    ->join(' '))
+                ->map(fn(string $keyword) => Str::replace("'", "\'", $keyword))
+                ->map(fn(string $keyword) => "MATCH(cb_chunks.text) AGAINST ('{$keyword}' IN BOOLEAN MODE)")
+                ->join(" + ");
+
             $filterByTenantId = $this->user->tenant_id ? "AND (users.tenant_id IS NULL OR users.tenant_id = {$this->user->tenant_id})" : "";
             $filterByCustomerId = $this->user->customer_id ? "AND (users.customer_id IS NULL OR users.customer_id = {$this->user->customer_id})" : "";
 
@@ -189,7 +277,7 @@ class QueryKnowledgeBase extends AbstractAction
                 FROM (
                     SELECT
                       'fr' AS lang,
-                      MAX(({$scoreFr}) / (cb_collections.priority + 0.01)) AS score,
+                      MAX(((2 * ({$scoreFr}) / 3) + ({$scoreKeywordsFr} / 3)) / (cb_collections.priority + 0.01)) AS score,
                       MAX(cb_chunks.id) AS id,
                       cb_chunks.text
                     FROM cb_chunks
@@ -200,7 +288,7 @@ class QueryKnowledgeBase extends AbstractAction
                     AND cb_files.is_deleted = 0
                     AND cb_collections.is_deleted = 0
                     AND (cb_collections.name LIKE '%lgfr' OR cb_collections.name NOT LIKE '%lg%')
-                    AND ({$exprFr})
+                    AND ({$exprFr} OR {$exprKeywordsFr})
                     {$filterByTenantId}
                     {$filterByCustomerId}
                     GROUP BY lang, text
@@ -209,7 +297,7 @@ class QueryKnowledgeBase extends AbstractAction
                     
                     SELECT
                       'en' AS lang,
-                      MAX(({$scoreEn}) / (cb_collections.priority + 0.01)) AS score,
+                      MAX(((2 * ({$scoreEn}) / 3) + ({$scoreKeywordsEn} / 3)) / (cb_collections.priority + 0.01)) AS score,
                       MAX(cb_chunks.id) AS id,
                       cb_chunks.text
                     FROM cb_chunks
@@ -220,7 +308,7 @@ class QueryKnowledgeBase extends AbstractAction
                     AND cb_files.is_deleted = 0
                     AND cb_collections.is_deleted = 0
                     AND (cb_collections.name LIKE '%lgen' OR cb_collections.name NOT LIKE '%lg%')
-                    AND ({$exprEn})
+                    AND ({$exprEn} OR {$exprKeywordsEn})
                     {$filterByTenantId}
                     {$filterByCustomerId}
                     GROUP BY lang, text
