@@ -64,6 +64,15 @@ class Agent
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
+            if (preg_match('/^([a-zA-Z0-9_]+)\(question="(.*)"\)$/i', trim($answer), $matches)) {
+
+                $name = trim($matches[1]);
+                $args = json_decode(trim($matches[2]), true) ?? [];
+
+                Log::debug("[3] $name(" . $matches[2] . ")");
+
+                return $this->findTool($user, $threadId, $messages, $name, $args);
+            }
             return new ClarifyRequest($user, $threadId, $messages, [], $answer);
         }
         if (count($toolCalls) > 1) {
@@ -73,7 +82,7 @@ class Agent
         $name = $toolCalls[0]['function']['name'] ?? '';
         $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
 
-        Log::debug("[3] $name(" . $toolCalls[0]['function']['arguments'] . ")");
+        Log::debug("[4] $name(" . $toolCalls[0]['function']['arguments'] . ")");
 
         return $this->findTool($user, $threadId, $messages, $name, $args);
     }
