@@ -31,6 +31,7 @@
         "spatie/laravel-package-tools": "^1.18",
         "symfony/process": "^7.0",
         "symfony/yaml": "^7.2",
+        "teamtnt/laravel-scout-tntsearch-driver": "^15.0",
         "vanilo/admin": "^4.0",
         "vanilo/framework": "^4.0",
         "vanilo/payment": "^4.0",

@@ -78,10 +78,12 @@ class User extends \Konekt\AppShell\Models\User
 
         try {
             // Set the user's prompts
+            self::setupPrompts($user, 'default_answer_question', 'seeds/prompts/default_answer_question.txt');
             self::setupPrompts($user, 'default_assistant', 'seeds/prompts/default_assistant.txt');
             self::setupPrompts($user, 'default_chat', 'seeds/prompts/default_chat.txt');
             self::setupPrompts($user, 'default_chat_history', 'seeds/prompts/default_chat_history.txt');
             self::setupPrompts($user, 'default_debugger', 'seeds/prompts/default_debugger.txt');
+            self::setupPrompts($user, 'default_reformulate_question', 'seeds/prompts/default_reformulate_question.txt');
 
             // Get the oldest user of the tenant. We will automatically attach the frameworks to this user
             $oldestTenantUser = User::query()
@@ -155,7 +157,6 @@ class User extends \Konekt\AppShell\Models\User
 
     private static function setupPrompts(User $user, string $name, string $root)
     {
-        $promptPrev = Str::lower(Str::trim(File::get(database_path("$root.prev"))));
         $promptNext = File::get(database_path($root));
 
         /** @var Prompt $p */
@@ -164,6 +165,7 @@ class User extends \Konekt\AppShell\Models\User
             ->first();
 
         if (isset($p)) {
+            $promptPrev = Str::lower(Str::trim(File::get(database_path("$root.prev"))));
             if (Str::lower(Str::trim($p->template)) === $promptPrev) {
                 $p->update(['template' => $promptNext]);
             } else {

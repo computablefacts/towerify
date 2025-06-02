@@ -17,6 +17,8 @@ services:
       - DB_DATABASE=__DB_NAME__
       - DB_USERNAME=__DB_USER__
       - DB_PASSWORD=__DB_PWD__
+    volumes:
+      - ./data/scout:/var/www/html/storage/scout
     deploy:
       update_config:
         parallelism: 1
@@ -107,3 +109,22 @@ services:
       - DB_PASSWORD=__DB_PWD__
     deploy:
       replicas: 3
+  lrvl9-queue-scout:
+    image: __DOCKER_IMAGE_NAME__:__DOCKER_IMAGE_TAG__
+    extra_hosts:
+      host.docker.internal: host-gateway
+    env_file:
+      - .env
+    environment:
+      - CONTAINER_ROLE=queue
+      - QUEUE_NAME=scout
+      - APP_URL=https://__DOMAIN____PATH__
+      - LOG_CHANNEL=stderr
+      - DB_CONNECTION=mysql
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_DATABASE=__DB_NAME__
+      - DB_USERNAME=__DB_USER__
+      - DB_PASSWORD=__DB_PWD__
+    volumes:
+      - ./data/scout:/var/www/html/storage/scout

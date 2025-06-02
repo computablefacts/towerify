@@ -102,16 +102,6 @@ class CyberBuddyNextGenController extends Controller
             ]]));
         }
 
-        $timestamp = Carbon::now();
-        $thread = $conversation->thread();
-
-        if (count($thread) > 0) {
-            $last = end($thread);
-            if (isset($last['timestamp'])) {
-                $timestamp = Carbon::parse($last['timestamp']);
-            }
-        }
-
         // Transform URLs provided by the user to notes
         collect(ProcessIncomingEmails::extractAndSummarizeHyperlinks($question))->each(fn(array $summary) => TimelineItem::createNote($user, $summary['summary'], $summary['url']));
 

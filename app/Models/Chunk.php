@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Laravel\Scout\Searchable;
 
 /**
  * @property int id
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Chunk extends Model
 {
-    use HasFactory, HasTenant;
+    use HasFactory, HasTenant, Searchable;
 
     protected $table = 'cb_chunks';
 
@@ -46,6 +47,21 @@ class Chunk extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'url' => $this->url,
+            'text' => $this->text,
+            'tags' => $this->tags()->get()->pluck('tag')->join(" | "),
+        ];
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return !$this->is_deleted;
+    }
 
     public function isEmbedded(): bool
     {
