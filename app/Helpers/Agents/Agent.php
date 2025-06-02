@@ -64,7 +64,7 @@ class Agent
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
-            if (preg_match('/^([a-zA-Z0-9_]+)\(question="(.*)"\)$/i', trim($answer), $matches)) {
+            if (preg_match('/^\[?([a-zA-Z0-9_]+)\(question="(.*)"\)]?$/i', trim($answer), $matches)) {
 
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
