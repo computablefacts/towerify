@@ -13,11 +13,13 @@ use App\Models\Port;
 use App\Models\PortTag;
 use App\Models\Scan;
 use App\Models\TimelineItem;
+use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use App\User;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -157,6 +159,39 @@ class Timeline extends Component
         ])->render();
     }
 
+    public static function newIoC(User $user, array $ioc): string
+    {
+        if ($ioc['first']['ioc']->score >= 75) {
+            $ioc['first']['txtColor'] = "white";
+            $ioc['first']['bgColor'] = "#ff4d4d";
+        } else if ($ioc['first']['ioc']->score >= 50) {
+            $ioc['first']['txtColor'] = "white";
+            $ioc['first']['bgColor'] = "#ffaa00";
+        } else if ($ioc['first']['ioc']->score >= 25) {
+            $ioc['first']['txtColor'] = "white";
+            $ioc['first']['bgColor'] = "#4bd28f";
+        } else {
+            $ioc['first']['txtColor'] = "var(--c-grey-400)";
+            $ioc['first']['bgColor'] = "rgba(125, 188, 255, 0.6)";
+        }
+        if ($ioc['last']['ioc']->score >= 75) {
+            $ioc['last']['txtColor'] = "white";
+            $ioc['last']['bgColor'] = "#ff4d4d";
+        } else if ($ioc['last']['ioc']->score >= 50) {
+            $ioc['last']['txtColor'] = "white";
+            $ioc['last']['bgColor'] = "#ffaa00";
+        } else if ($ioc['last']['ioc']->score >= 25) {
+            $ioc['last']['txtColor'] = "white";
+            $ioc['last']['bgColor'] = "#4bd28f";
+        } else {
+            $ioc['last']['txtColor'] = "var(--c-grey-400)";
+            $ioc['last']['bgColor'] = "rgba(125, 188, 255, 0.6)";
+        }
+        return \Illuminate\Support\Facades\View::make('cywise._timeline-item-ioc', [
+            'ioc' => $ioc,
+        ])->render();
+    }
+
     public static function newConversation(User $user, Conversation $conversation): string
     {
         $timestamp = $conversation->updated_at->utc()->format('Y-m-d H:i:s');
@@ -215,7 +250,8 @@ class Timeline extends Component
             $messages = $messages->concat($this->assets($user))
                 ->concat($this->scans($user))
                 ->concat($this->vulnerabilities($user))
-                ->concat($this->leaks($user));
+                ->concat($this->leaks($user))
+                ->concat($this->suspiciousEvents($user));
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_NOTES) {
             $messages = $messages->concat($this->notes($user));
@@ -562,6 +598,106 @@ class Timeline extends Component
                 ];
             })
             ->toArray();
+    }
+
+    private function suspiciousEvents(User $user): array
+    {
+        $cutOffTime = Carbon::now()->startOfDay()->subDay();
+        $servers = YnhServer::query()->when($this->serverId, fn($query, $serverId) => $query->where('id', $serverId))->get();
+        $events = YnhOsquery::select([
+            DB::raw('ynh_servers.name AS server_name'),
+            DB::raw('ynh_servers.ip_address AS server_ip_address'),
+            'ynh_osquery_rules.score',
+            'ynh_osquery_rules.comments',
+            'ynh_osquery.*'
+        ])
+            ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
+            ->join('ynh_osquery_latest_events', 'ynh_osquery_latest_events.ynh_osquery_id', '=', 'ynh_osquery.id')
+            ->join('ynh_osquery_rules', 'ynh_osquery_rules.name', '=', 'ynh_osquery.name')
+            ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_osquery.ynh_server_id')
+            ->whereIn('ynh_osquery.ynh_server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'ynh_osquery.ynh_server_id')
+                    ->whereColumn('name', '=', 'ynh_osquery.name')
+                    ->whereColumn('action', '=', 'ynh_osquery.action')
+                    ->whereColumn('columns_uid', '=', 'ynh_osquery.columns_uid')
+                    ->havingRaw('count(1) >=' . Messages::HIDE_AFTER_DISMISS_COUNT);
+            })
+            ->where('ynh_osquery_rules.is_ioc', true)
+            ->where('ynh_osquery_rules.score', '>', 0)
+            ->orderBy('calendar_time', 'desc')
+            ->get();
+
+        $groups = collect();
+        /** @var ?Collection $group */
+        $group = null;
+        /** @var ?int $groupServerId */
+        $groupServerId = null;
+        /** @var ?string $groupName */
+        $groupName = null;
+
+        /** @var YnhOsquery $event */
+        foreach ($events as $event) {
+
+            $serverId = $event->ynh_server_id ?? null;
+            $name = $event->name ?? null;
+
+            if ($group === null) {
+                $group = collect([$event]);
+                $groupServerId = $serverId;
+                $groupName = $name;
+            } else {
+                if ($serverId === $groupServerId && $name === $groupName) {
+                    $group->push($event);
+                } else {
+                    $groups->push($group);
+                    $group = collect([$event]);
+                    $groupServerId = $serverId;
+                    $groupName = $name;
+                }
+            }
+        }
+        if ($group !== null && $group->isNotEmpty()) {
+            $groups->push($group);
+        }
+        return $groups->map(function (Collection $group) use ($user) {
+
+            /** @var YnhOsquery $first */
+            $first = $group->first();
+            /** @var YnhOsquery $last */
+            $last = $group->last();
+
+            $timestampFirst = $first->calendar_time->utc()->format('Y-m-d H:i:s');
+            $dateFirst = Str::before($timestampFirst, ' ');
+            $timeFirst = Str::beforeLast(Str::after($timestampFirst, ' '), ':');
+
+            $timestampLast = $last->calendar_time->utc()->format('Y-m-d H:i:s');
+            $dateLast = Str::before($timestampLast, ' ');
+            $timeLast = Str::beforeLast(Str::after($timestampLast, ' '), ':');
+
+            return [
+                'timestamp' => $timestampFirst,
+                'date' => $dateFirst,
+                'time' => $timeFirst,
+                'html' => self::newIoC($user, [
+                    'first' => [
+                        'timestamp' => $timestampFirst,
+                        'date' => $dateFirst,
+                        'time' => $timeFirst,
+                        'ioc' => $first,
+                    ],
+                    'last' => [
+                        'timestamp' => $timestampLast,
+                        'date' => $dateLast,
+                        'time' => $timeLast,
+                        'ioc' => $last,
+                    ],
+                    'in_between' => $group->count(),
+                ]),
+            ];
+        })->toArray();
     }
 
     private function events(User $user): array
