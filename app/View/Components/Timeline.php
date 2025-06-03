@@ -175,7 +175,7 @@ class Timeline extends Component
             $ioc['first']['level'] = "(criticité basse)";
         } else {
             $ioc['first']['txtColor'] = "var(--c-grey-400)";
-            $ioc['first']['bgColor'] = "rgba(125, 188, 255, 0.6)";
+            $ioc['first']['bgColor'] = "var(--c-grey-100)";
             $ioc['first']['level'] = "(suspect)";
         }
         if ($ioc['last']['ioc']->score >= 75) {
