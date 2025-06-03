@@ -37,7 +37,6 @@ class HealthServiceProvider extends ServiceProvider
                 ->failWhenHealthJobTakesLongerThanMinutes(5),
             QueueCheck::new()->name('CriticalQueue')->onQueue('critical')
                 ->failWhenHealthJobTakesLongerThanMinutes(2),
-            RedisCheck::new()->unless(app()->environment('local')),
             ScheduleCheck::new(),
             UsedDiskSpaceCheck::new()
                 ->warnWhenUsedSpaceIsAbovePercentage(80)
