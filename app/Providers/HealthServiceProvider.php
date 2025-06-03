@@ -21,7 +21,6 @@ class HealthServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
         Health::checks([
             CacheCheck::new(),
             DatabaseCheck::new(),
@@ -37,6 +36,8 @@ class HealthServiceProvider extends ServiceProvider
                 ->failWhenHealthJobTakesLongerThanMinutes(5),
             QueueCheck::new()->name('CriticalQueue')->onQueue('critical')
                 ->failWhenHealthJobTakesLongerThanMinutes(2),
+            QueueCheck::new()->name('ScoutQueue')->onQueue('scout')
+                ->failWhenHealthJobTakesLongerThanMinutes(10),
             ScheduleCheck::new(),
             UsedDiskSpaceCheck::new()
                 ->warnWhenUsedSpaceIsAbovePercentage(80)
