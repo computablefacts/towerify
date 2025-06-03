@@ -645,25 +645,30 @@ class Timeline extends Component
         $groupServerId = null;
         /** @var ?string $groupName */
         $groupName = null;
+        /** @var ?string $groupDay */
+        $groupDay = null;
 
         /** @var YnhOsquery $event */
         foreach ($events as $event) {
 
             $serverId = $event->ynh_server_id ?? null;
             $name = $event->name ?? null;
+            $day = $event->calendar_time->utc()->startOfDay()->format('Y-m-d');
 
             if ($group === null) {
                 $group = collect([$event]);
                 $groupServerId = $serverId;
                 $groupName = $name;
+                $groupDay = $day;
             } else {
-                if ($serverId === $groupServerId && $name === $groupName) {
+                if ($serverId === $groupServerId && $name === $groupName && $day === $groupDay) {
                     $group->push($event);
                 } else {
                     $groups->push($group);
                     $group = collect([$event]);
                     $groupServerId = $serverId;
                     $groupName = $name;
+                    $groupDay = $day;
                 }
             }
         }
