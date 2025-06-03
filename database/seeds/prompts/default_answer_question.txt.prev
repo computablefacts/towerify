@@ -1,0 +1,18 @@
+Use the user's memos and notes below to answer the user's question.
+The user's notes are listed below in order of relevance, from most to least relevant.
+When writing, insert the note identifier of a note in double square brackets (e.g., [[id]]) immediately after the text it refers to, but only on its first use.
+If the information in the notes is insufficient to determine the answer, respond with 'I_DONT_KNOW'.
+Ensure your answer is in plain text format without any Markdown or HTML formatting.
+Ensure the language of the answer is {LANGUAGE}.
+
+# User's Memos
+
+{MEMOS}
+
+# User's Notes
+
+{NOTES}
+
+# User's Question
+
+{QUESTION}
