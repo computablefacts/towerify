@@ -123,7 +123,7 @@ class Timeline extends Component
             $level = "(criticité basse)";
         } else {
             $txtColor = "var(--c-grey-400)";
-            $bgColor = "rgba(125, 188, 255, 0.6)";
+            $bgColor = "var(--c-grey-100)";
             $level = "(niveau inconnu)";
         }
 
@@ -185,7 +185,7 @@ class Timeline extends Component
             $ioc['last']['bgColor'] = "#4bd28f";
         } else {
             $ioc['last']['txtColor'] = "var(--c-grey-400)";
-            $ioc['last']['bgColor'] = "rgba(125, 188, 255, 0.6)";
+            $ioc['last']['bgColor'] = "var(--c-grey-100)";
         }
         return \Illuminate\Support\Facades\View::make('cywise._timeline-item-ioc', [
             'ioc' => $ioc,

@@ -18,7 +18,7 @@
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
       <span>
-        <b>{{ $ioc['first']['ioc']->server_name }} ({{ $ioc['first']['ioc']->server_ip_address }})</b> - {{ $ioc['first']['ioc']->comment }}
+        <b>{{ $ioc['first']['ioc']->server_name }} ({{ $ioc['first']['ioc']->server_ip_address }})</b> - {{ $ioc['first']['ioc']->comments }}
       </span>
     </div>
     <pre class="comment"
