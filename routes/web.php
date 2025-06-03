@@ -37,6 +37,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Spatie\Health\Http\Controllers\HealthCheckResultsController;
+use Spatie\Health\Http\Controllers\SimpleHealthCheckController;
 
 /** @deprecated */
 Route::get('catalog', function () {
@@ -736,3 +738,9 @@ Route::post('pub/invitation/accept', [
     'uses' => 'PasswordRequirementsPublicInvitationController@accept',
     'as' => 'appshell.public.invitation.accept'
 ]);
+
+/**
+ * Health check
+ */
+Route::get('check-health', [SimpleHealthCheckController::class, '__invoke']);
+Route::get('check-health/ui', [HealthCheckResultsController::class, '__invoke'])->middleware('auth');

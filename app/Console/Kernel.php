@@ -16,6 +16,8 @@ use App\Jobs\TriggerSendAuditReport;
 use App\Jobs\UpdateTables;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Spatie\Health\Commands\DispatchQueueCheckJobsCommand;
+use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
 
 class Kernel extends ConsoleKernel
 {
@@ -54,6 +56,10 @@ class Kernel extends ConsoleKernel
         $schedule->job(new ProcessIncomingEmails())->everyMinute();
         $schedule->job(new UpdateTables())->everyMinute();
         $schedule->job(new RunScheduledTasks())->everyMinute();
+
+        // Health check - please let this at the end
+        $schedule->command(DispatchQueueCheckJobsCommand::class)->everyMinute();
+        $schedule->command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
     }
 
     /**
