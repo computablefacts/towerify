@@ -252,14 +252,15 @@ class Timeline extends Component
         $messages = collect();
 
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_EVENTS) {
-            $messages = $messages->concat($this->events($user));
+            $messages = $messages->concat($this->events($user))
+                ->concat($this->suspiciousEvents($user));
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_VULNERABILITIES) {
             $messages = $messages->concat($this->assets($user))
                 ->concat($this->scans($user))
                 ->concat($this->vulnerabilities($user))
                 ->concat($this->leaks($user))
-                ->concat($this->suspiciousEvents($user));
+                ->concat($this->suspiciousEvents($user, 25));
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_NOTES) {
             $messages = $messages->concat($this->notes($user));
@@ -282,8 +283,8 @@ class Timeline extends Component
 
         $this->assets = collect($this->messages)
             ->values()
-            ->flatMap(fn(array $events) => array_values($events))
-            ->map(fn(array $events) => $events[0])
+            ->flatMap(fn(array $events) => array_values($suspiciousEvents))
+            ->map(fn(array $events) => $suspiciousEvents[0])
             ->filter(fn(array $event) => isset($event['_asset']))
             ->unique(fn(array $event) => $event['_asset']->id)
             ->map(function (array $event) {
@@ -304,8 +305,8 @@ class Timeline extends Component
 
         $this->servers = collect($this->messages)
             ->values()
-            ->flatMap(fn(array $events) => array_values($events))
-            ->map(fn(array $events) => $events[0])
+            ->flatMap(fn(array $events) => array_values($suspiciousEvents))
+            ->map(fn(array $events) => $suspiciousEvents[0])
             ->filter(fn(array $event) => isset($event['_server']))
             ->unique(fn(array $event) => $event['_server']->id)
             ->map(function (array $event) {
@@ -608,7 +609,7 @@ class Timeline extends Component
             ->toArray();
     }
 
-    private function suspiciousEvents(User $user): array
+    private function suspiciousEvents(User $user, int $minScore = 1): array
     {
         $cutOffTime = Carbon::now()->startOfDay()->subDay();
         $servers = YnhServer::query()->when($this->serverId, fn($query, $serverId) => $query->where('id', $serverId))->get();
@@ -634,7 +635,7 @@ class Timeline extends Component
                     ->havingRaw('count(1) >=' . Messages::HIDE_AFTER_DISMISS_COUNT);
             })
             ->where('ynh_osquery_rules.is_ioc', true)
-            ->where('ynh_osquery_rules.score', '>', 0)
+            ->where('ynh_osquery_rules.score', '>=', $minScore)
             ->orderBy('calendar_time', 'desc')
             ->get();
 
