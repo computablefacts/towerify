@@ -751,6 +751,7 @@ EOT;
 
     public function addOsqueryEvents(array $events): int
     {
+        $rules = YnhOsqueryRule::all();
         $nbEvents = 0;
 
         foreach ($events as $event) {
@@ -759,11 +760,13 @@ EOT;
             }
             try {
 
+                $ruleId = $rules->where('name', $event['name'])->first()?->id;
                 $columnsUid = YnhOsquery::computeColumnsUid($event['columns']);
                 $calendarTime = Carbon::createFromFormat('D M j H:i:s Y e', $event['calendarTime'])->setTimezone('UTC');
 
                 /** @var YnhOsquery $e */
                 $e = YnhOsquery::firstOrCreate([
+                    'ynh_osquery_rule_id' => $ruleId,
                     'ynh_server_id' => $this->id,
                     'name' => $event['name'],
                     'host_identifier' => $event['hostIdentifier'],
@@ -775,6 +778,7 @@ EOT;
                     'columns_uid' => $columnsUid,
                     'action' => $event['action'],
                 ], [
+                    'ynh_osquery_rule_id' => $ruleId,
                     'ynh_server_id' => $this->id,
                     'row' => 0,
                     'name' => $event['name'],

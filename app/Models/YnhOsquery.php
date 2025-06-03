@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\DB;
  * @property bool packed
  * @property bool dismissed
  * @property ?string columns_uid
+ * @property ?int ynh_osquery_rule_id
  */
 class YnhOsquery extends Model
 {
@@ -37,6 +38,7 @@ class YnhOsquery extends Model
     protected $table = 'ynh_osquery';
 
     protected $fillable = [
+        'ynh_osquery_rule_id',
         'ynh_server_id',
         'row',
         'name',
@@ -1005,6 +1007,11 @@ EOT;
             return [];
         })
             ->filter(fn(array $metric) => count($metric) >= 1);
+    }
+
+    public function rule(): BelongsTo
+    {
+        return $this->belongsTo(YnhOsqueryRule::class, 'ynh_osquery_rule_id', 'id');
     }
 
     public function server(): BelongsTo
