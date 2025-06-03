@@ -494,8 +494,7 @@ Route::get('/events/{osquery}/dismiss', function (\App\Models\YnhOsquery $osquer
 Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
     Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
         Route::get('', 'YnhServerController@create')->name('create');
-        Route::get('{server}/edit', 'YnhServerController@index')->name('edit');
-        Route::post('{server}/edit', 'YnhServerController@index')->name('edit');
+        Route::match(['get', 'post'], '{server}/edit', 'YnhServerController@index')->name('edit');
         Route::post('{server}/backup', 'YnhServerController@createBackup')->name('create-backup');
         Route::get('{server}/backup/{backup}', 'YnhServerController@downloadBackup')->name('download-backup');
     });
