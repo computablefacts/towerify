@@ -459,6 +459,28 @@
         </div>
       </div>
       <x-onboarding-monitor-asset2/>
+      @if(\App\Models\YnhServer::count() < 3)
+      <div class="card mb-3">
+        <div class="card-body">
+          <h6 class="card-title">
+            {{ __('Vous souhaitez protéger un nouveau serveur ?') }}
+          </h6>
+          <div class="card-text mb-3">
+            {{ __('Cliquez ici pour installer notre agent :') }}
+          </div>
+          <form>
+            <div class="row">
+              <div class="col align-content-center">
+                <a href="{{ route('home', ['tab' => 'servers', 'servers_type' => 'instrumented']) }}"
+                   class="btn btn-primary" style="width: 100%;">
+                  {{ __('Installer !') }}
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      @endif
       @foreach($honeypots as $honeypot)
       <div class="card mb-3">
         <div class="card-body">
