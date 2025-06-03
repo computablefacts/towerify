@@ -18,7 +18,7 @@
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
       <span>
-        <b>{{ $ioc['first']['ioc']->server_name }} ({{ $ioc['first']['ioc']->server_ip_address }})</b> - {{ $ioc['first']['ioc']->comments }}
+        <b>{{ $ioc['first']['ioc']->server_name }} ({{ $ioc['first']['ioc']->server_ip_address }})</b> - {{ $ioc['first']['ioc']->comments }} {{ $ioc['first']['level'] }}
       </span>
     </div>
     <pre class="comment"
@@ -68,7 +68,7 @@
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
       <span>
-        <b>{{ $ioc['last']['ioc']->server_name }} ({{ $ioc['last']['ioc']->server_ip_address }})</b> - {{ $ioc['last']['ioc']->comments }}
+        <b>{{ $ioc['last']['ioc']->server_name }} ({{ $ioc['last']['ioc']->server_ip_address }})</b> - {{ $ioc['last']['ioc']->comments }} {{ $ioc['last']['level'] }}
       </span>
     </div>
     <pre class="comment"

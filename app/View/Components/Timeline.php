@@ -164,28 +164,36 @@ class Timeline extends Component
         if ($ioc['first']['ioc']->score >= 75) {
             $ioc['first']['txtColor'] = "white";
             $ioc['first']['bgColor'] = "#ff4d4d";
+            $ioc['first']['level'] = "(criticité haute)";
         } else if ($ioc['first']['ioc']->score >= 50) {
             $ioc['first']['txtColor'] = "white";
             $ioc['first']['bgColor'] = "#ffaa00";
+            $ioc['first']['level'] = "(criticité moyenne)";
         } else if ($ioc['first']['ioc']->score >= 25) {
             $ioc['first']['txtColor'] = "white";
             $ioc['first']['bgColor'] = "#4bd28f";
+            $ioc['first']['level'] = "(criticité basse)";
         } else {
             $ioc['first']['txtColor'] = "var(--c-grey-400)";
             $ioc['first']['bgColor'] = "rgba(125, 188, 255, 0.6)";
+            $ioc['first']['level'] = "(suspect)";
         }
         if ($ioc['last']['ioc']->score >= 75) {
             $ioc['last']['txtColor'] = "white";
             $ioc['last']['bgColor'] = "#ff4d4d";
+            $ioc['last']['level'] = "(criticité haute)";
         } else if ($ioc['last']['ioc']->score >= 50) {
             $ioc['last']['txtColor'] = "white";
             $ioc['last']['bgColor'] = "#ffaa00";
+            $ioc['last']['level'] = "(criticité moyenne)";
         } else if ($ioc['last']['ioc']->score >= 25) {
             $ioc['last']['txtColor'] = "white";
             $ioc['last']['bgColor'] = "#4bd28f";
+            $ioc['last']['level'] = "(criticité basse)";
         } else {
             $ioc['last']['txtColor'] = "var(--c-grey-400)";
             $ioc['last']['bgColor'] = "var(--c-grey-100)";
+            $ioc['last']['level'] = "(suspect)";
         }
         return \Illuminate\Support\Facades\View::make('cywise._timeline-item-ioc', [
             'ioc' => $ioc,
