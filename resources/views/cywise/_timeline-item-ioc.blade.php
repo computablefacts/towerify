@@ -43,7 +43,7 @@
   </span>
   <div class="timeline-item-description">
       <span>
-        &plus;&nbsp;<b>{{ $ioc['in_between'] - 2 }}</b>&nbsp;de plus
+        &plus;&nbsp;<b>{{ $ioc['in_between'] - 2 }}</b>&nbsp;événements similaires
       </span>
   </div>
 </li>
