@@ -283,8 +283,8 @@ class Timeline extends Component
 
         $this->assets = collect($this->messages)
             ->values()
-            ->flatMap(fn(array $events) => array_values($suspiciousEvents))
-            ->map(fn(array $events) => $suspiciousEvents[0])
+            ->flatMap(fn(array $events) => array_values($events))
+            ->map(fn(array $events) => $events[0])
             ->filter(fn(array $event) => isset($event['_asset']))
             ->unique(fn(array $event) => $event['_asset']->id)
             ->map(function (array $event) {
@@ -305,8 +305,8 @@ class Timeline extends Component
 
         $this->servers = collect($this->messages)
             ->values()
-            ->flatMap(fn(array $events) => array_values($suspiciousEvents))
-            ->map(fn(array $events) => $suspiciousEvents[0])
+            ->flatMap(fn(array $events) => array_values($events))
+            ->map(fn(array $events) => $events[0])
             ->filter(fn(array $event) => isset($event['_server']))
             ->unique(fn(array $event) => $event['_server']->id)
             ->map(function (array $event) {
