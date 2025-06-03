@@ -202,44 +202,52 @@ class QueryKnowledgeBase extends AbstractAction
         $frenchChunks = collect();
 
         foreach ($frenchKeywords as $keywords) {
-            $frenchChunks = $frenchChunks->concat(
-                Chunk::search($keywords)
-                    ->constrain(
-                        Chunk::select([DB::raw('\'fr\' AS lang'), 'cb_collections.priority', 'cb_chunks.*'])
-                            ->join('cb_collections', 'cb_collections.id', '=', 'cb_chunks.collection_id')
-                            ->join('cb_files', 'cb_files.id', '=', 'cb_chunks.file_id')
-                            ->where('cb_chunks.is_deleted', false)
-                            ->where('cb_collections.is_deleted', false)
-                            ->where(function ($query) {
-                                $query->where('cb_collections.name', 'like', '%lgfr')
-                                    ->orWhere('cb_collections.name', 'not like', '%lg%');
-                            })
-                    )
-                    ->paginate(10)
-                    ->getCollection()
-            )->unique();
+            try {
+                $frenchChunks = $frenchChunks->concat(
+                    Chunk::search($keywords)
+                        ->constrain(
+                            Chunk::select([DB::raw('\'fr\' AS lang'), 'cb_collections.priority', 'cb_chunks.*'])
+                                ->join('cb_collections', 'cb_collections.id', '=', 'cb_chunks.collection_id')
+                                ->join('cb_files', 'cb_files.id', '=', 'cb_chunks.file_id')
+                                ->where('cb_chunks.is_deleted', false)
+                                ->where('cb_collections.is_deleted', false)
+                                ->where(function ($query) {
+                                    $query->where('cb_collections.name', 'like', '%lgfr')
+                                        ->orWhere('cb_collections.name', 'not like', '%lg%');
+                                })
+                        )
+                        ->paginate(10)
+                        ->getCollection()
+                )->unique();
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+            }
         }
 
         $englishKeywords = array_merge([$json['question_en']], $json['paraphrased_en'], $json['expanded_en']);
         $englishChunks = collect();
 
         foreach ($englishKeywords as $keywords) {
-            $englishChunks = $englishChunks->concat(
-                Chunk::search($keywords)
-                    ->constrain(
-                        Chunk::select([DB::raw('\'en\' AS lang'), 'cb_collections.priority', 'cb_chunks.*'])
-                            ->join('cb_collections', 'cb_collections.id', '=', 'cb_chunks.collection_id')
-                            ->join('cb_files', 'cb_files.id', '=', 'cb_chunks.file_id')
-                            ->where('cb_chunks.is_deleted', false)
-                            ->where('cb_collections.is_deleted', false)
-                            ->where(function ($query) {
-                                $query->where('cb_collections.name', 'like', '%lgen')
-                                    ->orWhere('cb_collections.name', 'not like', '%lg%');
-                            })
-                    )
-                    ->paginate(10)
-                    ->getCollection()
-            )->unique();
+            try {
+                $englishChunks = $englishChunks->concat(
+                    Chunk::search($keywords)
+                        ->constrain(
+                            Chunk::select([DB::raw('\'en\' AS lang'), 'cb_collections.priority', 'cb_chunks.*'])
+                                ->join('cb_collections', 'cb_collections.id', '=', 'cb_chunks.collection_id')
+                                ->join('cb_files', 'cb_files.id', '=', 'cb_chunks.file_id')
+                                ->where('cb_chunks.is_deleted', false)
+                                ->where('cb_collections.is_deleted', false)
+                                ->where(function ($query) {
+                                    $query->where('cb_collections.name', 'like', '%lgen')
+                                        ->orWhere('cb_collections.name', 'not like', '%lg%');
+                                })
+                        )
+                        ->paginate(10)
+                        ->getCollection()
+                )->unique();
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+            }
         }
 
         $notes = $frenchChunks
