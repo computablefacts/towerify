@@ -430,7 +430,7 @@ class DatabaseSeeder extends Seeder
     {
         User::query()->chunkById(100, function ($users) {
             foreach ($users as $user) {
-                User::init($user, true);
+                User::init($user, false);
             }
         });
     }
