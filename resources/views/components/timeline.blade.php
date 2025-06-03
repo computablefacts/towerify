@@ -107,6 +107,10 @@
     color: #fff;
   }
 
+  .timeline-item-wrapper {
+    width: 100%;
+  }
+
   .timeline-item-description {
     display: flex;
     gap: 8px;
