@@ -252,15 +252,15 @@ class Timeline extends Component
         $messages = collect();
 
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_EVENTS) {
-            $messages = $messages->concat($this->events($user))
-                ->concat($this->suspiciousEvents($user));
+            $messages = $messages->concat($this->events($user));
+            /* ->concat($this->suspiciousEvents($user)); */
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_VULNERABILITIES) {
             $messages = $messages->concat($this->assets($user))
                 ->concat($this->scans($user))
                 ->concat($this->vulnerabilities($user))
-                ->concat($this->leaks($user))
-                ->concat($this->suspiciousEvents($user, 25));
+                ->concat($this->leaks($user));
+            /* ->concat($this->suspiciousEvents($user, 90)); */
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_NOTES) {
             $messages = $messages->concat($this->notes($user));
