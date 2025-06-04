@@ -144,6 +144,10 @@ class AssetsDiscoverCheck extends Check
 
     private function getResult(Status $status, string $message)
     {
+        if ($timestamp = $this->getLastStart()) {
+            $deltaHuman = Carbon::createFromTimestamp($timestamp)->diffForHumans();
+            $message = "{$message} ({$deltaHuman})";
+        }
         switch ($status) {
             case Status::failed():
                 $this->setLastStatus($status);
