@@ -407,7 +407,9 @@
               @else
               <span class="tw-dot-blue"></span>
               @endif
-              &nbsp;<a href="#vid-{{ $item->id }}">{{ $item->asset()->asset }}</a>
+              &nbsp;<a href="{{ route('home', ['category' => 'vulnerabilities']) }}#vid-{{ $item->id }}">
+                {{ $item->asset()->asset }}
+              </a>
             </div>
             <div class="d-flex justify-content-start align-items-center text-truncate mb-3">
               @if(empty($item->cve_id))

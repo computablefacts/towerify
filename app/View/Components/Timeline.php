@@ -253,14 +253,14 @@ class Timeline extends Component
 
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_EVENTS) {
             $messages = $messages->concat($this->events($user));
-            /* ->concat($this->suspiciousEvents($user)); */
+            // ->concat($this->suspiciousEvents($user));
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_VULNERABILITIES) {
             $messages = $messages->concat($this->assets($user))
                 ->concat($this->scans($user))
                 ->concat($this->vulnerabilities($user))
-                ->concat($this->leaks($user));
-            /* ->concat($this->suspiciousEvents($user, 90)); */
+                ->concat($this->leaks($user))
+                ->concat($this->suspiciousEvents($user, 75));
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_NOTES) {
             $messages = $messages->concat($this->notes($user));
@@ -622,9 +622,9 @@ class Timeline extends Component
         ])
             ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
             ->join('ynh_osquery_latest_events', 'ynh_osquery_latest_events.ynh_osquery_id', '=', 'ynh_osquery.id')
-            ->join('ynh_osquery_rules', 'ynh_osquery_rules.name', '=', 'ynh_osquery.name')
+            ->join('ynh_osquery_rules', 'ynh_osquery_rules.id', '=', 'ynh_osquery.ynh_osquery_rule_id')
             ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_osquery.ynh_server_id')
-            ->whereIn('ynh_osquery.ynh_server_id', $servers->pluck('id'))
+            ->whereIn('ynh_osquery_latest_events.ynh_server_id', $servers->pluck('id'))
             ->whereNotExists(function (Builder $query) {
                 $query->select(DB::raw(1))
                     ->from('v_dismissed')
@@ -720,7 +720,7 @@ class Timeline extends Component
         $servers = YnhServer::query()->when($this->serverId, fn($query, $serverId) => $query->where('id', $serverId))->get();
         return Messages::get($servers, $cutOffTime, [
             Messages::AUTHENTICATION_AND_SSH_ACTIVITY,
-            Messages::SERVICES_AND_SCHEDULED_TASKS,
+            // Messages::SERVICES_AND_SCHEDULED_TASKS,
             Messages::SHELL_HISTORY_AND_ROOT_COMMANDS,
             Messages::PACKAGES,
             Messages::USERS_AND_GROUPS,
