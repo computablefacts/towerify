@@ -39,7 +39,7 @@ class HealthServiceProvider extends ServiceProvider
                 ->failWhenHealthJobTakesLongerThanMinutes(2),
             QueueCheck::new()->name('ScoutQueue')->onQueue('scout')
                 ->failWhenHealthJobTakesLongerThanMinutes(10),
-            ScheduleCheck::new(),
+            ScheduleCheck::new()->heartbeatMaxAgeInMinutes(2),
             UsedDiskSpaceCheck::new()
                 ->warnWhenUsedSpaceIsAbovePercentage(80)
                 ->failWhenUsedSpaceIsAbovePercentage(90),
