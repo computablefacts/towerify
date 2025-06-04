@@ -24,28 +24,32 @@ class HealthServiceProvider extends ServiceProvider
     {
         // See: https://spatie.be/docs/laravel-health/v1/available-checks/overview
         Health::checks([
-            AssetsDiscoverCheck::new(),
+            // Custom checks
+            AssetsDiscoverCheck::new()->name('cywise.ioAssetsDiscover')
+                ->domain('cywise.io'),
+            VulnerabilityScannerApiCheck::new()->name('ApiVulnerabilityScanner'),
+
+            // Standard checks
+            QueueCheck::new()->name('QueueCritical')->onQueue('critical')
+                ->failWhenHealthJobTakesLongerThanMinutes(2),
+            QueueCheck::new()->name('QueueMedium')->onQueue('medium')
+                ->failWhenHealthJobTakesLongerThanMinutes(5),
+            QueueCheck::new()->name('QueueLow')->onQueue('low')
+                ->failWhenHealthJobTakesLongerThanMinutes(10),
+            QueueCheck::new()->name('QueueScout')->onQueue('scout')
+                ->failWhenHealthJobTakesLongerThanMinutes(10),
+            QueueCheck::new()->name('QueueDefault')->onQueue('default')
+                ->failWhenHealthJobTakesLongerThanMinutes(10),
             CacheCheck::new(),
             DatabaseCheck::new(),
             DatabaseTableSizeCheck::new()
                 ->table('telescope_entries', 1500),
             DebugModeCheck::new()->unless(app()->environment('local')),
             OptimizedAppCheck::new()->unless(app()->environment('local')),
-            QueueCheck::new()->name('DefaultQueue')->onQueue('default')
-                ->failWhenHealthJobTakesLongerThanMinutes(10),
-            QueueCheck::new()->name('LowQueue')->onQueue('low')
-                ->failWhenHealthJobTakesLongerThanMinutes(10),
-            QueueCheck::new()->name('MediumQueue')->onQueue('medium')
-                ->failWhenHealthJobTakesLongerThanMinutes(5),
-            QueueCheck::new()->name('CriticalQueue')->onQueue('critical')
-                ->failWhenHealthJobTakesLongerThanMinutes(2),
-            QueueCheck::new()->name('ScoutQueue')->onQueue('scout')
-                ->failWhenHealthJobTakesLongerThanMinutes(10),
             ScheduleCheck::new()->heartbeatMaxAgeInMinutes(2),
             UsedDiskSpaceCheck::new()
                 ->warnWhenUsedSpaceIsAbovePercentage(80)
                 ->failWhenUsedSpaceIsAbovePercentage(90),
-            VulnerabilityScannerApiCheck::new(),
         ]);
     }
 
