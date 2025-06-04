@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Check\AssetsDiscoverCheck;
 use App\Check\VulnerabilityScannerApiCheck;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Health\Checks\Checks\CacheCheck;
@@ -23,6 +24,7 @@ class HealthServiceProvider extends ServiceProvider
     {
         // See: https://spatie.be/docs/laravel-health/v1/available-checks/overview
         Health::checks([
+            AssetsDiscoverCheck::new(),
             CacheCheck::new(),
             DatabaseCheck::new(),
             DatabaseTableSizeCheck::new()
