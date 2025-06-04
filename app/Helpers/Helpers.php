@@ -413,3 +413,48 @@ if (!function_exists('app_sidebar')) {
         ];
     }
 }
+if (!function_exists('override_app_settings')) {
+    function override_app_settings(): array
+    {
+        $database = config('database.default');
+        $config = config('database.connections.' . $database);
+
+        try {
+            if ($database == 'sqlite') {
+                $dsn = "{$config['driver']}:{$config['database']}";
+                $pdo = new PDO($dsn);
+            } else {
+                $dsn = "{$config['driver']}:host={$config['host']};port={$config['port']};dbname={$config['database']};charset={$config['charset']}";
+                $pdo = new PDO($dsn, $config['username'], $config['password']);
+            }
+
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            $statement = $pdo->query("SELECT `key`, `value`, `is_encrypted` FROM app_settings");
+            $settings = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+            $pdo = null;
+
+            $key = config('app.key');
+            $cipher = config('app.cipher');
+
+            if (\Illuminate\Support\Str::startsWith($key, 'base64:')) {
+                $key = base64_decode(substr($key, 7));
+            }
+            foreach ($settings as $keyValuePair) {
+                $key = $keyValuePair['key'];
+                $value = $keyValuePair['value'];
+                if ($keyValuePair['is_encrypted'] === 1) {
+                    config([$key => decrypt($value)]);
+                } else {
+                    config([$key => $value]);
+                }
+            }
+            return ['loaded' => true];
+
+        } catch (PDOException $e) {
+            printf($e->getMessage());
+            return ['loaded' => false];
+        }
+    }
+}
