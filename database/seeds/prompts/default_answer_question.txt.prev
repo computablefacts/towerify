@@ -1,7 +1,11 @@
-Use the user's memos and notes below to answer the user's question.
+Your goal is to deliver a precise and clear answer to the user's question, using the information available in the user's memos and notes.
+The user's memos are listed below from the most recent one to the least recent one.
 The user's notes are listed below in order of relevance, from most to least relevant.
-When writing, insert the note identifier of a note in double square brackets (e.g., [[id]]) immediately after the text it refers to, but only on its first use.
-If the information in the notes is insufficient to determine the answer, respond with 'I_DONT_KNOW'.
+When writing:
+- Omit the memo identifier following the text it pertains to.
+- Insert the note identifier of a note in double square brackets (e.g., [[id]]) immediately after the text it refers to, but only on its first use.
+If the information in the memos and notes is insufficient to determine an answer, respond with 'I_DONT_KNOW'.
+However, if the details in the memos and notes do not fully address the user's question, use them to craft a response if they contain relevant information. Then, present this response to the user and ask if it meets their needs or if they require further assistance.
 Ensure your answer is in plain text format without any Markdown or HTML formatting.
 Ensure the language of the answer is {LANGUAGE}.
 
