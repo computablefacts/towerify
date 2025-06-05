@@ -684,6 +684,12 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
     elUploadButton.classList.add('tw-disabled');
   };
 
+  const actions = ["Chargement du contexte...", "Analyse de votre demande...", "Recherche d'informations...",
+    "Assemblage des informations recueillies...", "Génération de la réponse...",
+    "Un instant, nous y sommes presque..."];
+  let actionIndex = 0;
+  let loadingInterval = null;
+
   const addThinkingDots = () => {
 
     run++;
@@ -712,15 +718,29 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
                 </svg>
               </div>
             </div>
-            <div class="typing-wrapper">
+            <!-- <div class="typing-wrapper">
               <div class="typing">
                 <span></span>
                 <span></span>
                 <span></span>
               </div>
+            </div> -->
+            <div class="tw-answer-message">
+              <div class="tw-answer-message-html" style="color: var(--bs-gray);">
+                ${actions[actionIndex++]}
+              </div>
             </div>
           </div>
       `;
+
+        loadingInterval = setInterval(() => {
+          if (elThinkingDots && actionIndex < actions.length) {
+            const workInProgressEl = elThinkingDots.querySelector('.tw-answer-message-html');
+            if (workInProgressEl) {
+              workInProgressEl.innerHTML = actions[actionIndex++];
+            }
+          }
+        }, 5000);
 
         toggleButtons(false);
         toggleInput(false);
@@ -734,6 +754,12 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
 
   const removeThinkingDots = () => {
     if (elThinkingDots) {
+
+      if (loadingInterval) {
+        clearInterval(loadingInterval);
+        loadingInterval = null;
+        actionIndex = 0;
+      }
 
       elThinkingDots.remove();
       elThinkingDots = null;
