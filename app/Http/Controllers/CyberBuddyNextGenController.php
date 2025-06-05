@@ -10,7 +10,6 @@ use App\Http\Requests\ConverseRequest;
 use App\Jobs\ProcessIncomingEmails;
 use App\Models\Conversation;
 use App\Models\Prompt;
-use App\Models\TimelineItem;
 use App\Models\YnhServer;
 use App\User;
 use Carbon\Carbon;
@@ -102,8 +101,8 @@ class CyberBuddyNextGenController extends Controller
             ]]));
         }
 
-        // Transform URLs provided by the user to notes
-        collect(ProcessIncomingEmails::extractAndSummarizeHyperlinks($question))->each(fn(array $summary) => TimelineItem::createNote($user, $summary['summary'], $summary['url']));
+        // Transform URLs provided by the user into notes
+        ProcessIncomingEmails::extractAndSummarizeHyperlinks($question);
 
         // Save the user's question
         $conversation->dom = json_encode(array_merge($conversation->thread(), [[

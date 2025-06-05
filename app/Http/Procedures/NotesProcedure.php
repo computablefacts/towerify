@@ -2,6 +2,7 @@
 
 namespace App\Http\Procedures;
 
+use App\Jobs\ProcessIncomingEmails;
 use App\Models\TimelineItem;
 use App\User;
 use App\View\Components\Timeline;
@@ -31,6 +32,9 @@ class NotesProcedure extends Procedure
         /** @var User $user */
         $user = $request->user();
         $item = TimelineItem::createNote($user, $params['note']);
+
+        // Transform URLs provided by the user into notes
+        ProcessIncomingEmails::extractAndSummarizeHyperlinks($params['note']);
 
         return [
             "msg" => "Your note has been saved!",

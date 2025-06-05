@@ -68,6 +68,8 @@ class ProcessIncomingEmails implements ShouldQueue
              [TEXT]
         ";
         $tcb = new TheCyberBriefProcedure();
+        /** @var User $user */
+        $user = Auth::user();
         $result = [];
 
         foreach ($urls as $url) {
@@ -75,26 +77,40 @@ class ProcessIncomingEmails implements ShouldQueue
             $url = trim($url);
 
             if (!empty($url)) {
-                try {
-                    $request = new Request([
-                        'url_or_text' => $url,
-                        'prompt' => $prompt,
-                    ]);
-                    $request->setUserResolver(fn() => auth()->user());
-                    $summary = $tcb->summarize($request)['summary'] ?? '';
+
+                /** @var TimelineItem $note */
+                $note = TimelineItem::fetchNotes($user->id, null, null, 0, [[
+                    ['subject', '=', $url]
+                ]])->first();
+
+                if ($note) {
                     $result[] = [
                         'url' => $url,
-                        'summary' => empty($summary) ? "{$url} could not be accessed or summarized." : $summary,
+                        'summary' => $note->attributes()['body'],
                     ];
-                } catch (\Exception $exception) {
-                    Log::error($exception->getMessage());
-                    $result[] = [
-                        'url' => $url,
-                        'summary' => "{$url} could not be accessed or summarized.",
-                    ];
-                }
-                if (count($result) > 0) {
-                    Log::debug($result[count($result) - 1]);
+                } else {
+                    try {
+                        $request = new Request([
+                            'url_or_text' => $url,
+                            'prompt' => $prompt,
+                        ]);
+                        $request->setUserResolver(fn() => $user);
+                        $summary = $tcb->summarize($request)['summary'] ?? '';
+                        $result[] = [
+                            'url' => $url,
+                            'summary' => empty($summary) ? "{$url} could not be accessed or summarized." : $summary,
+                        ];
+                    } catch (\Exception $exception) {
+                        Log::error($exception->getMessage());
+                        $result[] = [
+                            'url' => $url,
+                            'summary' => "{$url} could not be accessed or summarized.",
+                        ];
+                    }
+                    if (count($result) > 0) {
+                        $note = $result[count($result) - 1];
+                        TimelineItem::createNote($user, $note['summary'], $note['url']);
+                    }
                 }
             }
         }
@@ -283,12 +299,9 @@ class ProcessIncomingEmails implements ShouldQueue
         }
         if (!empty($body)) {
 
-            $item = TimelineItem::createNote($user, $body, $message->getSubject()->toString());
-            $summaries = self::extractAndSummarizeHyperlinks($body);
+            TimelineItem::createNote($user, $body, $message->getSubject()->toString());
+            self::extractAndSummarizeHyperlinks($body);
 
-            foreach ($summaries as $summary) {
-                TimelineItem::createNote($user, $summary['summary'], $summary['url']);
-            }
             if ($message->hasAttachments()) {
 
                 $collection = $this->getOrCreateCollection("privcol{$user->id}", 0);
