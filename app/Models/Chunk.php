@@ -55,6 +55,7 @@ class Chunk extends Model
             'url' => $this->url,
             'text' => $this->text,
             'tags' => $this->tags()->get()->pluck('tag')->join(" | "),
+            'collection_id' => $this->collection_id,
         ];
     }
 

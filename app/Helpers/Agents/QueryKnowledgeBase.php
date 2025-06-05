@@ -11,7 +11,6 @@ use App\Models\Prompt;
 use App\Models\TimelineItem;
 use App\User;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Parsedown;
@@ -198,66 +197,109 @@ class QueryKnowledgeBase extends AbstractAction
             return '';
         }
 
-        $frenchKeywords = array_merge([$json['question_fr']], $json['paraphrased_fr'], $json['expanded_fr']);
+        $start = microtime(true);
+        $frenchQuestions = array_merge([$json['question_fr']], $json['paraphrased_fr'], $json['expanded_fr']);
+        $frenchCollections = \App\Models\Collection::query()
+            ->where('cb_collections.is_deleted', false)
+            ->where(function ($query) {
+                $query->where('cb_collections.name', 'like', "%lgfr") // see YnhFramework::collectionName
+                ->orWhere('cb_collections.name', 'not like', '%lg%');
+            })
+            ->orderBy('cb_collections.priority')
+            ->orderBy('cb_collections.name')
+            ->get();
+
         $frenchChunks = collect();
 
-        foreach ($frenchKeywords as $keywords) {
-            try {
-                $start = microtime(true);
-                $frenchChunks = $frenchChunks->concat(
-                    Chunk::search($keywords)
-                        ->constrain(
-                            Chunk::select([DB::raw('\'fr\' AS lang'), 'cb_collections.priority', 'cb_chunks.*'])
-                                ->join('cb_collections', 'cb_collections.id', '=', 'cb_chunks.collection_id')
-                                ->join('cb_files', 'cb_files.id', '=', 'cb_chunks.file_id')
-                                ->where('cb_chunks.is_deleted', false)
-                                ->where('cb_collections.is_deleted', false)
-                                ->where(function ($query) {
-                                    $query->where('cb_collections.name', 'like', '%lgfr')
-                                        ->orWhere('cb_collections.name', 'not like', '%lg%');
-                                })
-                        )
+        /** @var \App\Models\Collection $collection */
+        foreach ($frenchCollections as $collection) {
+
+            $start1 = microtime(true);
+            $chunks = collect();
+
+            /** @var string $question */
+            foreach ($frenchQuestions as $question) {
+                try {
+                    $start2 = microtime(true);
+                    $results = Chunk::search($question)
+                        ->where('collection_id', $collection->id)
                         ->paginate(10)
-                        ->getCollection()
-                )->unique();
-                $stop = microtime(true);
-                Log::debug("[FR] Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$frenchChunks->count()} results");
-            } catch (\Exception $e) {
-                Log::error($e->getMessage());
+                        ->getCollection();
+                    $chunks = $chunks->merge($results);
+                    $stop2 = microtime(true);
+                    Log::debug("[FR][{$collection->name}] Search for '{$question}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
+                }
+                if ($chunks->isNotEmpty()) {
+                    break;
+                }
+            }
+
+            $stop1 = microtime(true);
+            Log::debug("[FR][{$collection->name}] Search took " . ((int)ceil($stop1 - $start1)) . " seconds and returned {$chunks->count()} results");
+
+            if ($chunks->isNotEmpty()) {
+                $frenchChunks = $frenchChunks->merge($chunks);
+                // break;
             }
         }
 
-        $englishKeywords = array_merge([$json['question_en']], $json['paraphrased_en'], $json['expanded_en']);
+        $stop = microtime(true);
+        Log::debug("[FR] Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$frenchChunks->count()} results");
+
+        $start = microtime(true);
+        $englishQuestions = array_merge([$json['question_en']], $json['paraphrased_en'], $json['expanded_en']);
+        $englishCollections = \App\Models\Collection::query()
+            ->where('cb_collections.is_deleted', false)
+            ->where(function ($query) {
+                $query->where('cb_collections.name', 'like', "%lgen") // see YnhFramework::collectionName
+                ->orWhere('cb_collections.name', 'not like', '%lg%');
+            })
+            ->orderBy('cb_collections.priority')
+            ->orderBy('cb_collections.name')
+            ->get();
+
         $englishChunks = collect();
 
-        foreach ($englishKeywords as $keywords) {
-            try {
-                $start = microtime(true);
-                $englishChunks = $englishChunks->concat(
-                    Chunk::search($keywords)
-                        ->constrain(
-                            Chunk::select([DB::raw('\'en\' AS lang'), 'cb_collections.priority', 'cb_chunks.*'])
-                                ->join('cb_collections', 'cb_collections.id', '=', 'cb_chunks.collection_id')
-                                ->join('cb_files', 'cb_files.id', '=', 'cb_chunks.file_id')
-                                ->where('cb_chunks.is_deleted', false)
-                                ->where('cb_collections.is_deleted', false)
-                                ->where(function ($query) {
-                                    $query->where('cb_collections.name', 'like', '%lgen')
-                                        ->orWhere('cb_collections.name', 'not like', '%lg%');
-                                })
-                        )
+        /** @var \App\Models\Collection $collection */
+        foreach ($englishCollections as $collection) {
+
+            $start1 = microtime(true);
+            $chunks = collect();
+
+            /** @var string $question */
+            foreach ($englishQuestions as $question) {
+                try {
+                    $start2 = microtime(true);
+                    $results = Chunk::search($question)
+                        ->where('collection_id', $collection->id)
                         ->paginate(10)
-                        ->getCollection()
-                )->unique();
-                $stop = microtime(true);
-                Log::debug("[EN] Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$englishChunks->count()} results");
-            } catch (\Exception $e) {
-                Log::error($e->getMessage());
+                        ->getCollection();
+                    $chunks = $chunks->merge($results);
+                    $stop2 = microtime(true);
+                    Log::debug("[EN][{$collection->name}] Search for '{$question}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
+                }
+                if ($chunks->isNotEmpty()) {
+                    break;
+                }
+            }
+
+            $stop1 = microtime(true);
+            Log::debug("[EN][{$collection->name}] Search took " . ((int)ceil($stop1 - $start1)) . " seconds and returned {$chunks->count()} results");
+
+            if ($chunks->isNotEmpty()) {
+                $englishChunks = $englishChunks->merge($chunks);
+                // break;
             }
         }
 
-        $notes = $frenchChunks
-            ->concat($englishChunks)
+        $stop = microtime(true);
+        Log::debug("[EN] Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$englishChunks->count()} results");
+
+        $notes = $frenchChunks->merge($englishChunks)
             ->groupBy('text') // remove duplicates
             ->map(fn(Collection $group) => $group->sortByDesc('__tntSearchScore__')->first()) // the higher the better
             ->values() // associative array => array
