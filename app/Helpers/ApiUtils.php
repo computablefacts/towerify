@@ -229,8 +229,8 @@ class ApiUtils
         if ($user) {
             /** @var ?Collection $private */
             $private = Collection::query()
-                ->where('is_deleted', '=', false)
-                ->where('name', '=', "privcol{$user->id}")
+                ->where('is_deleted', false)
+                ->where('name', "privcol{$user->id}")
                 ->first();
             if ($private) {
                 array_unshift($collections, $private->name);

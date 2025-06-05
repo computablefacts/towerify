@@ -6,6 +6,7 @@ use App\Models\Chunk;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
 
 class Chunks extends Component
@@ -24,6 +25,11 @@ class Chunks extends Component
             ->join('cb_files', 'cb_files.id', 'cb_chunks.file_id')
             ->where('cb_chunks.is_deleted', false)
             ->where('cb_collections.is_deleted', false)
+            ->where(function ($query) {
+                $user = Auth::user();
+                $query->where('cb_collections.name', "privcol{$user->id}")
+                    ->orWhere('cb_collections.name', 'not like', "privcol%");
+            })
             ->orderBy('cb_collections.name')
             ->orderBy('cb_files.name')
             ->orderBy('cb_chunks.page')

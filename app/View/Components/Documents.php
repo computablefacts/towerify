@@ -6,6 +6,7 @@ use App\Models\File;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Component;
 
 class Documents extends Component
@@ -22,6 +23,11 @@ class Documents extends Component
             ->join('cb_collections', 'cb_collections.id', '=', 'cb_files.collection_id')
             ->where('cb_files.is_deleted', false)
             ->where('cb_collections.is_deleted', false)
+            ->where(function ($query) {
+                $user = Auth::user();
+                $query->where('cb_collections.name', "privcol{$user->id}")
+                    ->orWhere('cb_collections.name', 'not like', "privcol%");
+            })
             ->orderBy('cb_collections.name')
             ->orderBy('name_normalized')
             ->forPage($currentPage <= 0 ? 1 : $currentPage, $pagesSize <= 0 ? 25 : $pagesSize);
