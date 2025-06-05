@@ -50,9 +50,9 @@ class QueryKnowledgeBase extends AbstractAction
         $fallbackOnNextCollection = $this->args['fallback_on_next_collection'] ?? false;
         $question = htmlspecialchars($this->args['question'] ?? '', ENT_QUOTES, 'UTF-8');
         $json = $this->reformulateQuestion($question);
-        $answer = $this->queryChunks($json);
+        $answer = Str::replace('I_DONT_KNOW', '', $this->queryChunks($json));
 
-        if (!empty($answer) && !Str::contains($answer, 'I_DONT_KNOW')) {
+        if (!empty($answer)) {
             $this->output = [
                 'answer' => (new Parsedown)->text($answer),
                 'sources' => collect(),
