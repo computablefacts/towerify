@@ -203,6 +203,7 @@ class QueryKnowledgeBase extends AbstractAction
 
         foreach ($frenchKeywords as $keywords) {
             try {
+                $start = microtime(true);
                 $frenchChunks = $frenchChunks->concat(
                     Chunk::search($keywords)
                         ->constrain(
@@ -219,6 +220,8 @@ class QueryKnowledgeBase extends AbstractAction
                         ->paginate(10)
                         ->getCollection()
                 )->unique();
+                $stop = microtime(true);
+                Log::debug("[FR] Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$frenchChunks->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
@@ -229,6 +232,7 @@ class QueryKnowledgeBase extends AbstractAction
 
         foreach ($englishKeywords as $keywords) {
             try {
+                $start = microtime(true);
                 $englishChunks = $englishChunks->concat(
                     Chunk::search($keywords)
                         ->constrain(
@@ -245,6 +249,8 @@ class QueryKnowledgeBase extends AbstractAction
                         ->paginate(10)
                         ->getCollection()
                 )->unique();
+                $stop = microtime(true);
+                Log::debug("[EN] Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$englishChunks->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
