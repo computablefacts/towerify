@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 
 if (!function_exists('tw_random_string')) {
-    function tw_random_string($length): string
+    function tw_random_string(int $length): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&?!#';
         $lengthCharacters = strlen($characters);
@@ -432,20 +432,13 @@ if (!function_exists('override_app_settings')) {
 
             $statement = $pdo->query("SELECT `key`, `value`, `is_encrypted` FROM app_settings");
             $settings = $statement->fetchAll(PDO::FETCH_ASSOC);
-
             $pdo = null;
 
-            $key = config('app.key');
-            $cipher = config('app.cipher');
-
-            if (\Illuminate\Support\Str::startsWith($key, 'base64:')) {
-                $key = base64_decode(substr($key, 7));
-            }
             foreach ($settings as $keyValuePair) {
                 $key = $keyValuePair['key'];
                 $value = $keyValuePair['value'];
                 if ($keyValuePair['is_encrypted'] === 1) {
-                    config([$key => decrypt($value)]);
+                    config([$key => tw_unhash($value)]);
                 } else {
                     config([$key => $value]);
                 }

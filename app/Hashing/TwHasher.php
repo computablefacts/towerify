@@ -18,7 +18,7 @@ class TwHasher extends AbstractHasher implements Hasher
     }
 
     // Keep in sync with index.php
-    private static function tw_random_string($length): string
+    private static function tw_random_string(int $length): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&?!#';
         $lengthCharacters = strlen($characters);
