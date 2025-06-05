@@ -16,8 +16,8 @@ class AssetsDiscoverCheck extends Check
     protected string $rootCacheKey = 'health:checks:assetsDiscover';
 
     protected string $domain = 'cywise.io';
-    protected int $failedDurationThresholdSeconds = 130;
-    protected int $warningDurationThresholdSeconds = 65;
+    protected int $failedDurationThresholdSeconds = 90;
+    protected int $warningDurationThresholdSeconds = 45;
 
     public function cacheKey(string $cacheKey): self
     {
