@@ -193,14 +193,16 @@ class QueryKnowledgeBase extends AbstractAction
             })
             ->join("\n\n");
 
-        if (empty($memos) && (empty($json) || (empty($json['paraphrased_fr']) && empty($json['paraphrased_en'])) || (empty($json['expanded_fr']) && empty($json['expanded_en'])))) {
+        if (empty($memos) && (empty($json) || (empty($json['keywords_fr']) && empty($json['keywords_en'])))) {
             return '';
         }
 
         $start = microtime(true);
-        /* $englishQuestions = array_merge([$json['question_en']], $json['paraphrased_en'], $json['expanded_en']);
-        $frenchQuestions = array_merge([$json['question_fr']], $json['paraphrased_fr'], $json['expanded_fr']);
-        $questions = array_merge($englishQuestions, $frenchQuestions);
+        /** @var array<string> $englishKeywords */
+        $englishKeywords = $this->combine($json['keywords_en']);
+        /** @var array<string> $frenchKeywords */
+        $frenchKeywords = $this->combine($json['keywords_fr']);
+        /** @var array<int> $englishCollections */
         $englishCollections = \App\Models\Collection::query()
             ->where('cb_collections.is_deleted', false)
             ->where(function ($query) {
@@ -209,7 +211,10 @@ class QueryKnowledgeBase extends AbstractAction
             })
             ->orderBy('cb_collections.priority')
             ->orderBy('cb_collections.name')
-            ->get();
+            ->get()
+            ->pluck('id')
+            ->toArray();
+        /** @var array<int> $frenchCollections */
         $frenchCollections = \App\Models\Collection::query()
             ->where('cb_collections.is_deleted', false)
             ->where(function ($query) {
@@ -218,45 +223,46 @@ class QueryKnowledgeBase extends AbstractAction
             })
             ->orderBy('cb_collections.priority')
             ->orderBy('cb_collections.name')
-            ->get(); */
+            ->get()
+            ->pluck('id')
+            ->toArray();
+
         $chunks = collect();
 
-        /** @var string $question */
-        /* foreach ($englishQuestions as $question) {
+        foreach ($englishKeywords as $keywords) {
             try {
                 $start2 = microtime(true);
-                $results = Chunk::search($question)
-                    ->whereIn('collection_id', collect($englishCollections)->pluck('id')->toArray())
+                $results = Chunk::search($keywords)
+                    ->whereIn('collection_id', $englishCollections)
                     ->paginate(10)
                     ->getCollection();
                 $chunks = $chunks->merge($results);
                 $stop2 = microtime(true);
-                Log::debug("[EN] Search for '{$question}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
+                Log::debug("[EN] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
             if ($chunks->isNotEmpty()) {
                 break;
             }
-        } */
-        /** @var string $question */
-        /* foreach ($frenchQuestions as $question) {
+        }
+        foreach ($frenchKeywords as $keywords) {
             try {
                 $start2 = microtime(true);
-                $results = Chunk::search($question)
-                    ->whereIn('collection_id', collect($frenchCollections)->pluck('id')->toArray())
+                $results = Chunk::search($keywords)
+                    ->whereIn('collection_id', $frenchCollections)
                     ->paginate(10)
                     ->getCollection();
                 $chunks = $chunks->merge($results);
                 $stop2 = microtime(true);
-                Log::debug("[FR] Search for '{$question}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
+                Log::debug("[FR] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
             if ($chunks->isNotEmpty()) {
                 break;
             }
-        } */
+        }
 
         $stop = microtime(true);
         Log::debug("Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$chunks->count()} results");
@@ -298,5 +304,30 @@ class QueryKnowledgeBase extends AbstractAction
         $answer = $response['choices'][0]['message']['content'] ?? '';
         Log::debug("[3] answer : {$answer}");
         return preg_replace('/<think>.*?<\/think>/s', '', $answer);
+    }
+
+    private function combine(array $arrays): array
+    {
+        if (empty($arrays)) {
+            return [];
+        }
+
+        /** @var array<array<string>> $combinations */
+        $combinations = array_map(fn(string $word) => [$word], $arrays[0]);
+
+        for ($i = 1; $i < count($arrays); $i++) {
+
+            /** @var array<string> $cur */
+            $cur = $arrays[$i];
+            $new = [];
+
+            foreach ($combinations as $existing) {
+                foreach ($cur as $word) {
+                    $new[] = array_merge($existing, [$word]);
+                }
+            }
+            $combinations = $new;
+        }
+        return array_map(fn(array $combination) => implode(" ", $combination), $combinations);
     }
 }

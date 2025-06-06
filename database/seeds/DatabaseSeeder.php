@@ -428,11 +428,31 @@ class DatabaseSeeder extends Seeder
 
     private function setupUserPromptsAndFrameworks(): void
     {
-        User::query()->chunkById(100, function ($users) {
-            foreach ($users as $user) {
-                User::init($user, false);
+        \App\Models\Tenant::query()->chunkById(100, function ($tenants) {
+            /** @var \App\Models\Tenant $tenant */
+            foreach ($tenants as $tenant) {
+
+                $oldestInTenant = User::query()
+                    ->where('tenant_id', $tenant->id)
+                    ->orderBy('created_at')
+                    ->first();
+
+                if ($oldestInTenant) {
+                    User::init($oldestInTenant, true);
+                }
+
+                User::query()
+                    ->where('tenant_id', $tenant->id)
+                    ->when($oldestInTenant, fn($query) => $query->where('id', '<>', $oldestInTenant->id))
+                    ->chunkById(100, function ($users) {
+                        /** @var User $user */
+                        foreach ($users as $user) {
+                            User::init($user, false);
+                        }
+                    });
             }
         });
+
     }
 
     private function setupFrameworks(): void

@@ -124,7 +124,8 @@ class PrepareFramework extends Command
                 $chunk = [
                     'page' => 1,
                     'tags' => $this->extractTitlesFromMarkdown($block),
-                    'text' => "**Provider.** {$framework->provider}\n**Title.** {$framework->name}\n**Description.** {$framework->description}\n\n" . trim($block),
+                    // 'text' => "**Provider.** {$framework->provider}\n**Title.** {$framework->name}\n**Description.** {$framework->description}\n\n" . trim($block),
+                    'text' => trim($block),
                 ];
                 file_put_contents($filename, json_encode($chunk) . PHP_EOL, FILE_APPEND);
             }
