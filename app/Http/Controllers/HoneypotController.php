@@ -15,7 +15,7 @@ use App\Models\Attacker;
 use App\Models\HiddenAlert;
 use App\Models\Honeypot;
 use App\Models\HoneypotEvent;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

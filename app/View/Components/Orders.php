@@ -3,7 +3,7 @@
 namespace App\View\Components;
 
 use App\Models\YnhOrder;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -24,6 +24,6 @@ class Orders extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.orders');
+        return view('cywise.components.orders');
     }
 }

@@ -6,7 +6,7 @@ use App\Models\Asset;
 use App\Models\File;
 use App\Models\Honeypot;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +33,6 @@ class Onboarding extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.onboarding');
+        return view('cywise.components.onboarding');
     }
 }

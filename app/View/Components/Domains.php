@@ -3,7 +3,7 @@
 namespace App\View\Components;
 
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -29,6 +29,6 @@ class Domains extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.domains');
+        return view('cywise.components.domains');
     }
 }

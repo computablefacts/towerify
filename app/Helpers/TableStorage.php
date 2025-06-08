@@ -3,7 +3,7 @@
 namespace App\Helpers;
 
 use App\Events\ImportTable;
-use App\User;
+use App\Models\User;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;

@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;

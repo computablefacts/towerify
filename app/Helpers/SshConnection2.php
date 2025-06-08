@@ -5,7 +5,7 @@ namespace App\Helpers;
 use App\Enums\SshTraceStateEnum;
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 

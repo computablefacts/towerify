@@ -2,26 +2,22 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Middleware\TrustProxies as Middleware;
+use Illuminate\Http\Request;
 
 class TrustProxies extends Middleware
 {
     /**
      * The trusted proxies for this application.
      *
-     * @var array
+     * @var array<int, string>|string|null
      */
-    protected $proxies = [
-        '10.0.0.0/8',
-        '172.16.0.0/12',
-        '192.168.0.0/16',
-    ];
+    protected $proxies;
 
     /**
-     * The current proxy header mappings.
+     * The headers that should be used to detect proxies.
      *
-     * @var array
+     * @var int
      */
     protected $headers =
         Request::HEADER_X_FORWARDED_FOR |

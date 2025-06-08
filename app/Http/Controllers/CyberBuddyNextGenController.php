@@ -11,7 +11,7 @@ use App\Jobs\ProcessIncomingEmails;
 use App\Models\Conversation;
 use App\Models\Prompt;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

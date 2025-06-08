@@ -11,7 +11,7 @@ use App\Helpers\AppStore;
 use App\Helpers\SshConnection2;
 use App\Helpers\SshKeyPair;
 use App\Traits\HasTenant2;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -5,7 +5,7 @@ namespace App\Helpers;
 use App\Hashing\TwHasher;
 use App\Models\Role;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

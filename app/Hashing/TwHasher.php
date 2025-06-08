@@ -5,20 +5,21 @@ namespace App\Hashing;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Hashing\AbstractHasher;
 
+/** @deprecated */
 class TwHasher extends AbstractHasher implements Hasher
 {
     public static function hash($value): string
     {
-        return self::tw_hash($value);
+        return self::cywise_hash($value);
     }
 
     public static function unhash($value): string
     {
-        return self::tw_unhash($value);
+        return self::cywise_unhash($value);
     }
 
     // Keep in sync with index.php
-    private static function tw_random_string(int $length): string
+    private static function cywise_random_string(int $length): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&?!#';
         $lengthCharacters = strlen($characters);
@@ -31,15 +32,15 @@ class TwHasher extends AbstractHasher implements Hasher
     }
 
     // Keep in sync with index.php
-    private static function tw_hash(string $value): string
+    private static function cywise_hash(string $value): string
     {
         $key = config('towerify.hasher.nonce');
-        $initializationVector = self::tw_random_string(16);
+        $initializationVector = self::cywise_random_string(16);
         return $initializationVector . '_' . openssl_encrypt($value, 'AES-256-CBC', $key, 0, $initializationVector);
     }
 
     // Keep in sync with index.php
-    private static function tw_unhash(string $value): string
+    private static function cywise_unhash(string $value): string
     {
         $key = config('towerify.hasher.nonce');
         $initializationVector = strtok($value, '_');

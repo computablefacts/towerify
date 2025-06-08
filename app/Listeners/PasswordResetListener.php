@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
 

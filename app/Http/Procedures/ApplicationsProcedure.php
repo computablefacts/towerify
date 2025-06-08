@@ -12,7 +12,7 @@ use App\Models\YnhApplication;
 use App\Models\YnhOrder;
 use App\Models\YnhServer;
 use App\Models\YnhUser;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;

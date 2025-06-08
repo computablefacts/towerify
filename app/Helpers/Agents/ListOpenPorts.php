@@ -4,7 +4,7 @@ namespace App\Helpers\Agents;
 
 use App\Models\Asset;
 use App\Models\Port;
-use App\User;
+use App\Models\User;
 
 class ListOpenPorts extends AbstractAction
 {

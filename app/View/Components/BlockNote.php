@@ -15,6 +15,6 @@ class BlockNote extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.block-note');
+        return view('cywise.components.block-note');
     }
 }

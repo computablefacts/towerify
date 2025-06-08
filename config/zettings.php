@@ -1,4 +1,5 @@
 <?php
+
 /*
  * zettings.php
  *
@@ -7,4 +8,5 @@
  * Ideally this is the last file to be loaded in the config directory.
  *
  */
-return override_app_settings();
+
+return app_config_override();

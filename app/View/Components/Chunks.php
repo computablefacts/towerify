@@ -67,6 +67,6 @@ class Chunks extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.chunks');
+        return view('cywise.components.chunks');
     }
 }

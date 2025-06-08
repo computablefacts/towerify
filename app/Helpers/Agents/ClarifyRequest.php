@@ -2,7 +2,7 @@
 
 namespace App\Helpers\Agents;
 
-use App\User;
+use App\Models\User;
 
 class ClarifyRequest extends AbstractAction
 {

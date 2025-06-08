@@ -2,7 +2,7 @@
 
 namespace App\Helpers\Agents;
 
-use App\User;
+use App\Models\User;
 
 abstract class AbstractAction
 {
@@ -31,7 +31,7 @@ abstract class AbstractAction
                   </tbody>
                 </table>
               </div>
-            </div>        
+            </div>
         ";
     }
 

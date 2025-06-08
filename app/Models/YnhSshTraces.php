@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SshTraceStateEnum;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

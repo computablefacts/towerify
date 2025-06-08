@@ -2,7 +2,7 @@
 
 namespace App\Helpers\Agents;
 
-use App\User;
+use App\Models\User;
 
 class Help extends AbstractAction
 {
@@ -32,7 +32,7 @@ class Help extends AbstractAction
     function execute(): AbstractAction
     {
         $this->output = "
-# Commands Available To You        
+# Commands Available To You
 /monitor {begin|end} {domain|ip address}
 /discover {domain}
 /list {assets|open_ports|vulnerabilities}

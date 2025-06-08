@@ -7,7 +7,7 @@ use App\Models\Asset;
 use App\Models\YnhOsquery;
 use App\Models\YnhOverview;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

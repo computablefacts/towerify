@@ -11,7 +11,7 @@ use App\Models\Invitation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\YnhOrder;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Konekt\Customer\Models\CustomerType;

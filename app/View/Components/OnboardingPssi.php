@@ -15,6 +15,6 @@ class OnboardingPssi extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.onboarding-pssi');
+        return view('cywise.components.onboarding-pssi');
     }
 }

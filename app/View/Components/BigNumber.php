@@ -24,7 +24,7 @@ class BigNumber extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.big-number');
+        return view('cywise.components.big-number');
     }
 
     private function icon(string $icon): string

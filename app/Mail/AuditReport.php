@@ -7,7 +7,7 @@ use App\Models\Asset;
 use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryPackage;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;

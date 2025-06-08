@@ -4,7 +4,7 @@ namespace App\Helpers\Agents;
 
 use App\Http\Controllers\AssetController;
 use App\Models\Asset;
-use App\User;
+use App\Models\User;
 
 class RemoveAsset extends AbstractAction
 {

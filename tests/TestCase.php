@@ -10,7 +10,7 @@ use App\Models\Honeypot;
 use App\Models\Port;
 use App\Models\Scan;
 use App\Models\Screenshot;
-use App\User;
+use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 /**
@@ -36,8 +36,10 @@ abstract class TestCase extends BaseTestCase
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
-        print "\nSETTING UP DATABASE\n";
-        shell_exec('php artisan migrate:fresh --env=testing --seed');
+
+        print "\nPreparing database...\n";
+        shell_exec('php artisan migrate:fresh --env=testing --drop-views --seed');
+        print "\nDatabase is ready.\n";
     }
 
     protected function setUp(): void

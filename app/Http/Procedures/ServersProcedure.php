@@ -12,7 +12,7 @@ use App\Helpers\Messages;
 use App\Helpers\SshKeyPair;
 use App\Models\YnhDomain;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

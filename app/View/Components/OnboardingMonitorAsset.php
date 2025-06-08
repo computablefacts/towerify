@@ -15,6 +15,6 @@ class OnboardingMonitorAsset extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.onboarding-monitor-asset');
+        return view('cywise.components.onboarding-monitor-asset');
     }
 }

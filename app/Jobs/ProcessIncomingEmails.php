@@ -11,7 +11,7 @@ use App\Models\Conversation;
 use App\Models\File;
 use App\Models\TimelineItem;
 use App\Rules\IsValidCollectionName;
-use App\User;
+use App\Models\User;
 use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -49,10 +49,10 @@ class ProcessIncomingEmails implements ShouldQueue
         $urls = array_values(array_unique(array_map('html_entity_decode', $matches[0])));
 
         $prompt = "
-             You are a summarizer. You write a summary of the input using following steps: 
-             
-             1. **Analyze the input text and generate 5 essential questions** that, when answered, comprehensively capture 
-               the main points and core meaning of the text. Aim for questions that dig deeper into the content and avoid 
+             You are a summarizer. You write a summary of the input using following steps:
+
+             1. **Analyze the input text and generate 5 essential questions** that, when answered, comprehensively capture
+               the main points and core meaning of the text. Aim for questions that dig deeper into the content and avoid
                redundancy.
              2. **Guidelines for Formulating Questions:**
                2.1. Address the central theme or argument.
@@ -60,9 +60,9 @@ class ProcessIncomingEmails implements ShouldQueue
                2.3. Highlight important facts or evidence.
                2.4. Reveal the author’s purpose or perspective.
                2.5. Explore any significant implications or conclusions.
-             3. **Answer Each Question in Detail:** Provide thorough, clear answers, maintaining a balance between depth 
+             3. **Answer Each Question in Detail:** Provide thorough, clear answers, maintaining a balance between depth
                 and clarity.
-             4. **Final Summary:** Conclude with a short summary that encapsulates the core message of the text. Include 
+             4. **Final Summary:** Conclude with a short summary that encapsulates the core message of the text. Include
                 a specific example to illustrate your point.
 
              [TEXT]

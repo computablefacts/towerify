@@ -4,7 +4,7 @@ namespace App\View\Components;
 
 use App\Models\YnhOsquery;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -36,6 +36,6 @@ class Servers extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.servers');
+        return view('cywise.components.servers');
     }
 }

@@ -18,6 +18,7 @@ use App\Models\Port;
 use App\Models\PortTag;
 use App\Models\Scan;
 use App\Models\Screenshot;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -328,8 +329,9 @@ class ScansTest extends TestCase
                 ->etc();
         });
 
-        TriggerScan::dispatch();
-
+        $job = (new TriggerScan())->withFakeQueueInteractions();
+        $job->handle();
+        
         $asset->refresh();
 
         // Check tables content
@@ -401,7 +403,8 @@ class ScansTest extends TestCase
                 ->etc();
         });
 
-        TriggerScan::dispatch();
+        $job = (new TriggerScan())->withFakeQueueInteractions();
+        $job->handle();
 
         $asset->refresh();
 
@@ -631,7 +634,8 @@ class ScansTest extends TestCase
                 ->etc();
         });
 
-        TriggerScan::dispatch();
+        $job = (new TriggerScan())->withFakeQueueInteractions();
+        $job->handle();
 
         $asset->refresh();
 
@@ -926,6 +930,7 @@ class ScansTest extends TestCase
 
     private function addDns(): TestResponse
     {
+        Log::info($this->token);
         $response = $this->withHeaders([
             'Accept' => 'application/json',
             'Authorization' => "Bearer {$this->token}",

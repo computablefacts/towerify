@@ -3,7 +3,7 @@
 namespace App\Helpers\Agents;
 
 use App\Models\Asset;
-use App\User;
+use App\Models\User;
 
 class ListAssets extends AbstractAction
 {

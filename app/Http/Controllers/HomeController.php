@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\SupersetApiUtilsFacade as ApiUtils;
-use App\Http\Middleware\RedirectIfNotSubscribed;
 use App\Models\Role;
+use App\Models\User;
 use App\Models\YnhServer;
-use App\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +15,7 @@ class HomeController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', RedirectIfNotSubscribed::class]);
+        $this->middleware(['auth']);
     }
 
     public function index(Request $request)

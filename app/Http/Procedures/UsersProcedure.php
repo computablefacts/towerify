@@ -2,7 +2,7 @@
 
 namespace App\Http\Procedures;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Sajya\Server\Attributes\RpcMethod;
 use Sajya\Server\Procedure;

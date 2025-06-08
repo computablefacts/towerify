@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Konekt\Acl\Models\Role as RoleBase;
-
-class Role extends RoleBase
+class Role extends \Spatie\Permission\Models\Role
 {
     const ADMIN = 'admin';
     const ADMINISTRATOR = 'administrator';
@@ -244,5 +242,10 @@ class Role extends RoleBase
             Permission::VIEW_INVITATIONS,
             Permission::VIEW_DOCUMENTATION,
         ],
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 }

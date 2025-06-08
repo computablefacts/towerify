@@ -5,7 +5,7 @@ namespace App\Listeners;
 use App\Models\Invitation;
 use App\Models\Role;
 use App\Models\Saml2Tenant;
-use App\User;
+use App\Models\User;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;

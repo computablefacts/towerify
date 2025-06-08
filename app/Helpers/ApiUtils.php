@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Collection;
 use App\Models\Prompt;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;

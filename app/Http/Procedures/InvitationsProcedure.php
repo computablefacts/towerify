@@ -3,10 +3,8 @@
 namespace App\Http\Procedures;
 
 use App\Events\SendInvitation;
-use App\Models\Invitation;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Konekt\User\Models\InvitationProxy;
 use Sajya\Server\Attributes\RpcMethod;
 use Sajya\Server\Procedure;
 

@@ -34,6 +34,6 @@ class Collections extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.collections');
+        return view('cywise.components.collections');
     }
 }

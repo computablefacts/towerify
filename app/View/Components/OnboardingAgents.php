@@ -15,6 +15,6 @@ class OnboardingAgents extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.onboarding-agents');
+        return view('cywise.components.onboarding-agents');
     }
 }

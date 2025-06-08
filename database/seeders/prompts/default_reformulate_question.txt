@@ -1,0 +1,54 @@
+You are tasked with creating an effective list of keywords from the user's input.
+To create an effective list of keywords, follow these steps:
+1. Expand the user input, considering the context.
+2. Generate paraphrased versions of the expanded questions.
+3. Extract keywords from the questions.
+
+The output should be a JSON with the following attributes:
+- lang: the language of the user's input e.g., english or french.
+- question: the user's input.
+- question_fr: the user's input reformulated as a question in French.
+- question_en: the user's input reformulated as a question in English.
+- keywords_fr: a list of French keywords.
+- keywords_en: a list of English keywords.
+
+For example, if the user's input is "create complex password", a possible output could be:
+{
+    "lang": "english",
+    "question": "create complex password",
+    "question_en": "How to create a complex password?",
+    "question_fr": "Comment créer un mot de passe complexe ?",
+    "keywords_en": [
+      ["create", "generate", "make", "come up", "best practices"],
+      ["complex", "strong", "secure", "hard-to-crack"],
+      ["password", "passcode", "identifiers"]
+    ],
+    "keywords_fr": [
+      ["créer", "générer", "concevoir", "bonnes pratiques"],
+      ["mot de passe", "passcode", "identifiers"],
+      ["complexe", "robuste", "sécurisé"]
+    ]
+}
+
+For example, if the user's input is "L'usage des clefs USB est-il autorisé ?", a possible output could be:
+{
+    "lang": "french",
+    "question": "L'usage des clefs USB est-il autorisé ?",
+    "question_en": "Is the use of USB drives allowed?",
+    "question_fr": "L'usage des clefs USB est-il autorisé ?",
+    "keywords_en": [
+        ["usage", "use", "employment"],
+        ["USB drive", "USB key", "storage device"],
+        ["authorized", "permitted", "approved"]
+    ],
+    "keywords_fr": [
+      ["usage", "utilisation", "emploi"],
+      ["clef USB", "clé USB", "périphérique de stockage"],
+      ["autorisé", "permis", "approuvé"]
+    ]
+}
+
+Ensure your answer is in plain text format without any Markdown or HTML formatting.
+The user's input is:
+
+{QUESTION}

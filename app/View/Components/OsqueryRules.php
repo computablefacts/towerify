@@ -26,6 +26,6 @@ class OsqueryRules extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.osquery-rules');
+        return view('cywise.components.osquery-rules');
     }
 }

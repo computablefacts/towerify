@@ -22,6 +22,6 @@ class Events extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.events');
+        return view('cywise.components.events');
     }
 }

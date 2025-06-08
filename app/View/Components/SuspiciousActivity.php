@@ -5,7 +5,7 @@ namespace App\View\Components;
 use App\Models\Asset;
 use App\Models\YnhOsquery;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -32,6 +32,6 @@ class SuspiciousActivity extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.suspicious-activity');
+        return view('cywise.components.suspicious-activity');
     }
 }

@@ -4,7 +4,7 @@ namespace App\View\Components;
 
 use App\Models\YnhNginxLogs;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +27,6 @@ class Interdependencies extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.interdependencies');
+        return view('cywise.components.interdependencies');
     }
 }

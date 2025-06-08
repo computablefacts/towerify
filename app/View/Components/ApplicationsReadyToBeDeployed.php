@@ -32,6 +32,6 @@ class ApplicationsReadyToBeDeployed extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.applications-ready-to-be-deployed');
+        return view('cywise.components.applications-ready-to-be-deployed');
     }
 }

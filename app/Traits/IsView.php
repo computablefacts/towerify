@@ -6,7 +6,7 @@ use App\Models\Customer;
 use App\Models\Tenant;
 use App\Models\YnhOsquery;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait IsView

@@ -18,6 +18,6 @@ class Server extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.server');
+        return view('cywise.components.server');
     }
 }

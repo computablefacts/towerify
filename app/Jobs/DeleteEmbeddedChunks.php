@@ -45,6 +45,7 @@ class DeleteEmbeddedChunks implements ShouldQueue
                     if ($response['error']) {
                         Log::error($response['error_details']);
                     } else {
+                        $collection->chunks()->get()->each(fn(Chunk $chunk) => $chunk->unsearchable());
                         $collection->delete(); // cascade delete on files and chunks
                     }
                 } catch (\Exception $exception) {
@@ -59,6 +60,12 @@ class DeleteEmbeddedChunks implements ShouldQueue
                 $collection->chunks()
                     ->where('is_embedded', false)
                     ->where('is_deleted', true)
+                    ->get()
+                    ->each(fn(Chunk $chunk) => $chunk->unsearchable());
+
+                $collection->chunks()
+                    ->where('is_embedded', false)
+                    ->where('is_deleted', true)
                     ->delete();
 
                 // delete vectors then delete chunks
@@ -70,11 +77,13 @@ class DeleteEmbeddedChunks implements ShouldQueue
                         $files = [];
                         $uids = [];
 
+                        /** @var Chunk $chunk */
                         foreach ($chunks as $chunk) {
                             if (!in_array($chunk->file_id, $files)) {
                                 $files[] = $chunk->file_id;
                             }
                             $uids[] = (string)$chunk->id;
+                            $chunk->unsearchable();
                         }
                         try {
                             $response = ApiUtils::delete_chunks($uids, $collection->name);

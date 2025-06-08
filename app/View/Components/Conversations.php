@@ -31,6 +31,6 @@ class Conversations extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.conversations');
+        return view('cywise.components.conversations');
     }
 }

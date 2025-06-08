@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Konekt\Acl\Models\Permission as PermissionBase;
-
-class Permission extends PermissionBase
+class Permission extends \Spatie\Permission\Models\Permission
 {
     /** @deprecated */
     const LIST_SERVERS = 'list servers';
@@ -80,4 +78,9 @@ class Permission extends PermissionBase
     const VIEW_DOCUMENTATION = 'view documentation';
     const VIEW_TERMS = 'view terms';
     const VIEW_RESET_PASSWORD = 'view reset password';
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 }

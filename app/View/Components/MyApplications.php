@@ -3,7 +3,7 @@
 namespace App\View\Components;
 
 use App\Models\YnhPermission;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -24,6 +24,6 @@ class MyApplications extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.my-applications');
+        return view('cywise.components.my-applications');
     }
 }

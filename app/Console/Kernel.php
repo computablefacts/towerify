@@ -22,15 +22,6 @@ use Spatie\Health\Commands\ScheduleCheckHeartbeatCommand;
 class Kernel extends ConsoleKernel
 {
     /**
-     * The Artisan commands provided by your application.
-     *
-     * @var array
-     */
-    protected $commands = [
-        //
-    ];
-
-    /**
      * Define the application's command schedule.
      *
      * @param \Illuminate\Console\Scheduling\Schedule $schedule
@@ -60,6 +51,10 @@ class Kernel extends ConsoleKernel
         // Health check - please let this at the end
         $schedule->command(DispatchQueueCheckJobsCommand::class)->everyMinute();
         $schedule->command(ScheduleCheckHeartbeatCommand::class)->everyMinute();
+
+        // Misc. Wave
+        // $schedule->command('inspire')->hourly();
+        $schedule->command('subscriptions:cancel-expired')->hourly();
     }
 
     /**

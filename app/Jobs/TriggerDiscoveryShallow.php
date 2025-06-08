@@ -7,7 +7,7 @@ use App\Events\CreateAsset;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
 use App\Models\Asset;
 use App\Models\Tenant;
-use App\User;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

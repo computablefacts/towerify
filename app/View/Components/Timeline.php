@@ -15,7 +15,7 @@ use App\Models\Scan;
 use App\Models\TimelineItem;
 use App\Models\YnhOsquery;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -375,7 +375,7 @@ class Timeline extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.timeline');
+        return view('cywise.components.timeline');
     }
 
     private function conversations(User $user): array

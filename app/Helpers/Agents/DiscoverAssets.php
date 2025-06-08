@@ -3,7 +3,7 @@
 namespace App\Helpers\Agents;
 
 use App\Http\Controllers\AssetController;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class DiscoverAssets extends AbstractAction

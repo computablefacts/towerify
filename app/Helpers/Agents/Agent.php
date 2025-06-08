@@ -5,7 +5,7 @@ namespace App\Helpers\Agents;
 use App\Enums\RoleEnum;
 use App\Helpers\DeepInfra;
 use App\Models\Conversation;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 

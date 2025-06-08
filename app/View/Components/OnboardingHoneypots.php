@@ -15,6 +15,6 @@ class OnboardingHoneypots extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.onboarding-honeypots');
+        return view('cywise.components.onboarding-honeypots');
     }
 }

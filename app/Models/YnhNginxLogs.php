@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,16 +49,16 @@ class YnhNginxLogs extends Model
         $nodes = $servers->isEmpty() ? collect() : collect(DB::select("
             SELECT
               ynh_servers.name AS label
-            FROM ynh_nginx_logs 
+            FROM ynh_nginx_logs
             INNER JOIN ynh_servers ON ynh_servers.id = from_ynh_server_id
             WHERE from_ynh_server_id IN ({$ids})
-            AND from_ip_address NOT IN ('{$adversaryMeterIpAddresses}') 
+            AND from_ip_address NOT IN ('{$adversaryMeterIpAddresses}')
 
             UNION DISTINCT
 
-            SELECT 
+            SELECT
               ynh_servers.name AS label
-            FROM ynh_nginx_logs 
+            FROM ynh_nginx_logs
             INNER JOIN ynh_servers ON ynh_servers.id = to_ynh_server_id
             WHERE to_ynh_server_id IN ({$ids})
         "))->map(function (object $node) {
@@ -77,9 +77,9 @@ class YnhNginxLogs extends Model
         $center = $centeredAroundServer ? "AND (from_ynh_server_id = {$centeredAroundServer->id} OR to_ynh_server_id = {$centeredAroundServer->id})" : "";
         $edges = $servers->isEmpty() ? collect() : collect(DB::select("
             SELECT
-              CASE 
-                WHEN source.name IS NULL THEN from_ip_address 
-                ELSE source.name 
+              CASE
+                WHEN source.name IS NULL THEN from_ip_address
+                ELSE source.name
               END AS src,
               target.name AS dest,
               GROUP_CONCAT(service SEPARATOR '|') AS services

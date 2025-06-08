@@ -11,7 +11,7 @@ use App\Rules\IsValidAsset;
 use App\Rules\IsValidDomain;
 use App\Rules\IsValidIpAddress;
 use App\Rules\IsValidTag;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;

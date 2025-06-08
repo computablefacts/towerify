@@ -30,6 +30,6 @@ class Prompts extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.prompts');
+        return view('cywise.components.prompts');
     }
 }

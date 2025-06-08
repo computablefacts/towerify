@@ -55,6 +55,6 @@ class Sca extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.sca');
+        return view('cywise.components.sca');
     }
 }

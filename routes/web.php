@@ -18,17 +18,14 @@ use App\Events\EndVulnsScan;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
-use App\Http\Middleware\RedirectIfNotSubscribed;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Listeners\EndVulnsScanListener;
 use App\Mail\AuditReport;
 use App\Models\Asset;
 use App\Models\Honeypot;
-use App\Models\Port;
 use App\Models\Scan;
 use App\Models\YnhServer;
 use App\Models\YnhTrial;
-use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -39,30 +36,18 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Spatie\Health\Http\Controllers\HealthCheckResultsController;
 use Spatie\Health\Http\Controllers\SimpleHealthCheckController;
+use Wave\Facades\Wave;
 
-/** @deprecated */
-Route::get('catalog', function () {
-    \Illuminate\Support\Facades\Auth::login(\App\User::where('email', config('towerify.admin.email'))->firstOrFail());
-    $apps = \App\Models\Product::orderBy('name')
-        ->get()
-        ->map(function (\App\Models\Product $product) {
-            return \App\Helpers\ProductOrProductVariant::create($product);
-        })
-        ->filter(function (\App\Helpers\ProductOrProductVariant $product) {
-            return $product->isApplication();
-        })
-        ->map(function (\App\Helpers\ProductOrProductVariant $product) {
-            return [
-                'name' => $product->getName(),
-                'description' => $product->product()->description,
-                'image' => $product->getThumbnailUrl(),
-                'status' => $product->product()->state->value(),
-            ];
-        })
-        ->values();
-    return new JsonResponse($apps, 200, ['Access-Control-Allow-Origin' => '*']);
-})->middleware('throttle:30,1');
+// Wave routes
+Wave::routes();
 
+/**
+ * Health check
+ */
+Route::get('check-health', [SimpleHealthCheckController::class, '__invoke']);
+Route::get('check-health/ui', [HealthCheckResultsController::class, '__invoke'])->middleware('auth');
+
+// Cywise routes
 Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
 
     $token = $request->input('api_token');
@@ -80,7 +65,7 @@ Route::get('/setup/script', function (\Illuminate\Http\Request $request) {
             ->header('Content-Type', 'text/plain');
     }
 
-    /** @var User $user */
+    /** @var \App\Models\User $user */
     $user = $token->tokenable;
     Auth::login($user);
 
@@ -444,178 +429,6 @@ Route::get('/dispatch/job/{job}/{trialId?}', function (string $job, ?int $trialI
     return response('Unauthorized', 403)->header('Content-Type', 'text/plain');
 })->middleware('auth');
 
-Route::get('', function () {
-    if (\Illuminate\Support\Facades\Auth::user()) {
-        return redirect()->route('home');
-    }
-    return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
-})->middleware([RedirectIfNotSubscribed::class]);
-
-Route::get('/', function () {
-    if (\Illuminate\Support\Facades\Auth::user()) {
-        return redirect()->route('home');
-    }
-    return redirect()->route('the-cyber-brief', ['lang' => 'fr']);
-})->middleware([RedirectIfNotSubscribed::class]);
-
-Auth::routes();
-Route::post('/login/email', 'Auth\LoginController@loginEmail')->name('login.email');
-Route::get('/login/password', 'Auth\LoginController@showLoginPasswordForm')->name('login.password');
-
-Route::get('/home', 'HomeController@index')->name('home')->middleware([RedirectIfNotSubscribed::class]);
-
-Route::get('/terms', 'TermsController@show')->name('terms');
-
-Route::get('/reset-password', function () {
-    $email = \Illuminate\Support\Facades\Auth::user()->email;
-    Auth::logout();
-    return redirect()->route('password.request', ['email' => $email]);
-})->middleware(['auth', RedirectIfNotSubscribed::class])->name('reset-password');
-
-Route::get('/notifications/{notification}/dismiss', function (\Illuminate\Notifications\DatabaseNotification $notification, \Illuminate\Http\Request $request) {
-    \Illuminate\Notifications\DatabaseNotification::query()
-        ->whereNull('read_at')
-        ->whereJsonContains('data->group', $notification->data['group'])
-        ->get()
-        ->each(fn($notif) => $notif->markAsRead());
-})->middleware(['auth', RedirectIfNotSubscribed::class]);
-
-Route::get('/events/{osquery}/dismiss', function (\App\Models\YnhOsquery $osquery, \Illuminate\Http\Request $request) {
-    /** @var YnhServer $server */
-    $server = YnhServer::find($osquery->ynh_server_id);
-    if ($server) {
-        $osquery->dismissed = true;
-        $osquery->save();
-        return response()->json(['success' => "The event has been dismissed!"]);
-    }
-    return response()->json(['error' => "Unknown event."], 500);
-})->middleware(['auth', RedirectIfNotSubscribed::class]);
-
-Route::group(['prefix' => 'ynh', 'as' => 'ynh.'], function () {
-    Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
-        Route::get('', 'YnhServerController@create')->name('create');
-        Route::match(['get', 'post'], '{server}/edit', 'YnhServerController@index')->name('edit');
-        Route::post('{server}/backup', 'YnhServerController@createBackup')->name('create-backup');
-        Route::get('{server}/backup/{backup}', 'YnhServerController@downloadBackup')->name('download-backup');
-    });
-    Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
-        Route::get('{user}/toggle-gets-audit-report', 'UserController@toggleGetsAuditReport')->name('toggle-gets-audit-report');
-    });
-})->middleware([RedirectIfNotSubscribed::class]);
-
-Route::group(['prefix' => 'shop', 'as' => 'product.'], function () {
-    Route::get('index', 'ProductController@index')->name('index');
-    Route::get('c/{taxonomyName}/{taxon}', 'ProductController@index')->name('category');
-    Route::get('p/{slug}', 'ProductController@show')->name('show');
-    Route::get('p/{slug}/{taxon}', 'ProductController@show')->name('show-with-taxon');
-})->middleware([RedirectIfNotSubscribed::class]);
-
-Route::group(['prefix' => 'cart', 'as' => 'cart.'], function () {
-    Route::get('show', 'CartController@show')->name('show');
-    Route::post('add/{product}', 'CartController@add')->name('add');
-    Route::post('adv/{masterProductVariant}', 'CartController@addVariant')->name('add-variant');
-    Route::post('update/{cart_item}', 'CartController@update')->name('update');
-    Route::post('remove/{cart_item}', 'CartController@remove')->name('remove');
-})->middleware([RedirectIfNotSubscribed::class]);
-
-Route::group(['prefix' => 'checkout', 'as' => 'checkout.'], function () {
-    Route::get('show', 'CheckoutController@show')->name('show');
-    Route::post('submit', 'CheckoutController@submit')->name('submit');
-})->middleware([RedirectIfNotSubscribed::class]);
-
-Route::get('/plans', 'StripeController@plan')->name('plans');
-Route::get('/subscribe', 'StripeController@subscribe')->name('subscribe');
-Route::get('/subscribe/success/{tx_id}', 'StripeController@subscribed')->name('subscribed');
-Route::get('/customer-portal', 'StripeController@customerPortal')->middleware('auth')->name('customer-portal');
-Route::get('/invitation', fn() => new \App\Mail\Invitation(\App\Models\Invitation::query()->latest()->first()))->middleware('auth');
-
-Route::group(['prefix' => 'cyber-check', 'as' => 'cyber-check.'], function () {
-
-    Route::get('/', fn() => redirect()->route('cyber-check.cywise.onboarding', [
-        'hash' => Str::random(128),
-        'step' => 1,
-    ]));
-    Route::match(['get', 'post'], '/{hash}/step/{step}', 'CywiseController@onboarding')->name('cywise.onboarding');
-    Route::post('/{hash}/discovery', 'CywiseController@discovery')->name('cywise.discovery');
-
-})->middleware(['auth']);
-
-Route::group(['prefix' => 'cyber-advisor', 'as' => 'cyber-advisor.'], function () {
-
-    Route::match(['get', 'post'], '/', 'CywiseController@onboarding2')->name('cywise2.onboarding');
-
-})->middleware(['auth']);
-
-Route::get('/the-cyber-brief', 'TheCyberBriefController@index')->name('the-cyber-brief');
-
-Route::post('/llm1', 'CyberBuddyController@llm1')->middleware('auth');
-
-Route::post('/llm2', 'CyberBuddyController@llm2')->middleware('auth');
-
-Route::get('/templates', 'CyberBuddyController@templates')->middleware('auth');
-
-Route::post('/templates', 'CyberBuddyController@saveTemplate')->middleware('auth');
-
-Route::delete('/templates/{id}', 'CyberBuddyController@deleteTemplate')->middleware('auth');
-
-Route::get('/files', 'CyberBuddyController@files')->middleware('auth');
-
-Route::delete('/files/{id}', 'CyberBuddyController@deleteFile')->middleware('auth');
-
-Route::get('/files/stream/{secret}', 'CyberBuddyController@streamFile');
-
-Route::get('/files/download/{secret}', 'CyberBuddyController@downloadFile');
-
-Route::post('/files/one', 'CyberBuddyController@uploadOneFile')->middleware('auth:sanctum');
-
-Route::post('/files/many', 'CyberBuddyController@uploadManyFiles')->middleware('auth:sanctum');
-
-Route::get('/collections', 'CyberBuddyController@collections')->middleware('auth');
-
-Route::delete('/collections/{id}', 'CyberBuddyController@deleteCollection')->middleware('auth');
-
-Route::post('/collections/{id}', 'CyberBuddyController@saveCollection')->middleware('auth');
-
-Route::delete('/chunks/{id}', 'CyberBuddyController@deleteChunk')->middleware('auth');
-
-Route::post('/chunks/{id}', 'CyberBuddyController@saveChunk')->middleware('auth');
-
-Route::delete('/prompts/{id}', 'CyberBuddyController@deletePrompt')->middleware('auth');
-
-Route::post('/prompts/{id}', 'CyberBuddyController@savePrompt')->middleware('auth');
-
-Route::delete('/conversations/{id}', 'CyberBuddyController@deleteConversation')->middleware('auth');
-
-Route::delete('/frameworks/{id}', 'CyberBuddyController@unloadFramework')->middleware('auth');
-
-Route::post('/frameworks/{id}', 'CyberBuddyController@loadFramework')->middleware('auth');
-
-Route::get('/cyber-buddy', 'CyberBuddyController@showPage')->middleware('auth');
-
-Route::get('/cyber-buddy/chat', 'CyberBuddyController@showChat');
-
-Route::match(['get', 'post'], 'botman', 'CyberBuddyController@handle');
-
-Route::group([
-    'prefix' => 'tables',
-], function () {
-    Route::get('/', 'CyberBuddyController@listTables')->name('list-tables');
-    Route::post('/columns', 'CyberBuddyController@listTablesColumns')->name('list-tables-columns');
-    Route::post('/import', 'CyberBuddyController@importTables')->name('import-tables');
-    Route::get('/available', 'CyberBuddyController@availableTables')->name('available-tables');
-    Route::post('/query', 'CyberBuddyController@queryTables')->name('query-tables');
-    Route::post('/prompt-to-query', 'CyberBuddyController@promptToTablesQuery')->name('prompt-to-tables-query');
-})->middleware(['auth']);
-
-Route::group([
-    'prefix' => 'assistant',
-], function () {
-    Route::get('/', 'CyberBuddyNextGenController@showAssistant');
-    Route::post('/converse', 'CyberBuddyNextGenController@converse');
-})->middleware(['auth', 'throttle:15,1']);
-
-Route::get('/cyber-todo/{hash}', 'CyberTodoController@show');
-
 Route::get('/audit-report', fn() => AuditReport::create()['report'])->middleware('auth');
 
 /** @deprecated */
@@ -721,25 +534,15 @@ Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illumina
         ->header('Content-Type', 'text/plain');
 })->middleware(['throttle:240,1']);
 
-/**
- * We need to add password requirements to invitation form
- * So we extends Konekt\AppShell\Http\Controllers\PublicInvitationController
- * Then we need to change the routes to use our controller
- *
- * See: vendor/konekt/appshell/src/resources/routes/public.php
- */
-Route::get('pub/invitation/{hash}', [
-    'uses' => 'PasswordRequirementsPublicInvitationController@show',
-    'as' => 'appshell.public.invitation.show'
-])->where('hash', '[A-Za-z0-9]+');
+Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function () {
 
-Route::post('pub/invitation/accept', [
-    'uses' => 'PasswordRequirementsPublicInvitationController@accept',
-    'as' => 'appshell.public.invitation.accept'
-]);
+    Route::get('/dashboard', fn() => view('cywise.iframes.dashboard'))
+        ->name('dashboard');
 
-/**
- * Health check
- */
-Route::get('check-health', [SimpleHealthCheckController::class, '__invoke']);
-Route::get('check-health/ui', [HealthCheckResultsController::class, '__invoke'])->middleware('auth');
+    Route::get('/stories', fn() => view('cywise.iframes.stories'))
+        ->name('stories');
+
+    Route::get('/users', fn() => view('cywise.iframes.users'))
+        ->name('users');
+
+});

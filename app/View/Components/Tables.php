@@ -10,6 +10,6 @@ class Tables extends Component
 {
     public function render(): View|Closure|string
     {
-        return view('components.tables');
+        return view('cywise.components.tables');
     }
 }

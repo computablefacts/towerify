@@ -3,7 +3,7 @@
 namespace App\Helpers\Agents;
 
 use App\Models\ScheduledTask;
-use App\User;
+use App\Models\User;
 use Cron\CronExpression;
 use Illuminate\Support\Carbon;
 

@@ -67,6 +67,6 @@ class Documents extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.documents');
+        return view('cywise.components.documents');
     }
 }

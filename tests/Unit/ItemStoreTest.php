@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Hashing\TwHasher;
 use App\Models\TimelineItem;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Tests\TestCase;

@@ -43,7 +43,6 @@ use App\Listeners\ImportVirtualTableListener;
 use App\Listeners\IngestFileListener;
 use App\Listeners\IngestHoneypotsEventsListener;
 use App\Listeners\InstallAppListener;
-use App\Listeners\OrderCreatedListener;
 use App\Listeners\PasswordResetListener;
 use App\Listeners\ProcessLogalertPayloadListener;
 use App\Listeners\ProcessLogalertPayloadListenerEx;
@@ -54,20 +53,17 @@ use App\Listeners\RemoveUserPermissionListener;
 use App\Listeners\SendAuditReportListener;
 use App\Listeners\SendInvitationListener;
 use App\Listeners\StartAssetsDiscoverListener;
-use App\Listeners\StripeEventListener;
 use App\Listeners\UninstallAppListener;
 use App\Listeners\UpdateServerInfosListener;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Laravel\Cashier\Events\WebhookReceived;
-use Vanilo\Order\Events\OrderWasCreated;
 
 class EventServiceProvider extends ServiceProvider
 {
     /**
-     * The event listener mappings for the application.
+     * The event to listener mappings for the application.
      *
-     * @var array
+     * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
         PasswordReset::class => [
@@ -90,9 +86,6 @@ class EventServiceProvider extends ServiceProvider
         ],
         RemoveUserPermission::class => [
             RemoveUserPermissionListener::class,
-        ],
-        OrderWasCreated::class => [
-            OrderCreatedListener::class,
         ],
         CreateBackup::class => [
             CreateBackupListener::class,
@@ -156,11 +149,6 @@ class EventServiceProvider extends ServiceProvider
             ImportVirtualTableListener::class,
         ],
 
-        // Stripe
-        WebhookReceived::class => [
-            StripeEventListener::class,
-        ],
-
         // Check
         StartAssetsDiscover::class => [
             StartAssetsDiscoverListener::class,
@@ -174,8 +162,16 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        parent::boot();
-
         //
+    }
+
+    /**
+     * Determine if events and listeners should be automatically discovered.
+     *
+     * @return bool
+     */
+    public function shouldDiscoverEvents()
+    {
+        return false;
     }
 }

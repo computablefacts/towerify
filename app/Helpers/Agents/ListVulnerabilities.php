@@ -4,7 +4,7 @@ namespace App\Helpers\Agents;
 
 use App\Models\Alert;
 use App\Models\Asset;
-use App\User;
+use App\Models\User;
 
 class ListVulnerabilities extends AbstractAction
 {

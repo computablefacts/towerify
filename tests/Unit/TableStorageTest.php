@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use App\Events\ImportTable;
 use App\Helpers\StorageType;
 use App\Helpers\TableStorage;
-use App\User;
+use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\DataProvider;

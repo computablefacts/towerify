@@ -16,6 +16,6 @@ class SqlEditor extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.sql-editor');
+        return view('cywise.components.sql-editor');
     }
 }

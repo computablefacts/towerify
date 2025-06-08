@@ -18,7 +18,7 @@ use App\Rules\IsValidAsset;
 use App\Rules\IsValidDomain;
 use App\Rules\IsValidIpAddress;
 use App\Rules\IsValidTag;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

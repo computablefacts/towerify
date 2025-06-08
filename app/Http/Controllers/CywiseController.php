@@ -8,7 +8,7 @@ use App\Enums\HoneypotStatusesEnum;
 use App\Mail\HoneypotRequested;
 use App\Models\Honeypot;
 use App\Models\YnhTrial;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;

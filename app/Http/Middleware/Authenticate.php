@@ -2,13 +2,12 @@
 
 namespace App\Http\Middleware;
 
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
-use Closure;
-use Illuminate\Http\Request;
+use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Support\Facades\Auth;
 
-class Authenticate
+class Authenticate extends Middleware
 {
     /**
      * Handle an incoming request.
@@ -18,7 +17,7 @@ class Authenticate
      * @param string|null $guard
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $guard = null)
+    public function handle($request, $next, ...$guards)
     {
         // Check either the bearer token or the query string (Sanctum)
         $token = $request->bearerToken() ?: $request->input('api_token');
@@ -41,5 +40,18 @@ class Authenticate
             return $next($request);
         }
         return $response; // 401 returned by Auth::onceBasic()
+    }
+
+    /**
+     * Get the path the user should be redirected to when they are not authenticated.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return string|null
+     */
+    protected function redirectTo($request)
+    {
+        if (!$request->expectsJson()) {
+            return route('login');
+        }
     }
 }

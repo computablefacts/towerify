@@ -4,7 +4,7 @@ namespace App\View\Components;
 
 use App\Jobs\Summarize;
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +36,6 @@ class Overview extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.overview');
+        return view('cywise.components.overview');
     }
 }

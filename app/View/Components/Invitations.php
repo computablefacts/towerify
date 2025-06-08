@@ -19,6 +19,6 @@ class Invitations extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.invitations');
+        return view('cywise.components.invitations');
     }
 }

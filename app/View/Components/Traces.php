@@ -4,7 +4,7 @@ namespace App\View\Components;
 
 use App\Models\YnhServer;
 use App\Models\YnhSshTraces;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -38,6 +38,6 @@ class Traces extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.traces');
+        return view('cywise.components.traces');
     }
 }

@@ -38,6 +38,6 @@ class Frameworks extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.frameworks');
+        return view('cywise.components.frameworks');
     }
 }

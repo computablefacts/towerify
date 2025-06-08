@@ -7,7 +7,7 @@ use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
 use App\Jobs\TriggerDiscoveryShallow;
 use App\Models\Asset;
 use App\Models\Tenant;
-use App\User;
+use App\Models\User;
 use Tests\TestCase;
 
 class DiscoveryShallowTest extends TestCase
@@ -35,7 +35,9 @@ class DiscoveryShallowTest extends TestCase
 
         CreateAsset::dispatch($user, 'example.com', false);
         CreateAsset::dispatch($user, 'example.com', false);
-        TriggerDiscoveryShallow::dispatch();
+
+        $job = (new TriggerDiscoveryShallow())->withFakeQueueInteractions();
+        $job->handle();
 
         $assetsOriginal = Asset::where('asset', 'example.com')->get();
         $assetsDiscovered = Asset::whereLike('asset', 'www%.example.com')->get();

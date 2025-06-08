@@ -4,7 +4,7 @@ namespace App\Http\Procedures;
 
 use App\Jobs\ProcessIncomingEmails;
 use App\Models\TimelineItem;
-use App\User;
+use App\Models\User;
 use App\View\Components\Timeline;
 use Illuminate\Http\Request;
 use Sajya\Server\Attributes\RpcMethod;

@@ -17,6 +17,6 @@ class TablesAdd extends Component
 
     public function render(): View|Closure|string
     {
-        return view('components.tables-add');
+        return view('cywise.components.tables-add');
     }
 }

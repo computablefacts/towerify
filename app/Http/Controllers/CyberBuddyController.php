@@ -25,7 +25,7 @@ use App\Models\Template;
 use App\Models\YnhFramework;
 use App\Models\YnhServer;
 use App\Rules\IsValidCollectionName;
-use App\User;
+use App\Models\User;
 use BotMan\BotMan\BotMan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

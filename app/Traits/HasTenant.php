@@ -3,7 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Tenant;
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 

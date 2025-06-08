@@ -3,7 +3,7 @@
 namespace App\Events;
 
 use App\Models\YnhServer;
-use App\User;
+use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
