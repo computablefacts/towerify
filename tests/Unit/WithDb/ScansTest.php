@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\WithDb;
 
 use App\Enums\AssetTypesEnum;
 use App\Helpers\ApiUtilsFacade as ApiUtils2;

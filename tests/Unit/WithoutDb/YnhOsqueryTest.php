@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\WithoutDb;
 
 use App\Models\YnhOsquery;
 use Tests\TestCaseNoDb;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\WithDb;
 
 use App\Hashing\TwHasher;
 use App\Models\TimelineItem;

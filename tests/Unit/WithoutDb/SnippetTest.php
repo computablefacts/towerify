@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\WithoutDb;
 
 use App\Helpers\Snippet;
 use Tests\TestCaseNoDb;

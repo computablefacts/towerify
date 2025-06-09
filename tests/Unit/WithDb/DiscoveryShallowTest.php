@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\WithDb;
 
 use App\Events\CreateAsset;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
