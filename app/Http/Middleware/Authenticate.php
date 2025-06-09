@@ -33,13 +33,7 @@ class Authenticate extends Middleware
                 }
             }
         }
-
-        // Check basic auth
-        $response = Auth::onceBasic();
-        if ($response === null) {
-            return $next($request);
-        }
-        return $response; // 401 returned by Auth::onceBasic()
+        return parent::handle($request, $next, $guards);
     }
 
     /**
