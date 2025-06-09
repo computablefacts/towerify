@@ -33,7 +33,7 @@ RUN node --version
 RUN npm --version
 # RUN npm install -g npm && npm --version
 RUN npm install --verbose
-RUN npm run prod
+RUN npm run build
 
 #
 # Application
