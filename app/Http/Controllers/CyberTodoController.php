@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+/** @deprecated */
 class CyberTodoController extends Controller
 {
     public function __construct()

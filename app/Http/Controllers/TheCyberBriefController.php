@@ -6,6 +6,7 @@ use App\Enums\LanguageEnum;
 use App\Models\Stories;
 use Illuminate\Http\Request;
 
+/** @deprecated */
 class TheCyberBriefController extends Controller
 {
     public function __construct()
