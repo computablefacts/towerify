@@ -160,6 +160,26 @@ class CopyDataFromOldDbToNewDb extends Command
                 ->table('cb_templates')
                 ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_templates', $items));
 
+            \DB::connection('mysql_legacy')
+                ->table('saml2_tenants')
+                ->chunkById(100, fn(Collection $items) => $this->upsertAll('saml2_tenants', $items));
+
+            \DB::connection('mysql_legacy')
+                ->table('t_facts')
+                ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_facts', $items));
+
+            \DB::connection('mysql_legacy')
+                ->table('t_facts_items')
+                ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_facts_items', $items));
+
+            \DB::connection('mysql_legacy')
+                ->table('t_items')
+                ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_items', $items));
+
+            \DB::connection('mysql_legacy')
+                ->table('t_items_items')
+                ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_items_items', $items));
+
             // TODO : add missing tables
 
         } catch (\Exception $e) {
@@ -169,7 +189,7 @@ class CopyDataFromOldDbToNewDb extends Command
         }
         return 0;
     }
-    
+
     private function upsertAll(string $table, Collection $items)
     {
         /** @var object $item */
