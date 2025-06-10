@@ -15,10 +15,13 @@
           integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
           crossorigin="anonymous"></script>
 
+  <!-- app-specific styles -->
+  <link href="{{ asset('cywise/css/app.css') }}" rel="stylesheet">
+
   <!-- page-specific styles -->
   @stack('styles')
 </head>
-<body>
+<body class="bg-zinc-50">
 @include('cywise.iframes._blueprintjs')
 @include('cywise.iframes._toaster')
 @include('cywise.iframes._json-rpc')

@@ -1,0 +1,13 @@
+
+.bg-zinc-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(250 250 250 / var(--tw-bg-opacity, 1));
+}
+
+.pt {
+  padding-top: calc(var(--bs-gutter-x) * .5);
+}
+
+.pb {
+  padding-bottom: calc(var(--bs-gutter-x) * .5);
+}

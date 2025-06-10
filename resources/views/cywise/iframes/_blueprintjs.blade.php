@@ -7,8 +7,8 @@
 
 <!-- Blueprintjs -->
 <!-- <link href="{{ asset('cywise/js/blueprintjs/normalize/normalize.css') }}" rel="stylesheet"/> -->
-<link href="{{ asset('cywise/js/blueprintjs/blueprintjs/blueprint-icons.css') }}" rel="stylesheet"/>
 <link href="{{ asset('cywise/js/blueprintjs/blueprintjs/blueprint.css') }}" rel="stylesheet"/>
+<link href="{{ asset('cywise/js/blueprintjs/blueprintjs/blueprint-icons.css') }}" rel="stylesheet"/>
 <link href="{{ asset('cywise/js/blueprintjs/blueprintjs/blueprint-popover2.css') }}" rel="stylesheet"/>
 <link href="{{ asset('cywise/js/blueprintjs/blueprintjs/table.css') }}" rel="stylesheet"/>
 <link href="{{ asset('cywise/js/blueprintjs/blueprintjs/blueprint-select.css') }}" rel="stylesheet"/>
