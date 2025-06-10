@@ -18,6 +18,7 @@ use App\Events\EndVulnsScan;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
+use App\Http\Controllers\Iframes\DashboardController;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Listeners\EndVulnsScanListener;
 use App\Mail\AuditReport;
@@ -536,8 +537,7 @@ Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illumina
 
 Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function () {
 
-    Route::get('/dashboard', fn() => view('cywise.iframes.dashboard'))
-        ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, '__invoke'])->name('dashboard');
 
     Route::get('/stories', fn() => view('cywise.iframes.stories'))
         ->name('stories');

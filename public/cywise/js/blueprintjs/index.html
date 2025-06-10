@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="normalize/normalize.css" rel="stylesheet"/>
+  <link href="blueprintjs/blueprint-icons.css" rel="stylesheet"/>
+  <link href="blueprintjs/blueprint.css" rel="stylesheet"/>
+  <link href="blueprintjs/blueprint-popover2.css" rel="stylesheet"/>
+  <link href="blueprintjs/table.css" rel="stylesheet"/>
+  <link href="blueprintjs/blueprint-select.css" rel="stylesheet"/>
+  <link href="blueprintjs/blueprint-datetime.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="form">
+  <div style="display:flex;flex-direction:row;align-items:center;background-color:yellow;">
+    <div id="form-text-input" style="width:50%;"></div>
+    <div id="form-radio-buttons" style="width:50%"></div>
+  </div>
+  <div style="display:flex;flex-direction:row;align-items:center;background-color:green;">
+    <div style="width:50%"></div>
+    <div id="form-button" style="width:50%"></div>
+  </div>
+</div>
+<div id="button-loading"></div>
+<div id="button-left-icon"></div>
+<div id="button-right-icon"></div>
+<div id="numeric-input"></div>
+<div id="text-input"></div>
+<div id="radio-group"></div>
+<div id="file-input"></div>
+<div id="suggest"></div>
+<div id="multiselect"></div>
+<div id="list"></div>
+<div id="daterange" style="width:500px"></div>
+<div id="datetime" style="width:250px"></div>
+<div id="date" style="width:200px"></div>
+<div id="checkbox"></div>
+<div id="icon"></div>
+<div id="card"></div>
+<div id="toaster"></div>
+<div id="switch"></div>
+<div id="spinner"></div>
+<div id="tabs"></div>
+<div id="tab"></div>
+<div id="drawer"></div>
+<a href="#" onclick="window.showDrawer()">Show drawer!</a>
+<div id="range-slider"></div>
+<div id="slider"></div>
+<div id="select-with-filter"></div>
+<div id="select-without-filter"></div>
+<div id="select-without-filter-2"></div>
+<div id="table">
+  Loading...
+  <noscript>JavaScript is required.</noscript>
+</div>
+<script src="reactjs/react.production.min.js"></script>
+<script src="reactjs/react-dom.production.min.js"></script>
+<script src="reactjs/react-is.production.min.js"></script>
+<script>
+  /*
+   * Fix Blueprintjs issue.
+   *
+   * https://adambien.blog/roller/abien/entry/uncaught_referenceerror_process_is_not
+   */
+  window.process = {
+    env: {
+      NODE_ENV: 'production'
+    }
+  }
+</script>
+<script src="main.min.js"></script>
+<script>
+
+  const env = 'www';
+  const client = 'ista';
+  const apiKey = '';
+  const baseUrl = `https://${env}.${client}.computablefacts.com`;
+  const url = `https://${env}.${client}.computablefacts.com/api/v2/public/json-rpc?api_token=${apiKey}`;
+
+  function testWhoAmI() {
+
+    const httpClient = new com.computablefacts.platform.HttpClient();
+    httpClient.init(baseUrl, apiKey);
+    httpClient.whoAmI().then(response => console.log(response));
+
+    /*
+      httpClient.findObjects({
+        format: 'arrays', dataset: 'rnic-t4-2023', sample_size: 10, cursor: null, json_query: 'TEXT:vérif*',
+      }).then(response => {
+        return httpClient.getObjects({
+          dataset: 'test-ocr-irve',
+          json_ids: response.data,
+        });
+      }).then(response => console.log(response));
+*//*
+    httpClient.findObjects({
+       format: 'arrays',dataset: 'job-syndics-clients-avec-codes-communes-2', sample_size: 10, json_query: 'NOM:"sevig*"',
+    }).then(response => console.log(response));
+
+    httpClient.findObjects({
+      format: 'arrays',dataset: 'job-syndics-clients-avec-codes-communes-2', sample_size: 10, json_query: 'CAGTCO:[94 TO 94]',
+    }).then(response => console.log(response));
+*/
+    httpClient.findObjects({
+      format: 'arrays',
+      dataset: 'job-syndics-clients-avec-codes-communes-2',
+      sample_size: 10,
+      json_query: 'NOM:"sevig*" AND CAGTCO:[94 TO 94]',
+    }).then(response => console.log(response));
+
+    /*
+      httpClient.findTerms({
+        dataset: 'job-syndics-clients-avec-codes-communes-2', sample_size: 10, json_query: 'NOM:"sevig*"',
+      }).then(response => console.log(response));
+  */
+    /*
+      httpClient.executeSqlQuery({
+        format: 'arrays_with_header', invalidate_cache: true, force_rebuild: true, sql_query: 'SELECT ID FROM tmp_docs_irve LIMIT 30',
+      }).then(response => console.log(response));
+    */
+    /*
+    httpClient.executeSqlQuery({
+      format: 'arrays_with_header',
+      invalidate_cache: true,
+      sql_query: 'SELECT ID FROM tmp_copros_clientes_2_3_denormalise LIMIT 30',
+    }).then(response => console.log(response));
+    */
+    /*
+      httpClient.getObjects({
+        dataset: 'test-ocr-irve',
+        json_ids: ['85723|2023-12-13T21:28:52.610Z'],
+      }).then(response => console.log(response));
+    */
+    /*
+      httpClient.getObjects({
+        dataset: 'bamhvp2009',
+        json_ids: ['2fsxq|2022-06-01T14:03:03.815Z'],
+      }).then(response => console.log(response));
+    */
+  }
+
+  function testTable() {
+
+    const root = document.getElementById('table');
+    root.style.height = window.innerHeight + 'px';
+    root.style.width = (window.innerWidth / 3) + 'px';
+
+    let columnsOrder = [['NIDEAD', 'ASC'], ['CAGCOM', 'ASC'], ['NESCAL', 'ASC'], ['NUEXPL', 'ASC'], ['CSOCTE', 'ASC'],
+      ['ATYPEP', 'ASC'], ['NBATIM', 'ASC'], ['CAGEXP', 'ASC']];
+
+    const query = (projection, order, nextRow) => `
+      SELECT
+        ${projection.join(', ')}
+      FROM (
+        SELECT *
+        FROM tmp_babatp
+      )
+      ORDER BY
+        ${order.map(cols => cols.join(' ')).join(', ')} LIMIT
+        ${nextRow}, 100
+    `;
+
+    const tbl = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Table',
+      container: 'table',
+      columns: ['NIDEAD', 'CAGCOM', 'NESCAL', 'NUEXPL', 'CSOCTE', 'ATYPEP', 'NBATIM', 'CAGEXP'],
+      columnTypes: ['text', 'number', 'number', 'text', 'text', 'text', 'number', 'number'],
+      on_sort_columns: (column, order) => {
+        tbl.el.rows = []; // force table rendering (an update on the number of rows trigger a refresh)
+        columnsOrder = [[column, order]];
+        tbl.el.columns.forEach(col => {
+          if (col !== column) {
+            columnsOrder.push([col, 'ASC']);
+          }
+        });
+        httpClient.executeSqlQuery({
+          format: "arrays_with_header", sql_query: query(tbl.el.columns, columnsOrder, 0)
+        }).then(response => response.data).then(array => {
+          array.shift(); // remove header
+          tbl.el.rows = array;
+        }).catch(err => console.log(err));
+      },
+      on_fetch_next_rows: (nextRow) => {
+        httpClient.executeSqlQuery({
+          format: "arrays_with_header", sql_query: query(tbl.el.columns, columnsOrder, nextRow)
+        }).then(response => response.data).then(array => {
+          array.shift(); // remove header
+          tbl.el.rows = tbl.el.rows.concat(array);
+        }).catch(err => console.log(err))
+      },
+      on_selection_change: cells => console.log(cells),
+    });
+
+    const httpClient = new com.computablefacts.platform.HttpClient();
+    httpClient.init(baseUrl, apiKey);
+    httpClient.executeSqlQuery({
+      format: "arrays_with_header", sql_query: query(tbl.columns, columnsOrder, 0)
+    }).then(response => response.data).then(array => {
+      array.shift(); // remove header
+      tbl.el.rows = array;
+    }).catch(err => console.log(err))
+  }
+
+  function testSelect1() {
+
+    const root = document.getElementById('select-with-filter');
+    root.style.width = '300px';
+    root.style.height = '50px';
+
+    const items = ['A', 'B', 'C'];
+
+    const createItem = (query) => {
+      console.log('Create item \'' + query + '\'');
+      return query;
+    }
+
+    const filterChange = (query) => {
+      const itemz = [];
+      for (let i = 0; i < items.length; i++) {
+        if (query === '' || items[i].toLowerCase().indexOf(query.toLowerCase()) >= 0) {
+          itemz.push(items[i])
+        }
+      }
+      select.el.items = itemz;
+    };
+
+    const select = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Select',
+      container: 'select-with-filter',
+      items: items,
+      item_create: createItem,
+      selected_item: 'A',
+      on_selection_change: item => console.log(item),
+      on_filter_change: filterChange,
+    });
+  }
+
+  function testSelect2() {
+
+    const root = document.getElementById('select-without-filter');
+    root.style.width = '300px';
+    root.style.height = '50px';
+
+    const select = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Select',
+      container: 'select-without-filter',
+      filterable: false,
+      items: ['A', 'B', 'C'],
+      selected_item: 'B',
+      on_selection_change: item => console.log(item),
+    });
+  }
+
+  function testSelect3() {
+
+    const root = document.getElementById('select-without-filter-2');
+    root.style.width = '300px';
+    root.style.height = '50px';
+
+    const select = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Select',
+      container: 'select-without-filter-2',
+      filterable: false,
+      items: [{id: 1, name: 'A'}, {id: 2, name: 'B'}, {id: 3, name: 'C'}],
+      selected_item: {id: 3, name: 'C'},
+      item_to_text: item => item.name,
+      on_selection_change: item => console.log(item),
+    });
+  }
+
+  function testSlider() {
+
+    const root = document.getElementById('slider');
+    root.style.width = '300px';
+    root.style.height = '50px';
+
+    const slider = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Slider',
+      container: 'slider',
+      min: 0,
+      max: 100,
+      increment: 1,
+      display_increment: 10,
+      on_selection_change: value => console.log(value),
+    });
+  }
+
+  function testRangeSlider() {
+
+    const root = document.getElementById('range-slider');
+    root.style.width = '300px';
+    root.style.height = '50px';
+
+    const slider = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'RangeSlider',
+      container: 'range-slider',
+      min: 0,
+      max: 100,
+      increment: 1,
+      display_increment: 10,
+      default_min_value: 25,
+      default_max_value: 75,
+      on_selection_change: (min, max) => console.log(min, max),
+    });
+  }
+
+  function testDrawer() {
+
+    const drawer = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Drawer', container: 'drawer', on_open: el => {
+        const div = document.createElement('div');
+        div.style.textAlign = 'center';
+        div.style.color = 'red';
+        div.style.padding = '20px';
+        div.innerText = 'Hello world!';
+        el.appendChild(div);
+      }, on_close: el => console.log('Drawer closed!'),
+    });
+
+    window.showDrawer = function () {
+      drawer.el.show = true;
+    }
+  }
+
+  function testTabs() {
+
+    const tabs = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Tabs', container: 'tabs', on_selection_change: (tabName, tabBody) => {
+        if (document.querySelector('#tab').firstChild) {
+          document.querySelector('#tab').firstChild.remove();
+        }
+        document.querySelector('#tab').appendChild(tabBody);
+      },
+    });
+
+    const tab1 = document.createElement('div');
+    tab1.innerText = 'First tab!';
+    tab1.style.paddingBottom = '20px';
+    tab1.style.backgroundColor = 'red';
+    tab1.style.color = 'white';
+
+    const tab2 = document.createElement('div');
+    tab2.innerText = 'Second tab!';
+    tab2.style.paddingBottom = '20px';
+    tab2.style.backgroundColor = 'green';
+    tab2.style.color = 'white';
+
+    const tab3 = document.createElement('div');
+    tab3.innerText = 'Thirds tab!';
+    tab3.style.paddingBottom = '20px';
+    tab3.style.backgroundColor = 'blue';
+    tab3.style.color = 'white';
+
+    tabs.el.addTab('Tab n°1', tab1);
+    tabs.el.addTab('Tab n°2', tab2);
+    tabs.el.addTab('Tab n°3', tab3);
+    tabs.el.selectTab('Tab n°2');
+  }
+
+  function testSpinner() {
+    const spinner = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Spinner', container: 'spinner'
+    });
+  }
+
+  function testSwitch() {
+
+    const root = document.getElementById('switch');
+    root.style.width = '200px';
+
+    const switchz = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Switch',
+      container: 'switch',
+      checked: true,
+      label: 'Sort by name',
+      label_position: 'left',
+      label_checked: 'ASC',
+      label_unchecked: 'DESC',
+      on_selection_change: status => console.log('Selection changed to \'' + status + '\'!')
+    });
+  }
+
+  function testToaster() {
+
+    const toaster = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Toaster', container: 'toaster',
+    });
+
+    toaster.el.toast('An error occurred!', 'danger');
+    toaster.el.toast('Everything is fine!');
+  }
+
+  function testCard() {
+
+    const root = document.getElementById('card');
+    root.style.padding = '30px';
+
+    const body = document.createElement('div');
+    body.style.textAlign = 'center';
+    body.style.backgroundColor = 'yellow';
+    body.style.padding = '10px';
+    body.innerText = 'Hello world!';
+
+    const card = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Card', container: 'card', body: body, interactive: true, on_click: () => console.log('Card clicked!'),
+    });
+  }
+
+  function testIcon() {
+    const icon = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Icon', container: 'icon', icon: 'graph', intent: 'danger', on_click: () => console.log('Icon clicked!'),
+    });
+  }
+
+  function testCheckbox() {
+    const checkbox = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Checkbox',
+      container: 'icon',
+      checked: false,
+      label: 'Ma checkbox',
+      label_position: 'right',
+      on_selection_change: () => console.log('Checkbox clicked!'),
+    });
+  }
+
+  function testDate() {
+    const date = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Date',
+      container: 'date',
+      format: 'dd/MM/yyyy',
+      shortcuts: true,
+      show_actions_bar: true,
+      on_selection_change: date => console.log(date),
+    });
+  }
+
+  function testDatetime() {
+    const date = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Datetime',
+      container: 'datetime',
+      format: 'dd/MM/yyyy HH:mm',
+      default_timezone: 'UTC',
+      disable_timezone: true,
+      on_selection_change: datetime => console.log(datetime),
+    });
+  }
+
+  function testDateRange() {
+
+    const date = new Date();
+    date.setDate(new Date().getDate() + 3); // add three days to today
+
+    const daterange = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'DateRange',
+      container: 'daterange',
+      date_min: new Date(),
+      date_max: date,
+      shortcuts: false,
+      disable_timezone: true,
+      on_selection_change: (minDate, maxDate) => console.log(minDate, maxDate),
+    });
+  }
+
+  function testList() {
+
+    const root = document.getElementById('list');
+
+    const Item = class extends com.computablefacts.widgets.Widget {
+
+      constructor(container, data) {
+        super(container);
+        this.data = data; // Triggers rendering
+      }
+
+      _newElement() {
+        if (this.data) {
+          const wrapper = document.createElement('span');
+          wrapper.innerHTML = `<b>${this.data.id}:</b> ${this.data.name}`;
+          return wrapper;
+        }
+        return null;
+      }
+    }
+
+    const List = class extends com.computablefacts.widgets.Widget {
+
+      constructor(container, data) {
+        super(container);
+        this.data = data; // Triggers rendering
+      }
+
+      append(array) {
+        this.data = this.data.concat(array);
+      }
+
+      _newElement() {
+        if (this.data) {
+
+          const list = document.createElement('ul');
+
+          for (let i = 0; i < this.data.length; i++) {
+            const item = document.createElement('li');
+            list.appendChild(item);
+            this._register(new Item(item, this.data[i]));
+          }
+          return list;
+        }
+        return null;
+      }
+    }
+
+    const list = new List(root, [{id: 1, name: 'first'}, {id: 2, name: 'second'}]);
+
+    setTimeout(() => list.append([{id: 3, name: 'third'}, {id: 4, name: 'fourth'}]), 5000);
+  }
+
+  function testMultiSelect() {
+
+    const root = document.getElementById('multiselect');
+    root.style.width = '300px';
+    root.style.height = '50px';
+
+    const items = ['A', 'B', 'C'];
+
+    const createItem = (query) => {
+      console.log('Create item \'' + query + '\'');
+      return query;
+    }
+
+    const multiselect = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'MultiSelect',
+      container: 'multiselect',
+      item_create: createItem,
+      items: items,
+      selected_items: ['B'],
+      on_selection_change: items => console.log(items),
+      on_filter_change: query => console.log('query=' + query),
+    });
+  }
+
+  function testSuggest() {
+
+    const root = document.getElementById('suggest');
+    root.style.width = '300px';
+    root.style.height = '50px';
+
+    const items = ['A', 'B', 'C'];
+
+    const suggest = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Suggest',
+      container: 'suggest',
+      items: items,
+      on_selection_change: items => console.log(items),
+      on_filter_change: query => console.log('query=' + query),
+    });
+  }
+
+  function testFileInput() {
+
+    const root = document.getElementById('file-input');
+    root.style.width = '500px';
+
+    const fileInput = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'FileInput',
+      container: 'file-input',
+      text: 'Sélectionner un fichier...',
+      buttonText: 'Rechercher...',
+      multiple: true,
+      on_selection_change: file => console.log(file),
+    });
+  }
+
+  function testRadioGroup() {
+    const radioGroup = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'RadioGroup', container: 'radio-group', label: 'A Group of Radio Buttons :', inline: true, items: [{
+        label: 'Option A', value: 'a', disabled: false
+      }, {
+        label: 'Option B', value: 'b', disabled: true
+      }, {
+        label: 'Option C', value: 'c'
+      }], selected_item: 'a', on_selection_change: selection => console.log(selection),
+    });
+  }
+
+  function testTextInput() {
+
+    const root = document.getElementById('text-input');
+    root.style.width = '300px';
+
+    const textInput = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'TextInput',
+      container: 'text-input',
+      default_value: 'john.doe@example.com',
+      icon: 'filter',
+      intent: 'danger',
+      placeholder: 'Filter users...',
+    });
+  }
+
+  function testNumericInput() {
+
+    const root = document.getElementById('numeric-input');
+    root.style.width = '300px';
+
+    const numericInput = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'NumericInput',
+      container: 'numeric-input',
+      min: -5,
+      max: 5,
+      increment: 0.5,
+      default_value: 2,
+      icon: 'th-filtered',
+      intent: 'success',
+      placeholder: 'Filter rows...',
+      on_value_change: value => console.log(value),
+    });
+  }
+
+  function testButtonLeftIcon() {
+    const button = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Button',
+      container: 'button-left-icon',
+      label: 'Click me!',
+      left_icon: 'download',
+      fill_container: false,
+      on_click: () => console.log('Button clicked!'),
+    });
+  }
+
+  function testButtonRightIcon() {
+    const button = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Button',
+      container: 'button-right-icon',
+      label: 'Click me!',
+      right_icon: 'download',
+      fill_container: false,
+      on_click: () => console.log('Button clicked!'),
+    });
+  }
+
+  function testButtonLoading() {
+    const button = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
+      type: 'Button',
+      container: 'button-loading',
+      label: 'Click me!',
+      left_icon: 'download',
+      fill_container: false,
+      loading: true,
+      on_click: () => console.log('Button clicked!'),
+    });
+  }
+
+  function testPopulate() {
+
+    const textInput = {
+      type: 'TextInput', container: 'form-text-input', icon: 'filter', placeholder: 'Filter stuff...',
+    };
+
+    const radioButtons = {
+      type: 'RadioGroup',
+      container: 'form-radio-buttons',
+      label: 'Another Group of Radio Buttons :',
+      inline: true,
+      items: [{
+        label: 'Option A', value: 'a', disabled: false
+      }, {
+        label: 'Option B', value: 'b', disabled: true
+      }, {
+        label: 'Option C', value: 'c'
+      }],
+      selected_item: 'a',
+    };
+
+    const button = {
+      type: 'Button',
+      container: 'form-button',
+      label: 'Submit',
+      right_icon: 'chevron-right',
+      on_click: () => console.log(textInput.el.value, radioButtons.el.selectedItem),
+    };
+
+    com.computablefacts.blueprintjs.Blueprintjs.populate(document.getElementById('form'),
+      [textInput, radioButtons, button]);
+  }
+
+  testWhoAmI();
+  testTable();
+  testSelect1();
+  testSelect2();
+  testSelect3();
+  testSlider();
+  testRangeSlider();
+  testDrawer();
+  testTabs();
+  testSpinner();
+  testSwitch();
+  testToaster();
+  testCard();
+  testIcon();
+  testCheckbox();
+  testDate();
+  testDatetime();
+  testDateRange();
+  testList();
+  testMultiSelect();
+  testSuggest();
+  testFileInput();
+  testRadioGroup();
+  testTextInput();
+  testNumericInput();
+  testButtonLeftIcon();
+  testButtonRightIcon();
+  testButtonLoading();
+  testPopulate();
+
+</script>
+</body>
+</html>

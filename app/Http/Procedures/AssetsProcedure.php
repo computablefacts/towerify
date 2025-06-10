@@ -14,11 +14,11 @@ use App\Models\HiddenAlert;
 use App\Models\Port;
 use App\Models\PortTag;
 use App\Models\Scan;
+use App\Models\User;
 use App\Rules\IsValidAsset;
 use App\Rules\IsValidDomain;
 use App\Rules\IsValidIpAddress;
 use App\Rules\IsValidTag;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -358,17 +358,17 @@ class AssetsProcedure extends Procedure
 
         $params = $request->validate([
             'is_monitored' => 'boolean',
-            'status' => 'integer|min:0',
+            'created_the_last_x_hours' => 'integer|min:0',
         ]);
 
-        $valid = Str::lower($params['valid']);
-        $hours = $params['hours'];
+        $valid = $params['is_monitored'] ?? null;
+        $hours = $params['created_the_last_x_hours'] ?? null;
         $query = Asset::query();
 
-        if ($valid === 'true') {
+        if ($valid === true) {
             $query->where('is_monitored', true);
         }
-        if ($valid === 'false') {
+        if ($valid === false) {
             $query->where('is_monitored', false);
         }
         if ($hours && is_integer($hours)) {
