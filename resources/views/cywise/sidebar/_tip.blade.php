@@ -1,3 +1,4 @@
+<!--
 <div x-show="sidebarTip"
      x-data="{ sidebarTip: $persist(true) }"
      class="px-1 py-3"
@@ -18,3 +19,4 @@
         </p>
     </div>
 </div>
+-->
