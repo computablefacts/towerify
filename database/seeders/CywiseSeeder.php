@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Hashing\TwHasher;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Yaml\Yaml;
 
@@ -87,7 +87,7 @@ class CywiseSeeder extends Seeder
             [
                 'name' => $username,
                 'email' => $email,
-                'password' => TwHasher::hash($password),
+                'password' => Hash::make($password),
                 'verified' => true,
             ]
         );
