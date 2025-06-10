@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Wave\Facades\Wave;
 
 class DatabaseSeeder extends Seeder
 {
