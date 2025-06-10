@@ -1,5 +1,9 @@
 {
   "Assets": "Actifs",
   "Assets Monitorable": "Actifs à surveiller",
-  "Assets Monitored": "Actifs surveillés"
+  "Assets Monitored": "Actifs surveillés",
+  "Vuln. High": "Vuln. de criticité haute",
+  "Vuln. Low": "Vuln. de criticité basse",
+  "Vuln. Medium": "Vuln. de criticité moyenne",
+  "Your 5 most critical vulnerabilities to fix!": "Vos 5 vulnérabilités les plus critiques à corriger !"
 }

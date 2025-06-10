@@ -2,6 +2,8 @@
 
 namespace App\Http\Procedures;
 
+use App\Models\Alert;
+use App\Models\Asset;
 use App\Models\HiddenAlert;
 use Illuminate\Http\Request;
 use Sajya\Server\Attributes\RpcMethod;
@@ -10,6 +12,41 @@ use Sajya\Server\Procedure;
 class VulnerabilitiesProcedure extends Procedure
 {
     public static string $name = 'vulnerabilities';
+
+    #[RpcMethod(
+        description: "List the user's vulnerabilities.",
+        params: [
+            "asset_id" => "The asset id (optional).",
+        ],
+        result: [
+            "high" => "A list of vulnerabilities with critical severity.",
+            "medium" => "A list of vulnerabilities with medium severity.",
+            "low" => "A list of vulnerabilities with low severity.",
+        ]
+    )]
+    public function list(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+
+        $params = $request->validate([
+            'asset_id' => 'nullable|integer|exists:am_assets,id',
+        ]);
+
+        $assetId = $params['asset_id'] ?? null;
+        $alerts = Asset::where('is_monitored', true)
+            ->when($assetId, fn($query, $assetId) => $query->where('id', $assetId))
+            ->get()
+            ->flatMap(fn(Asset $asset) => $asset->alerts()->get())
+            ->filter(fn(Alert $alert) => $alert->is_hidden === 0);
+
+        return [
+            'high' => $alerts->filter(fn(Alert $alert) => $alert->level === 'High')->values(),
+            'medium' => $alerts->filter(fn(Alert $alert) => $alert->level === 'Medium')->values(),
+            'low' => $alerts->filter(fn(Alert $alert) => $alert->level === 'Low')->values(),
+        ];
+    }
 
     #[RpcMethod(
         description: "Hide/Show one or more vulnerabilities.",

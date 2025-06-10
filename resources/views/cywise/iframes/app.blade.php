@@ -21,7 +21,7 @@
   <!-- page-specific styles -->
   @stack('styles')
 </head>
-<body class="bg-zinc-50">
+<body data-bs-theme="light">
 @include('cywise.iframes._blueprintjs')
 @include('cywise.iframes._toaster')
 @include('cywise.iframes._json-rpc')
