@@ -13,9 +13,9 @@ class TermsController extends Controller
      */
     public function show()
     {
-        $file = file_exists(public_path('/markdown/terms.' . app()->getLocale() . '.md'))
-            ? public_path('/markdown/terms.' . app()->getLocale() . '.md')
-            : public_path('/markdown/terms.md');
+        $file = file_exists(public_path('/cywise/markdown/terms.' . app()->getLocale() . '.md'))
+            ? public_path('/cywise/markdown/terms.' . app()->getLocale() . '.md')
+            : public_path('/cywise/markdown/terms.md');
 
         return view('markdown', [
             'terms' => (new Parsedown)->text(file_get_contents($file))
