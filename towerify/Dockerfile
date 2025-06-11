@@ -140,6 +140,7 @@ role=${CONTAINER_ROLE:-app}
 queue_name=${QUEUE_NAME:-default}
 echo "Optimize Laravel..."
 (cd /var/www/html && php artisan optimize)
+(cd /var/www/html && php artisan filament:optimize)
 if [[ "$role" = "app" ]]; then
     echo "Start apache..."
     (cd /var/www/html && php artisan storage:link && php artisan vendor:publish --tag=telescope-assets)
@@ -155,8 +156,9 @@ elif [[ "$role" = "queue" ]]; then
 elif [[ "$role" = "scheduler" ]]; then
     echo "Migrate database if needed..."
     (cd /var/www/html && php artisan migrate --step --force)
-    if [[ -f /var/www/html/database/seeds/CywiseSeeder.php ]]; then
+    if [[ -f /var/www/html/database/seeders/CywiseSeeder.php ]]; then
         echo "Apply DatabaseSeeder..."
+        (cd /var/www/html && php artisan db:from-old-to-new)
         (cd /var/www/html && php artisan db:seed --class=CywiseSeeder)
     fi
     echo "Launch schedule:run every minute..."
