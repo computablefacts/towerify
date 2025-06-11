@@ -33,6 +33,7 @@ class CopyDataFromOldDbToNewDb extends Command
                         foreach ($items as $item) {
                             $item->username = $item->name;
                             $item->password = Hash::make(cywise_unhash($item->password));
+                            $item->verified = true;
                             $this->upsert('users', $item);
                             // TODO : deal with stripe_id
                         }
@@ -50,7 +51,7 @@ class CopyDataFromOldDbToNewDb extends Command
                     ->table('model_roles')
                     ->get()
                     ->each(function (object $item) {
-                        $item->model_type = 'App\Models\User';
+                        $item->model_type = 'users';
                         $objKeys = array_keys((array)$item);
                         $tblKeys = Schema::getColumnListing('model_has_roles');
                         $keys = array_intersect($objKeys, $tblKeys);
@@ -62,7 +63,7 @@ class CopyDataFromOldDbToNewDb extends Command
                     ->table('model_permissions')
                     ->get()
                     ->each(function (object $item) {
-                        $item->model_type = 'App\Models\User';
+                        $item->model_type = 'users';
                         $objKeys = array_keys((array)$item);
                         $tblKeys = Schema::getColumnListing('model_has_roles');
                         $keys = array_intersect($objKeys, $tblKeys);
@@ -74,7 +75,7 @@ class CopyDataFromOldDbToNewDb extends Command
                     ->table('role_permissions')
                     ->get()
                     ->each(function (object $item) {
-                        $item->model_type = 'App\Models\User';
+                        $item->model_type = 'users';
                         $objKeys = array_keys((array)$item);
                         $tblKeys = Schema::getColumnListing('role_has_permissions');
                         $keys = array_intersect($objKeys, $tblKeys);

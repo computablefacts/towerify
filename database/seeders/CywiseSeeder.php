@@ -10,6 +10,9 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Yaml\Yaml;
+use Wave\Plan;
+use Wave\Setting;
+use Wave\Theme;
 
 class CywiseSeeder extends Seeder
 {
@@ -20,6 +23,7 @@ class CywiseSeeder extends Seeder
      */
     public function run()
     {
+        $this->setupWave();
         $this->setupTenants();
         $this->setupPermissions();
         $this->setupRoles();
@@ -29,6 +33,84 @@ class CywiseSeeder extends Seeder
         $this->fillMissingOsqueryUids();
         $this->setupFrameworks();
         $this->setupUserPromptsAndFrameworks();
+    }
+
+    private function setupWave()
+    {
+        Role::updateOrCreate([
+            'name' => 'admin',
+            'guard_name' => 'web',
+        ], [
+            'description' => 'The admin user has full access to all features including the ability to access the admin panel.',
+        ]);
+        Plan::updateOrCreate([
+            'name' => 'Essential',
+        ], [
+            'description' => '',
+            'features' => '',
+            'role_id' => Role::where('name', 'administrator')->where('guard_name', 'web')->firstOrFail()->id,
+            'default' => 0,
+            'monthly_price' => '150',
+            'monthly_price_id' => config('towerify.stripe.plans.essential'),
+        ]);
+        Plan::updateOrCreate([
+            'name' => 'Standard',
+        ], [
+            'description' => '',
+            'features' => '',
+            'role_id' => Role::where('name', 'administrator')->where('guard_name', 'web')->firstOrFail()->id,
+            'default' => 1,
+            'monthly_price' => '400',
+            'monthly_price_id' => config('towerify.stripe.plans.standard'),
+        ]);
+        Plan::updateOrCreate([
+            'name' => 'Premium',
+        ], [
+            'description' => '',
+            'features' => '',
+            'role_id' => Role::where('name', 'administrator')->where('guard_name', 'web')->firstOrFail()->id,
+            'default' => 0,
+            'monthly_price' => '600',
+            'monthly_price_id' => config('towerify.stripe.plans.premium'),
+        ]);
+        Setting::updateOrCreate([
+            'key' => 'site.title',
+        ], [
+            'display_name' => 'Site Title',
+            'value' => 'Cywise',
+            'details' => '',
+            'type' => 'text',
+            'order' => 1,
+            'group' => 'Site',
+        ]);
+        Setting::updateOrCreate([
+            'key' => 'site.description',
+        ], [
+            'display_name' => 'Site Description',
+            'value' => 'La solution de Cybersécurité pour TPE et PME',
+            'details' => '',
+            'type' => 'text',
+            'order' => 2,
+            'group' => 'Site',
+        ]);
+        Setting::updateOrCreate([
+            'key' => 'site.google_analytics_tracking_id',
+        ], [
+            'display_name' => 'Google Analytics Tracking ID',
+            'value' => null,
+            'details' => '',
+            'type' => 'text',
+            'order' => 3,
+            'group' => 'Site',
+        ]);
+        Theme::updateOrCreate([
+            'folder' => 'anchor',
+        ], [
+            'name' => 'Anchor Theme',
+            'folder' => 'anchor',
+            'active' => 1,
+            'version' => 1.0
+        ]);
     }
 
     private function setupTenants(): void
