@@ -40,6 +40,7 @@ abstract class TestCase extends BaseTestCase
         print "\nMigrating database...\n";
         print shell_exec('php artisan migrate');
         print "\nSeeding database...\n";
+        print shell_exec('php artisan db:seed --class=DatabaseSeeder');
         print shell_exec('php artisan db:seed --class=CywiseSeeder');
         print "\nDatabase is ready.\n";
     }
