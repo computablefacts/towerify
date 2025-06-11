@@ -2,8 +2,18 @@
   "Assets": "Actifs",
   "Assets Monitorable": "Actifs à surveiller",
   "Assets Monitored": "Actifs surveillés",
+  "Click here to launch CyberBuddy:": "Cliquez ici pour lancer CyberBuddy :",
+  "Do you have a question related to Cyber?": "Vous avez une question liée à la Cyber ?",
+  "Enter a domain name or an IP address belonging to you below:": "Saisissez un nom de domaine ou une adresse IP vous appartenant ci-dessous :",
+  "Human or Targeted": "Humain ou ciblé",
+  "Monitor >": "Surveiller >",
+  "No recent events.": "Aucun événement récent.",
+  "Start Conversation >": "Démarrer une conversation >",
+  "The&nbsp;<span style=\"color: var(--c-orange-light);\">5</span>&nbsp;most recent attacks": "Les <span style=\"color: var(--c-orange-light);\">5</span> attaques les plus récentes",
   "Vuln. High": "Vuln. de criticité haute",
   "Vuln. Low": "Vuln. de criticité basse",
   "Vuln. Medium": "Vuln. de criticité moyenne",
+  "Would you like to protect a new domain?": "Vous souhaitez protéger un nouveau domaine ?",
+  "Would you like to redirect one of your domains to this honeypot? Contact support!": "Vous souhaitez rediriger un de vos domaines vers ce honeypot ? Contactez le support !",
   "Your 5 most critical vulnerabilities to fix!": "Vos 5 vulnérabilités les plus critiques à corriger !"
 }
