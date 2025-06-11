@@ -205,8 +205,8 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
     Route::group(['prefix' => 'public', 'as' => 'public.'], function () {
 
         Route::get('/docs', function (Request $request) {
-            if (Storage::exists('/docs/docs.public.html')) {
-                return response(Storage::get('/docs/docs.public.html'))
+            if (Storage::exists('/public/docs/docs.public.html')) {
+                return response(Storage::get('/public/docs/docs.public.html'))
                     ->header('Content-Type', 'text/html')
                     ->header('Cache-Control', 'public, max-age=3600');
             }
@@ -227,8 +227,8 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
             ->middleware([\App\Http\Middleware\Authenticate::class]);
 
         Route::get('/docs', function (Request $request) {
-            if (Storage::exists('/docs/docs.private.html')) {
-                return response(Storage::get('/docs/docs.private.html'))
+            if (Storage::exists('/public/docs/docs.private.html')) {
+                return response(Storage::get('/public/docs/docs.private.html'))
                     ->header('Content-Type', 'text/html')
                     ->header('Cache-Control', 'public, max-age=3600');
             }
