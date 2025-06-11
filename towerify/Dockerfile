@@ -157,7 +157,7 @@ elif [[ "$role" = "scheduler" ]]; then
     (cd /var/www/html && php artisan migrate --step --force)
     if [[ -f /var/www/html/database/seeds/CywiseSeeder.php ]]; then
         echo "Apply DatabaseSeeder..."
-        (cd /var/www/html && php artisan db:seed)
+        (cd /var/www/html && php artisan db:seed --class=CywiseSeeder.php)
     fi
     echo "Launch schedule:run every minute..."
     while [[ true ]]
