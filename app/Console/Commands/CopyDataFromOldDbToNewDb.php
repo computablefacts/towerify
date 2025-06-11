@@ -22,9 +22,13 @@ class CopyDataFromOldDbToNewDb extends Command
 
             try {
 
+                Log::info('tenants...');
+
                 \DB::connection('mysql_legacy')
                     ->table('tenants')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('tenants', $items));
+
+                Log::info('users...');
 
                 \DB::connection('mysql_legacy')
                     ->table('users')
@@ -39,13 +43,19 @@ class CopyDataFromOldDbToNewDb extends Command
                         }
                     });
 
+                Log::info('roles...');
+
                 \DB::connection('mysql_legacy')
                     ->table('roles')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('roles', $items));
 
+                Log::info('permissions...');
+
                 \DB::connection('mysql_legacy')
                     ->table('permissions')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('permissions', $items));
+
+                Log::info('model_has_roles...');
 
                 \DB::connection('mysql_legacy')
                     ->table('model_roles')
@@ -59,6 +69,8 @@ class CopyDataFromOldDbToNewDb extends Command
                         \DB::table('model_has_roles')->upsert($newItem, $tblKeys, $keys);
                     });
 
+                Log::info('model_has_permissions...');
+
                 \DB::connection('mysql_legacy')
                     ->table('model_permissions')
                     ->get()
@@ -70,6 +82,8 @@ class CopyDataFromOldDbToNewDb extends Command
                         $newItem = array_intersect_key((array)$item, array_flip($tblKeys));
                         \DB::table('model_has_permissions')->upsert($newItem, $tblKeys, $keys);
                     });
+
+                Log::info('role_has_permissions...');
 
                 \DB::connection('mysql_legacy')
                     ->table('role_permissions')
@@ -83,199 +97,297 @@ class CopyDataFromOldDbToNewDb extends Command
                         \DB::table('role_has_permissions')->upsert($newItem, $tblKeys, $keys);
                     });
 
+                Log::info('am_alerts...');
+
                 \DB::connection('mysql_legacy')
                     ->table('am_alerts')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_alerts', $items));
+
+                Log::info('am_assets...');
 
                 \DB::connection('mysql_legacy')
                     ->table('am_assets')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_assets', $items));
 
+                Log::info('am_assets_tags...');
+
                 \DB::connection('mysql_legacy')
                     ->table('am_assets_tags')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_assets_tags', $items));
+
+                Log::info('am_assets_tags_hashes...');
 
                 \DB::connection('mysql_legacy')
                     ->table('am_assets_tags_hashes')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_assets_tags_hashes', $items));
 
+                Log::info('am_attackers...');
+
                 \DB::connection('mysql_legacy')
                     ->table('am_attackers')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_attackers', $items));
+
+                Log::info('am_hidden_alerts...');
 
                 \DB::connection('mysql_legacy')
                     ->table('am_hidden_alerts')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_hidden_alerts', $items));
 
+                Log::info('am_honeypots...');
+
                 \DB::connection('mysql_legacy')
                     ->table('am_honeypots')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_honeypots', $items));
+
+                Log::info('am_honeypots_events...');
 
                 \DB::connection('mysql_legacy')
                     ->table('am_honeypots_events')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_honeypots_events', $items));
 
+                Log::info('am_ports...');
+
                 \DB::connection('mysql_legacy')
                     ->table('am_ports')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_ports', $items));
+
+                Log::info('am_ports_tags...');
 
                 \DB::connection('mysql_legacy')
                     ->table('am_ports_tags')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_ports_tags', $items));
 
+                Log::info('am_scans...');
+
                 \DB::connection('mysql_legacy')
                     ->table('am_scans')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_scans', $items));
+
+                Log::info('am_screenshots...');
 
                 \DB::connection('mysql_legacy')
                     ->table('am_screenshots')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_screenshots', $items));
 
+                Log::info('cb_chunks...');
+
                 \DB::connection('mysql_legacy')
                     ->table('cb_chunks')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_chunks', $items));
+
+                Log::info('cb_chunks_tags...');
 
                 \DB::connection('mysql_legacy')
                     ->table('cb_chunks_tags')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_chunks_tags', $items));
 
+                Log::info('cb_collections...');
+
                 \DB::connection('mysql_legacy')
                     ->table('cb_collections')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_collections', $items));
+
+                Log::info('cb_conversations...');
 
                 \DB::connection('mysql_legacy')
                     ->table('cb_conversations')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_conversations', $items));
 
+                Log::info('cb_files...');
+
                 \DB::connection('mysql_legacy')
                     ->table('cb_files')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_files', $items));
+
+                Log::info('cb_prompts...');
 
                 \DB::connection('mysql_legacy')
                     ->table('cb_prompts')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_prompts', $items));
 
+                Log::info('cb_scheduled_tasks...');
+
                 \DB::connection('mysql_legacy')
                     ->table('cb_scheduled_tasks')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_scheduled_tasks', $items));
+
+                Log::info('cb_tables...');
 
                 \DB::connection('mysql_legacy')
                     ->table('cb_tables')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_tables', $items));
 
+                Log::info('cb_templates...');
+
                 \DB::connection('mysql_legacy')
                     ->table('cb_templates')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('cb_templates', $items));
 
-                \DB::connection('mysql_legacy')
-                    ->table('t_items_items')
-                    ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_items_items', $items));
+                Log::info('health_check_result_history_items...');
 
                 \DB::connection('mysql_legacy')
                     ->table('health_check_result_history_items')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('health_check_result_history_items', $items));
 
+                Log::info('other personal_access_tokens...');
+
                 \DB::connection('mysql_legacy')
                     ->table('personal_access_tokens')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('personal_access_tokens', $items));
+
+                Log::info('saml2_tenants...');
 
                 \DB::connection('mysql_legacy')
                     ->table('saml2_tenants')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('saml2_tenants', $items));
 
+                Log::info('t_facts...');
+
                 \DB::connection('mysql_legacy')
                     ->table('t_facts')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_facts', $items));
+
+                Log::info('t_facts_items...');
 
                 \DB::connection('mysql_legacy')
                     ->table('t_facts_items')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_facts_items', $items));
 
+                Log::info('t_items...');
+
                 \DB::connection('mysql_legacy')
                     ->table('t_items')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_items', $items));
+
+                Log::info('t_items_items...');
+
+                \DB::connection('mysql_legacy')
+                    ->table('t_items_items')
+                    ->chunkById(100, fn(Collection $items) => $this->upsertAll('t_items_items', $items));
+
+                Log::info('tcb_stories...');
 
                 \DB::connection('mysql_legacy')
                     ->table('tcb_stories')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('tcb_stories', $items));
 
+                Log::info('ynh_applications...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_applications')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_applications', $items));
+
+                Log::info('ynh_backups...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_backups')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_backups', $items));
 
+                Log::info('ynh_cves...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_cves')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_cves', $items));
+
+                Log::info('ynh_domains...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_domains')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_domains', $items));
 
+                Log::info('ynh_frameworks...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_frameworks')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_frameworks', $items));
+
+                Log::info('ynh_mitre_attck...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_mitre_attck')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_mitre_attck', $items));
 
+                Log::info('ynh_nginx_logs...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_nginx_logs')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_nginx_logs', $items));
+
+                Log::info('ynh_osquery...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_osquery')
                     ->whereIn('id', fn($query) => $query->select('ynh_osquery_id')->from('ynh_osquery_latest_events'))
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_osquery', $items));
 
+                Log::info('ynh_osquery_events_counts...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_osquery_events_counts')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_osquery_events_counts', $items));
+
+                Log::info('ynh_osquery_latest_events...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_osquery_latest_events')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_osquery_latest_events', $items));
 
+                Log::info('ynh_osquery_packages...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_osquery_packages')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_osquery_packages', $items));
+
+                Log::info('ynh_osquery_rules...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_osquery_rules')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_osquery_rules', $items));
 
+                Log::info('ynh_ossec_checks...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_ossec_checks')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_ossec_checks', $items));
+
+                Log::info('ynh_ossec_policies...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_ossec_policies')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_ossec_policies', $items));
 
+                Log::info('ynh_overview...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_overview')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_overview', $items));
+
+                Log::info('ynh_permissions...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_permissions')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_permissions', $items));
 
+                Log::info('ynh_servers...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_servers')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_servers', $items));
+
+                Log::info('ynh_ssh_traces...');
 
                 \DB::connection('mysql_legacy')
                     ->table('ynh_ssh_traces')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_ssh_traces', $items));
 
+                Log::info('ynh_trials...');
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_trials')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_trials', $items));
 
+                Log::info('ynh_users...');
+                
                 \DB::connection('mysql_legacy')
                     ->table('ynh_users')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_users', $items));
