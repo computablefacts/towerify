@@ -143,6 +143,8 @@ class CopyDataFromOldDbToNewDb extends Command
 
                 \DB::connection('mysql_legacy')
                     ->table('am_honeypots_events')
+                    ->orderBy('updated_at', 'desc')
+                    ->limit(1000)
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('am_honeypots_events', $items));
 
                 Log::info('am_ports...');
@@ -227,9 +229,11 @@ class CopyDataFromOldDbToNewDb extends Command
 
                 \DB::connection('mysql_legacy')
                     ->table('health_check_result_history_items')
+                    ->orderBy('created_at', 'desc')
+                    ->limit(1000)
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('health_check_result_history_items', $items));
 
-                Log::info('other personal_access_tokens...');
+                Log::info('personal_access_tokens...');
 
                 \DB::connection('mysql_legacy')
                     ->table('personal_access_tokens')
@@ -387,7 +391,7 @@ class CopyDataFromOldDbToNewDb extends Command
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_trials', $items));
 
                 Log::info('ynh_users...');
-                
+
                 \DB::connection('mysql_legacy')
                     ->table('ynh_users')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_users', $items));
@@ -415,6 +419,6 @@ class CopyDataFromOldDbToNewDb extends Command
         $tblKeys = Schema::getColumnListing($table);
         $keys = array_intersect($objKeys, $tblKeys);
         $newItem = array_intersect_key((array)$item, array_flip($keys));
-        \DB::table($table)->upsert($newItem, ['id'], $keys);
+        \DB::connection('mysql')->table($table)->upsert($newItem, ['id'], $keys);
     }
 }
