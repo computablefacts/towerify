@@ -38,7 +38,8 @@ abstract class TestCase extends BaseTestCase
         parent::setUpBeforeClass();
 
         print "\nPreparing database...\n";
-        shell_exec('php artisan migrate:fresh --env=testing --drop-views --seed');
+        shell_exec('php artisan migrate:fresh --drop-views');
+        shell_exec('php artisan db:seed --class=CywiseSeeder');
         print "\nDatabase is ready.\n";
     }
 
