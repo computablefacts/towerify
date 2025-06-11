@@ -13,10 +13,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        \DB::table('posts')->delete();
-        \DB::table('pages')->delete();
-        \DB::table('plans')->delete();
-
         $this->call(RolesTableSeeder::class);
         $this->call(UsersTableSeeder::class);
         $this->call(ChangelogsTableSeeder::class);
@@ -33,7 +29,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SettingsTableSeeder::class);
         $this->call(ProfileKeyValuesTableSeeder::class);
         $this->call(ThemesTableSeeder::class);
-        $this->call(CywiseSeeder::class);
         fixPostgresSequence();
     }
 }
