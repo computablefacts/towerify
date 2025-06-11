@@ -23,10 +23,10 @@ class CywiseSeeder extends Seeder
      */
     public function run()
     {
-        $this->setupWave();
         $this->setupTenants();
         $this->setupPermissions();
         $this->setupRoles();
+        $this->setupWave();
         $this->setupUsers();
         $this->setupOssecRules();
         $this->setupOsqueryRules();
@@ -42,6 +42,12 @@ class CywiseSeeder extends Seeder
             'guard_name' => 'web',
         ], [
             'description' => 'The admin user has full access to all features including the ability to access the admin panel.',
+        ]);
+        Role::updateOrCreate([
+            'name' => 'registered',
+            'guard_name' => 'web',
+        ], [
+            'description' => 'This is the default user role. If a user has this role they have created an account; however, they have are not a subscriber.',
         ]);
         Plan::updateOrCreate([
             'name' => 'Essential',
