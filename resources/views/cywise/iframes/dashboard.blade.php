@@ -137,9 +137,9 @@
             <div class="row align-items-center">
               <div class="col-auto">
                 <div class="d-flex align-content-center">
-              <span class="bg-red text-white avatar">
-                <span class="bp4-icon bp4-icon-issue"></span>
-              </span>
+                  <span class="bg-red text-white avatar">
+                    <span class="bp4-icon bp4-icon-issue"></span>
+                  </span>
                 </div>
               </div>
               <div class="col">
@@ -160,9 +160,9 @@
             <div class="row align-items-center">
               <div class="col-auto">
                 <div class="d-flex align-content-center">
-              <span class="bg-orange text-white avatar">
-                <span class="bp4-icon bp4-icon-issue"></span>
-              </span>
+                  <span class="bg-orange text-white avatar">
+                    <span class="bp4-icon bp4-icon-issue"></span>
+                  </span>
                 </div>
               </div>
               <div class="col">
@@ -183,9 +183,9 @@
             <div class="row align-items-center">
               <div class="col-auto">
                 <div class="d-flex align-content-center">
-              <span class="bg-green text-white avatar">
-                <span class="bp4-icon bp4-icon-issue"></span>
-              </span>
+                  <span class="bg-green text-white avatar">
+                    <span class="bp4-icon bp4-icon-issue"></span>
+                  </span>
                 </div>
               </div>
               <div class="col">
@@ -202,12 +202,72 @@
       </div>
     </div>
     <!-- VULNERABILITIES : END -->
+    <!-- ACTIONS : BEGIN -->
+    <div class="row pt-3">
+      <div class="col pe-0">
+        <!-- ACTION PROTECT : BEGIN -->
+        <div class="card">
+          <div class="card-body">
+            <h6 class="card-title">{{ __('Would you like to protect a new domain?') }}</h6>
+            <div class="card-text mb-3">
+              {{ __('Enter a domain name or an IP address belonging to you below:') }}
+            </div>
+            <form>
+              <div class="row">
+                <div class="col">
+                  <input type="text"
+                         class="form-control"
+                         id="asset"
+                         placeholder="example.com ou 93.184.215.14"
+                         autofocus>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col align-content-center">
+                  <button type="button"
+                          onclick="createAsset()"
+                          class="btn btn-primary"
+                          style="width: 100%;">
+                    {{ __('Monitor >') }}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- ACTION PROTECT : END -->
+      </div>
+      <div class="col">
+        <!-- ACTION CYBERBUDDY : BEGIN -->
+        <div class="card">
+          <div class="card-body">
+            <h6 class="card-title">
+              {{ __('Do you have a question related to Cyber?') }}
+            </h6>
+            <div class="card-text mb-3">
+              {{ __('Click here to launch CyberBuddy:') }}
+            </div>
+            <form>
+              <div class="row">
+                <div class="col align-content-center">
+                  <a href="{{ route('home', ['tab' => 'ama2']) }}" class="btn btn-primary" style="width: 100%;">
+                    {{ __('Start Conversation >') }}
+                  </a>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <!-- ACTION CYBERBUDDY : END -->
+      </div>
+    </div>
+    <!-- ACTIONS : BEGIN -->
   </div>
 </div>
 <!-- HONEYPOTS : BEGIN -->
 @if(count($honeypots) > 0)
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
-<div class="row pt-3 pe-3">
+<div class="row pt-3 pb-3 pe-3">
   @foreach($honeypots as $honeypot)
   <div class="col pe-0">
     <div class="card">
@@ -308,3 +368,14 @@
 @endif
 <!-- HONEYPOTS : END -->
 @endsection
+
+@push('scripts')
+<script>
+
+  function createAsset() {
+    const asset = document.querySelector('#asset').value;
+    createAssetApiCall(asset, true, () => toaster.toastSuccess(`La surveillance de ${asset} a commencé.`));
+  }
+
+</script>
+@endpush

@@ -389,40 +389,6 @@
       </div>
     </div>
     <div class="col-xl-4" style="padding-left: 0;">
-      @if(count($todo) > 0)
-      <div class="card mb-3">
-        <div class="card-body">
-          <h6 class="card-title">
-            {!! __('Your 5 most critical vulnerabilities to fix!') !!}
-          </h6>
-          <div class="card-text mb-3">
-            @foreach($todo as $item)
-            <div class="d-flex justify-content-start align-items-center text-truncate mb-2 todo-item">
-              @if($item->level === 'High')
-              <span class="tw-dot-red"></span>
-              @elseif ($item->level === 'Medium')
-              <span class="tw-dot-orange"></span>
-              @elseif($item->level === 'Low')
-              <span class="tw-dot-green"></span>
-              @else
-              <span class="tw-dot-blue"></span>
-              @endif
-              &nbsp;<a href="{{ route('home', ['category' => 'vulnerabilities']) }}#vid-{{ $item->id }}">
-                {{ $item->asset()->asset }}
-              </a>
-            </div>
-            <div class="d-flex justify-content-start align-items-center text-truncate mb-3">
-              @if(empty($item->cve_id))
-              {{ $item->title }}
-              @else
-              {{ $item->cve_id }}&nbsp;/&nbsp;{{ $item->title }}
-              @endif
-            </div>
-            @endforeach
-          </div>
-        </div>
-      </div>
-      @endif
       @if(count($blacklist) > 0)
       <div class="card mb-3">
         <div class="card-body">
@@ -444,27 +410,6 @@
         </div>
       </div>
       @endif
-      <div class="card mb-3">
-        <div class="card-body">
-          <h6 class="card-title">
-            {{ __('Vous souhaitez poser une question à CyberBuddy ?') }}
-          </h6>
-          <div class="card-text mb-3">
-            {{ __('Cliquez ici pour lancer CyberBuddy :') }}
-          </div>
-          <form>
-            <div class="row">
-              <div class="col align-content-center">
-                <a href="{{ route('home', ['tab' => 'ama2']) }}"
-                   class="btn btn-primary" style="width: 100%;">
-                  {{ __('Start Conversation >') }}
-                </a>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-      <x-onboarding-monitor-asset2/>
       @if(\App\Models\YnhServer::count() < 3)
       <div class="card mb-3">
         <div class="card-body">
@@ -487,102 +432,6 @@
         </div>
       </div>
       @endif
-      @foreach($honeypots as $honeypot)
-      <div class="card mb-3">
-        <div class="card-body">
-          <h6 class="card-title text-truncate">
-            {{ $honeypot['type'] }}&nbsp;<span style="color: #ffaa00;">/</span>&nbsp;{{ $honeypot['name'] }}
-          </h6>
-          @if(\Illuminate\Support\Str::endsWith($honeypot['name'], '.cywise.io'))
-          <p>{{ __('Vous souhaitez rediriger un de vos domaines vers ce honeypot ? Contactez le support !') }}</p>
-          @endif
-          @if(count($honeypot['counts']) <= 0)
-          <p>{{ __('Aucun événement récent.') }}</p>
-          @else
-          <div class="card-text mb-3">
-            <table
-              class="charts-css column hide-data show-labels show-primary-axis show-3-secondary-axes data-spacing-3 multiple stacked">
-              <thead>
-              <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Human or Targeted</th>
-                <th scope="col">Bots</th>
-              </tr>
-              </thead>
-              <tbody>
-              @foreach($honeypot['counts'] as $count)
-              <tr>
-                <th scope="row">{{ \Illuminate\Support\Str::after($count['date'], '-') }}</th>
-                <td
-                  style="--size: calc({{ $count['human_or_targeted'] }} / {{ $honeypot['max'] }});">
-                  <span class="data">{{ $count['human_or_targeted'] }}</span>
-                  <span class="tooltip">Human or Targeted: {{ $count['human_or_targeted'] }}</span>
-                </td>
-                <td
-                  style="--size: calc({{ $count['not_human_or_targeted'] }} / {{ $honeypot['max'] }});">
-                  <span class="data">{{ $count['not_human_or_targeted'] }}</span>
-                  <span class="tooltip">Bots: {{ $count['not_human_or_targeted'] }}</span>
-                </td>
-              </tr>
-              @endforeach
-              </tbody>
-            </table>
-          </div>
-          @endif
-          @if(isset($mostRecentHoneypotEvents[$honeypot['name']]))
-          <div class="card-text mb-3">
-            <table class="table">
-              <thead>
-              <tr>
-                <th colspan="3">
-                  {!! __('The&nbsp;<span style="color: #ffaa00;">5</span>&nbsp;most recent attacks') !!}
-                </th>
-              </tr>
-              </thead>
-              <tbody>
-              @foreach($mostRecentHoneypotEvents[$honeypot['name']]['events'] as $event)
-              <tr title="{{ $event['event_details'] }}">
-                <td style="color: var(--c-blue-500);">
-                  @if($event['attacker_name'] !== '-')
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                       class="icon icon-tabler icons-tabler-outline icon-tabler-user">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
-                    <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
-                  </svg>
-                  @else
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                       class="icon icon-tabler icons-tabler-outline icon-tabler-robot">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M6 4m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z"/>
-                    <path d="M12 2v2"/>
-                    <path d="M9 12v9"/>
-                    <path d="M15 12v9"/>
-                    <path d="M5 16l4 -2"/>
-                    <path d="M15 14l4 2"/>
-                    <path d="M9 18h6"/>
-                    <path d="M10 8v.01"/>
-                    <path d="M14 8v.01"/>
-                  </svg>
-                  @endif
-                </td>
-                <td>
-                  {{ $event['timestamp'] }}
-                </td>
-                <td>
-                  {{ $event['event_type'] }}
-                </td>
-              </tr>
-              @endforeach
-              </tbody>
-            </table>
-          </div>
-          @endif
-        </div>
-      </div>
-      @endforeach
     </div>
   </div>
   <button id="scrollToTopBtn" class="scroll-to-top" title="Go to top">

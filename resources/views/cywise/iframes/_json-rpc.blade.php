@@ -127,5 +127,9 @@
     executeJsonRpcApiCall('events@dismiss', {event_id: eventId});
   }
 
+  function createAssetApiCall(asset, monitor, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('assets@create', {asset: asset, watch: monitor}, onSuccess);
+  }
+
 </script>
 @endonce

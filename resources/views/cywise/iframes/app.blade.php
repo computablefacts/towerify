@@ -28,6 +28,7 @@
 <div class="container-fluid">
   @yield('content')
 </div>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
 <!-- page-specific scripts -->
 @stack('scripts')
 </body>
