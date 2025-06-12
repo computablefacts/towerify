@@ -41,6 +41,7 @@
   "Start Conversation >": "Démarrer une conversation >",
   "Start Monitoring": "Démarrer la surveillance",
   "Stop Monitoring": "Arrêter la surveillance",
+  "similar events": "événements similaires",
   "The&nbsp;<span style=\"color: var(--c-orange-light);\">5</span>&nbsp;most recent attacks": "Les <span style=\"color: var(--c-orange-light);\">5</span> attaques les plus récentes",
   "The asset will be deleted soon.": "L'actif sera supprimé dans quelques instants.",
   "The monitoring started.": "La surveillance a commencé.",

@@ -22,7 +22,7 @@
   </x-app.sidebar-link>
   <x-app.sidebar-link
     href="{{ route('ioc') }}"
-    icon="phosphor-cube"
+    icon="phosphor-magnifying-glass"
     :active="(Request::is('ioc'))">
     {{ __('Indicators of Compromise') }}
   </x-app.sidebar-link>

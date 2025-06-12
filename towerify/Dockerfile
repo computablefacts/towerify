@@ -157,7 +157,7 @@ elif [[ "$role" = "scheduler" ]]; then
     echo "Migrate database if needed..."
     (cd /var/www/html && php artisan migrate --step --force)
     if [[ -f /var/www/html/database/seeders/CywiseSeeder.php ]]; then
-        echo "Apply DatabaseSeeder..."
+        echo "Apply Seeders..."
         (cd /var/www/html && php artisan db:from-old-to-new)
         (cd /var/www/html && php artisan db:seed --class=CywiseSeeder)
     fi

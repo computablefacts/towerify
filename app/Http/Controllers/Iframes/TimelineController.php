@@ -11,12 +11,15 @@ use App\Models\Conversation;
 use App\Models\PortTag;
 use App\Models\TimelineItem;
 use App\Models\User;
+use App\Models\YnhOsquery;
 use App\Models\YnhServer;
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -47,16 +50,18 @@ class TimelineController extends Controller
         $params = $request->validate([
             'status' => ['nullable', 'string', 'in:monitorable,monitored'],
             'level' => ['nullable', 'string', 'in:low,medium,high'],
+            'server_id' => ['nullable', 'integer', 'exists:ynh_servers,id'],
+            'asset_id' => ['nullable', 'integer', 'exists:am_assets,id'],
         ]);
         $objects = last(explode('/', trim($request->path(), '/')));
         $items = match ($objects) {
-            'assets' => $this->assets($params['status'] ?? null),
+            'assets' => $this->assets($params['status'] ?? null, $params['asset_id'] ?? null),
             'conversations' => $this->conversations(),
-            'events' => $this->events(),
-            'ioc' => $this->ioc(),
+            'events' => $this->events($params['server_id'] ?? null),
+            'ioc' => $this->ioc(75, $params['server_id'] ?? null),
             'leaks' => $this->leaks(),
             'notes-and-memos' => $this->notesAndMemos(),
-            'vulnerabilities' => $this->vulnerabilities($params['level'] ?? null),
+            'vulnerabilities' => $this->vulnerabilities($params['level'] ?? null, $params['asset_id'] ?? null),
             default => [],
         };
         return view('cywise.iframes.timeline', [
@@ -182,9 +187,147 @@ class TimelineController extends Controller
             });
     }
 
-    private function ioc(): Collection
+    private function ioc(int $minScore = 1, ?int $serverId = null): Collection
     {
-        return collect();
+        $cutOffTime = Carbon::now()->startOfDay()->subDay();
+        $servers = YnhServer::query()->when($serverId, fn($query, $serverId) => $query->where('id', $serverId))->get();
+        $events = YnhOsquery::select([
+            DB::raw('ynh_servers.name AS server_name'),
+            DB::raw('ynh_servers.ip_address AS server_ip_address'),
+            'ynh_osquery_rules.score',
+            'ynh_osquery_rules.comments',
+            'ynh_osquery.*'
+        ])
+            ->where('ynh_osquery.calendar_time', '>=', $cutOffTime)
+            ->join('ynh_osquery_latest_events', 'ynh_osquery_latest_events.ynh_osquery_id', '=', 'ynh_osquery.id')
+            ->join('ynh_osquery_rules', 'ynh_osquery_rules.id', '=', 'ynh_osquery.ynh_osquery_rule_id')
+            ->join('ynh_servers', 'ynh_servers.id', '=', 'ynh_osquery.ynh_server_id')
+            ->whereIn('ynh_osquery_latest_events.ynh_server_id', $servers->pluck('id'))
+            ->whereNotExists(function (Builder $query) {
+                $query->select(DB::raw(1))
+                    ->from('v_dismissed')
+                    ->whereColumn('ynh_server_id', '=', 'ynh_osquery.ynh_server_id')
+                    ->whereColumn('name', '=', 'ynh_osquery.name')
+                    ->whereColumn('action', '=', 'ynh_osquery.action')
+                    ->whereColumn('columns_uid', '=', 'ynh_osquery.columns_uid')
+                    ->havingRaw('count(1) >=' . Messages::HIDE_AFTER_DISMISS_COUNT);
+            })
+            ->where('ynh_osquery_rules.is_ioc', true)
+            ->where('ynh_osquery_rules.score', '>=', $minScore)
+            ->orderBy('calendar_time', 'desc')
+            ->get();
+
+        $groups = collect();
+        /** @var ?Collection $group */
+        $group = null;
+        /** @var ?int $groupServerId */
+        $groupServerId = null;
+        /** @var ?string $groupName */
+        $groupName = null;
+        /** @var ?string $groupDay */
+        $groupDay = null;
+
+        /** @var YnhOsquery $event */
+        foreach ($events as $event) {
+
+            $serverId = $event->ynh_server_id ?? null;
+            $name = $event->name ?? null;
+            $day = $event->calendar_time->utc()->startOfDay()->format('Y-m-d');
+
+            if ($group === null) {
+                $group = collect([$event]);
+                $groupServerId = $serverId;
+                $groupName = $name;
+                $groupDay = $day;
+            } else {
+                if ($serverId === $groupServerId && $name === $groupName && $day === $groupDay) {
+                    $group->push($event);
+                } else {
+                    $groups->push($group);
+                    $group = collect([$event]);
+                    $groupServerId = $serverId;
+                    $groupName = $name;
+                    $groupDay = $day;
+                }
+            }
+        }
+        if ($group !== null && $group->isNotEmpty()) {
+            $groups->push($group);
+        }
+        return $groups->map(function (Collection $group) {
+
+            /** @var YnhOsquery $first */
+            $first = $group->first();
+            /** @var YnhOsquery $last */
+            $last = $group->last();
+
+            $timestampFirst = $first->calendar_time->utc()->format('Y-m-d H:i:s');
+            $dateFirst = Str::before($timestampFirst, ' ');
+            $timeFirst = Str::beforeLast(Str::after($timestampFirst, ' '), ':');
+
+            $timestampLast = $last->calendar_time->utc()->format('Y-m-d H:i:s');
+            $dateLast = Str::before($timestampLast, ' ');
+            $timeLast = Str::beforeLast(Str::after($timestampLast, ' '), ':');
+
+            $ioc = [
+                'first' => [
+                    'timestamp' => $timestampFirst,
+                    'date' => $dateFirst,
+                    'time' => $timeFirst,
+                    'ioc' => $first,
+                ],
+                'last' => [
+                    'timestamp' => $timestampLast,
+                    'date' => $dateLast,
+                    'time' => $timeLast,
+                    'ioc' => $last,
+                ],
+                'in_between' => $group->count(),
+            ];
+
+            if ($ioc['first']['ioc']->score >= 75) {
+                $ioc['first']['txtColor'] = "white";
+                $ioc['first']['bgColor'] = "#ff4d4d";
+                $ioc['first']['level'] = "(criticité haute)";
+            } else if ($ioc['first']['ioc']->score >= 50) {
+                $ioc['first']['txtColor'] = "white";
+                $ioc['first']['bgColor'] = "#ffaa00";
+                $ioc['first']['level'] = "(criticité moyenne)";
+            } else if ($ioc['first']['ioc']->score >= 25) {
+                $ioc['first']['txtColor'] = "white";
+                $ioc['first']['bgColor'] = "#4bd28f";
+                $ioc['first']['level'] = "(criticité basse)";
+            } else {
+                $ioc['first']['txtColor'] = "var(--c-grey-400)";
+                $ioc['first']['bgColor'] = "var(--c-grey-100)";
+                $ioc['first']['level'] = "(suspect)";
+            }
+            if ($ioc['last']['ioc']->score >= 75) {
+                $ioc['last']['txtColor'] = "white";
+                $ioc['last']['bgColor'] = "#ff4d4d";
+                $ioc['last']['level'] = "(criticité haute)";
+            } else if ($ioc['last']['ioc']->score >= 50) {
+                $ioc['last']['txtColor'] = "white";
+                $ioc['last']['bgColor'] = "#ffaa00";
+                $ioc['last']['level'] = "(criticité moyenne)";
+            } else if ($ioc['last']['ioc']->score >= 25) {
+                $ioc['last']['txtColor'] = "white";
+                $ioc['last']['bgColor'] = "#4bd28f";
+                $ioc['last']['level'] = "(criticité basse)";
+            } else {
+                $ioc['last']['txtColor'] = "var(--c-grey-400)";
+                $ioc['last']['bgColor'] = "var(--c-grey-100)";
+                $ioc['last']['level'] = "(suspect)";
+            }
+            return [
+                'timestamp' => $timestampFirst,
+                'date' => $dateFirst,
+                'time' => $timeFirst,
+                'html' => \Illuminate\Support\Facades\View::make('cywise.iframes.timeline._ioc', [
+                    'ioc' => $ioc,
+                ])->render(),
+            ];
+        });
     }
 
     private function leaks(): Collection
