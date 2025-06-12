@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\CyberBuddyNextGenController;
+use App\Http\Controllers\Iframes\CyberBuddyController;
 use App\Http\Requests\ConverseRequest;
 use App\Listeners\EndVulnsScanListener;
 use App\Models\Conversation;
@@ -48,7 +48,7 @@ class RunScheduledTasks implements ShouldQueue
                         'thread_id' => $threadId,
                         'directive' => $task->task,
                     ]);
-                    $response = (new CyberBuddyNextGenController())->converse($request, true);
+                    $response = (new CyberBuddyController())->converse($request, true);
                     $json = json_decode($response->content(), true);
                     $subject = $task->name;
                     $body = $json['answer']['html'] ?? '';

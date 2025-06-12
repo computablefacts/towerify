@@ -131,5 +131,10 @@
     executeJsonRpcApiCall('assets@create', {asset: asset, watch: monitor}, onSuccess);
   }
 
+  function askCyberBuddyApiCall(threadId, directive, onSuccess = onSuccessDefault, onFinally = onFinallyDefault) {
+    executeJsonRpcApiCall('cyberbuddy@ask', {thread_id: threadId, directive: directive}, onSuccess,
+      (response) => toaster.toastError(response.message), onFinally);
+  }
+
 </script>
 @endonce

@@ -247,7 +247,7 @@
             <form>
               <div class="row">
                 <div class="col align-content-center">
-                  <a href="{{ route('home', ['tab' => 'ama2']) }}" class="btn btn-primary" style="width: 100%;">
+                  <a href="{{ route('iframes.cyberbuddy') }}" class="btn btn-primary" style="width: 100%;">
                     {{ __('Start Conversation >') }}
                   </a>
                 </div>

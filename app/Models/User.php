@@ -16,7 +16,9 @@ use Wave\Traits\HasProfileKeyValues;
 use Wave\User as WaveUser;
 
 /**
+ * @property int id
  * @property int tenant_id
+ * @property ?int customer_id
  * @property Carbon trial_ends_at
  * @property string am_api_token
  * @property string se_api_token

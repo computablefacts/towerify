@@ -1,74 +1,55 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Procedures;
 
 use App\Enums\RoleEnum;
 use App\Helpers\Agents\AbstractAction;
 use App\Helpers\Agents\Agent;
 use App\Helpers\OpenAi;
-use App\Http\Requests\ConverseRequest;
 use App\Jobs\ProcessIncomingEmails;
 use App\Models\Conversation;
 use App\Models\Prompt;
-use App\Models\YnhServer;
 use App\Models\User;
+use App\Models\YnhServer;
 use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Parsedown;
+use Sajya\Server\Attributes\RpcMethod;
+use Sajya\Server\Procedure;
 
-class CyberBuddyNextGenController extends Controller
+class CyberBuddyProcedure extends Procedure
 {
-    public function __construct()
+    public static string $name = 'cyberbuddy';
+
+    #[RpcMethod(
+        description: "Ask CyberBuddy to answer a question or execute some tasks.",
+        params: [
+            "thread_id" => "The thread identifier.",
+            "directive" => "The user's directive.",
+            "fallback_on_next_collection" => "Automatically search the next collection if the first one yields no result (optional)",
+        ],
+        result: [
+            "response" => "CyberBuddy's introductory text.",
+            "html" => "CyberBuddy's answer in HTML.",
+        ]
+    )]
+    public function ask(Request $request): array
     {
-        //
-    }
-
-    public function showAssistant(Request $request)
-    {
-        $conversationId = $request->query('conversation_id');
-
-        /** @var User $user */
-        $user = Auth::user();
-
-        if ($conversationId) {
-            $conversation = Conversation::where('id', $conversationId)
-                ->where('format', Conversation::FORMAT_V1)
-                ->where('created_by', $user?->id)
-                ->first();
-        }
-
-        /** @var Conversation $conversation */
-        $conversation = $conversation ?? Conversation::create([
-            'thread_id' => Str::random(10),
-            'dom' => json_encode([]),
-            'autosaved' => true,
-            'created_by' => $user?->id,
-            'format' => Conversation::FORMAT_V1,
+        $params = $request->validate([
+            'thread_id' => 'required|string|min:10|max:10|regex:/^[a-zA-Z0-9]+$/',
+            'directive' => 'required|string|min:1|max:1024',
+            'fallback_on_next_collection' => 'nullable|boolean',
         ]);
-
-        $threadId = $conversation->thread_id;
-
-        return view('modules.cyber-buddy.assistant', ['threadId' => $threadId]);
-    }
-
-    public function converse(ConverseRequest $request, bool $fallbackOnNextCollection = true): JsonResponse
-    {
-        $threadId = Str::trim($request->string('thread_id', ''));
-        $question = Str::trim($request->string('directive', ''));
+        $threadId = Str::trim($params['thread_id'] ?? '');
+        $question = Str::trim($params['directive'] ?? '');
+        $fallbackOnNextCollection = Str::lower($params['fallback_on_next_collection'] ?? 'true') === 'true';
 
         /** @var User $user */
         $user = Auth::user();
 
         if (!$user) {
-            return response()->json([
-                'error' => 'Unauthorized. Please log in and try again.',
-                'answer' => [
-                    'response' => ['Sorry, you are not logged in. Please log in and try again.'],
-                    'html' => '',
-                ]]);
+            throw new \Exception('Unauthorized. Please log in and try again.');
         }
 
         /** @var Conversation $conversation */
@@ -78,10 +59,7 @@ class CyberBuddyNextGenController extends Controller
             ->first();
 
         if (!$conversation) {
-            return response()->json([
-                'error' => "{$threadId} is an invalid thread id.",
-                'answer' => [],
-            ]);
+            throw new \Exception("{$threadId} is an invalid thread id.");
         }
         if (count($conversation->thread()) <= 0) {
 
@@ -149,11 +127,9 @@ class CyberBuddyNextGenController extends Controller
         }
 
         unset($answer['raw_answer']);
+        unset($answer['memoize']);
 
-        return response()->json([
-            'success' => 'The directive has been successfully processed.',
-            'answer' => $answer,
-        ]);
+        return $answer;
     }
 
     private function processCommand(User $user, string $threadId, string $command): array

@@ -540,6 +540,7 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
 
     Route::get('/assets', [TimelineController::class, '__invoke'])->name('assets');
     Route::get('/conversations', [TimelineController::class, '__invoke'])->name('conversations');
+    Route::get('/cyberbuddy', [TimelineController::class, '__invoke'])->name('cyberbuddy');
     Route::get('/dashboard', [DashboardController::class, '__invoke'])->name('dashboard');
     Route::get('/events', [TimelineController::class, '__invoke'])->name('events');
     Route::get('/ioc', [TimelineController::class, '__invoke'])->name('ioc');

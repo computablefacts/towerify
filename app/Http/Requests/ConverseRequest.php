@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Contracts\Requests\Converse;
 use Illuminate\Foundation\Http\FormRequest;
 
+/** @deprecated */
 class ConverseRequest extends FormRequest implements Converse
 {
     /**

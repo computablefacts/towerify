@@ -52,8 +52,36 @@ class TimelineController extends Controller
             'level' => ['nullable', 'string', 'in:low,medium,high'],
             'server_id' => ['nullable', 'integer', 'exists:ynh_servers,id'],
             'asset_id' => ['nullable', 'integer', 'exists:am_assets,id'],
+            'conversation_id' => ['nullable', 'integer', 'exists:cb_conversations,id'],
         ]);
         $objects = last(explode('/', trim($request->path(), '/')));
+
+        if ($objects === 'cyberbuddy') {
+
+            $conversationId = $params['conversation_id'] ?? null;
+
+            /** @var User $user */
+            $user = Auth::user();
+
+            if ($conversationId) {
+                $conversation = Conversation::where('id', $conversationId)
+                    ->where('format', Conversation::FORMAT_V1)
+                    ->where('created_by', $user?->id)
+                    ->first();
+            }
+
+            /** @var Conversation $conversation */
+            $conversation = $conversation ?? Conversation::create([
+                'thread_id' => Str::random(10),
+                'dom' => json_encode([]),
+                'autosaved' => true,
+                'created_by' => $user?->id,
+                'format' => Conversation::FORMAT_V1,
+            ]);
+
+            return view('cywise.iframes.cyberbuddy', ['threadId' => $conversation->thread_id]);
+        }
+
         $items = match ($objects) {
             'assets' => $this->assets($params['status'] ?? null, $params['asset_id'] ?? null),
             'conversations' => $this->conversations(),
@@ -62,7 +90,7 @@ class TimelineController extends Controller
             'leaks' => $this->leaks(),
             'notes-and-memos' => $this->notesAndMemos(),
             'vulnerabilities' => $this->vulnerabilities($params['level'] ?? null, $params['asset_id'] ?? null),
-            default => [],
+            default => collect(),
         };
         return view('cywise.iframes.timeline', [
             'today_separator' => $this->separator(Carbon::now()),

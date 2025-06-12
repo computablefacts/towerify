@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Http\Controllers\CyberBuddyNextGenController;
+use App\Http\Controllers\Iframes\CyberBuddyController;
 use App\Http\Procedures\TheCyberBriefProcedure;
 use App\Http\Requests\ConverseRequest;
 use App\Listeners\EndVulnsScanListener;
@@ -10,8 +10,8 @@ use App\Models\Collection;
 use App\Models\Conversation;
 use App\Models\File;
 use App\Models\TimelineItem;
-use App\Rules\IsValidCollectionName;
 use App\Models\User;
+use App\Rules\IsValidCollectionName;
 use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -253,7 +253,7 @@ class ProcessIncomingEmails implements ShouldQueue
             'thread_id' => $threadId,
             'directive' => $body,
         ]);
-        $response = (new CyberBuddyNextGenController())->converse($request, true);
+        $response = (new CyberBuddyController())->converse($request, true);
         $json = json_decode($response->content(), true);
         $subject = $message->getSubject()->toString();
         $body = $json['answer']['html'] ?? '';
