@@ -60,3 +60,58 @@ span.dot-orange {
   border-radius: 50%;
   display: inline-block;
 }
+
+.lozenge {
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: var(--bs-border-radius);
+  font-size: 14px;
+}
+
+.lozenge.new {
+  background-color: var(--ds-background-discovery);
+  color: var(--ds-text-discovery);
+}
+
+.lozenge.information {
+  background-color: var(--ds-background-information);
+  color: var(--ds-text-information);
+}
+
+.lozenge.success {
+  background-color: var(--ds-background-success);
+  color: var(--ds-text-success);
+}
+
+.lozenge.error {
+  background-color: var(--ds-background-danger);
+  color: var(--ds-text-danger);
+}
+
+.lozenge.warning {
+  background-color: #fff7d6;
+  color: #974f0c;
+}
+
+.lozenge.information {
+  background-color: var(--ds-background-information);
+  color: var(--ds-text-information);
+}
+
+.lozenge.neutral {
+  background-color: var(--ds-background-neutral);
+  color: var(--ds-text-neutral);
+}
+
+a.link {
+  color: var(--c-grey-500);
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px dashed;
+}
+
+a:hover.link, a:focus.link {
+  outline: 0;
+  color: var(--c-blue);
+  text-decoration: none;
+}

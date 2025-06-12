@@ -4,7 +4,7 @@
   </span>
   <span class="timeline-item-icon | faded-icon"
         style="background-color: var(--c-red) !important; color: white !important;">
-    <span class="bp4-icon bp4-icon-mugshot"></span>
+    <span class="bp4-icon bp4-icon-person"></span>
   </span>
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">

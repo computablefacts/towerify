@@ -119,19 +119,6 @@
     text-decoration: none;
   }
 
-  .timeline-item-description a {
-    color: var(--c-grey-500);
-    font-weight: 500;
-    text-decoration: none;
-    border-bottom: 1px dashed;
-  }
-
-  .timeline-item-description a:hover, .timeline-item-description a:focus {
-    outline: 0;
-    color: var(--c-blue);
-    text-decoration: none;
-  }
-
   .avatar {
     display: flex;
     align-items: center;
@@ -162,10 +149,6 @@
     border-radius: 6px;
     padding: 16px;
     font-size: 0.8rem;
-  }
-
-  .comment p {
-    margin: 0;
   }
 
   .button {

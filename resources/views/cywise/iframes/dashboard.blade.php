@@ -4,23 +4,6 @@
 <div class="row pt-3">
   <!-- CYBERTODO : BEGIN -->
   @if(count($todo) > 0)
-  @push('styles')
-  <style>
-
-    .todo-item a {
-      color: var(--c-grey-500);
-      font-weight: 500;
-      text-decoration: none;
-      border-bottom: 1px dashed;
-    }
-
-    .todo-item a:hover, .todo-item a:focus {
-      outline: 0;
-      color: var(--c-blue-500);
-    }
-
-  </style>
-  @endpush
   <div class="col-4 pe-0">
     <div class="card">
       <div class="card-body">
@@ -29,7 +12,7 @@
         </h6>
         <div class="card-text mb-3">
           @foreach($todo as $item)
-          <div class="d-flex justify-content-start align-items-center text-truncate mb-2 todo-item">
+          <div class="d-flex justify-content-start align-items-center text-truncate mb-2">
             @if($item->level === 'High')
             <span class="dot-red"></span>
             @elseif ($item->level === 'Medium')
@@ -39,7 +22,7 @@
             @else
             <span class="dot-blue"></span>
             @endif
-            &nbsp;<a href="{{ route('vulnerabilities') }}#vid-{{ $item->id }}">
+            &nbsp;<a href="{{ route('iframes.vulnerabilities') }}#vid-{{ $item->id }}" class="link">
               {{ $item->asset()->asset }}
             </a>
           </div>
@@ -76,7 +59,9 @@
                   <b>{{ $nb_monitored + $nb_monitorable }}</b>
                 </div>
                 <div class="text-muted">
-                  {{ __('Assets') }}
+                  <a href="{{ route('iframes.assets') }}" class="link">
+                    {{ __('Assets') }}
+                  </a>
                 </div>
               </div>
             </div>
@@ -99,7 +84,9 @@
                   <b>{{ $nb_monitored }}</b>
                 </div>
                 <div class="text-muted">
-                  {{ __('Assets Monitored') }}
+                  <a href="{{ route('iframes.assets', [ 'status' => 'monitored' ]) }}" class="link">
+                    {{ __('Assets Monitored') }}
+                  </a>
                 </div>
               </div>
             </div>
@@ -122,7 +109,9 @@
                   <b>{{ $nb_monitorable }}</b>
                 </div>
                 <div class="text-muted">
-                  {{ __('Assets Monitorable') }}
+                  <a href="{{ route('iframes.assets', [ 'status' => 'monitorable' ]) }}" class="link">
+                    {{ __('Assets Monitorable') }}
+                  </a>
                 </div>
               </div>
             </div>
@@ -149,7 +138,9 @@
                   <b>{{ $nb_high }}</b>
                 </div>
                 <div class="text-muted">
-                  {{ __('Vuln. High') }}
+                  <a href="{{ route('iframes.vulnerabilities', [ 'level' => 'high' ]) }}" class="link">
+                    {{ __('High') }}
+                  </a>
                 </div>
               </div>
             </div>
@@ -172,7 +163,9 @@
                   <b>{{ $nb_medium }}</b>
                 </div>
                 <div class="text-muted">
-                  {{ __('Vuln. Medium') }}
+                  <a href="{{ route('iframes.vulnerabilities', [ 'level' => 'medium' ]) }}" class="link">
+                    {{ __('Medium') }}
+                  </a>
                 </div>
               </div>
             </div>
@@ -195,7 +188,9 @@
                   <b>{{ $nb_low }}</b>
                 </div>
                 <div class="text-muted">
-                  {{ __('Vuln. Low') }}
+                  <a href="{{ route('iframes.vulnerabilities', [ 'level' => 'low' ]) }}" class="link">
+                    {{ __('Low') }}
+                  </a>
                 </div>
               </div>
             </div>

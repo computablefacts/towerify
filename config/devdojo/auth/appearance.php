@@ -29,7 +29,7 @@ return [
         'container' => 'center',
     ],
     'favicon' => [
-        'light' => '/cywise/images/cywise.png',
-        'dark' => '/cywise/images/cywise.png',
+        'light' => '/storage/auth/favicon.png',
+        'dark' => '/storage/auth/favicon-dark.png',
     ],
 ];

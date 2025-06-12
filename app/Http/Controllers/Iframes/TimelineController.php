@@ -44,15 +44,19 @@ class TimelineController extends Controller
 
     public function __invoke(Request $request): View
     {
+        $params = $request->validate([
+            'status' => ['nullable', 'string', 'in:monitorable,monitored'],
+            'level' => ['nullable', 'string', 'in:low,medium,high'],
+        ]);
         $objects = last(explode('/', trim($request->path(), '/')));
         $items = match ($objects) {
-            'assets' => $this->assets(),
+            'assets' => $this->assets($params['status'] ?? null),
             'conversations' => $this->conversations(),
             'events' => $this->events(),
             'ioc' => $this->ioc(),
             'leaks' => $this->leaks(),
             'notes-and-memos' => $this->notesAndMemos(),
-            'vulnerabilities' => $this->vulnerabilities(),
+            'vulnerabilities' => $this->vulnerabilities($params['level'] ?? null),
             default => [],
         };
         return view('cywise.iframes.timeline', [
@@ -80,9 +84,16 @@ class TimelineController extends Controller
         ])->render());
     }
 
-    private function assets(?int $assetId = null): Collection
+    private function assets(?string $status = null, ?int $assetId = null): Collection
     {
         return Asset::query()
+            ->when($status, function ($query, $status) {
+                if ($status === 'monitorable') {
+                    $query->where('is_monitored', false);
+                } else if ($status === 'monitored') {
+                    $query->where('is_monitored', true);
+                }
+            })
             ->when($assetId, fn($query, $assetId) => $query->where('id', $assetId))
             ->get()
             ->map(function (Asset $asset) {
@@ -271,9 +282,9 @@ class TimelineController extends Controller
             ->map(fn(TimelineItem $item) => self::noteAndMemo($user, $item));
     }
 
-    private function vulnerabilities(?int $assetId = null): Collection
+    private function vulnerabilities(?string $level = null, ?int $assetId = null): Collection
     {
-        return $this->alerts($assetId)
+        return $this->alerts($level, $assetId)
             ->map(function (Alert $alert) {
 
                 $timestamp = $alert->updated_at->utc()->format('Y-m-d H:i:s');
@@ -326,12 +337,20 @@ class TimelineController extends Controller
             });
     }
 
-    private function alerts(?int $assetId = null): Collection
+    private function alerts(?string $level = null, ?int $assetId = null): Collection
     {
         return Asset::where('is_monitored', true)
             ->when($assetId, fn($query, $assetId) => $query->where('id', $assetId))
             ->get()
-            ->flatMap(fn(Asset $asset) => $asset->alerts()->get())
+            ->flatMap(fn(Asset $asset) => $asset->alerts()->when($level, function ($query, $level) {
+                if ($level === 'high') {
+                    $query->where('level', 'High');
+                } else if ($level === 'medium') {
+                    $query->where('level', 'Medium');
+                } else if ($level === 'low') {
+                    $query->where('level', 'Low');
+                }
+            })->get())
             ->filter(fn(Alert $alert) => $alert->is_hidden === 0);
     }
 

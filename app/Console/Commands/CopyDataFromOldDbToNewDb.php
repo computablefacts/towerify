@@ -38,6 +38,7 @@ class CopyDataFromOldDbToNewDb extends Command
                             $item->username = $item->name;
                             $item->password = Hash::make(cywise_unhash($item->password));
                             $item->verified = true;
+                            $item->avatar = 'demo/default.png';
                             $this->upsert('users', $item);
                             // TODO : deal with stripe_id
                         }

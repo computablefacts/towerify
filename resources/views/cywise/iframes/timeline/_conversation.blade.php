@@ -8,7 +8,7 @@
   @if(empty($conversation->description))
   <div class="timeline-item-description">
       <span>
-        {!! __('<b>:user</b> started a <a href=":href">conversation</a>', [
+        {!! __('<b>:user</b> started a <a href=":href" class="link">conversation</a>', [
           'user' => $conversation->createdBy()->name,
           'href' => route('dashboard', ['tab' => 'ama2', 'conversation_id' => $conversation->id]) ])
         !!}
@@ -19,7 +19,7 @@
     <div class="timeline-item-description">
       <span>
         @if($conversation->format === \App\Models\Conversation::FORMAT_V1)
-        {!! __('<b>:user</b> started a <a href=":href">conversation</a>', [
+        {!! __('<b>:user</b> started a <a href=":href" class="link">conversation</a>', [
           'user' => $conversation->createdBy()->name,
           'href' => route('dashboard', ['tab' => 'ama2', 'conversation_id' => $conversation->id]) ])
         !!}

@@ -22,7 +22,7 @@ return [
 	'primary_color' => '#000000',
 
 	'user_model' => \App\Models\User::class,
-	'show_docs' => env('WAVE_DOCS', true),
+	'show_docs' => env('WAVE_DOCS', false),
     'demo' => env('WAVE_DEMO', false),
     'dev_bar' => env('WAVE_BAR', false),
 	'default_user_role' => 'registered',
