@@ -19,6 +19,7 @@ use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
 use App\Http\Controllers\Iframes\DashboardController;
+use App\Http\Controllers\Iframes\TimelineController;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Listeners\EndVulnsScanListener;
 use App\Mail\AuditReport;
@@ -537,12 +538,13 @@ Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illumina
 
 Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function () {
 
+    Route::get('/assets', [TimelineController::class, '__invoke'])->name('assets');
+    Route::get('/conversations', [TimelineController::class, '__invoke'])->name('conversations');
     Route::get('/dashboard', [DashboardController::class, '__invoke'])->name('dashboard');
-
-    Route::get('/stories', fn() => view('cywise.iframes.stories'))
-        ->name('stories');
-
-    Route::get('/users', fn() => view('cywise.iframes.users'))
-        ->name('users');
+    Route::get('/events', [TimelineController::class, '__invoke'])->name('events');
+    Route::get('/ioc', [TimelineController::class, '__invoke'])->name('ioc');
+    Route::get('/leaks', [TimelineController::class, '__invoke'])->name('leaks');
+    Route::get('/notes-and-memos', [TimelineController::class, '__invoke'])->name('notes-and-memos');
+    Route::get('/vulnerabilities', [TimelineController::class, '__invoke'])->name('vulnerabilities');
 
 });

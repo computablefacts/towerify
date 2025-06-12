@@ -4,12 +4,8 @@
 <div class="row pt-3">
   <!-- CYBERTODO : BEGIN -->
   @if(count($todo) > 0)
+  @push('styles')
   <style>
-
-    .todo-item a:hover, .todo-item a:focus {
-      outline: 0;
-      color: var(--c-blue-500);
-    }
 
     .todo-item a {
       color: var(--c-grey-500);
@@ -18,7 +14,13 @@
       border-bottom: 1px dashed;
     }
 
+    .todo-item a:hover, .todo-item a:focus {
+      outline: 0;
+      color: var(--c-blue-500);
+    }
+
   </style>
+  @endpush
   <div class="col-4 pe-0">
     <div class="card">
       <div class="card-body">
@@ -37,7 +39,7 @@
             @else
             <span class="dot-blue"></span>
             @endif
-            &nbsp;<a href="#vid-{{ $item->id }}">
+            &nbsp;<a href="{{ route('vulnerabilities') }}#vid-{{ $item->id }}">
               {{ $item->asset()->asset }}
             </a>
           </div>

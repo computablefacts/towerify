@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 
+/** @deprecated */
 class Timeline extends Component
 {
     const string CATEGORY_EVENTS = 'events';

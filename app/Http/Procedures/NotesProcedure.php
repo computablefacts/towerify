@@ -2,10 +2,10 @@
 
 namespace App\Http\Procedures;
 
+use App\Http\Controllers\Iframes\TimelineController;
 use App\Jobs\ProcessIncomingEmails;
 use App\Models\TimelineItem;
 use App\Models\User;
-use App\View\Components\Timeline;
 use Illuminate\Http\Request;
 use Sajya\Server\Attributes\RpcMethod;
 use Sajya\Server\Procedure;
@@ -38,7 +38,7 @@ class NotesProcedure extends Procedure
 
         return [
             "msg" => "Your note has been saved!",
-            "html" => Timeline::newNote($user, $item),
+            "html" => TimelineController::noteAndMemo($user, $item)['html'] ?? '',
         ];
     }
 

@@ -8,7 +8,7 @@
     toastSuccess: (msg) => toaster.toast(msg, 'success'),
     toastError: (msg) => toaster.toast(msg, 'danger'),
     toastAxiosError: (error) => {
-      console.error('Error:', error.response.data);
+      console.error('Error:', error);
       if (error.response && error.response.data && error.response.data.message) {
         toaster.toastError(error.response.data.message);
       } else {
