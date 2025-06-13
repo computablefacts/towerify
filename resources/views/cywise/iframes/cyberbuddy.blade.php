@@ -387,6 +387,96 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
     padding-top: 0.5rem;
   }
 
+  /* COMMANDS */
+
+  .tw-answer-command {
+    background-color: rgb(255, 255, 255);
+    align-items: center;
+    cursor: pointer;
+    justify-content: center;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    text-align: center;
+    display: inline-flex;
+    width: 160.55px;
+    height: 2.25rem;
+    border-width: 1px;
+    border-color: rgb(226, 232, 240);
+    border-style: solid;
+    border-radius: 6px
+  }
+
+  .tw-answer-command:hover {
+    background-color: var(--c-blue);
+    color: white;
+  }
+
+  /* DOCUMENT */
+
+  .tw-answer-document {
+    align-items: center;
+    display: flex;
+    margin-top: 0.5rem;
+    font-size: 14px;
+    font-weight: 500
+  }
+
+  .tw-answer-document-button {
+    background-color: rgb(255, 255, 255);
+    align-items: center;
+    cursor: pointer;
+    justify-content: center;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    text-align: center;
+    display: flex;
+    width: 232.633px;
+    height: 2.5rem;
+    border-width: 0;
+    border-radius: 6px;
+    gap: 8px
+  }
+
+  .tw-answer-document-button:hover {
+    background-color: #444aee;
+    color: white;
+  }
+
+  .tw-answer-document-icon-svg {
+    width: 1rem;
+    height: 1rem
+  }
+
+  .tw-answer-document-download-svg {
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.5rem;
+  }
+
+  /* CHART */
+
+  .tw-answer-chart {
+    background-color: rgb(255, 255, 255);
+    margin-top: 1rem;
+    border-radius: 8px;
+    padding: 1rem
+  }
+
+  /* IMAGE */
+
+  .tw-answer-image {
+    width: 802.5px;
+    height: auto;
+    max-width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px
+  }
+
+  /* TABLE */
+
   .tw-answer-table-wrapper {
     background-color: rgb(255, 255, 255);
     width: 100%;
