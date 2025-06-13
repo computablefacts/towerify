@@ -23,7 +23,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Parsedown;
 
 class TimelineController extends Controller
 {
@@ -53,52 +52,8 @@ class TimelineController extends Controller
             'level' => ['nullable', 'string', 'in:low,medium,high'],
             'server_id' => ['nullable', 'integer', 'exists:ynh_servers,id'],
             'asset_id' => ['nullable', 'integer', 'exists:am_assets,id'],
-            'conversation_id' => ['nullable', 'integer', 'exists:cb_conversations,id'],
         ]);
         $objects = last(explode('/', trim($request->path(), '/')));
-
-        if ($objects === 'terms') {
-
-            $file = file_exists(public_path('/cywise/markdown/terms.' . app()->getLocale() . '.md'))
-                ? public_path('/cywise/markdown/terms.' . app()->getLocale() . '.md')
-                : public_path('/cywise/markdown/terms.md');
-
-            return view('cywise.iframes.markdown', [
-                'html' => (new Parsedown)->text(file_get_contents($file))
-            ]);
-        }
-        if ($objects === 'cyberbuddy') {
-
-            $conversationId = $params['conversation_id'] ?? null;
-
-            /** @var User $user */
-            $user = Auth::user();
-
-            if ($conversationId) {
-                $conversation = Conversation::where('id', $conversationId)
-                    ->where('format', Conversation::FORMAT_V1)
-                    ->where('created_by', $user?->id)
-                    ->first();
-            }
-
-            /** @var Conversation $conversation */
-            $conversation = $conversation ?? Conversation::create([
-                'thread_id' => Str::random(10),
-                'dom' => json_encode([]),
-                'autosaved' => true,
-                'created_by' => $user?->id,
-                'format' => Conversation::FORMAT_V1,
-            ]);
-
-            return view('cywise.iframes.cyberbuddy', ['threadId' => $conversation->thread_id]);
-        }
-        if ($objects === 'cyberscribe') {
-
-            // TODO
-
-            return view('cywise.iframes.cyberscribe', []);
-        }
-
         $items = match ($objects) {
             'assets' => $this->assets($params['status'] ?? null, $params['asset_id'] ?? null),
             'conversations' => $this->conversations(),

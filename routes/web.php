@@ -18,7 +18,10 @@ use App\Events\EndVulnsScan;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
+use App\Http\Controllers\Iframes\CyberBuddyController;
+use App\Http\Controllers\Iframes\CyberScribeController;
 use App\Http\Controllers\Iframes\DashboardController;
+use App\Http\Controllers\Iframes\TermsController;
 use App\Http\Controllers\Iframes\TimelineController;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Listeners\EndVulnsScanListener;
@@ -594,14 +597,14 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
 
     Route::get('/assets', [TimelineController::class, '__invoke'])->name('assets');
     Route::get('/conversations', [TimelineController::class, '__invoke'])->name('conversations');
-    Route::get('/cyberbuddy', [TimelineController::class, '__invoke'])->name('cyberbuddy');
-    Route::get('/cyberscribe', [TimelineController::class, '__invoke'])->name('cyberscribe');
+    Route::get('/cyberbuddy', [CyberBuddyController::class, '__invoke'])->name('cyberbuddy');
+    Route::get('/cyberscribe', [CyberScribeController::class, '__invoke'])->name('cyberscribe');
     Route::get('/dashboard', [DashboardController::class, '__invoke'])->name('dashboard');
     Route::get('/events', [TimelineController::class, '__invoke'])->name('events');
     Route::get('/ioc', [TimelineController::class, '__invoke'])->name('ioc');
     Route::get('/leaks', [TimelineController::class, '__invoke'])->name('leaks');
     Route::get('/notes-and-memos', [TimelineController::class, '__invoke'])->name('notes-and-memos');
-    Route::get('/terms', [TimelineController::class, '__invoke'])->name('terms');
+    Route::get('/terms', [TermsController::class, '__invoke'])->name('terms');
     Route::get('/vulnerabilities', [TimelineController::class, '__invoke'])->name('vulnerabilities');
 
 });
