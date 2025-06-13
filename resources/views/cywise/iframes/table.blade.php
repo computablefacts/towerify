@@ -1,3 +1,6 @@
+@extends('cywise.iframes.app')
+
+@push('styles')
 <style>
 
   table {
@@ -17,13 +20,13 @@
 
   .step {
     padding: 10px 15px;
-    color: var(--c-blue);
+    color: var(--ds-background-brand-bold);
     flex: 1;
     text-align: center;
   }
 
   .step.active {
-    background: var(--c-blue);
+    background: var(--ds-background-brand-bold);
     color: white;
     font-weight: bold;
   }
@@ -45,7 +48,10 @@
   }
 
 </style>
-<div class="steps mb-2">
+@endpush
+
+@section('content')
+<div class="steps mt-3">
   <div class="step active" data-step="1">
     {{ __('Step 1') }}
   </div>
@@ -65,7 +71,7 @@
     {{ __('Step 6') }}
   </div>
 </div>
-<div class="content">
+<div class="content my-3">
   <div class="card step-content active">
     <div class="card-body">
       <h5 class="card-title">
@@ -325,12 +331,16 @@
       </div>
       <div class="row mt-2">
         <div class="col text-center">
-          <a class="btn btn-primary" href="{{ route('home', ['tab' => 'tables']) }}">{{ __('Back to tables list') }}</a>
+          <a class="btn btn-primary" href="{{ route('iframes.tables') }}">{{ __('Back to tables list') }}</a>
         </div>
       </div>
     </div>
   </div>
 </div>
+@endsection
+
+@push('scripts')
+
 <script>
 
   const steps = document.querySelectorAll('.step');
@@ -470,9 +480,7 @@
   });
 
   const elVirtualTableName = com.computablefacts.blueprintjs.Blueprintjs.component(document, {
-    type: 'TextInput',
-    container: 'vtable-name',
-    placeholder: "{{ __('The virtual table name such as active_users') }}"
+    type: 'TextInput', container: 'vtable-name', placeholder: "{{ __('The virtual table name such as active_users') }}"
   });
 
   const listTables = () => {
@@ -482,32 +490,26 @@
 
     let encodedUrl;
     if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
-      encodedUrl = '/tables/' +
-          '?storage=s3' +
-          '&region=' + encodeURIComponent(elAwsRegion.el.value) +
-          '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) +
-          '&secret_access_key=' + encodeURIComponent(elAwsSecretAccessKey.el.value) +
-          '&input_folder=' + encodeURIComponent(elAwsInputFolder.el.value) +
-          '&output_folder=' + encodeURIComponent(elAwsOutputFolder.el.value);
+      encodedUrl = '/tables/' + '?storage=s3' + '&region=' + encodeURIComponent(elAwsRegion.el.value)
+        + '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) + '&secret_access_key='
+        + encodeURIComponent(elAwsSecretAccessKey.el.value) + '&input_folder=' + encodeURIComponent(
+          elAwsInputFolder.el.value) + '&output_folder=' + encodeURIComponent(elAwsOutputFolder.el.value);
     }
 
     if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
-      encodedUrl = '/tables/' +
-          '?storage=azure' +
-          '&connection_string=' + encodeURIComponent(elAzureConnectionString.el.value) +
-          '&input_folder=' + encodeURIComponent(elAzureInputFolder.el.value) +
-          '&output_folder=' + encodeURIComponent(elAzureOutputFolder.el.value);
+      encodedUrl = '/tables/' + '?storage=azure' + '&connection_string=' + encodeURIComponent(
+          elAzureConnectionString.el.value) + '&input_folder=' + encodeURIComponent(elAzureInputFolder.el.value)
+        + '&output_folder=' + encodeURIComponent(elAzureOutputFolder.el.value);
     }
 
     if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
-      axios.get(encodedUrl).then(
-          response => {
-            if (response.data.success) {
-              if (!response.data.tables || response.data.tables.length === 0) {
-                elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('No files found.') }}</td></tr>";
-              } else {
-                const rows = response.data.tables.map(table => {
-                  return `
+      axios.get(encodedUrl).then(response => {
+        if (response.data.success) {
+          if (!response.data.tables || response.data.tables.length === 0) {
+            elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('No files found.') }}</td></tr>";
+          } else {
+            const rows = response.data.tables.map(table => {
+              return `
                 <tr>
                   <td><input type="checkbox" value="${table.object}" data-file="${table.object}"/></td>
                   <td>${table.object}</td>
@@ -515,16 +517,16 @@
                   <td class="text-end">${table.last_modified}</td>
                 </tr>
               `;
-                });
-                elListTables.innerHTML = rows.join('');
-              }
-            } else if (response.data.error) {
-              toaster.toastError(response.data.error);
-            } else {
-              console.log(response.data);
-            }
-          })
-          .catch(error => toaster.toastAxiosError(error));
+            });
+            elListTables.innerHTML = rows.join('');
+          }
+        } else if (response.data.error) {
+          toaster.toastError(response.data.error);
+        } else {
+          console.log(response.data);
+        }
+      })
+      .catch(error => toaster.toastAxiosError(error));
     } else if (elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
       // TODO
     } else {
@@ -604,7 +606,7 @@
     const description = document.getElementById('table-description').value;
     const checkboxes = Array.from(document.querySelectorAll('#tables-columns input[type="checkbox"]:checked'));
     const tables = checkboxes.map(
-        checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
+      checkbox => JSON.parse(com.computablefacts.helpers.fromBase64(checkbox.getAttribute('data-file'))));
 
     if (tables.length === 0) {
       toaster.toastError("{{ __('Please select the table to import.') }}");
@@ -684,12 +686,14 @@
     }
 
     axios.post(`/tables/query`,
-        {query: sql, store: true, name: name, materialize: materialize, description: description}).then(response => {
+      {query: sql, store: true, name: name, materialize: materialize, description: description}).then(response => {
       if (response.data.success) {
         toaster.toastSuccess(response.data.success);
       } else if (response.data.error) {
         toaster.toastError(response.data.error);
-        if (response.data.message) toaster.toastError(response.data.message);
+        if (response.data.message) {
+          toaster.toastError(response.data.message);
+        }
       } else {
         console.log(response.data);
       }
@@ -699,3 +703,4 @@
   };
 
 </script>
+@endpush

@@ -2,7 +2,7 @@
 
 @section('content')
 <h6 class="m-0 mt-3 mb-3">
-  <a href="{{ route('home', ['tab' => 'tables-add']) }}">
+  <a href="{{ route('iframes.table') }}">
     {{ __('+ new') }}
   </a>
 </h6>

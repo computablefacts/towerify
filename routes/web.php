@@ -25,6 +25,7 @@ use App\Http\Controllers\Iframes\CyberScribeController;
 use App\Http\Controllers\Iframes\DashboardController;
 use App\Http\Controllers\Iframes\DocumentsController;
 use App\Http\Controllers\Iframes\PromptsController;
+use App\Http\Controllers\Iframes\TableController;
 use App\Http\Controllers\Iframes\TablesController;
 use App\Http\Controllers\Iframes\TermsController;
 use App\Http\Controllers\Iframes\TimelineController;
@@ -610,6 +611,7 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
     Route::get('/leaks', [TimelineController::class, '__invoke'])->name('leaks');
     Route::get('/notes-and-memos', [TimelineController::class, '__invoke'])->name('notes-and-memos');
     Route::get('/prompts', [PromptsController::class, '__invoke'])->name('prompts');
+    Route::get('/table', [TableController::class, '__invoke'])->name('table');
     Route::get('/tables', [TablesController::class, '__invoke'])->name('tables');
     Route::get('/terms', [TermsController::class, '__invoke'])->name('terms');
     Route::get('/vulnerabilities', [TimelineController::class, '__invoke'])->name('vulnerabilities');

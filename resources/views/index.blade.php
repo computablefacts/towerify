@@ -32,9 +32,6 @@
   @if($tab === 'security_rules')
   <x-osquery-rules/>
   @endif
-  @if($tab === 'tables-add')
-  <x-tables-add :step="request()->input('step') ? request()->input('step') : ''"/>
-  @endif
   @if($tab === 'conversations')
   <x-conversations :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
