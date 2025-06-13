@@ -21,6 +21,7 @@ use App\Helpers\SshKeyPair;
 use App\Http\Controllers\Iframes\CyberBuddyController;
 use App\Http\Controllers\Iframes\CyberScribeController;
 use App\Http\Controllers\Iframes\DashboardController;
+use App\Http\Controllers\Iframes\PromptsController;
 use App\Http\Controllers\Iframes\TermsController;
 use App\Http\Controllers\Iframes\TimelineController;
 use App\Jobs\DownloadDebianSecurityBugTracker;
@@ -601,6 +602,7 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
     Route::get('/ioc', [TimelineController::class, '__invoke'])->name('ioc');
     Route::get('/leaks', [TimelineController::class, '__invoke'])->name('leaks');
     Route::get('/notes-and-memos', [TimelineController::class, '__invoke'])->name('notes-and-memos');
+    Route::get('/prompts', [PromptsController::class, '__invoke'])->name('prompts');
     Route::get('/terms', [TermsController::class, '__invoke'])->name('terms');
     Route::get('/vulnerabilities', [TimelineController::class, '__invoke'])->name('vulnerabilities');
 });

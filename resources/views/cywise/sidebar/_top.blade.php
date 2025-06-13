@@ -5,7 +5,7 @@
 </x-app.sidebar-link>
 <x-app.sidebar-dropdown text="{{ __('Timelines') }}"
                         icon="phosphor-stack"
-                        id="projects_dropdown"
+                        id="timelines_dropdown"
                         :active="(Request::is('vulnerabilities') || Request::is('leaks') || Request::is('ioc') || Request::is('assets') || Request::is('events') || Request::is('conversations') || Request::is('notes-and-memos') || Request::is('cyberbuddy') || Request::is('cyberscribe'))"
                         :open="(Request::is('vulnerabilities') || Request::is('leaks') || Request::is('ioc') || Request::is('assets') || Request::is('events') || Request::is('conversations') || Request::is('notes-and-memos') || Request::is('cyberbuddy') || Request::is('cyberscribe')) ? '1' : '0'">
   <x-app.sidebar-link
@@ -61,3 +61,14 @@
                     :active="Request::is('cyberscribe')">
   {{ __('CyberScribe') }}
 </x-app.sidebar-link>
+<x-app.sidebar-dropdown text="{{ __('Data Management') }}"
+                        icon="phosphor-database"
+                        id="datamanagement_dropdown"
+                        :active="(Request::is('prompts'))"
+                        :open="(Request::is('prompts')) ? '1' : '0'">
+  <x-app.sidebar-link href="{{ route('prompts') }}"
+                      icon="phosphor-files"
+                      :active="Request::is('prompts')">
+    {{ __('Prompts') }}
+  </x-app.sidebar-link>
+</x-app.sidebar-dropdown>
