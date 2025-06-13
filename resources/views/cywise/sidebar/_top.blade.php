@@ -64,8 +64,8 @@
 <x-app.sidebar-dropdown text="{{ __('Data Management') }}"
                         icon="phosphor-database"
                         id="datamanagement_dropdown"
-                        :active="(Request::is('prompts'))"
-                        :open="(Request::is('prompts')) ? '1' : '0'">
+                        :active="(Request::is('prompts') || Request::is('collections') || Request::is('documents') || Request::is('chunks'))"
+                        :open="(Request::is('prompts') || Request::is('collections') || Request::is('documents') || Request::is('chunks')) ? '1' : '0'">
   <x-app.sidebar-link href="{{ route('prompts') }}"
                       icon="phosphor-notepad"
                       :active="Request::is('prompts')">
@@ -80,5 +80,10 @@
                       icon="phosphor-files"
                       :active="Request::is('documents')">
     {{ __('Documents') }}
+  </x-app.sidebar-link>
+  <x-app.sidebar-link href="{{ route('chunks') }}"
+                      icon="phosphor-grid-four"
+                      :active="Request::is('chunks')">
+    {{ __('Chunks') }}
   </x-app.sidebar-link>
 </x-app.sidebar-dropdown>

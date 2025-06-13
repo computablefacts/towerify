@@ -1,25 +1,27 @@
 <?php
 
-namespace App\View\Components;
+namespace App\Http\Controllers\Iframes;
 
+use App\Http\Controllers\Controller;
 use App\Models\Chunk;
-use Closure;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\Component;
+use Illuminate\View\View;
 
-class Chunks extends Component
+class ChunksController extends Controller
 {
-    public Collection $chunks;
-    public string $collection;
-    public string $file;
-    public int $nbPages;
-    public int $pagesSize;
-    public int $currentPage;
-
-    public function __construct(int $currentPage, int $pagesSize = 25, ?string $collection = null, ?string $file = null)
+    public function __invoke(Request $request): View
     {
+        $params = $request->validate([
+            'page' => ['nullable', 'integer', 'min:1'],
+            'page_size' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'collection' => ['nullable', 'string', 'min:1', 'max:100'],
+            'file' => ['nullable', 'string', 'min:1', 'max:100'],
+        ]);
+        $page = $params['page'] ?? 1;
+        $pagesSize = $params['page_size'] ?? 25;
+        $collection = $params['collection'] ?? null;
+        $file = $params['file'] ?? null;
         $query = Chunk::select('cb_chunks.*')
             ->join('cb_collections', 'cb_collections.id', 'cb_chunks.collection_id')
             ->join('cb_files', 'cb_files.id', 'cb_chunks.file_id')
@@ -34,7 +36,7 @@ class Chunks extends Component
             ->orderBy('cb_files.name')
             ->orderBy('cb_chunks.page')
             ->orderBy('cb_chunks.id')
-            ->forPage($currentPage <= 0 ? 1 : $currentPage, $pagesSize <= 0 ? 25 : $pagesSize);
+            ->forPage($page <= 0 ? 1 : $page, $pagesSize <= 0 ? 25 : $pagesSize);
 
         if (!empty($collection)) {
             $query->where('cb_collections.name', $collection);
@@ -43,7 +45,7 @@ class Chunks extends Component
             $query->where('cb_files.name_normalized', $file);
         }
 
-        $this->chunks = $query->get();
+        $chunks = $query->get();
 
         $query = Chunk::select('cb_chunks.*')
             ->join('cb_collections', 'cb_collections.id', 'cb_chunks.collection_id')
@@ -58,15 +60,15 @@ class Chunks extends Component
             $query->where('cb_files.name_normalized', $file);
         }
 
-        $this->collection = empty($collection) ? '' : $collection;
-        $this->file = empty($file) ? '' : $file;
-        $this->nbPages = ceil($query->count() / $pagesSize);
-        $this->currentPage = $currentPage;
-        $this->pagesSize = $pagesSize;
-    }
+        $nbPages = ceil($query->count() / $pagesSize);
 
-    public function render(): View|Closure|string
-    {
-        return view('cywise.components.chunks');
+        return view('cywise.iframes.chunks', [
+            'chunks' => $chunks,
+            'collection' => $collection,
+            'file' => $file,
+            'nbPages' => $nbPages,
+            'currentPage' => $page,
+            'pagesSize' => $pagesSize,
+        ]);
     }
 }

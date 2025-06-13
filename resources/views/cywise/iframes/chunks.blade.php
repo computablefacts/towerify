@@ -1,3 +1,6 @@
+@extends('cywise.iframes.app')
+
+@push('styles')
 <style>
 
   .pre-light {
@@ -5,8 +8,11 @@
   }
 
 </style>
+@endpush
+
+@section('content')
 @if($file)
-<div class="card mb-3" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+<div class="card mt-3" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
   <div class="card-body">
     <div class="row">
       <div class="col">
@@ -16,7 +22,7 @@
   </div>
 </div>
 @elseif($collection)
-<div class="card mb-3" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
+<div class="card mt-3" style="border-top:1px solid #becdcf;background-color:#fff3cd;">
   <div class="card-body">
     <div class="row">
       <div class="col">
@@ -26,7 +32,7 @@
   </div>
 </div>
 @endif
-<div class="card">
+<div class="card mt-3 mb-3">
   @if($chunks->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -118,49 +124,31 @@
         <ul class="pagination justify-content-center mt-3 mb-3">
           <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('home', ['tab' => 'chunks', 'page' => 1, 'collection' => $collection]) }}">
+               href="{{ route('iframes.chunks', ['page' => 1, 'collection' => $collection]) }}">
               <span>&laquo;&nbsp;{{ __('First') }}</span>
             </a>
           </li>
           <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('home', ['tab' => 'chunks', 'page' => $currentPage <= 1 ? 1 : $currentPage - 1, 'collection' => $collection]) }}">
+               href="{{ route('iframes.chunk', ['page' => $currentPage <= 1 ? 1 : $currentPage - 1, 'collection' => $collection]) }}">
               <span>&lt;&nbsp;{{ __('Previous') }}</span>
             </a>
           </li>
-          <!--
-          @if($currentPage > 1)
-          <li class="page-item">
-            <a class="page-link" href="{{ route('home', ['tab' => 'chunks', 'page' => $currentPage - 1, 'collection' => $collection]) }}">
-              {{ $currentPage - 1 }}
-            </a>
-          </li>
-          @endif
-          -->
           <li class="page-item">
             <a class="page-link active"
-               href="{{ route('home', ['tab' => 'chunks', 'page' => $currentPage, 'collection' => $collection]) }}">
+               href="{{ route('iframes.chunk', ['page' => $currentPage, 'collection' => $collection]) }}">
               {{ $currentPage }}
             </a>
           </li>
-          <!--
-          @if($currentPage < $nbPages)
-          <li class="page-item">
-            <a class="page-link" href="{{ route('home', ['tab' => 'chunks', 'page' => $currentPage + 1, 'collection' => $collection]) }}">
-              {{ $currentPage + 1 }}
-            </a>
-          </li>
-          @endif
-          -->
           <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('home', ['tab' => 'chunks', 'page' => $currentPage >= $nbPages ? $nbPages : $currentPage + 1, 'collection' => $collection])}}">
+               href="{{ route('iframes.chunk', ['page' => $currentPage >= $nbPages ? $nbPages : $currentPage + 1, 'collection' => $collection])}}">
               <span>{{ __('Next') }}&nbsp;&gt;</span>
             </a>
           </li>
           <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('home', ['tab' => 'chunks', 'page' => $nbPages, 'collection' => $collection]) }}">
+               href="{{ route('iframes.chunk', ['page' => $nbPages, 'collection' => $collection]) }}">
               <span>{{ __('Last') }}&nbsp;&raquo;</span>
             </a>
           </li>
@@ -170,6 +158,9 @@
   </div>
   @endif
 </div>
+@endsection
+
+@push('scripts')
 <script>
 
   function deleteChunk(chunkId) {
@@ -229,3 +220,4 @@
   }
 
 </script>
+@endpush
