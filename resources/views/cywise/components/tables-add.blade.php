@@ -17,13 +17,13 @@
 
   .step {
     padding: 10px 15px;
-    color: #007bff;
+    color: var(--c-blue);
     flex: 1;
     text-align: center;
   }
 
   .step.active {
-    background: #007bff;
+    background: var(--c-blue);
     color: white;
     font-weight: bold;
   }

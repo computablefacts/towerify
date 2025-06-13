@@ -1,4 +1,4 @@
-<table class="table table-hover no-bottom-margin">
+<table class="table table-hover mb-0">
   <thead>
   <tr>
     <th>{{ __('Table') }}</th>

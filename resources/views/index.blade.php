@@ -32,9 +32,6 @@
   @if($tab === 'security_rules')
   <x-osquery-rules/>
   @endif
-  @if($tab === 'tables')
-  <x-tables/>
-  @endif
   @if($tab === 'tables-add')
   <x-tables-add :step="request()->input('step') ? request()->input('step') : ''"/>
   @endif
