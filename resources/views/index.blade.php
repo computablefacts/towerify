@@ -32,29 +32,14 @@
   @if($tab === 'security_rules')
   <x-osquery-rules/>
   @endif
-  @if($tab === 'collections')
-  <x-collections :currentPage="request()->input('page') ? request()->input('page') : 1"/>
-  @endif
-  @if($tab === 'documents')
-  <x-documents :collection="request()->input('collection') ? request()->input('collection') : ''"
-               :currentPage="request()->input('page') ? request()->input('page') : 1"/>
-  @endif
   @if($tab === 'tables')
   <x-tables/>
   @endif
   @if($tab === 'tables-add')
   <x-tables-add :step="request()->input('step') ? request()->input('step') : ''"/>
   @endif
-  @if($tab === 'chunks')
-  <x-chunks :collection="request()->input('collection') ? request()->input('collection') : ''"
-            :file="request()->input('file') ? request()->input('file') : ''"
-            :currentPage="request()->input('page') ? request()->input('page') : 1"/>
-  @endif
   @if($tab === 'conversations')
   <x-conversations :currentPage="request()->input('page') ? request()->input('page') : 1"/>
-  @endif
-  @if($tab === 'prompts')
-  <x-prompts :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
   @if($tab === 'sca')
   <x-sca :policy="request()->input('policy') ? request()->input('policy') : ''"
