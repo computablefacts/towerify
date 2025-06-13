@@ -130,25 +130,25 @@
           </li>
           <li class="page-item {{ $currentPage <= 1 ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('iframes.chunk', ['page' => $currentPage <= 1 ? 1 : $currentPage - 1, 'collection' => $collection]) }}">
+               href="{{ route('iframes.chunks', ['page' => $currentPage <= 1 ? 1 : $currentPage - 1, 'collection' => $collection]) }}">
               <span>&lt;&nbsp;{{ __('Previous') }}</span>
             </a>
           </li>
           <li class="page-item">
             <a class="page-link active"
-               href="{{ route('iframes.chunk', ['page' => $currentPage, 'collection' => $collection]) }}">
+               href="{{ route('iframes.chunks', ['page' => $currentPage, 'collection' => $collection]) }}">
               {{ $currentPage }}
             </a>
           </li>
           <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('iframes.chunk', ['page' => $currentPage >= $nbPages ? $nbPages : $currentPage + 1, 'collection' => $collection])}}">
+               href="{{ route('iframes.chunks', ['page' => $currentPage >= $nbPages ? $nbPages : $currentPage + 1, 'collection' => $collection])}}">
               <span>{{ __('Next') }}&nbsp;&gt;</span>
             </a>
           </li>
           <li class="page-item {{ $currentPage >= $nbPages ? 'disabled' : '' }}">
             <a class="page-link"
-               href="{{ route('iframes.chunk', ['page' => $nbPages, 'collection' => $collection]) }}">
+               href="{{ route('iframes.chunks', ['page' => $nbPages, 'collection' => $collection]) }}">
               <span>{{ __('Last') }}&nbsp;&raquo;</span>
             </a>
           </li>
