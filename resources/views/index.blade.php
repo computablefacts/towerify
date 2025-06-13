@@ -2,10 +2,7 @@
 
 @section('content')
 <div class="container">
-  @if(!$tab || $tab === 'timeline')
-  <x-timeline/>
-  @endif
-  @if($tab === 'overview')
+  @if(!$tab || $tab === 'overview')
   <x-overview/>
   @endif
   @if($tab === 'my-apps')
