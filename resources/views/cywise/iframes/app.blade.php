@@ -21,7 +21,7 @@
   <!-- page-specific styles -->
   @stack('styles')
 </head>
-<body data-bs-theme="light" style="background-color: var(--c-grey-100);">
+<body data-bs-theme="light" style="background-color: #fafafa;">
 @include('cywise.iframes._blueprintjs')
 @include('cywise.iframes._toaster')
 @include('cywise.iframes._json-rpc')

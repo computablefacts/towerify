@@ -20,6 +20,8 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
 ]);
 
 @endphp
+
+@push('styles')
 <style>
 
   .tw-wrapper1 {
@@ -590,7 +592,10 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
   }
 
 </style>
-<div class="tw-wrapper1 p-3">
+@endpush
+
+@section('content')
+<div class="tw-wrapper1 pt-3 pb-3">
   <div class="tw-wrapper2">
     <div class="tw-chat">
 
@@ -641,6 +646,9 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
     </div>
   </div>
 </div>
+@endsection
+
+@push('scripts')
 <script>
 
   let run = 0;
@@ -923,4 +931,5 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
     elInputField.focus();
   });
 </script>
+@endpush
 
