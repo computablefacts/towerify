@@ -16,7 +16,7 @@ return [
 	],
 
 	'auth' => [
-		'min_password_length' => 5,
+		'min_password_length' => 12,
 	],
 
 	'primary_color' => '#000000',
