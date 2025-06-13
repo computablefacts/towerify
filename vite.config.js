@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,14 +10,17 @@ console.log(`Active theme: ${activeTheme}`);
 
 export default defineConfig({
     plugins: [
+        react(),
         laravel({
             input: [
                 `resources/themes/${activeTheme}/assets/css/app.css`,
                 `resources/themes/${activeTheme}/assets/js/app.js`,
                 'resources/css/filament/admin/theme.css',
+                'resources/js/app.js',
             ],
             refresh: [
                 `resources/themes/${activeTheme}/**/*`,
+                'resources/js/**',
             ],
         }),
     ],

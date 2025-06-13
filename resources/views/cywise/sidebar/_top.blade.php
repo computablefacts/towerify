@@ -6,8 +6,8 @@
 <x-app.sidebar-dropdown text="{{ __('Timelines') }}"
                         icon="phosphor-stack"
                         id="projects_dropdown"
-                        :active="(Request::is('vulnerabilities') || Request::is('leaks') || Request::is('ioc') || Request::is('assets') || Request::is('events') || Request::is('conversations') || Request::is('notes-and-memos') || Request::is('cyberbuddy'))"
-                        :open="(Request::is('vulnerabilities') || Request::is('leaks') || Request::is('ioc') || Request::is('assets') || Request::is('events') || Request::is('conversations') || Request::is('notes-and-memos') || Request::is('cyberbuddy')) ? '1' : '0'">
+                        :active="(Request::is('vulnerabilities') || Request::is('leaks') || Request::is('ioc') || Request::is('assets') || Request::is('events') || Request::is('conversations') || Request::is('notes-and-memos') || Request::is('cyberbuddy') || Request::is('cyberscribe'))"
+                        :open="(Request::is('vulnerabilities') || Request::is('leaks') || Request::is('ioc') || Request::is('assets') || Request::is('events') || Request::is('conversations') || Request::is('notes-and-memos') || Request::is('cyberbuddy') || Request::is('cyberscribe')) ? '1' : '0'">
   <x-app.sidebar-link
     href="{{ route('vulnerabilities') }}"
     icon="phosphor-warning-circle"
@@ -55,4 +55,9 @@
                     icon="phosphor-robot"
                     :active="Request::is('cyberbuddy')">
   {{ __('CyberBuddy') }}
+</x-app.sidebar-link>
+<x-app.sidebar-link href="{{ route('cyberscribe') }}"
+                    icon="phosphor-pencil-circle"
+                    :active="Request::is('cyberscribe')">
+  {{ __('CyberScribe') }}
 </x-app.sidebar-link>

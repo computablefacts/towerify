@@ -81,6 +81,12 @@ class TimelineController extends Controller
 
             return view('cywise.iframes.cyberbuddy', ['threadId' => $conversation->thread_id]);
         }
+        if ($objects === 'cyberscribe') {
+
+            // TODO
+
+            return view('cywise.iframes.cyberscribe', []);
+        }
 
         $items = match ($objects) {
             'assets' => $this->assets($params['status'] ?? null, $params['asset_id'] ?? null),

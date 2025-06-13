@@ -28,12 +28,10 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
     flex-grow: 1;
     display: flex;
     overflow: hidden;
-    background-color: rgb(243, 244, 246);
     height: 100vh;
   }
 
   .tw-wrapper2 {
-    background-color: rgb(249, 250, 251);
     flex-grow: 1;
     overflow-x: hidden;
     overflow-y: auto

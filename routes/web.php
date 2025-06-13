@@ -536,11 +536,66 @@ Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illumina
         ->header('Content-Type', 'text/plain');
 })->middleware(['throttle:240,1']);
 
+
+Route::post('/llm1', '\App\Http\Controllers\CyberBuddyController@llm1')->middleware('auth');
+
+Route::post('/llm2', '\App\Http\Controllers\CyberBuddyController@llm2')->middleware('auth');
+
+Route::get('/templates', '\App\Http\Controllers\CyberBuddyController@templates')->middleware('auth');
+
+Route::post('/templates', '\App\Http\Controllers\CyberBuddyController@saveTemplate')->middleware('auth');
+
+Route::delete('/templates/{id}', '\App\Http\Controllers\CyberBuddyController@deleteTemplate')->middleware('auth');
+
+Route::get('/files', '\App\Http\Controllers\CyberBuddyController@files')->middleware('auth');
+
+Route::delete('/files/{id}', '\App\Http\Controllers\CyberBuddyController@deleteFile')->middleware('auth');
+
+Route::get('/files/stream/{secret}', '\App\Http\Controllers\CyberBuddyController@streamFile');
+
+Route::get('/files/download/{secret}', '\App\Http\Controllers\CyberBuddyController@downloadFile');
+
+Route::post('/files/one', '\App\Http\Controllers\CyberBuddyController@uploadOneFile')->middleware('auth:sanctum');
+
+Route::post('/files/many', '\App\Http\Controllers\CyberBuddyController@uploadManyFiles')->middleware('auth:sanctum');
+
+Route::get('/collections', '\App\Http\Controllers\CyberBuddyController@collections')->middleware('auth');
+
+Route::delete('/collections/{id}', '\App\Http\Controllers\CyberBuddyController@deleteCollection')->middleware('auth');
+
+Route::post('/collections/{id}', '\App\Http\Controllers\CyberBuddyController@saveCollection')->middleware('auth');
+
+Route::delete('/chunks/{id}', '\App\Http\Controllers\CyberBuddyController@deleteChunk')->middleware('auth');
+
+Route::post('/chunks/{id}', '\App\Http\Controllers\CyberBuddyController@saveChunk')->middleware('auth');
+
+Route::delete('/prompts/{id}', '\App\Http\Controllers\CyberBuddyController@deletePrompt')->middleware('auth');
+
+Route::post('/prompts/{id}', '\App\Http\Controllers\CyberBuddyController@savePrompt')->middleware('auth');
+
+Route::delete('/conversations/{id}', '\App\Http\Controllers\CyberBuddyController@deleteConversation')->middleware('auth');
+
+Route::delete('/frameworks/{id}', '\App\Http\Controllers\CyberBuddyController@unloadFramework')->middleware('auth');
+
+Route::post('/frameworks/{id}', '\App\Http\Controllers\CyberBuddyController@loadFramework')->middleware('auth');
+
+Route::group([
+    'prefix' => 'tables',
+], function () {
+    Route::get('/', 'CyberBuddyController@listTables')->name('list-tables');
+    Route::post('/columns', 'CyberBuddyController@listTablesColumns')->name('list-tables-columns');
+    Route::post('/import', 'CyberBuddyController@importTables')->name('import-tables');
+    Route::get('/available', 'CyberBuddyController@availableTables')->name('available-tables');
+    Route::post('/query', 'CyberBuddyController@queryTables')->name('query-tables');
+    Route::post('/prompt-to-query', 'CyberBuddyController@promptToTablesQuery')->name('prompt-to-tables-query');
+})->middleware(['auth']);
+
 Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function () {
 
     Route::get('/assets', [TimelineController::class, '__invoke'])->name('assets');
     Route::get('/conversations', [TimelineController::class, '__invoke'])->name('conversations');
     Route::get('/cyberbuddy', [TimelineController::class, '__invoke'])->name('cyberbuddy');
+    Route::get('/cyberscribe', [TimelineController::class, '__invoke'])->name('cyberscribe');
     Route::get('/dashboard', [DashboardController::class, '__invoke'])->name('dashboard');
     Route::get('/events', [TimelineController::class, '__invoke'])->name('events');
     Route::get('/ioc', [TimelineController::class, '__invoke'])->name('ioc');

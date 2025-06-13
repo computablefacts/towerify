@@ -25,7 +25,7 @@
     text-overflow: ellipsis;
   }
 </style>
-<div class="container">
+<div class="container-fluid">
   <div class="row p-0">
     <div class="col col-3 bn-summary" id="block-note-headings">
       <div class="pt-2 pb-2 bn-h1"><b>Table des matières</b></div>
