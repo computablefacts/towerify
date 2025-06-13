@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Parsedown;
 
 class TimelineController extends Controller
 {
@@ -56,6 +57,16 @@ class TimelineController extends Controller
         ]);
         $objects = last(explode('/', trim($request->path(), '/')));
 
+        if ($objects === 'terms') {
+
+            $file = file_exists(public_path('/cywise/markdown/terms.' . app()->getLocale() . '.md'))
+                ? public_path('/cywise/markdown/terms.' . app()->getLocale() . '.md')
+                : public_path('/cywise/markdown/terms.md');
+
+            return view('cywise.iframes.markdown', [
+                'html' => (new Parsedown)->text(file_get_contents($file))
+            ]);
+        }
         if ($objects === 'cyberbuddy') {
 
             $conversationId = $params['conversation_id'] ?? null;

@@ -1,12 +1,12 @@
-@extends('layouts.app')
+@extends('cywise.iframes.app')
 
 @section('content')
-<div class="container">
+<div class="container-fluid p-0 pt-3 pb-3">
   <div class="row justify-content-center">
     <div class="col">
       <div class="card">
         <div class="card-body">
-          {!! $terms !!}
+          {!! $html !!}
         </div>
       </div>
     </div>
