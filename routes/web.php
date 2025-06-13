@@ -582,19 +582,16 @@ Route::delete('/frameworks/{id}', '\App\Http\Controllers\CyberBuddyController@un
 
 Route::post('/frameworks/{id}', '\App\Http\Controllers\CyberBuddyController@loadFramework')->middleware('auth');
 
-Route::group([
-    'prefix' => 'tables',
-], function () {
+Route::middleware(['auth'])->prefix('tables')->group(function () {
     Route::get('/', '\App\Http\Controllers\CyberBuddyController@listTables')->name('list-tables');
     Route::post('/columns', '\App\Http\Controllers\CyberBuddyController@listTablesColumns')->name('list-tables-columns');
     Route::post('/import', '\App\Http\Controllers\CyberBuddyController@importTables')->name('import-tables');
     Route::get('/available', '\App\Http\Controllers\CyberBuddyController@availableTables')->name('available-tables');
     Route::post('/query', '\App\Http\Controllers\CyberBuddyController@queryTables')->name('query-tables');
     Route::post('/prompt-to-query', '\App\Http\Controllers\CyberBuddyController@promptToTablesQuery')->name('prompt-to-tables-query');
-})->middleware(['auth']);
+});
 
 Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function () {
-
     Route::get('/assets', [TimelineController::class, '__invoke'])->name('assets');
     Route::get('/conversations', [TimelineController::class, '__invoke'])->name('conversations');
     Route::get('/cyberbuddy', [CyberBuddyController::class, '__invoke'])->name('cyberbuddy');
@@ -606,5 +603,4 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
     Route::get('/notes-and-memos', [TimelineController::class, '__invoke'])->name('notes-and-memos');
     Route::get('/terms', [TermsController::class, '__invoke'])->name('terms');
     Route::get('/vulnerabilities', [TimelineController::class, '__invoke'])->name('vulnerabilities');
-
 });
