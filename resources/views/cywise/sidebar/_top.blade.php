@@ -67,7 +67,7 @@
                         :active="(Request::is('prompts'))"
                         :open="(Request::is('prompts')) ? '1' : '0'">
   <x-app.sidebar-link href="{{ route('prompts') }}"
-                      icon="phosphor-files"
+                      icon="phosphor-notepad"
                       :active="Request::is('prompts')">
     {{ __('Prompts') }}
   </x-app.sidebar-link>
@@ -75,5 +75,10 @@
                       icon="phosphor-folders"
                       :active="Request::is('collections')">
     {{ __('Collections') }}
+  </x-app.sidebar-link>
+  <x-app.sidebar-link href="{{ route('documents') }}"
+                      icon="phosphor-files"
+                      :active="Request::is('documents')">
+    {{ __('Documents') }}
   </x-app.sidebar-link>
 </x-app.sidebar-dropdown>

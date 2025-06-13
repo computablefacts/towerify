@@ -22,6 +22,7 @@ use App\Http\Controllers\Iframes\CollectionsController;
 use App\Http\Controllers\Iframes\CyberBuddyController;
 use App\Http\Controllers\Iframes\CyberScribeController;
 use App\Http\Controllers\Iframes\DashboardController;
+use App\Http\Controllers\Iframes\DocumentsController;
 use App\Http\Controllers\Iframes\PromptsController;
 use App\Http\Controllers\Iframes\TermsController;
 use App\Http\Controllers\Iframes\TimelineController;
@@ -600,6 +601,7 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
     Route::get('/cyberbuddy', [CyberBuddyController::class, '__invoke'])->name('cyberbuddy');
     Route::get('/cyberscribe', [CyberScribeController::class, '__invoke'])->name('cyberscribe');
     Route::get('/dashboard', [DashboardController::class, '__invoke'])->name('dashboard');
+    Route::get('/documents', [DocumentsController::class, '__invoke'])->name('documents');
     Route::get('/events', [TimelineController::class, '__invoke'])->name('events');
     Route::get('/ioc', [TimelineController::class, '__invoke'])->name('ioc');
     Route::get('/leaks', [TimelineController::class, '__invoke'])->name('leaks');

@@ -1,24 +1,25 @@
 <?php
 
-namespace App\View\Components;
+namespace App\Http\Controllers\Iframes;
 
+use App\Http\Controllers\Controller;
 use App\Models\File;
-use Closure;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\Component;
+use Illuminate\View\View;
 
-class Documents extends Component
+class DocumentsController extends Controller
 {
-    public Collection $files;
-    public string $collection;
-    public int $nbPages;
-    public int $pagesSize;
-    public int $currentPage;
-
-    public function __construct(int $currentPage, int $pagesSize = 25, ?string $collection = null)
+    public function __invoke(Request $request): View
     {
+        $params = $request->validate([
+            'page' => ['nullable', 'integer', 'min:1'],
+            'page_size' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'collection' => ['nullable', 'string', 'min:1', 'max:100'],
+        ]);
+        $page = $params['page'] ?? 1;
+        $pagesSize = $params['page_size'] ?? 25;
+        $collection = $params['collection'] ?? null;
         $query = File::select('cb_files.*')
             ->join('cb_collections', 'cb_collections.id', '=', 'cb_files.collection_id')
             ->where('cb_files.is_deleted', false)
@@ -30,13 +31,13 @@ class Documents extends Component
             })
             ->orderBy('cb_collections.name')
             ->orderBy('name_normalized')
-            ->forPage($currentPage <= 0 ? 1 : $currentPage, $pagesSize <= 0 ? 25 : $pagesSize);
+            ->forPage($page <= 0 ? 1 : $page, $pagesSize <= 0 ? 25 : $pagesSize);
 
         if (!empty($collection)) {
             $query->where('cb_collections.name', $collection);
         }
 
-        $this->files = $query->get()
+        $files = $query->get()
             ->map(function (File $file) {
                 $nbChunks = $file->chunks()->count();
                 $nbVectors = $file->chunks()->where('is_embedded', true)->count();
@@ -56,17 +57,17 @@ class Documents extends Component
                     'download_url' => $file->downloadUrl(),
                 ];
             });
-        $this->collection = empty($collection) ? '' : $collection;
-        $this->nbPages = ceil(File::select('cb_files.*')
+        $nbPages = ceil(File::select('cb_files.*')
                 ->join('cb_collections', 'cb_collections.id', '=', 'cb_files.collection_id')
                 ->where('cb_files.is_deleted', false)
                 ->where('cb_collections.is_deleted', false)->count() / $pagesSize);
-        $this->currentPage = $currentPage;
-        $this->pagesSize = $pagesSize;
-    }
 
-    public function render(): View|Closure|string
-    {
-        return view('cywise.components.documents');
+        return view('cywise.iframes.documents', [
+            'files' => $files,
+            'collection' => $collection,
+            'nbPages' => $nbPages,
+            'currentPage' => $page,
+            'pagesSize' => $pagesSize,
+        ]);
     }
 }
