@@ -169,7 +169,7 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
   }
 
   .tw-disabled {
-    opacity: 0.5;
+    opacity: 0.5 !important;
     pointer-events: none;
   }
 
