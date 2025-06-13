@@ -71,4 +71,9 @@
                       :active="Request::is('prompts')">
     {{ __('Prompts') }}
   </x-app.sidebar-link>
+  <x-app.sidebar-link href="{{ route('collections') }}"
+                      icon="phosphor-folders"
+                      :active="Request::is('collections')">
+    {{ __('Collections') }}
+  </x-app.sidebar-link>
 </x-app.sidebar-dropdown>

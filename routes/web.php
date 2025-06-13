@@ -18,6 +18,7 @@ use App\Events\EndVulnsScan;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
+use App\Http\Controllers\Iframes\CollectionsController;
 use App\Http\Controllers\Iframes\CyberBuddyController;
 use App\Http\Controllers\Iframes\CyberScribeController;
 use App\Http\Controllers\Iframes\DashboardController;
@@ -594,6 +595,7 @@ Route::middleware(['auth'])->prefix('tables')->group(function () {
 
 Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function () {
     Route::get('/assets', [TimelineController::class, '__invoke'])->name('assets');
+    Route::get('/collections', [CollectionsController::class, '__invoke'])->name('collections');
     Route::get('/conversations', [TimelineController::class, '__invoke'])->name('conversations');
     Route::get('/cyberbuddy', [CyberBuddyController::class, '__invoke'])->name('cyberbuddy');
     Route::get('/cyberscribe', [CyberScribeController::class, '__invoke'])->name('cyberscribe');
