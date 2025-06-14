@@ -61,6 +61,22 @@
                     :active="Request::is('cyberscribe')">
   {{ __('CyberScribe') }}
 </x-app.sidebar-link>
+<x-app.sidebar-dropdown text="{{ __('Libraries') }}"
+                        icon="phosphor-books"
+                        id="libraries_dropdown"
+                        :active="(Request::is('frameworks') || Request::is('sca'))"
+                        :open="(Request::is('frameworks') || Request::is('sca')) ? '1' : '0'">
+  <x-app.sidebar-link href="{{ route('frameworks') }}"
+                      icon="phosphor-cube"
+                      :active="Request::is('frameworks')">
+    {{ __('Frameworks') }}
+  </x-app.sidebar-link>
+  <x-app.sidebar-link href="{{ route('sca') }}"
+                      icon="phosphor-cube"
+                      :active="Request::is('sca')">
+    {{ __('Security Checks Automation') }}
+  </x-app.sidebar-link>
+</x-app.sidebar-dropdown>
 <x-app.sidebar-dropdown text="{{ __('Data Management') }}"
                         icon="phosphor-database"
                         id="datamanagement_dropdown"
@@ -90,21 +106,5 @@
                       icon="phosphor-grid-four"
                       :active="Request::is('chunks')">
     {{ __('Chunks') }}
-  </x-app.sidebar-link>
-</x-app.sidebar-dropdown>
-<x-app.sidebar-dropdown text="{{ __('Libraries') }}"
-                        icon="phosphor-books"
-                        id="libraries_dropdown"
-                        :active="(Request::is('frameworks') || Request::is('sca'))"
-                        :open="(Request::is('frameworks') || Request::is('sca')) ? '1' : '0'">
-  <x-app.sidebar-link href="{{ route('frameworks') }}"
-                      icon="phosphor-cube"
-                      :active="Request::is('frameworks')">
-    {{ __('Frameworks') }}
-  </x-app.sidebar-link>
-  <x-app.sidebar-link href="{{ route('sca') }}"
-                      icon="phosphor-cube"
-                      :active="Request::is('sca')">
-    {{ __('Security Checks Automation') }}
   </x-app.sidebar-link>
 </x-app.sidebar-dropdown>

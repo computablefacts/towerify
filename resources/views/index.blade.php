@@ -35,15 +35,6 @@
   @if($tab === 'conversations')
   <x-conversations :currentPage="request()->input('page') ? request()->input('page') : 1"/>
   @endif
-  @if($tab === 'sca')
-  <x-sca :policy="request()->input('policy') ? request()->input('policy') : ''"
-         :framework="request()->input('framework') ? request()->input('framework') : ''"
-         :search="request()->input('search') ? request()->input('search') : ''"
-         :check="request()->input('check') ? request()->input('check') : ''"/>
-  @endif
-  @if($tab === 'frameworks')
-  <x-frameworks :search="request()->input('search') ? request()->input('search') : ''"/>
-  @endif
   @if($tab === 'interdependencies')
   <x-interdependencies/>
   @endif
