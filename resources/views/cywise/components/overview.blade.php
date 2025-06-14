@@ -9,7 +9,6 @@
   }
 
 </style>
-<x-onboarding/>
 <div class="container p-0">
   @if(Auth::user()->isInTrial())
   <div class="alert alert-danger border border-danger">
