@@ -76,7 +76,7 @@
         </td>
         <td style="text-align:right">
           <a
-            href="{{ route('iframes.documents', ['page' => 1, 'collection' => $file['collection'], 'file' => $file['name_normalized']]) }}">
+            href="{{ route('iframes.chunks', ['page' => 1, 'collection' => $file['collection'], 'file' => $file['name_normalized']]) }}">
             {{ Illuminate\Support\Number::format($file['nb_chunks'], locale:'sv') }}
           </a>
         </td>
