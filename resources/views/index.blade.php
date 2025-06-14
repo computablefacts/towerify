@@ -2,10 +2,7 @@
 
 @section('content')
 <div class="container">
-  @if(!$tab || $tab === 'overview')
-  <x-overview/>
-  @endif
-  @if($tab === 'my-apps')
+  @if(!$tab || $tab === 'my-apps')
   <x-my-applications/>
   @endif
   @if($tab === 'servers')
