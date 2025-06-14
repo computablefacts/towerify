@@ -17,6 +17,7 @@
         "ext-pdo": "*",
         "24slides/laravel-saml2": "^2.4",
         "azure-oss/storage-blob-laravel": "^1.3",
+        "baril/sqlout": "^5.1",
         "bezhansalleh/filament-google-analytics": "^2.0",
         "codeat3/blade-phosphor-icons": "^2.0",
         "devdojo/app": "0.11.0",
@@ -46,7 +47,6 @@
         "stripe/stripe-php": "^15.3",
         "symfony/process": "^7.3",
         "symfony/yaml": "^7.3",
-        "teamtnt/laravel-scout-tntsearch-driver": "^15.0",
         "tymon/jwt-auth": "@dev",
         "webklex/laravel-imap": "^6.2"
     },

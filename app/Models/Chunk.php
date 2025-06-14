@@ -3,12 +3,12 @@
 namespace App\Models;
 
 use App\Traits\HasTenant;
+use Baril\Sqlout\Searchable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Laravel\Scout\Searchable;
 
 /**
  * @property int id
@@ -48,11 +48,15 @@ class Chunk extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected $weights = [
+        'tags' => 4,
+        'text' => 2,
+    ];
+
     public function toSearchableArray()
     {
         return [
             'id' => $this->id,
-            'url' => $this->url,
             'text' => $this->text,
             'tags' => $this->tags()->get()->pluck('tag')->join(" | "),
             'collection_id' => $this->collection_id,

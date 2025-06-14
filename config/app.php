@@ -208,7 +208,7 @@ return [
          * Search
          */
         Laravel\Scout\ScoutServiceProvider::class,
-        TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
+        Baril\Sqlout\SqloutServiceProvider::class,
     ],
 
     /*
