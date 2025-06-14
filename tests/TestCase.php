@@ -2,16 +2,9 @@
 
 namespace Tests;
 
-use App\Models\Alert;
-use App\Models\Asset;
-use App\Models\Attacker;
-use App\Models\HiddenAlert;
-use App\Models\Honeypot;
-use App\Models\Port;
-use App\Models\Scan;
-use App\Models\Screenshot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Plannr\Laravel\FastRefreshDatabase\Traits\FastRefreshDatabase;
 
 /**
  * To create the test database:
@@ -30,6 +23,8 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
  */
 abstract class TestCase extends BaseTestCase
 {
+    use FastRefreshDatabase;
+
     protected User $user;
     protected string $token;
 
@@ -37,12 +32,10 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUpBeforeClass();
 
-        print "\nMigrating database...\n";
-        print shell_exec('php artisan migrate');
         print "\nSeeding database...\n";
         print shell_exec('php artisan db:seed --class=DatabaseSeeder');
         print shell_exec('php artisan db:seed --class=CywiseSeeder');
-        print "\nDatabase is ready.\n";
+        print "\nDatabase is seeded.\n";
     }
 
     protected function setUp(): void
@@ -60,7 +53,7 @@ abstract class TestCase extends BaseTestCase
         $this->user->save();
     }
 
-    protected function tearDown(): void
+    /* protected function tearDown(): void
     {
         Alert::whereNotNull('id')->delete();
         Asset::whereNotNull('id')->delete();
@@ -71,5 +64,5 @@ abstract class TestCase extends BaseTestCase
         Scan::whereNotNull('id')->delete();
         Screenshot::whereNotNull('id')->delete();
         parent::tearDown();
-    }
+    } */
 }

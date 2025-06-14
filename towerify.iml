@@ -191,6 +191,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/enum" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/laravel-health" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/regex" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/plannr/laravel-fast-refresh-database" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

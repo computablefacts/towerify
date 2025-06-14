@@ -61,6 +61,7 @@
         "pestphp/pest": "^3.4",
         "pestphp/pest-plugin-laravel": "^3.0",
         "phpunit/phpunit": "^11.0",
+        "plannr/laravel-fast-refresh-database": "^1.2",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
