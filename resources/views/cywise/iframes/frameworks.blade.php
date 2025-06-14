@@ -1,3 +1,6 @@
+@extends('cywise.iframes.app')
+
+@push('styles')
 <style>
 
   .pre-light {
@@ -12,7 +15,10 @@
   }
 
 </style>
-<div class="card">
+@endpush
+
+@section('content')
+<div class="card mt-3">
   <div class="card-body">
     <div class="row">
       <div class="col">
@@ -26,7 +32,7 @@
 </div>
 @if($highlights->isNotEmpty())
 @foreach($highlights as $highlight)
-<div class="card mt-3">
+<div class="card mt-3 mb-3">
   <div class="card-header p-2 background-light-grey">
     <h5 class="mb-0">
       <span class="lozenge information">{{ \Illuminate\Support\Str::lower($highlight->framework->provider) }}</span>
@@ -46,7 +52,7 @@
 </div>
 @endforeach
 @else
-<div class="card mt-3">
+<div class="card mt-3 mb-3">
   @if($frameworks->isEmpty())
   <div class="card-body">
     <div class="row">
@@ -57,7 +63,7 @@
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover no-bottom-margin">
+    <table class="table table-hover mb-0">
       <thead>
       <tr>
         <th>{{ __('Provider') }}</th>
@@ -128,6 +134,9 @@
   @endif
 </div>
 @endif
+@endsection
+
+@push('scripts')
 <script>
 
   const load = (id, event) => {
@@ -160,7 +169,7 @@
 
   let searchText = null;
 
-  const queryString = () => '?tab=frameworks' + (searchText ? '&search=' + searchText : '');
+  const queryString = () => (searchText ? '?search=' + searchText : '');
 
   const elSearch = new com.computablefacts.blueprintjs.MinimalTextInput(document.getElementById('search'),
     "{{ $search }}");
@@ -176,3 +185,4 @@
   });
 
 </script>
+@endpush

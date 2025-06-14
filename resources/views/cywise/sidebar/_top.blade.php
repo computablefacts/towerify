@@ -92,3 +92,14 @@
     {{ __('Chunks') }}
   </x-app.sidebar-link>
 </x-app.sidebar-dropdown>
+<x-app.sidebar-dropdown text="{{ __('Libraries') }}"
+                        icon="phosphor-books"
+                        id="libraries_dropdown"
+                        :active="(Request::is('frameworks'))"
+                        :open="(Request::is('frameworks')) ? '1' : '0'">
+  <x-app.sidebar-link href="{{ route('frameworks') }}"
+                      icon="phosphor-cube"
+                      :active="Request::is('frameworks')">
+    {{ __('Frameworks') }}
+  </x-app.sidebar-link>
+</x-app.sidebar-dropdown>
