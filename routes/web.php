@@ -26,6 +26,7 @@ use App\Http\Controllers\Iframes\DashboardController;
 use App\Http\Controllers\Iframes\DocumentsController;
 use App\Http\Controllers\Iframes\FrameworksController;
 use App\Http\Controllers\Iframes\PromptsController;
+use App\Http\Controllers\Iframes\ScaController;
 use App\Http\Controllers\Iframes\TableController;
 use App\Http\Controllers\Iframes\TablesController;
 use App\Http\Controllers\Iframes\TermsController;
@@ -613,6 +614,7 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
     Route::get('/leaks', [TimelineController::class, '__invoke'])->name('leaks');
     Route::get('/notes-and-memos', [TimelineController::class, '__invoke'])->name('notes-and-memos');
     Route::get('/prompts', [PromptsController::class, '__invoke'])->name('prompts');
+    Route::get('/sca', [ScaController::class, '__invoke'])->name('sca');
     Route::get('/table', [TableController::class, '__invoke'])->name('table');
     Route::get('/tables', [TablesController::class, '__invoke'])->name('tables');
     Route::get('/terms', [TermsController::class, '__invoke'])->name('terms');
