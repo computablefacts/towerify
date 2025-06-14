@@ -12,20 +12,17 @@ use App\Helpers\ClickhouseUtils;
 use App\Helpers\OpenAi;
 use App\Helpers\StorageType;
 use App\Helpers\TableStorage;
-use App\Http\Requests\DownloadOneFileRequest;
-use App\Http\Requests\StreamOneFileRequest;
-use App\Http\Requests\UploadManyFilesRequest;
-use App\Http\Requests\UploadOneFileRequest;
 use App\Models\Chunk;
 use App\Models\Conversation;
 use App\Models\File;
 use App\Models\Prompt;
 use App\Models\Table;
 use App\Models\Template;
+use App\Models\User;
 use App\Models\YnhFramework;
 use App\Models\YnhServer;
 use App\Rules\IsValidCollectionName;
-use App\Models\User;
+use App\Rules\IsValidFileType;
 use BotMan\BotMan\BotMan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -324,7 +321,7 @@ class CyberBuddyController extends Controller
         return self::removeSourcesFromAnswer($response['response']);
     }
 
-    public function streamFile(string $secret, StreamOneFileRequest $request)
+    public function streamFile(string $secret, Request $request)
     {
         /** @var File $file */
         $file = File::where('secret', $secret)->where('is_deleted', false)->first();
@@ -352,8 +349,12 @@ class CyberBuddyController extends Controller
         ]);
     }
 
-    public function downloadFile(string $secret, DownloadOneFileRequest $request)
+    public function downloadFile(string $secret, Request $request)
     {
+        $params = $request->validate([
+            'page' => 'integer|min:1',
+        ]);
+
         /** @var File $file */
         $file = File::where('secret', $secret)->where('is_deleted', false)->first();
 
@@ -375,7 +376,7 @@ class CyberBuddyController extends Controller
             return response()->json(['error' => 'Unknown storage path.'], 500);
         }
 
-        $page = $request->integer('page', -1);
+        $page = $params['page'] ?? -1;
 
         if ($file->isPdf() && $page > 0) {
 
@@ -468,22 +469,42 @@ class CyberBuddyController extends Controller
         return response()->json(['error' => 'The framework could not be loaded.'], 500);
     }
 
-    public function uploadOneFile(UploadOneFileRequest $request)
+    public function uploadOneFile(Request $request)
     {
+        if (!Auth::user()->canUseCyberBuddy()) {
+            response()->json([
+                'error' => 'Missing permission.',
+                'urls_success' => [],
+                'filenames_error' => [],
+            ], 500);
+        }
+
+        $params = $request->validate([
+            'collection' => 'required|string',
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                new IsValidFileType()
+            ],
+        ]);
+
+        $collectionName = $params['collection'];
+        $file = $params['file'];
+
         /** @var \App\Models\Collection $collection */
-        $collection = \App\Models\Collection::where('name', $request->string('collection'))->where('is_deleted', false)->first();
+        $collection = \App\Models\Collection::where('name', $collectionName)->where('is_deleted', false)->first();
 
         if (!$collection) {
-            if (!IsValidCollectionName::test($request->string('collection'))) {
+            if (!IsValidCollectionName::test($collectionName)) {
                 return response()->json(['error' => 'Invalid collection name.'], 500);
             }
-            $collection = \App\Models\Collection::create(['name' => $request->string('collection')]);
+            $collection = \App\Models\Collection::create(['name' => $collectionName]);
         }
         if (!$request->hasFile('file')) {
             return response()->json(['error' => 'Missing file content.'], 500);
         }
 
-        $file = $request->file('file');
         $url = self::saveUploadedFile($collection, $file);
 
         if ($url) {
@@ -495,19 +516,39 @@ class CyberBuddyController extends Controller
         return response()->json(['error' => 'The file could not be saved.'], 500);
     }
 
-    public function uploadManyFiles(UploadManyFilesRequest $request)
+    public function uploadManyFiles(Request $request)
     {
-        /** @var \App\Models\Collection $collection */
-        $collection = \App\Models\Collection::where('name', $request->string('collection'))->where('is_deleted', false)->first();
-
-        if (!$collection) {
-            if (!IsValidCollectionName::test($request->string('collection'))) {
-                return response()->json(['error' => 'Invalid collection name.'], 500);
-            }
-            $collection = \App\Models\Collection::create(['name' => $request->string('collection')]);
+        if (!Auth::user()->canUseCyberBuddy()) {
+            response()->json([
+                'error' => 'Missing permission.',
+                'urls_success' => [],
+                'filenames_error' => [],
+            ], 500);
         }
 
-        $files = $request->allFiles();
+        $params = $request->validate([
+            'collection' => 'required|string',
+            'files.*' => [
+                'required',
+                'file',
+                'max:10240',
+                new IsValidFileType()
+            ],
+        ]);
+
+        $collectionName = $params['collection'];
+        $files = $params['files'];
+
+        /** @var \App\Models\Collection $collection */
+        $collection = \App\Models\Collection::where('name', $collectionName)->where('is_deleted', false)->first();
+
+        if (!$collection) {
+            if (!IsValidCollectionName::test($collectionName)) {
+                return response()->json(['error' => 'Invalid collection name.'], 500);
+            }
+            $collection = \App\Models\Collection::create(['name' => $collectionName]);
+        }
+
         $successes = [];
         $errors = [];
 
