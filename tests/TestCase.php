@@ -11,6 +11,8 @@ use App\Models\Port;
 use App\Models\Scan;
 use App\Models\Screenshot;
 use App\Models\User;
+use Database\Seeders\CywiseSeeder;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Plannr\Laravel\FastRefreshDatabase\Traits\FastRefreshDatabase;
 
@@ -36,13 +38,11 @@ abstract class TestCase extends BaseTestCase
     protected User $user;
     protected string $token;
 
-    public static function setUpBeforeClass(): void
+    protected function afterRefreshingDatabase()
     {
-        parent::setUpBeforeClass();
-
         print "\nSeeding database...\n";
-        print shell_exec('php artisan db:seed --class=DatabaseSeeder');
-        print shell_exec('php artisan db:seed --class=CywiseSeeder');
+        $this->seed(DatabaseSeeder::class);
+        $this->seed(CywiseSeeder::class);
         print "\nDatabase is seeded.\n";
     }
 
