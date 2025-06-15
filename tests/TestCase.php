@@ -2,6 +2,14 @@
 
 namespace Tests;
 
+use App\Models\Alert;
+use App\Models\Asset;
+use App\Models\Attacker;
+use App\Models\HiddenAlert;
+use App\Models\Honeypot;
+use App\Models\Port;
+use App\Models\Scan;
+use App\Models\Screenshot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Plannr\Laravel\FastRefreshDatabase\Traits\FastRefreshDatabase;
@@ -53,7 +61,7 @@ abstract class TestCase extends BaseTestCase
         $this->user->save();
     }
 
-    /* protected function tearDown(): void
+    protected function tearDown(): void
     {
         Alert::whereNotNull('id')->delete();
         Asset::whereNotNull('id')->delete();
@@ -64,5 +72,5 @@ abstract class TestCase extends BaseTestCase
         Scan::whereNotNull('id')->delete();
         Screenshot::whereNotNull('id')->delete();
         parent::tearDown();
-    } */
+    }
 }

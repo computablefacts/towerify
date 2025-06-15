@@ -132,7 +132,7 @@ class ItemStoreTest extends TestCase
         $item->updateAttribute('pi', 3.14159265359);
 
         $this->assertEquals(1, $item->facts()->count());
-        $this->assertEquals(['pi' => 3.14], $item->attributes());
+        $this->assertEquals(['pi' => 3.14159265359], $item->attributes());
     }
 
     public function testRemoveAttribute()
