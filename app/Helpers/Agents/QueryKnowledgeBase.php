@@ -232,35 +232,29 @@ class QueryKnowledgeBase extends AbstractAction
         foreach ($englishKeywords as $keywords) {
             try {
                 $start2 = microtime(true);
-                $results = Chunk::search($keywords)
+                $results = Chunk::search("en:$keywords")
                     ->whereIn('collection_id', $englishCollections)
-                    ->paginate(10)
-                    ->getCollection();
+                    ->take(50)
+                    ->get();
                 $chunks = $chunks->merge($results);
                 $stop2 = microtime(true);
                 Log::debug("[EN] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
-            if ($chunks->isNotEmpty()) {
-                break;
-            }
         }
         foreach ($frenchKeywords as $keywords) {
             try {
                 $start2 = microtime(true);
-                $results = Chunk::search($keywords)
+                $results = Chunk::search("fr:$keywords")
                     ->whereIn('collection_id', $frenchCollections)
-                    ->paginate(10)
-                    ->getCollection();
+                    ->take(50)
+                    ->get();
                 $chunks = $chunks->merge($results);
                 $stop2 = microtime(true);
                 Log::debug("[FR] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
-            }
-            if ($chunks->isNotEmpty()) {
-                break;
             }
         }
 
@@ -269,14 +263,14 @@ class QueryKnowledgeBase extends AbstractAction
 
         $notes = $chunks
             ->groupBy('text') // remove duplicates
-            ->map(fn(Collection $group) => $group->sortByDesc('__tntSearchScore__')->first()) // the higher the better
+            ->map(fn(Collection $group) => $group->sortByDesc('_score')->first()) // the higher the better
             ->values() // associative array => array
-            ->sortByDesc('__tntSearchScore__')
+            ->sortByDesc('_score')
             ->sortBy('priority')
-            ->take(10)
+            ->take(25)
             ->map(function (Chunk $chunk) {
 
-                $text = Str::replace("#", "", $chunk->text);
+                $text = preg_replace('/^#/m', '###', $chunk->text);
 
                 $tags = ChunkTag::where('chunk_id', '=', $chunk->id)
                     ->orderBy('id')
@@ -286,7 +280,7 @@ class QueryKnowledgeBase extends AbstractAction
 
                 $tags = empty($tags) ? 'n/a' : $tags;
 
-                return "## Note {$chunk->id}\n\n{$text}\n\nTags: {$tags}\nScore: {$chunk->{'__tntSearchScore__'}}";
+                return "## Note {$chunk->id}\n\n{$text}\n\n**Tags:** {$tags}\n**Score:** {$chunk->{'_score'}}";
             })
             ->join("\n\n");
 

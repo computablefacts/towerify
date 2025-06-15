@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\SqloutServiceProvider;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -208,7 +209,7 @@ return [
          * Search
          */
         Laravel\Scout\ScoutServiceProvider::class,
-        Baril\Sqlout\SqloutServiceProvider::class,
+        SqloutServiceProvider::class,
     ],
 
     /*

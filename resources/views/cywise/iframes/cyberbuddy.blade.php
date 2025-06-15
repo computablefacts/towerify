@@ -965,8 +965,8 @@ $conversation = $conversation ?? \App\Models\Conversation::create([
       elInputField.value = '';
 
       askCyberBuddyApiCall('{{ $conversation->thread_id }}', directive, (response) => {
-        if (response && response.answer) {
-          addBotAnswer(new Date(), response.answer);
+        if (response) {
+          addBotAnswer(new Date(), response);
         } else {
           console.log(response);
         }

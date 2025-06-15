@@ -238,7 +238,13 @@ class CopyDataFromOldDbToNewDb extends Command
 
                 \DB::connection('mysql_legacy')
                     ->table('personal_access_tokens')
-                    ->chunkById(100, fn(Collection $items) => $this->upsertAll('personal_access_tokens', $items));
+                    ->chunkById(100, function ($items) {
+                        /** @var object $item */
+                        foreach ($items as $item) {
+                            $item->tokenable_type = 'App\Models\User';
+                            $this->upsert('personal_access_tokens', $item);
+                        }
+                    });
 
                 Log::info('saml2_tenants...');
 

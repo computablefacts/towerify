@@ -28,6 +28,7 @@
         "gehrisandro/tailwind-merge-laravel": "^1.2",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^2.7",
+        "juanantoniodelgado/stopwords": "^1.4",
         "lab404/laravel-impersonate": "^1.7.5",
         "laravel/folio": "^1.1",
         "laravel/framework": "^11.0",
@@ -48,6 +49,7 @@
         "symfony/process": "^7.3",
         "symfony/yaml": "^7.3",
         "tymon/jwt-auth": "@dev",
+        "wamania/php-stemmer": "^4.0",
         "webklex/laravel-imap": "^6.2"
     },
     "require-dev": {

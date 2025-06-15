@@ -152,10 +152,10 @@ return [
             'strip_tags',
             'html_entity_decode',
             'mb_strtolower',
-            //    'strip_punctuation',
+            'strip_punctuation',
         ],
         'token_delimiter' => '/[\s]+/',
-        'minimum_length' => 2,
+        'minimum_length' => 3,
         'stopwords' => [
             //
         ],

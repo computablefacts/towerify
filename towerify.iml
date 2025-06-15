@@ -190,6 +190,9 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/regex" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/baril/sqlout" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/plannr/laravel-fast-refresh-database" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/joomla/string" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/juanantoniodelgado/stopwords" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/wamania/php-stemmer" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
