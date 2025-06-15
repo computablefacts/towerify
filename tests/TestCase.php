@@ -11,9 +11,9 @@ use App\Models\Port;
 use App\Models\Scan;
 use App\Models\Screenshot;
 use App\Models\User;
-use Database\Seeders\CywiseSeeder;
-use Database\Seeders\DatabaseSeeder;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Str;
 use Plannr\Laravel\FastRefreshDatabase\Traits\FastRefreshDatabase;
 
 /**
@@ -40,10 +40,16 @@ abstract class TestCase extends BaseTestCase
 
     protected function afterRefreshingDatabase()
     {
-        print "\nSeeding database...\n";
-        $this->seed(DatabaseSeeder::class);
-        $this->seed(CywiseSeeder::class);
-        print "\nDatabase is seeded.\n";
+        $cachedChecksum = $this->getCachedSeederChecksum();
+        $currentChecksum = $this->calculateSeederChecksum();
+
+        if ($cachedChecksum !== $currentChecksum) {
+            print "\nSeeding database...\n";
+            shell_exec('php artisan db:seed --class=DatabaseSeeder');
+            shell_exec('php artisan db:seed --class=CywiseSeeder');
+            print "\nDatabase is seeded.\n";
+            $this->storeSeederChecksum($currentChecksum);
+        }
     }
 
     protected function setUp(): void
@@ -72,5 +78,29 @@ abstract class TestCase extends BaseTestCase
         Scan::whereNotNull('id')->delete();
         Screenshot::whereNotNull('id')->delete();
         parent::tearDown();
+    }
+
+    protected function calculateSeederChecksum(): string
+    {
+        return rescue(fn() => md5_file(database_path('seeders/DatabaseSeeder.php')) . md5_file(database_path('seeders/CywiseSeeder.php')), '');
+    }
+
+    private function getCachedSeederChecksum(): ?string
+    {
+        return rescue(fn() => file_get_contents($this->getSeederChecksumFile()), null, false);
+    }
+
+    private function storeSeederChecksum(string $checksum): void
+    {
+        file_put_contents($this->getSeederChecksumFile(), $checksum);
+    }
+
+    private function getSeederChecksumFile(): string
+    {
+        $connection = $this->app[ConnectionInterface::class];
+
+        $databaseNameSlug = Str::slug($connection->getDatabaseName());
+
+        return storage_path("app/seeder-checksum_{$databaseNameSlug}.txt");
     }
 }
