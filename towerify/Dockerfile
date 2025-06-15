@@ -139,11 +139,11 @@ set -e
 role=${CONTAINER_ROLE:-app}
 queue_name=${QUEUE_NAME:-default}
 echo "Optimize Laravel..."
-(cd /var/www/html && php artisan optimize)
-(cd /var/www/html && php artisan filament:optimize)
 if [[ "$role" = "app" ]]; then
     echo "Start apache..."
     (cd /var/www/html && php artisan storage:link && php artisan vendor:publish --tag=telescope-assets)
+    (cd /var/www/html && php artisan optimize)
+    (cd /var/www/html && php artisan filament:optimize)
     exec apache2-foreground
 elif [[ "$role" = "queue" ]]; then
     while [[ true ]]
