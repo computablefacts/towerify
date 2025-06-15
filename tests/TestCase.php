@@ -80,7 +80,7 @@ abstract class TestCase extends BaseTestCase
         parent::tearDown();
     }
 
-    protected function calculateSeederChecksum(): string
+    private function calculateSeederChecksum(): string
     {
         return rescue(fn() => md5_file(database_path('seeders/DatabaseSeeder.php')) . md5_file(database_path('seeders/CywiseSeeder.php')), '');
     }
