@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Sajya\Server\Attributes\RpcMethod;
 use Sajya\Server\Procedure;
 
+/** @deprecated */
 class InvitationsProcedure extends Procedure
 {
     public static string $name = 'invitations';

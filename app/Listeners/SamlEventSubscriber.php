@@ -2,7 +2,6 @@
 
 namespace App\Listeners;
 
-use App\Models\Invitation;
 use App\Models\Role;
 use App\Models\Saml2Tenant;
 use App\Models\User;
@@ -13,8 +12,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use Konekt\User\Models\InvitationProxy;
-use Konekt\User\Models\UserType;
 use Slides\Saml2\Events\SignedIn;
 use Slides\Saml2\Events\SignedOut;
 use Slides\Saml2\Saml2User;
@@ -244,25 +241,7 @@ class SamlEventSubscriber
 
         if (!$user) {
             Log::info('[SAML2 Authentication] User does not exist, we create it');
-
-            $invitation = Invitation::query()
-                ->where('email', $this->saml2UserEmail)
-                ->first();
-            if (!$invitation) {
-                $invitation = InvitationProxy::createInvitation(
-                    $this->saml2UserEmail,
-                    $this->saml2UserName,
-                    UserType::CLIENT(),
-                    [
-                        'tenant_id' => $tenantId,
-                        'customer_id' => $customerId,
-                        'terms_accepted' => true,
-                    ]
-                );
-            }
-            $user = $invitation->createUser([
-                'password' => Str::random(64),
-            ]);
+            $user = User::getOrCreate($this->saml2UserEmail, $this->saml2UserName);
         } elseif ($user && $tenantId == $user->tenant_id && $customerId == $user->customer_id) {
             Log::info('[SAML2 Authentication] User already exist, we update attributes');
 

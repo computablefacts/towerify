@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
@@ -98,21 +99,18 @@ class User extends WaveUser
         $user = User::where('email', $email)->first();
         if (!$user) {
 
-            /** @var Invitation $invitation */
-            $invitation = Invitation::where('email', $email)->first();
-
-            if (!$invitation) {
-                $invitation = InvitationProxy::createInvitation($email, empty($name) ? Str::before($email, '@') : $name);
-            }
-
             /** @var Tenant $tenant */
             $tenant = Tenant::create(['name' => Str::random()]);
 
-            $user = $invitation->createUser([
-                'password' => empty($password) ? Str::random(64) : $password,
+            /** @var User $user */
+            $user = User::create([
+                'name' => empty($name) ? Str::before($email, '@') : $name,
+                'email' => $email,
+                'username' => Str::before($email, '@'),
+                'password' => Hash::make(empty($password) ? Str::random(64) : $password),
+                'verified' => 1,
                 'tenant_id' => $tenant->id,
-                'type' => UserType::CLIENT(),
-                'terms_accepted' => true,
+                'avatar' => 'demo/default.png',
             ]);
 
             $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);

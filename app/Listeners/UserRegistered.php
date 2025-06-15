@@ -2,9 +2,8 @@
 
 namespace App\Listeners;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class UserRegistered
 {
@@ -21,7 +20,8 @@ class UserRegistered
      */
     public function handle(Registered $event): void
     {
-        // $user = $event->user;
-        // Perform any functionality to the user here...
+        /** @var User $user */
+        $user = $event->user;
+        User::init($user);
     }
 }
