@@ -41,6 +41,8 @@ jobs:
           DB_DATABASE: 'tw_testdb'
           DB_USERNAME: 'tw_testuser'
           DB_PASSWORD: 'z0rglub'
+      - name: Build assets
+        run: npm run build
       - name: Run Unit Tests
         run: php vendor/bin/pest -c phpunit.xml --testdox
         env:
