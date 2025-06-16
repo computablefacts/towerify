@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/** @deprecated  */
 class SupersetApiUtils
 {
     public function get_or_add_user(User $user): ?array

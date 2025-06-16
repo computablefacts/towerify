@@ -21,6 +21,7 @@ use Vanilo\Properties\Traits\HasPropertyValues;
 use Vanilo\Support\Traits\BuyableModel;
 use Vanilo\Support\Traits\HasImagesFromMediaLibrary;
 
+/** @deprecated */
 class ProductOrProductVariant
 {
     use HasTaxons, HasPropertyValues, BuyableModel, HasImagesFromMediaLibrary;

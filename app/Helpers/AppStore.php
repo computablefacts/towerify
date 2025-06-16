@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use Illuminate\Support\Collection;
 
+/** @deprecated */
 class AppStore
 {
     public static function categories(): array
