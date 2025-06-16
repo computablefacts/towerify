@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Enums;
 
-// TODO : move to App\Modules\CyberBuddy\Enums
 enum StorageType: string
 {
     case AWS_S3 = 's3';

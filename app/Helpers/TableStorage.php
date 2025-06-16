@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Enums\StorageType;
 use App\Events\ImportTable;
 use App\Models\User;
 use Illuminate\Contracts\Filesystem\Filesystem;

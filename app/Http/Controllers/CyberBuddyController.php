@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Conversations\QuestionsAndAnswers;
+use App\Enums\StorageType;
 use App\Events\ImportVirtualTable;
 use App\Events\IngestFile;
 use App\Helpers\ApiUtilsFacade as ApiUtils;
@@ -10,7 +11,6 @@ use App\Helpers\ClickhouseClient;
 use App\Helpers\ClickhouseLocal;
 use App\Helpers\ClickhouseUtils;
 use App\Helpers\LlmProvider;
-use App\Helpers\StorageType;
 use App\Helpers\TableStorage;
 use App\Models\Chunk;
 use App\Models\Conversation;

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\WithoutDb;
 
+use App\Enums\StorageType;
 use App\Events\ImportTable;
-use App\Helpers\StorageType;
 use App\Helpers\TableStorage;
 use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
