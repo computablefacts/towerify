@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Conversations\QuestionsAndAnswers;
 use App\Enums\StorageType;
 use App\Events\ImportVirtualTable;
 use App\Events\IngestFile;
@@ -20,10 +19,8 @@ use App\Models\Table;
 use App\Models\Template;
 use App\Models\User;
 use App\Models\YnhFramework;
-use App\Models\YnhServer;
 use App\Rules\IsValidCollectionName;
 use App\Rules\IsValidFileType;
-use BotMan\BotMan\BotMan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -903,155 +900,6 @@ class CyberBuddyController extends Controller
             'success' => 'The query generation has succeeded.',
             'result' => LlmProvider::cleanSqlQuery($query),
         ]);
-    }
-
-    public function handle(): void
-    {
-        $botman = app('botman');
-
-        $botman->hears('/stop', fn(BotMan $botman) => $botman->reply('Conversation stopped.'))->stopsConversation();
-
-        $botman->hears('/login {username} {password}', function (BotMan $botman, string $username, string $password) {
-            $user = $this->user($botman);
-            if ($user) {
-                $botman->reply('You are now logged in.');
-            } else {
-                $user = User::where('email', $username)->first();
-                if (!$user) {
-                    $botman->reply('Invalid username or password.');
-                } else {
-                    if (Auth::attempt(['email' => $username, 'password' => $password])) {
-                        $botman->userStorage()->save(['user_id' => $user->id]);
-                        $botman->reply('You are now logged in.');
-                    } else {
-                        $botman->reply('Invalid username or password.');
-                    }
-                }
-            }
-        })->skipsConversation();
-
-        $botman->hears('/servers', function (BotMan $botman) {
-            $user = $this->user($botman);
-            $servers = $user ? YnhServer::forUser($user) : collect();
-            if ($servers->isEmpty()) {
-                $botman->reply('Connectez-vous pour accéder à cette commande.<br>Pour ce faire, vous pouvez utiliser la commande <b>/login {username} {password}</b>');
-            } else {
-                $list = $servers->filter(fn(YnhServer $server) => $server->ip())
-                    ->map(function (YnhServer $server) use ($botman, $user) {
-                        $json = base64_encode(json_encode($server));
-                        $name = $server->name;
-                        $ipv4 = $server->ip();
-                        $ipv6 = $server->ipv6() ?: '-';
-                        $domains = $server->isYunoHost() ? $server->domains->count() : '-';
-                        $applications = $server->isYunoHost() ? $server->applications->count() : '-';
-                        $users = $server->isYunoHost() ? $server->users->count() : '-';
-                        $linkServer = $server->isYunoHost() ?
-                            '<a href="' . route('ynh.servers.edit', $server->id) . '" target="_blank">' . $name . '</a>' :
-                            '<a href="' . route('home', ['tab' => 'servers', 'servers_type' => 'instrumented']) . '" target="_blank">' . $name . '</a>';
-                        $linkDomains = $domains === '-' ? $domains : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=domains\" target=\"_blank\">$domains</a>";
-                        $linkApplications = $applications === '-' ? $applications : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=applications\" target=\"_blank\">$applications</a>";
-                        $linkUsers = $users === '-' ? $users : '<a href="' . route('ynh.servers.edit', $server->id) . "?tab=users\" target=\"_blank\">$users</a>";
-                        return "
-                          <tr data-json=\"{$json}\">
-                            <td>{$linkServer}</td>
-                            <td>{$ipv4}</td>
-                            <td>{$ipv6}</td>
-                            <td>{$linkDomains}</td>
-                            <td>{$linkApplications}</td>
-                            <td>{$linkUsers}</td>
-                          </tr>
-                        ";
-                    })
-                    ->join("");
-                $botman->reply("
-                    <table data-type=\"table\" style=\"width:100%\">
-                      <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>IP V4</th>
-                            <th>IP V6</th>
-                            <th>Domains</th>
-                            <th>Applications</th>
-                            <th>Users</th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                        {$list}
-                      </tbody>
-                    </table>
-                ");
-            }
-        })->skipsConversation();
-
-        $botman->hears('/question ([a-zA-Z0-9]+) (.*)', function (BotMan $botman, string $collection, string $question) {
-            /** @var Prompt $prompt */
-            $prompt = Prompt::where('name', 'default_debugger')->firstOrfail();
-            $response = ApiUtils::ask_chunks_demo($collection, $question, $prompt->template);
-            if ($response['error']) {
-                $botman->reply('Une erreur s\'est produite. Veuillez réessayer ultérieurement.');
-            } else {
-                $answer = self::enhanceAnswerWithSources($response['response'], collect($response['context'] ?? []));
-                $botman->reply($answer);
-            }
-        })->skipsConversation();
-
-        $botman->hears('/autosave ([a-z0-9]+) (.*)', function (BotMan $botman, string $threadId, string $dom) {
-            $user = $this->user($botman);
-            if ($user) {
-                $dom = Str::after($botman->getMessage()->getPayload()['message'], "/autosave {$threadId} ");
-                $conversation = Conversation::updateOrCreate([
-                    'thread_id' => $threadId
-                ], [
-                    'thread_id' => $threadId,
-                    'autosaved' => true,
-                    'dom' => $dom,
-                ]);
-            }
-        });
-
-        $botman->hears('/rate ([a-z0-9]+) (.*)', function (BotMan $botman, string $threadId, string $dom) {
-            $user = $this->user($botman);
-            if ($user) {
-                $dom = Str::after($botman->getMessage()->getPayload()['message'], "/rate {$threadId} ");
-                $conversation = Conversation::updateOrCreate([
-                    'thread_id' => $threadId
-                ], [
-                    'thread_id' => $threadId,
-                    'autosaved' => false,
-                    'dom' => $dom,
-                ]);
-            }
-        });
-
-        $botman->hears('{message}', function (BotMan $botman, string $message) {
-            if (Str::startsWith($message, "/")) {
-                return;
-            }
-            $user = $this->user($botman);
-            if (!$user) {
-                $botman->reply('Connectez-vous pour accéder à cette commande.<br>Pour ce faire, vous pouvez utiliser la commande <b>/login {username} {password}</b>');
-            } else {
-                $botman->startConversation(new QuestionsAndAnswers($message));
-            }
-        });
-
-        $botman->fallback(fn(BotMan $botman) => $botman->reply('Désolé, je n\'ai pas compris votre commande.'));
-        $botman->listen();
-    }
-
-    private function user(BotMan $botman): ?User
-    {
-        /** @var int $userId */
-        $userId = $botman->userStorage()->get('user_id');
-        if ($userId) {
-            return User::find($userId);
-        }
-        /** @var User $user */
-        $user = Auth::user();
-        if ($user) {
-            $botman->userStorage()->save(['user_id' => $user->id]);
-        }
-        return $user;
     }
 
     private function storagePath(\App\Models\Collection $collection, File $file): string
