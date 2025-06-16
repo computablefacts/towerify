@@ -9,7 +9,6 @@ use App\Jobs\EmbedChunks;
 use App\Jobs\ProcessIncomingEmails;
 use App\Jobs\PullServersInfos;
 use App\Jobs\RunScheduledTasks;
-use App\Jobs\Summarize;
 use App\Jobs\TriggerDiscoveryShallow;
 use App\Jobs\TriggerScan;
 use App\Jobs\TriggerSendAuditReport;
@@ -31,7 +30,6 @@ class Kernel extends ConsoleKernel
     {
         $schedule->job(new Cleanup())->everyThreeMinutes();
         $schedule->job(new PullServersInfos())->everyThreeHours();
-        $schedule->job(new Summarize())->everySixHours();
         $schedule->job(new DownloadDebianSecurityBugTracker())->daily();
         $schedule->command('telescope:prune --hours=48')->daily();
 

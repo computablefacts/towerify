@@ -6,7 +6,6 @@ use App\Enums\HoneypotCloudProvidersEnum;
 use App\Enums\HoneypotCloudSensorsEnum;
 use App\Enums\HoneypotStatusesEnum;
 use App\Http\Procedures\AssetsProcedure;
-use App\Jobs\Summarize;
 use App\Mail\HoneypotRequested;
 use App\Models\Alert;
 use App\Models\Asset;
@@ -267,7 +266,28 @@ class HoneypotController extends Controller
 
     public function getAlertStats(): array
     {
-        $nbVulnerabilities = Summarize::numberOfVulnerabilitiesByLevel();
+        $nbVulnerabilities = Asset::all()
+            ->map(function (Asset $asset) {
+                return [
+                    'high' => $asset->alerts()->where('level', 'High')->count(),
+                    'high_unverified' => $asset->alerts()->where('level', 'High (unverified)')->count(),
+                    'medium' => $asset->alerts()->where('level', 'Medium')->count(),
+                    'low' => $asset->alerts()->where('level', 'Low')->count(),
+                ];
+            })
+            ->reduce(function (array $carry, array $counts) {
+                return [
+                    'high' => $carry['high'] + $counts['high'],
+                    'high_unverified' => $carry['high_unverified'] + $counts['high_unverified'],
+                    'medium' => $carry['medium'] + $counts['medium'],
+                    'low' => $carry['low'] + $counts['low'],
+                ];
+            }, [
+                'high' => 0,
+                'high_unverified' => 0,
+                'medium' => 0,
+                'low' => 0,
+            ]);
         return [
             'High' => $nbVulnerabilities['high'],
             'High (unverified)' => $nbVulnerabilities['high_unverified'],
