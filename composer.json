@@ -54,6 +54,7 @@
     },
     "require-dev": {
         "alebatistella/duskapiconf": "^1.2",
+        "barryvdh/laravel-debugbar": "^3.15",
         "fakerphp/faker": "^1.9.1",
         "kitloong/laravel-migrations-generator": "^7.1",
         "laravel/dusk": "^8.0",
