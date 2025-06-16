@@ -30,12 +30,23 @@ class CopyDataFromOldDbToNewDb extends Command
 
                 Log::info('users...');
 
+                $usernameCounts = \DB::connection('mysql_legacy')
+                    ->table('users')
+                    ->select('name', \DB::raw('COUNT(*) as count'))
+                    ->groupBy('name')
+                    ->get()
+                    ->pluck('count', 'name')
+                    ->toArray();
+
+                Log::info($usernameCounts);
+
                 \DB::connection('mysql_legacy')
                     ->table('users')
-                    ->chunkById(100, function ($items) {
+                    ->chunkById(100, function ($items) use (&$usernameCounts) {
                         /** @var object $item */
                         foreach ($items as $item) {
-                            $item->username = $item->name;
+                            $count = --$usernameCounts[$item->name];
+                            $item->username = $count === 0 ? $item->name : ($item->name . $count);
                             $item->password = Hash::make(cywise_unhash($item->password));
                             $item->verified = true;
                             $item->avatar = 'demo/default.png';

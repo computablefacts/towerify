@@ -99,6 +99,10 @@ class User extends WaveUser
         $user = User::where('email', $email)->first();
         if (!$user) {
 
+            $username = Str::before($email, '@');
+            /** @var int $count */
+            $count = User::where('username', $username)->count();
+
             /** @var Tenant $tenant */
             $tenant = Tenant::create(['name' => Str::random()]);
 
@@ -106,7 +110,7 @@ class User extends WaveUser
             $user = User::create([
                 'name' => empty($name) ? Str::before($email, '@') : $name,
                 'email' => $email,
-                'username' => Str::before($email, '@'),
+                'username' => $count === 0 ? $username : ($username . $count),
                 'password' => Hash::make(empty($password) ? Str::random(64) : $password),
                 'verified' => 1,
                 'tenant_id' => $tenant->id,
