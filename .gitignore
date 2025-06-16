@@ -2,7 +2,13 @@
 /node_modules
 /public/hot
 /public/storage
+/public/build/assets/*
+/public/build/manifest.json
 /storage/*.key
+/storage/app/public/deb-cve-*
+/storage/app/public/images/*
+/storage/app/public/livewire-tmp/*
+/storage/debugbar/*
 /storage/migration-checksum_*.txt
 /storage/scout/*.index
 /storage/scout/*.index-shm
