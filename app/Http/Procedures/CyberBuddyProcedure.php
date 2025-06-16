@@ -5,7 +5,7 @@ namespace App\Http\Procedures;
 use App\Enums\RoleEnum;
 use App\Helpers\Agents\AbstractAction;
 use App\Helpers\Agents\Agent;
-use App\Helpers\OpenAi;
+use App\Helpers\LlmProvider;
 use App\Jobs\ProcessIncomingEmails;
 use App\Models\Conversation;
 use App\Models\Prompt;
@@ -121,7 +121,7 @@ class CyberBuddyProcedure extends Procedure
                     return Str::upper($message['role']) . " : {$msg}";
                 })
                 ->join("\n\n");
-            $response = OpenAi::execute("Summarize the conversation in about 10 words :\n\n{$exchange}");
+            $response = (new LlmProvider(LlmProvider::OPEN_AI))->execute("Summarize the conversation in about 10 words :\n\n{$exchange}");
             $conversation->description = $response['choices'][0]['message']['content'] ?? null;
             $conversation->save();
         }

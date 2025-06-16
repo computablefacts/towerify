@@ -9,7 +9,7 @@ use App\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Helpers\ClickhouseClient;
 use App\Helpers\ClickhouseLocal;
 use App\Helpers\ClickhouseUtils;
-use App\Helpers\OpenAi;
+use App\Helpers\LlmProvider;
 use App\Helpers\StorageType;
 use App\Helpers\TableStorage;
 use App\Models\Chunk;
@@ -901,7 +901,7 @@ class CyberBuddyController extends Controller
         }
         return response()->json([
             'success' => 'The query generation has succeeded.',
-            'result' => OpenAi::cleanSqlQuery($query),
+            'result' => LlmProvider::cleanSqlQuery($query),
         ]);
     }
 

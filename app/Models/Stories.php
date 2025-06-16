@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\LanguageEnum;
-use App\Helpers\OpenAi;
+use App\Helpers\LlmProvider;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -70,7 +70,7 @@ class Stories extends Model
 
             $brief = $response['choices'][0]['message']['content'];
 
-            if (OpenAi::isHyperlink($this->news)) {
+            if (LlmProvider::isHyperlink($this->news)) {
                 $this->hyperlink = Str::limit(trim($this->news), 500);
                 $this->website = Str::before(Str::after($this->news, '://'), '/');
             }
@@ -111,8 +111,8 @@ class Stories extends Model
 
     private function summary(LanguageEnum $language): array
     {
-        $news = OpenAi::download($this->news);
-        return OpenAi::execute($this->prompt($language, $news));
+        $news = LlmProvider::download($this->news);
+        return (new LlmProvider(LlmProvider::OPEN_AI))->execute($this->prompt($language, $news));
     }
 
     private function prompt(LanguageEnum $language, string $news): string

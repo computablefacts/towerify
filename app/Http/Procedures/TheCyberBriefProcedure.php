@@ -2,7 +2,7 @@
 
 namespace App\Http\Procedures;
 
-use App\Helpers\OpenAi;
+use App\Helpers\LlmProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Sajya\Server\Attributes\RpcMethod;
@@ -32,9 +32,9 @@ class TheCyberBriefProcedure extends Procedure
         $text = $request->string('url_or_text', '');
         $prompt = $request->string('prompt', '');
         $model = $request->string('model', 'gpt-4o');
-        $temperature = $request->float('temperature', 0.7);
-        $content = OpenAi::download($text);
-        $response = OpenAi::execute(Str::replace('[TEXT]', $content, $prompt), $model, $temperature);
+        // $temperature = $request->float('temperature', 0.7);
+        $content = LlmProvider::download($text);
+        $response = (new LlmProvider(LlmProvider::OPEN_AI))->execute(Str::replace('[TEXT]', $content, $prompt), $model);
 
         if (isset($response['choices'][0]['message']['content'])) {
             return [

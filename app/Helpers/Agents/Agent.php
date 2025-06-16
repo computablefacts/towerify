@@ -3,7 +3,7 @@
 namespace App\Helpers\Agents;
 
 use App\Enums\RoleEnum;
-use App\Helpers\DeepInfra;
+use App\Helpers\LlmProvider;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
@@ -89,8 +89,7 @@ class Agent
 
     protected function llm(array $messages): array
     {
-        return DeepInfra::executeEx($messages, 'meta-llama/Llama-4-Scout-17B-16E-Instruct', 0.7, $this->tools());
-        // return DeepSeek::executeEx($messages, 'deepseek-chat', 0.7, $this->tools());
+        return (new LlmProvider(LlmProvider::DEEP_INFRA))->execute($messages, 'meta-llama/Llama-4-Scout-17B-16E-Instruct', $this->tools());
     }
 
     protected function tools(): array

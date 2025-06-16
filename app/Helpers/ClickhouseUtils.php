@@ -41,7 +41,7 @@ class ClickhouseUtils
             N'utilise pas de ` dans ta réponse.
         ";
 
-        $response = OpenAi::execute($prompt);
+        $response = (new LlmProvider(LlmProvider::OPEN_AI))->execute($prompt);
         return $response['choices'][0]['message']['content'] ?? '';
     }
 }

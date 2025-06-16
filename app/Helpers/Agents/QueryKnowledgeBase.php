@@ -3,7 +3,7 @@
 namespace App\Helpers\Agents;
 
 use App\Helpers\ApiUtilsFacade as ApiUtils;
-use App\Helpers\DeepInfra;
+use App\Helpers\LlmProvider;
 use App\Models\Chunk;
 use App\Models\ChunkTag;
 use App\Models\File;
@@ -173,7 +173,7 @@ class QueryKnowledgeBase extends AbstractAction
     {
         $prompt = Prompt::where('created_by', $this->user->id)->where('name', 'default_reformulate_question')->firstOrfail();
         $prompt->template = Str::replace('{QUESTION}', $question, $prompt->template);
-        $response = DeepInfra::execute($prompt->template, 'Qwen/Qwen3-30B-A3B');
+        $response = (new LlmProvider(LlmProvider::DEEP_INFRA))->execute($prompt->template, 'Qwen/Qwen3-30B-A3B');
         $answer = $response['choices'][0]['message']['content'] ?? '';
         // Log::debug("[2] answer : {$answer}");
         $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
@@ -294,7 +294,7 @@ class QueryKnowledgeBase extends AbstractAction
         $prompt->template = Str::replace('{NOTES}', $notes, $prompt->template);
         $prompt->template = Str::replace('{QUESTION}', $json['question_en'], $prompt->template);
         Log::debug($prompt->template);
-        $response = DeepInfra::execute($prompt->template, 'Qwen/Qwen3-30B-A3B');
+        $response = (new LlmProvider(LlmProvider::DEEP_INFRA))->execute($prompt->template, 'Qwen/Qwen3-30B-A3B');
         $answer = $response['choices'][0]['message']['content'] ?? '';
         Log::debug("[3] answer : {$answer}");
         return preg_replace('/<think>.*?<\/think>/s', '', $answer);
