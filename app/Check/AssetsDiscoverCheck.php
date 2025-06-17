@@ -107,13 +107,13 @@ class AssetsDiscoverCheck extends Check
 
     private function shouldStartAssetsDiscover(): bool
     {
-        if ($this->lastStatusIs(Status::ok()) && $this->lastStartLessThanMinutes(60)) {
+        if ($this->lastStatusIs(Status::ok()) && $this->lastStartLessThanMinutes(15)) {
             return false;
         }
-        if ($this->lastStatusIs(Status::warning()) && $this->lastStartLessThanMinutes(15)) {
+        if ($this->lastStatusIs(Status::warning()) && $this->lastStartLessThanMinutes(6)) {
             return false;
         }
-        if ($this->lastStatusIs(Status::failed()) && $this->lastStartLessThanMinutes(5)) {
+        if ($this->lastStatusIs(Status::failed()) && $this->lastStartLessThanMinutes(3)) {
             return false;
         }
         return true;
