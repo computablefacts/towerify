@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -69,7 +70,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     protected function gate(): void
     {
-        Gate::define('viewTelescope', function ($user) {
+        Gate::define('viewTelescope', function (User $user) {
             return Str::startsWith($user->email, $this->whitelistUsernames()) && Str::endsWith($user->email, $this->whitelistDomains());
         });
     }
@@ -93,7 +94,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     {
         return ($entry->type === EntryType::REQUEST) &&
             array_key_exists('duration', $entry->content) &&
-            $entry->content['duration'] > 5000;
+            $entry->content['duration'] > 2500;
     }
 
     private function isLogEntry(IncomingEntry $entry): bool
