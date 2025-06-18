@@ -259,8 +259,8 @@ class Timeline extends Component
             $messages = $messages->concat($this->assets($user))
                 ->concat($this->scans($user))
                 ->concat($this->vulnerabilities($user))
-                ->concat($this->leaks($user))
-                ->concat($this->suspiciousEvents($user, 75));
+                ->concat($this->leaks($user));
+                // ->concat($this->suspiciousEvents($user, 75));
         }
         if (empty($this->categoryId) || $this->categoryId === self::CATEGORY_NOTES) {
             $messages = $messages->concat($this->notes($user));
