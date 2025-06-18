@@ -590,15 +590,6 @@ Route::delete('/frameworks/{id}', '\App\Http\Controllers\CyberBuddyController@un
 
 Route::post('/frameworks/{id}', '\App\Http\Controllers\CyberBuddyController@loadFramework')->middleware('auth');
 
-Route::middleware(['auth'])->prefix('tables')->group(function () {
-    Route::get('/', '\App\Http\Controllers\CyberBuddyController@listTables')->name('list-tables');
-    Route::post('/columns', '\App\Http\Controllers\CyberBuddyController@listTablesColumns')->name('list-tables-columns');
-    Route::post('/import', '\App\Http\Controllers\CyberBuddyController@importTables')->name('import-tables');
-    Route::get('/available', '\App\Http\Controllers\CyberBuddyController@availableTables')->name('available-tables');
-    Route::post('/query', '\App\Http\Controllers\CyberBuddyController@queryTables')->name('query-tables');
-    Route::post('/prompt-to-query', '\App\Http\Controllers\CyberBuddyController@promptToTablesQuery')->name('prompt-to-tables-query');
-});
-
 Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function () {
     Route::get('/assets', [TimelineController::class, '__invoke'])->name('assets');
     Route::get('/chunks', [ChunksController::class, '__invoke'])->name('chunks');

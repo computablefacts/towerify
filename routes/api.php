@@ -197,6 +197,15 @@ Route::group([
     Route::post('honeypots/set-next-step', '\App\Http\Controllers\HoneypotController@moveHoneypotsConfigurationToNextStep');
 })->middleware(['auth:sanctum']);
 
+Route::middleware(['auth:api'])->prefix('tables')->group(function () {
+    Route::get('/', '\App\Http\Controllers\CyberBuddyController@listTables')->name('list-tables');
+    Route::post('/columns', '\App\Http\Controllers\CyberBuddyController@listTablesColumns')->name('list-tables-columns');
+    Route::post('/import', '\App\Http\Controllers\CyberBuddyController@importTables')->name('import-tables');
+    Route::get('/available', '\App\Http\Controllers\CyberBuddyController@availableTables')->name('available-tables');
+    Route::post('/query', '\App\Http\Controllers\CyberBuddyController@queryTables')->name('query-tables');
+    Route::post('/prompt-to-query', '\App\Http\Controllers\CyberBuddyController@promptToTablesQuery')->name('prompt-to-tables-query');
+});
+
 Route::middleware('auth:api')->get('/v2/public/whoami', fn(Request $request) => Auth::user());
 
 Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
