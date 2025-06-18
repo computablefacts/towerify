@@ -59,7 +59,7 @@
       @foreach($chunks as $chunk)
       <tr style="border-bottom-color:white">
         <td class="ps-4" width="25px">
-          <span class="{{ $chunk->isEmbedded() ? 'tw-dot-green' : 'tw-dot-red' }}"></span>
+          <span class="{{ $chunk->isEmbedded() ? 'dot-green' : 'dot-red' }}"></span>
         </td>
         <td>
           <span class="lozenge new">{{ $chunk->collection->name }}</span>
