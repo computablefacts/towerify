@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\BeginVulnsScan;
-use App\Events\EndVulnsScan;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -50,7 +49,7 @@ class BeginVulnsScanListener extends AbstractListener
             $scan->vulns_scan_begins_at = Carbon::now();
             $scan->save();
 
-            EndVulnsScan::dispatch(Carbon::now(), $scan);
+            // TODO : EndVulnsScan::dispatch(Carbon::now(), $scan);
         }
     }
 
