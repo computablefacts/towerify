@@ -488,45 +488,35 @@
     const elListTables = document.getElementById('list-tables');
     elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
-    let encodedUrl;
-    if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
-      encodedUrl = '/tables/' + '?storage=s3' + '&region=' + encodeURIComponent(elAwsRegion.el.value)
-        + '&access_key_id=' + encodeURIComponent(elAwsAccessKeyId.el.value) + '&secret_access_key='
-        + encodeURIComponent(elAwsSecretAccessKey.el.value) + '&input_folder=' + encodeURIComponent(
-          elAwsInputFolder.el.value) + '&output_folder=' + encodeURIComponent(elAwsOutputFolder.el.value);
-    }
-
-    if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
-      encodedUrl = '/tables/' + '?storage=azure' + '&connection_string=' + encodeURIComponent(
-          elAzureConnectionString.el.value) + '&input_folder=' + encodeURIComponent(elAzureInputFolder.el.value)
-        + '&output_folder=' + encodeURIComponent(elAzureOutputFolder.el.value);
-    }
-
     if (elTableType.el.selectedItem === PHYSICAL_TABLE.value) {
-      axios.get(encodedUrl).then(response => {
-        if (response.data.success) {
-          if (!response.data.tables || response.data.tables.length === 0) {
-            elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('No files found.') }}</td></tr>";
-          } else {
-            const rows = response.data.tables.map(table => {
-              return `
-                <tr>
-                  <td><input type="checkbox" value="${table.object}" data-file="${table.object}"/></td>
-                  <td>${table.object}</td>
-                  <td class="text-end">${table.size}</td>
-                  <td class="text-end">${table.last_modified}</td>
-                </tr>
-              `;
-            });
-            elListTables.innerHTML = rows.join('');
-          }
-        } else if (response.data.error) {
-          toaster.toastError(response.data.error);
+
+      const onSuccess = response => {
+        if (!response.files || response.files.length === 0) {
+          elListTables.innerHTML = "<tr><td colspan=\"4\" class=\"text-center\">{{ __('No files found.') }}</td></tr>";
         } else {
-          console.log(response.data);
+          const rows = response.files.map(table => {
+            return `
+              <tr>
+                <td><input type="checkbox" value="${table.object}" data-file="${table.object}"/></td>
+                <td>${table.object}</td>
+                <td class="text-end">${table.size}</td>
+                <td class="text-end">${table.last_modified}</td>
+              </tr>
+            `;
+          });
+          elListTables.innerHTML = rows.join('');
         }
-      })
-      .catch(error => toaster.toastAxiosError(error));
+      };
+
+      if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+        listAwsBucketContentApiCall(elAwsRegion.el.value, elAwsAccessKeyId.el.value, elAwsSecretAccessKey.el.value,
+          elAwsInputFolder.el.value, elAwsOutputFolder.el.value, onSuccess);
+      } else if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+        listAzureBucketContentApiCall(elAzureConnectionString.el.value, elAwsInputFolder.el.value,
+          elAwsOutputFolder.el.value, onSuccess);
+      } else {
+        // TODO
+      }
     } else if (elTableType.el.selectedItem === VIRTUAL_TABLE.value) {
       // TODO
     } else {
@@ -547,57 +537,37 @@
     const elTablesColumns = document.getElementById('tables-columns');
     elTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('Loading...') }}</td></tr>";
 
-    let postProperties;
-    if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
-      postProperties = {
-        storage: 's3',
-        region: elAwsRegion.el.value,
-        access_key_id: elAwsAccessKeyId.el.value,
-        secret_access_key: elAwsSecretAccessKey.el.value,
-        input_folder: elAwsInputFolder.el.value,
-        output_folder: elAwsOutputFolder.el.value,
-        tables: tables,
-      }
-    }
-
-    if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
-      postProperties = {
-        storage: 'azure',
-        connection_string: elAzureConnectionString.el.value,
-        input_folder: elAzureInputFolder.el.value,
-        output_folder: elAzureOutputFolder.el.value,
-        tables: tables,
-      }
-    }
-
-    axios.post('/tables/columns', postProperties).then(response => {
-      if (response.data.success) {
-        if (!response.data.tables || response.data.tables.length === 0) {
-          elTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('No columns found.') }}</td></tr>";
-        } else {
-          const rows = response.data.tables.flatMap(table => {
-            return table.columns.map(column => {
-              column.table = table.table;
-              return `
-                <tr>
-                  <td><input type="checkbox" data-file="${com.computablefacts.helpers.toBase64(JSON.stringify(column))}" checked/></td>
-                  <td>${table.table}</td>
-                  <td>${column.old_name}</td>
-                  <td>${column.new_name}</td>
-                  <td>${column.type}</td>
-                </tr>
-              `;
-            });
-          });
-          elTablesColumns.innerHTML = rows.join('');
-        }
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
+    const onSuccess = response => {
+      if (!response.tables || response.tables.length === 0) {
+        elTablesColumns.innerHTML = "<tr><td colspan=\"5\" class=\"text-center\">{{ __('No columns found.') }}</td></tr>";
       } else {
-        console.log(response.data);
+        const rows = response.tables.flatMap(table => {
+          return table.columns.map(column => {
+            column.table = table.table;
+            return `
+              <tr>
+                <td><input type="checkbox" data-file="${com.computablefacts.helpers.toBase64(JSON.stringify(column))}" checked/></td>
+                <td>${table.table}</td>
+                <td>${column.old_name}</td>
+                <td>${column.new_name}</td>
+                <td>${column.type}</td>
+              </tr>
+            `;
+          });
+        });
+        elTablesColumns.innerHTML = rows.join('');
       }
-    }).catch(error => toaster.toastAxiosError(error));
+    };
 
+    if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
+      listAwsFileContentApiCall(elAwsRegion.el.value, elAwsAccessKeyId.el.value, elAwsSecretAccessKey.el.value,
+        elAwsInputFolder.el.value, elAwsOutputFolder.el.value, tables, onSuccess);
+    } else if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+      listAzureFileContentApiCall(elAzureConnectionString.el.value, elAwsInputFolder.el.value,
+        elAwsOutputFolder.el.value, tables, onSuccess);
+    } else {
+      // TODO
+    }
     return true;
   };
 
@@ -620,48 +590,18 @@
     const updatable = document.getElementById('toggle-updatable').checked === true;
     const copy = document.getElementById('toggle-copy').checked === true;
     const deduplicate = document.getElementById('toggle-deduplicate').checked === true;
+    const onSuccess = response => toaster.toastSuccess(response.message);
 
-    let postProperties;
     if (elStorageType.el.selectedItem === AWS_STORAGE.value) {
-      postProperties = {
-        storage: 's3',
-        region: elAwsRegion.el.value,
-        access_key_id: elAwsAccessKeyId.el.value,
-        secret_access_key: elAwsSecretAccessKey.el.value,
-        input_folder: elAwsInputFolder.el.value,
-        output_folder: elAwsOutputFolder.el.value,
-        tables: tables,
-        updatable: updatable,
-        copy: copy,
-        deduplicate: deduplicate,
-        description: description,
-      }
+      importAwsFileApiCall(elAwsRegion.el.value, elAwsAccessKeyId.el.value, elAwsSecretAccessKey.el.value,
+        elAwsInputFolder.el.value, elAwsOutputFolder.el.value, tables, updatable, copy, deduplicate, description,
+        onSuccess);
+    } else if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
+      importAzureFileApiCall(elAzureConnectionString.el.value, elAwsInputFolder.el.value, elAwsOutputFolder.el.value,
+        tables, updatable, copy, deduplicate, description, onSuccess);
+    } else {
+      // TODO
     }
-
-    if (elStorageType.el.selectedItem === AZURE_STORAGE.value) {
-      postProperties = {
-        storage: 'azure',
-        connection_string: elAzureConnectionString.el.value,
-        input_folder: elAzureInputFolder.el.value,
-        output_folder: elAzureOutputFolder.el.value,
-        tables: tables,
-        updatable: updatable,
-        copy: copy,
-        deduplicate: deduplicate,
-        description: description,
-      }
-    }
-
-    axios.post('/tables/import', postProperties).then(response => {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
-
     return true;
   };
 
@@ -685,20 +625,7 @@
       return false;
     }
 
-    axios.post(`/tables/query`,
-      {query: sql, store: true, name: name, materialize: materialize, description: description}).then(response => {
-      if (response.data.success) {
-        toaster.toastSuccess(response.data.success);
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-        if (response.data.message) {
-          toaster.toastError(response.data.message);
-        }
-      } else {
-        console.log(response.data);
-      }
-    }).catch(error => toaster.toastAxiosError(error));
-
+    createVirtualTableApiCall(sql, materialize, name, description, response => toaster.toastSuccess(response.message));
     return true;
   };
 

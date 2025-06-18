@@ -136,5 +136,99 @@
       (response) => toaster.toastError(response.message), onFinally);
   }
 
+  function listTablesApiCall(onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@list', {}, onSuccess);
+  }
+
+  function listAwsBucketContentApiCall(region, access_key_id, secret_access_key, input_folder, output_folder,
+    onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@listBucketContent', {
+      'storage': 's3',
+      'region': region,
+      'access_key_id': access_key_id,
+      'secret_access_key': secret_access_key,
+      'input_folder': input_folder,
+      'output_folder': output_folder,
+    }, onSuccess);
+  }
+
+  function listAzureBucketContentApiCall(connection_string, input_folder, output_folder, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@listBucketContent', {
+      'storage': 'azure',
+      'connection_string': connection_string,
+      'input_folder': input_folder,
+      'output_folder': output_folder,
+    }, onSuccess);
+  }
+
+  function listAwsFileContentApiCall(region, access_key_id, secret_access_key, input_folder, output_folder, tables,
+    onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@listFileContent', {
+      'storage': 's3',
+      'region': region,
+      'access_key_id': access_key_id,
+      'secret_access_key': secret_access_key,
+      'input_folder': input_folder,
+      'output_folder': output_folder,
+      'tables': tables,
+    }, onSuccess);
+  }
+
+  function listAzureFileContentApiCall(connection_string, input_folder, output_folder, tables,
+    onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@listFileContent', {
+      'storage': 'azure',
+      'connection_string': connection_string,
+      'input_folder': input_folder,
+      'output_folder': output_folder,
+      'tables': tables,
+    }, onSuccess);
+  }
+
+  function importAwsFileApiCall(region, access_key_id, secret_access_key, input_folder, output_folder, tables,
+    updatable, copy, deduplicate, description, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@import', {
+      'storage': 's3',
+      'region': region,
+      'access_key_id': access_key_id,
+      'secret_access_key': secret_access_key,
+      'input_folder': input_folder,
+      'output_folder': output_folder,
+      'tables': tables,
+      'updatable': updatable,
+      'copy': copy,
+      'deduplicate': deduplicate,
+      'description': description,
+    }, onSuccess);
+  }
+
+  function importAzureFileApiCall(connection_string, input_folder, output_folder, tables, updatable, copy, deduplicate,
+    description, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@import', {
+      'storage': 'azure',
+      'connection_string': connection_string,
+      'input_folder': input_folder,
+      'output_folder': output_folder,
+      'tables': tables,
+      'updatable': updatable,
+      'copy': copy,
+      'deduplicate': deduplicate,
+      'description': description,
+    }, onSuccess);
+  }
+
+  function executeSqlQueryApiCall(query, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@executeSqlQuery', {query: query, store: false}, onSuccess);
+  }
+
+  function createVirtualTableApiCall(query, materialize, name, description, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@executeSqlQuery',
+      {query: query, store: true, materialize: materialize, name: name, description: description}, onSuccess);
+  }
+
+  function promptToQueryApiCall(prompt, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('tables@promptToQuery', {prompt: prompt}, onSuccess);
+  }
+
 </script>
 @endonce

@@ -53,14 +53,7 @@
 
     const prompt = document.getElementById('prompt').value;
 
-    axios.post(`/tables/prompt-to-query`, {prompt: prompt}).then(response => {
-      if (response.data.success && response.data.result) {
-        editor.setValue(response.data.result);
-      } else {
-        console.log(response.data);
-      }
-    })
-    .catch(error => toaster.toastAxiosError(error));
+    promptToQueryApiCall(prompt, response => editor.setValue(response.query));
   });
 
   const elExecuteSqlQuery = document.getElementById('execute-sql-query');
@@ -77,26 +70,21 @@
     elTableBody.innerHTML = "<tr><td>{{ __('Loading...') }}</td></tr>";
 
     const sql = editor.getValue();
-    axios.post(`/tables/query`, {query: sql, store: false}).then(response => {
-      if (response.data.success) {
+
+    executeSqlQueryApiCall(sql, response => {
+      if (response.data.length >= 0) {
         elTableHead.innerHTML = `
-          <tr>${response.data.result[0].map(column => `<th>${column}</th>`).join('')}</tr>
+          <tr>${response.data[0].map(column => `<th>${column}</th>`).join('')}</tr>
         `;
-        if (response.data.result.length === 1) {
-          elTableBody.innerHTML = `<tr><td colspan='${response.data.result[0].length}'>{{ __('No results found.') }}</td></tr>`;
+        if (response.data.length === 1) {
+          elTableBody.innerHTML = `<tr><td colspan='${response.data[0].length}'>{{ __('No results found.') }}</td></tr>`;
         } else {
-          elTableBody.innerHTML = response.data.result.slice(1)
+          elTableBody.innerHTML = response.data.slice(1)
           .map(row => `<tr>${row.map(column => `<td>${column}</td>`).join('')}</tr>`)
           .join('');
         }
-      } else if (response.data.error) {
-        toaster.toastError(response.data.error);
-        if (response.data.message) toaster.toastError(response.data.message);
-      } else {
-        console.log(response.data);
       }
-    })
-    .catch(error => toaster.toastAxiosError(error));
+    });
   });
 
 </script>
