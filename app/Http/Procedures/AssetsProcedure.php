@@ -23,6 +23,7 @@ use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Sajya\Server\Attributes\RpcMethod;
@@ -67,12 +68,16 @@ class AssetsProcedure extends Procedure
             throw new \Exception("This domain is blacklisted : {$domain}");
         }
         $response = ApiUtils::discover_public($domain);
-        if (($response['fallback'] ?? false) === true) {
-            $subject = "no subdomain for {$domain}";
-            $body = [
-                "domain" => $domain,
-            ];
-            Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.freshdesk.from_email'), 'Support', $subject, $body));
+        try {
+            if (($response['fallback'] ?? false) === true) {
+                $subject = "no subdomain for {$domain}";
+                $body = [
+                    "domain" => $domain,
+                ];
+                Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.freshdesk.from_email'), 'Support', $subject, $body));
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
         }
         return $response;
     }
