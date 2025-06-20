@@ -8,8 +8,8 @@
       <sourceFolder url="file://$MODULE_DIR$/database/seeders" isTestSource="false" packagePrefix="Database\Seeders\" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" packagePrefix="Tests\" />
-      <sourceFolder url="file://$MODULE_DIR$/wave/" isTestSource="false" packagePrefix="Wave\" />
       <sourceFolder url="file://$MODULE_DIR$/wave/src" isTestSource="false" packagePrefix="Wave\" />
+      <sourceFolder url="file://$MODULE_DIR$/wave/" isTestSource="false" packagePrefix="Wave\" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/aws/aws-crt-php" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/aws/aws-sdk-php" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/barryvdh/laravel-debugbar" />
@@ -185,14 +185,12 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/robrichards/xmlseclibs" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/league/html-to-markdown" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/laravel/scout" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/predis/predis" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/teamtnt/laravel-scout-tntsearch-driver" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/teamtnt/tntsearch" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/enum" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/laravel-health" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/spatie/regex" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/baril/sqlout" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/plannr/laravel-fast-refresh-database" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/joomla/string" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/juanantoniodelgado/stopwords" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/wamania/php-stemmer" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
