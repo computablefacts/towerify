@@ -70,6 +70,7 @@ class Cleanup implements ShouldQueue
             Collection::query()
                 ->where('name', $collectionName)
                 ->where('is_deleted', false)
+                ->where('created_at', '<', now()->subDays(7))
                 ->get()
                 ->filter(fn(Collection $collection) => $collection->files()->exists())
                 ->each(function (Collection $collection) {
