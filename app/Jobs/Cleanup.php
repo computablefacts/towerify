@@ -2,6 +2,8 @@
 
 namespace App\Jobs;
 
+use App\Models\Collection;
+use App\Models\YnhFramework;
 use App\Models\YnhOsquery;
 use App\Models\YnhOsqueryLatestEvent;
 use App\Models\YnhOsqueryRule;
@@ -58,5 +60,23 @@ class Cleanup implements ShouldQueue
                 ->limit($event->event_count - $threshold)
                 ->delete();
         }
+
+        Log::debug('Remove empty framework collections');
+
+        YnhFramework::all()->each(function (YnhFramework $framework) {
+
+            $collectionName = $framework->collectionName();
+
+            Collection::query()
+                ->where('name', $collectionName)
+                ->where('is_deleted', false)
+                ->get()
+                ->filter(fn(Collection $collection) => $collection->files()->exists())
+                ->each(function (Collection $collection) {
+                    Log::debug("Marking collection {$collection->name} as deleted");
+                    $collection->is_deleted = true;
+                    $collection->save();
+                });
+        });
     }
 }
