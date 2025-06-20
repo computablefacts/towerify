@@ -9,7 +9,12 @@
   <div class="timeline-item-wrapper">
     <div class="timeline-item-description">
       <span>
-        {!! __('<b>:user</b> has added the asset <b>:asset</b>', [ 'asset' => $asset->asset, 'user' => $asset->createdBy()->name ]) !!}
+        {!! __('<b>:user</b> has added the asset <b>:asset</b> (<a href=":href" class="link">:count vulnerabilities</a>)', [
+        'asset' => $asset->asset,
+        'count' => $asset->alerts()->count(),
+        'href' => route('iframes.vulnerabilities', [ 'asset_id' => $asset->id ]),
+        'user' => $asset->createdBy()->name
+        ]) !!}
       </span>
     </div>
     <div style="display: flex; gap: 10px;">
