@@ -86,10 +86,15 @@ class User extends WaveUser
 
         // Listen for the created event of the model
         static::created(function ($user) {
+
             // Remove all roles
             $user->syncRoles([]);
+
             // Assign the default role
             $user->assignRole(config('wave.default_user_role', 'registered'));
+            
+            // Set frameworks, templates and roles
+            User::init($user);
         });
     }
 

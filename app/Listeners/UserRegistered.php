@@ -22,6 +22,5 @@ class UserRegistered
     {
         /** @var User $user */
         $user = $event->user;
-        User::init($user);
     }
 }
