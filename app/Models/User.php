@@ -92,7 +92,7 @@ class User extends WaveUser
 
             // Assign the default role
             $user->assignRole(config('wave.default_user_role', 'registered'));
-            
+
             // Set frameworks, templates and roles
             User::init($user);
         });
@@ -151,6 +151,7 @@ class User extends WaveUser
                 ->first();
 
             // TODO : create CyberScribe's templates
+            // TODO : create user's private collection privcol*
 
             // Create shadow collections for some frameworks
             $frameworks = \App\Models\YnhFramework::all();
