@@ -42,7 +42,6 @@ use App\Listeners\ImportVirtualTableListener;
 use App\Listeners\IngestFileListener;
 use App\Listeners\IngestHoneypotsEventsListener;
 use App\Listeners\InstallAppListener;
-use App\Listeners\PasswordResetListener;
 use App\Listeners\ProcessLogalertPayloadListener;
 use App\Listeners\ProcessLogalertPayloadListenerEx;
 use App\Listeners\ProcessLogparserPayloadListener;
@@ -53,7 +52,6 @@ use App\Listeners\SendAuditReportListener;
 use App\Listeners\StartAssetsDiscoverListener;
 use App\Listeners\UninstallAppListener;
 use App\Listeners\UpdateServerInfosListener;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -64,9 +62,6 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        PasswordReset::class => [
-            PasswordResetListener::class,
-        ],
         ConfigureHost::class => [
             ConfigureHostListener::class,
         ],

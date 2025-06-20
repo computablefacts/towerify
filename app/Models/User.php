@@ -123,8 +123,6 @@ class User extends WaveUser
             ]);
 
             $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
-
-            User::init($user);
         }
         return $user;
     }
