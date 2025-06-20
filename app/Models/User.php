@@ -516,7 +516,7 @@ class User extends WaveUser
 
     public function ynhPassword(): string
     {
-        return TwHasher::unhash($this->password);
+        return TwHasher::unhash($this->password); // TODO : migrate legacy column
     }
 
     public function client(): string
