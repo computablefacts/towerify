@@ -137,6 +137,22 @@ class TimelineController extends Controller
                 $date = Str::before($timestamp, ' ');
                 $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
 
+                $alerts = $asset->is_monitored ?
+                    $asset->alerts()->get()->filter(fn($alert) => $alert->is_hidden === 0) :
+                    collect();
+                $hasHigh = $alerts->contains(fn($alert) => $alert->level === 'High');
+                $hasMedium = $alerts->contains(fn($alert) => $alert->level === 'Medium');
+                $hasLow = $alerts->contains(fn($alert) => $alert->level === 'Low');
+
+                if ($hasHigh) {
+                    $bgColor = 'var(--c-red)';
+                } elseif ($hasMedium) {
+                    $bgColor = 'var(--c-orange-light)';
+                } elseif ($hasLow) {
+                    $bgColor = 'var(--c-green)';
+                } else {
+                    $bgColor = 'var(--c-blue)';
+                }
                 return [
                     'timestamp' => $timestamp,
                     'date' => $date,
@@ -145,6 +161,8 @@ class TimelineController extends Controller
                         'date' => $date,
                         'time' => $time,
                         'asset' => $asset,
+                        'bgColor' => $bgColor,
+                        'alerts' => $alerts,
                     ])->render(),
                     '_asset' => $asset,
                 ];
