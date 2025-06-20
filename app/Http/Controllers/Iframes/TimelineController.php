@@ -55,7 +55,9 @@ class TimelineController extends Controller
         ]);
         $objects = last(explode('/', trim($request->path(), '/')));
         $items = match ($objects) {
-            'assets' => $this->assets($params['status'] ?? null, $params['asset_id'] ?? null),
+            'assets' => $this
+                ->assets($params['status'] ?? null, $params['asset_id'] ?? null)
+                ->concat($this->servers($params['server_id'] ?? null)),
             'conversations' => $this->conversations(),
             'events' => $this->events($params['server_id'] ?? null),
             'ioc' => $this->ioc(75, $params['server_id'] ?? null),
@@ -87,6 +89,34 @@ class TimelineController extends Controller
         return Str::replace("\n", '', \Illuminate\Support\Facades\View::make('cywise.iframes.timeline._separator', [
             'date' => $date,
         ])->render());
+    }
+
+    private function servers(?int $serverId = null): Collection
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        return YnhServer::forUser($user)
+            ->filter(fn(YnhServer $server) => !$serverId || $serverId === $server->id)
+            ->filter(fn(YnhServer $server) => !$server->isYunoHost())
+            ->map(function (YnhServer $server) {
+
+                $timestamp = $server->created_at->utc()->format('Y-m-d H:i:s');
+                $date = Str::before($timestamp, ' ');
+                $time = Str::beforeLast(Str::after($timestamp, ' '), ':');
+
+                return [
+                    'timestamp' => $timestamp,
+                    'date' => $date,
+                    'time' => $time,
+                    'html' => \Illuminate\Support\Facades\View::make('cywise.iframes.timeline._server', [
+                        'date' => $date,
+                        'time' => $time,
+                        'server' => $server,
+                    ])->render(),
+                    '_server' => $server,
+                ];
+            });
     }
 
     private function assets(?string $status = null, ?int $assetId = null): Collection
