@@ -145,6 +145,8 @@ class User extends WaveUser
                 ->orderBy('created_at')
                 ->first();
 
+            // TODO : create CyberScribe's templates
+
             // Create shadow collections for some frameworks
             $frameworks = \App\Models\YnhFramework::all();
             $providers = [
