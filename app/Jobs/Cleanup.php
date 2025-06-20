@@ -3,11 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\YnhOsquery;
-use App\Models\YnhOsqueryEventsCount;
 use App\Models\YnhOsqueryLatestEvent;
 use App\Models\YnhOsqueryRule;
-use App\Models\YnhServer;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -61,53 +58,5 @@ class Cleanup implements ShouldQueue
                 ->limit($event->event_count - $threshold)
                 ->delete();
         }
-
-        Log::debug('Group server events by increments of 10 minutes');
-
-        YnhServer::where('is_ready', true)
-            ->where('is_frozen', false)
-            ->get()
-            ->each(function (YnhServer $server) {
-
-                /** @var YnhOsqueryEventsCount $ec */
-                $ec = YnhOsqueryEventsCount::where('ynh_server_id', $server->id)
-                    ->orderBy('date_max', 'desc')
-                    ->limit(1)
-                    ->first();
-
-                $dateEnd = Carbon::now();
-                $dateBegin = $ec ? $ec->date_max : $dateEnd->copy()->subDays(10);
-
-                for ($dateMin = $dateBegin; $dateMin->lt($dateEnd); $dateMin->addMinutes(10)) {
-
-                    $dateMax = $dateMin->copy()->addMinutes(10);
-
-                    if ($dateMax->gt($dateEnd)) {
-                        break; // if date max is in the future, wait for a later run
-                    }
-
-                    $events = $server->osqueryEvents($dateMin, $dateMax);
-
-                    Log::debug("Grouping {$events->count()} events for server {$server->name}");
-
-                    if ($events->isEmpty()) { // Nothing happened!
-                        /** @var YnhOsqueryEventsCount $count */
-                        $count = YnhOsqueryEventsCount::create([
-                            'ynh_server_id' => $server->id,
-                            'date_min' => $dateMin,
-                            'date_max' => $dateMax,
-                        ]);
-                    } else { // Compute the next count
-                        /** @var YnhOsqueryEventsCount $count */
-                        $count = YnhOsqueryEventsCount::create([
-                            'ynh_server_id' => $server->id,
-                            'date_min' => $dateMin,
-                            'date_max' => $dateMax,
-                            'count' => $events->count(),
-                            'events' => $events,
-                        ]);
-                    }
-                }
-            });
     }
 }

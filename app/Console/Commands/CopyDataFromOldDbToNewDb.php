@@ -342,14 +342,8 @@ class CopyDataFromOldDbToNewDb extends Command
                     ->whereIn('id', fn($query) => $query->select('ynh_osquery_id')->from('ynh_osquery_latest_events'))
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_osquery', $items));
 
-                Log::info('ynh_osquery_events_counts...');
-
-                \DB::connection('mysql_legacy')
-                    ->table('ynh_osquery_events_counts')
-                    ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_osquery_events_counts', $items));
-
                 Log::info('ynh_osquery_latest_events...');
-
+                
                 \DB::connection('mysql_legacy')
                     ->table('ynh_osquery_latest_events')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('ynh_osquery_latest_events', $items));
