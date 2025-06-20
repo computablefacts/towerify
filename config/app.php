@@ -195,7 +195,6 @@ return [
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\HealthServiceProvider::class,
@@ -203,7 +202,6 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\FolioServiceProvider::class,
 
-        \DevDojo\Themes\ThemesServiceProvider::class,
         App\Providers\VoltServiceProvider::class,
 
         /**

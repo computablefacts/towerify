@@ -41,11 +41,6 @@ class Saml2Tenant extends Tenant
         return $this->tenant_id;
     }
 
-    public function getCustomerId()
-    {
-        return $this->customer_id;
-    }
-
     public function config(string $key, $default = null)
     {
         $keys = explode('.', $key);

@@ -233,7 +233,6 @@ class SamlEventSubscriber
         $debug = config('app.debug');
 
         $tenantId = $this->saml2Tenant->getTenantId(); // Cywise Tenant ID
-        $customerId = $this->saml2Tenant->getCustomerId();
 
         $user = User::query()
             ->where('email', '=', $this->saml2UserEmail)
@@ -241,8 +240,8 @@ class SamlEventSubscriber
 
         if (!$user) {
             Log::info('[SAML2 Authentication] User does not exist, we create it');
-            $user = User::getOrCreate($this->saml2UserEmail, $this->saml2UserName);
-        } elseif ($user && $tenantId == $user->tenant_id && $customerId == $user->customer_id) {
+            $user = User::getOrCreate($this->saml2UserEmail, $this->saml2UserName, '', $tenantId);
+        } elseif ($user && $tenantId == $user->tenant_id) {
             Log::info('[SAML2 Authentication] User already exist, we update attributes');
 
             $user->name = $this->saml2UserName;
@@ -254,9 +253,7 @@ class SamlEventSubscriber
         } else {
             Log::error('[SAML2 Authentication] User already exist but with different IDs', [
                 'saml_tenant_id' => $tenantId,
-                'saml_customer_id' => $customerId,
                 'user_tenant_id' => $user->tenant_id,
-                'user_customer_id' => $user->customer_id,
             ]);
             Log::error('[SAML2 Authentication] Failed: User email not found.');
             abort(401, 'Authentication failed.' . ($debug ? ' User already exist but with different IDs.' : ''));

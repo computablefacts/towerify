@@ -53,6 +53,7 @@ use Wave\Facades\Wave;
 
 // Wave routes
 Wave::routes();
+Route::view('/auth/login', 'vendor/auth/pages/auth/login');
 
 /**
  * Health check

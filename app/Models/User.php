@@ -98,7 +98,7 @@ class User extends WaveUser
         });
     }
 
-    public static function getOrCreate(string $email, string $name = '', string $password = ''): \App\Models\User
+    public static function getOrCreate(string $email, string $name = '', string $password = '', ?int $tenant_id = null): \App\Models\User
     {
         /** @var User $user */
         $user = User::where('email', $email)->first();
@@ -108,8 +108,10 @@ class User extends WaveUser
             /** @var int $count */
             $count = User::where('username', $username)->count();
 
-            /** @var Tenant $tenant */
-            $tenant = Tenant::create(['name' => Str::random()]);
+            if (!$tenant_id) {
+                /** @var Tenant $tenant */
+                $tenant = Tenant::create(['name' => Str::random()]);
+            }
 
             /** @var User $user */
             $user = User::create([
@@ -118,7 +120,7 @@ class User extends WaveUser
                 'username' => $count === 0 ? $username : ($username . $count),
                 'password' => Hash::make(empty($password) ? Str::random(64) : $password),
                 'verified' => 1,
-                'tenant_id' => $tenant->id,
+                'tenant_id' => $tenant_id ?? $tenant->id,
                 'avatar' => 'demo/default.png',
             ]);
 
