@@ -147,7 +147,7 @@ class Agent
             })
             ->map(fn(array $message) => [
                 'role' => $message['role'],
-                'content' => Str::before($message['content'], "\n\n**Sources:**\n"), // Remove sources. See QueryKnowledgeBase::enhanceAnswerWithSources2 for details.
+                'content' => Str::before($message['content'], "\n\n**Sources:**\n"), // Remove sources. See QueryKnowledgeBase::enhanceXxxAnswerWithSources for details.
             ])
             ->values()
             ->toArray();
