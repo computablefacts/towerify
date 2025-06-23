@@ -46,7 +46,7 @@ class Agent
             // Log::debug("[0] answer : {$answer}");
             $answer = trim(preg_replace('/<think>.*?<\/think>/s', '', $answer));
 
-            if (preg_match('/^<function=([a-zA-Z0-9_]+)>([{].*[}])$/im', $answer, $matches)) {
+            if (preg_match('/^<function=([a-zA-Z0-9_]+)>([{].*[}]).*/i', $answer, $matches)) {
 
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
@@ -55,7 +55,7 @@ class Agent
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
-            if (preg_match('/^[{]"function":"([a-zA-Z0-9_]+)","parameters":([{].*[}])[}]$/im', $answer, $matches)) {
+            if (preg_match('/^[{]"function":"([a-zA-Z0-9_]+)","parameters":([{].*[}])[}].*/i', $answer, $matches)) {
 
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
@@ -64,7 +64,7 @@ class Agent
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
-            if (preg_match('/^\[?([a-zA-Z0-9_]+)\(question="(.*)"\)]?$/im', $answer, $matches)) {
+            if (preg_match('/^\[?([a-zA-Z0-9_]+)\(question="(.*)"\)]?.*/i', $answer, $matches)) {
 
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
