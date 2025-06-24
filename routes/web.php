@@ -53,7 +53,12 @@ use Wave\Facades\Wave;
 
 // Wave routes
 Wave::routes();
+
+// See https://devdojo.com/question/customizing-the-two-factor-authentication
 Route::view('/auth/login', 'vendor/auth/pages/auth/login');
+
+// See https://devdojo.com/wave/docs/features/user-profiles
+Route::redirect('profile/{username}', '/dashboard');
 
 /**
  * Health check
