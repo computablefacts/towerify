@@ -219,7 +219,8 @@ class CyberBuddyNextGenController extends Controller
         $agent = (new Agent($fallbackOnNextCollection))->run($conversation);
         $markdown = $agent->markdown();
         if ($agent->name() === 'query_knowledge_base' || $agent->name() === 'list_assets' ||
-            $agent->name() === 'list_open_ports' || $agent->name() === 'list_vulnerabilities') {
+            $agent->name() === 'list_open_ports' || $agent->name() === 'list_vulnerabilities' ||
+            $agent->name() === 'clarify_request') {
             return [
                 'response' => [],
                 'html' => $agent->html(),
