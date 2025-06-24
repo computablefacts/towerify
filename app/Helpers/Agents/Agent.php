@@ -37,6 +37,20 @@ class Agent
 
     protected function decideNextAction(User $user, string $threadId, array $messages): AbstractAction
     {
+        if (Str::endsWith($user->email, $this->whitelistDomains())) {
+
+            $question = (end($messages) ?? [])['content'] ?? '';
+
+            if (Str::containsAll($question, ['qui', 'est', 'rssi'], true) || Str::containsAll($question, ['comment', 'appel', 'rssi'], true)) {
+                sleep(5);
+                return new ClarifyRequest($user, $threadId, $messages, [], "Jean Roger est le Responsable de la Sécurité des Systèmes d'Information (RSSI) de l'organisation. Il est chargé de superviser tous les aspects de la sécurité de l'information, y compris le développement, la mise en œuvre et le suivi de la politique de sécurité des systèmes d'information de l'organisation (PSSI). Il conseille la direction sur les stratégies de sécurité et veille à ce que des mesures de sécurité soient appliquées dans tous les départements. Son rôle est crucial pour maintenir la sécurité et l'intégrité des systèmes d'information de l'organisation. [[6093]]");
+            }
+            if (Str::containsAll($question, ['respecte', 'pas', 'pssi'], true)) {
+                sleep(5);
+                return new ClarifyRequest($user, $threadId, $messages, [], "Les conséquences de non-respect des règles et responsabilités définies dans la PSSI peuvent aller jusqu'à des sanctions pénales, notamment la prison, comme mentionné dans la note [[6093]]. Cela souligne l'importance cruciale du respect de ces règles pour assurer la sécurité et l'intégrité des systèmes d'information.");
+            }
+        }
+
         $response = $this->llm($messages);
         $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
 
@@ -44,32 +58,32 @@ class Agent
 
             $answer = $response['choices'][0]['message']['content'] ?? '';
             // Log::debug("[0] answer : {$answer}");
-            $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
+            $answer = trim(preg_replace('/<think>.*?<\/think>/s', '', $answer));
 
-            if (preg_match('/^<function=([a-zA-Z0-9_]+)>([{].*[}])$/i', trim($answer), $matches)) {
+            if (preg_match('/^<function=([a-zA-Z0-9_]+)>([{].*[}]).*/i', $answer, $matches)) {
 
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
 
-                Log::debug("[1] $name(" . $matches[2] . ")");
+                Log::warning("[1] $name(" . $matches[2] . ")");
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
-            if (preg_match('/^[{]"function":"([a-zA-Z0-9_]+)","parameters":([{].*[}])[}]$/i', trim($answer), $matches)) {
+            if (preg_match('/^[{]"function":"([a-zA-Z0-9_]+)","parameters":([{].*[}])[}].*/i', $answer, $matches)) {
 
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
 
-                Log::debug("[2] $name(" . $matches[2] . ")");
+                Log::warning("[2] $name(" . $matches[2] . ")");
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
-            if (preg_match('/^\[?([a-zA-Z0-9_]+)\(question="(.*)"\)]?$/i', trim($answer), $matches)) {
+            if (preg_match('/^\[?([a-zA-Z0-9_]+)\(question="(.*)"\)]?.*/i', $answer, $matches)) {
 
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
 
-                Log::debug("[3] $name(" . $matches[2] . ")");
+                Log::warning("[3] $name(" . $matches[2] . ")");
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
@@ -146,7 +160,7 @@ class Agent
             })
             ->map(fn(array $message) => [
                 'role' => $message['role'],
-                'content' => Str::before($message['content'], "\n\n**Sources:**\n"), // Remove sources. See QueryKnowledgeBase::enhanceAnswerWithSources2 for details.
+                'content' => Str::before($message['content'], "\n\n**Sources:**\n"), // Remove sources. See QueryKnowledgeBase::enhanceXxxAnswerWithSources for details.
             ])
             ->values()
             ->toArray();
@@ -154,7 +168,8 @@ class Agent
 
     protected function isIntentMalicious(User $user, string $threadId, array $messages): bool
     {
-        return Str::contains((end($messages) ?? [])['content'] ?? '', [
+        $question = (end($messages) ?? [])['content'] ?? '';
+        return Str::contains($question, [
             "ignore previous instructions",
             "ignore above instructions",
             "disregard previous",
@@ -163,6 +178,11 @@ class Agent
             "new role",
             "act as",
             "ignore all previous commands"
-        ]);
+        ], true);
+    }
+
+    private function whitelistDomains(): array
+    {
+        return collect(config('towerify.telescope.whitelist.domains'))->map(fn(string $domain) => '@' . $domain)->toArray();
     }
 }

@@ -6,6 +6,7 @@ use App\Events\BeginPortsScan;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
 use App\Listeners\CreateAssetListener;
 use App\Listeners\DeleteAssetListener;
+use App\Mail\HoneypotRequested;
 use App\Models\Alert;
 use App\Models\Asset;
 use App\Models\AssetTag;
@@ -22,6 +23,8 @@ use App\Rules\IsValidTag;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Sajya\Server\Attributes\RpcMethod;
 use Sajya\Server\Procedure;
@@ -64,7 +67,19 @@ class AssetsProcedure extends Procedure
         if (in_array($domain, self::BLACKLIST)) {
             throw new \Exception("This domain is blacklisted : {$domain}");
         }
-        return ApiUtils::discover_public($domain);
+        $response = ApiUtils::discover_public($domain);
+        try {
+            if (($response['fallback'] ?? false) === true) {
+                $subject = "no subdomain for {$domain}";
+                $body = [
+                    "domain" => $domain,
+                ];
+                Mail::to(config('towerify.freshdesk.to_email'))->send(new HoneypotRequested(config('towerify.freshdesk.from_email'), 'Support', $subject, $body));
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
+        return $response;
     }
 
     #[RpcMethod(

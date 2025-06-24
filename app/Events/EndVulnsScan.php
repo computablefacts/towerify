@@ -30,7 +30,7 @@ class EndVulnsScan
 
     public function sink(): void
     {
-        EndVulnsScan::dispatch($this->start, $this->scan());
+        // TODO : EndVulnsScan::dispatch($this->start, $this->scan());
     }
 
     public function drop(): bool
