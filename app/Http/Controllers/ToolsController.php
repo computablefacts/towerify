@@ -5,24 +5,30 @@ namespace App\Http\Controllers;
 use App\Enums\HoneypotCloudProvidersEnum;
 use App\Enums\HoneypotCloudSensorsEnum;
 use App\Enums\HoneypotStatusesEnum;
+use App\Http\Procedures\AssetsProcedure;
 use App\Mail\HoneypotRequested;
 use App\Models\Honeypot;
-use App\Models\YnhTrial;
 use App\Models\User;
+use App\Models\YnhTrial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class CywiseController extends Controller
+class ToolsController extends Controller
 {
     public function __construct()
     {
         //
     }
 
-    public function onboarding(string $hash, int $step, Request $request)
+    public function cyberAdvisor(Request $request)
+    {
+        return view('cywise.tools.cyberadvisor', []);
+    }
+
+    public function cyberCheck(string $hash, int $step, Request $request)
     {
         $validator = Validator::make([
             'hash' => $hash,
@@ -36,13 +42,13 @@ class CywiseController extends Controller
 
         // Deal with the "back" buttons
         if ($step === 3 && $request->get('action') == 'back') {
-            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 1]);
+            return redirect()->route('tools.cybercheck', ['hash' => $hash, 'step' => 1]);
         }
         if ($step === 4 && $request->get('action') == 'back') {
-            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 2]);
+            return redirect()->route('tools.cybercheck', ['hash' => $hash, 'step' => 2]);
         }
         if ($step === 5 && $request->get('action') == 'back') {
-            return redirect()->route('cyber-check.cywise.onboarding', ['hash' => $hash, 'step' => 3]);
+            return redirect()->route('tools.cybercheck', ['hash' => $hash, 'step' => 3]);
         }
 
         // Load trial (if any)
@@ -165,7 +171,7 @@ class CywiseController extends Controller
             // Logout!
             Auth::logout();
         }
-        return view('cywise.cywise', [
+        return view('cywise.tools.cybercheck', [
             'hash' => $hash,
             'step' => $step,
             'trial' => $trial,
@@ -173,25 +179,16 @@ class CywiseController extends Controller
         ]);
     }
 
-    public function discovery(string $hash, Request $request)
+    public function discovery(Request $request)
     {
-        $validator = Validator::make([
-            'hash' => $hash,
-        ], [
-            'hash' => 'required|string|min:128|max:128',
-        ]);
-        $validator->validate();
+        $params = $request->validate(['hash' => 'required|string|min:128|max:128']);
+        $hash = $params['hash'];
 
         // Load trial (if any)
         /** @var YnhTrial $trial */
         $trial = YnhTrial::where('hash', $hash)->firstOrFail();
         $request->replace(['domain' => $trial->domain]);
 
-        return (new AssetController())->discover($request)['subdomains'];
-    }
-
-    public function onboarding2(Request $request)
-    {
-        return view('cywise.cywise2', []);
+        return (new AssetsProcedure())->discover($request)['subdomains'];
     }
 }

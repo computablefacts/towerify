@@ -4,7 +4,7 @@
   détecter les failles potentielles.</p>
 <p><b>Pas besoin d'être un expert, je suis là pour vous guider !</b></p>
 <p>On se lance ?!</p>
-<form action="{{ route('cyber-check.cywise.onboarding', [ 'hash' => $hash, 'step' => 2 ]) }}" method="post">
+<form action="{{ route('tools.cybercheck', [ 'hash' => $hash, 'step' => 2 ]) }}" method="post">
   @csrf
   <input type="text" placeholder="Votre nom de domaine ex. cywise.io" name="domain" value="{{ $trial->domain }}">
   <button type="submit" name="action" value="next">Suivant →</button>

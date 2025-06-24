@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ app()->getLocale() }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>{{ config('app.name') }}</title>
-
-  <!-- favicons -->
-  @include('layouts._favicons')
 
   <!-- FastBootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/fastbootstrap@2.2.0/dist/css/fastbootstrap.min.css" rel="stylesheet"
@@ -197,20 +194,18 @@
 <body>
 <div class="outer-wrapper">
   <div class="inner-wrapper">
-    <h1 style="margin-top: var(--spacing-medium);margin-bottom: 1rem;">Découvrez CyberBuddy, votre partenaire
-      intelligent en cybersécurité !</h1>
-    <p>CyberBuddy est votre assistant dédié en cybersécurité, conçu pour vous accompagner au quotidien. Pré-packagé avec
-      des référentiels de confiance tels que l'ANSSI, CyberBuddy vous offre un accès immédiat à des ressources fiables
-      et constamment mises à jour.</p>
-    <p>Vous pouvez <b>interroger CyberBuddy</b> en envoyant vos questions par email à <b
-        style="color: var(--color-cywise)">cyberbuddy@cywise.io</b>, et obtenir des réponses précises et rapides.</p>
-    <p>Pour <b>enrichir les connaissances de CyberBuddy</b>, vous avez la possibilité de stocker des informations liées
-      à la cybersécurité dans sa mémoire. Il vous suffit d'envoyer un email à <b style="color: var(--color-cywise)">memex@cywise.io</b>
-      contenant les informations à stocker, soit dans le corps de l'email soit en pièce-jointe au format PDF.</p>
-    <p>Si vous voulez poursuivre vos échanges en mode chat, ajouter des référentiels, gérer les éléments que vous avez
-      stocké via memex@cywise.io connectez-vous à Cywise.</p>
-    <p>Avec CyberBuddy, bénéficiez d’un assistant intelligent et évolutif, toujours à vos côtés pour renforcer votre
-      sécurité.</p>
+    @include('cywise.tools._breadcrumbs')
+    @if($step == 1)
+    @include('cywise.tools._step-1')
+    @elseif($step == 2)
+    @include('cywise.tools._step-2')
+    @elseif($step == 3)
+    @include('cywise.tools._step-3')
+    @elseif($step == 4)
+    @include('cywise.tools._step-4')
+    @elseif($step == 5)
+    @include('cywise.tools._step-5')
+    @endif
   </div>
 </div>
 </body>

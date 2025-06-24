@@ -60,6 +60,23 @@ Route::view('/auth/login', 'vendor/auth/pages/auth/login');
 // See https://devdojo.com/wave/docs/features/user-profiles
 Route::redirect('profile/{username}', '/dashboard');
 
+// Public facing tools
+Route::get('/cyber-check', function (\Illuminate\Http\Request $request) {
+    return redirect()->route('tools.cybercheck', [
+        'hash' => Str::random(128),
+        'step' => 1,
+    ]);
+});
+
+Route::match(['get', 'post'], '/cyber-check/{hash}/{step}', [\App\Http\Controllers\ToolsController::class, 'cyberCheck'])
+    ->name('tools.cybercheck');
+
+Route::post('/cyber-check/discovery', [\App\Http\Controllers\ToolsController::class, 'discovery'])
+    ->name('tools.discovery');
+
+Route::get('/cyber-advisor', [\App\Http\Controllers\ToolsController::class, 'cyberAdvisor'])
+    ->name('tools.cyberadvisor');
+
 /**
  * Health check
  */
@@ -552,7 +569,6 @@ Route::post('am/api/v2/public/honeypots/{dns}', function (string $dns, \Illumina
     return response("ok ({$events->count()} events in file)", 200)
         ->header('Content-Type', 'text/plain');
 })->middleware(['throttle:240,1']);
-
 
 Route::post('/llm1', '\App\Http\Controllers\CyberBuddyController@llm1')->middleware('auth');
 

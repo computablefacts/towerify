@@ -74,7 +74,7 @@ class EndVulnsScanListener extends AbstractListener
 
         unset($output);
 
-        $onboarding = route('cyber-check.cywise.onboarding', ['hash' => $trial->hash, 'step' => 5]);
+        $onboarding = route('tools.cybercheck', ['hash' => $trial->hash, 'step' => 5]);
         $alerts = $assets->flatMap(fn(Asset $asset) => $asset->alerts()->get())->filter(fn(Alert $alert) => $alert->is_hidden === 0);
         $alertsHigh = $alerts->filter(fn(Alert $alert) => $alert->level === 'High');
         $alertsMedium = $alerts->filter(fn(Alert $alert) => $alert->level === 'Medium');
