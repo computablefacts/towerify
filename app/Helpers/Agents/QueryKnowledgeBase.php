@@ -199,11 +199,11 @@ class QueryKnowledgeBase extends AbstractAction
 
         $start = microtime(true);
         /** @var array<string> $englishKeywords */
-        $englishKeywords = $this->combine($json['keywords_en']);
+        // $englishKeywords = $this->combine($json['keywords_en']);
         /** @var array<string> $frenchKeywords */
-        $frenchKeywords = $this->combine($json['keywords_fr']);
+        // $frenchKeywords = $this->combine($json['keywords_fr']);
         /** @var array<int> $englishCollections */
-        $englishCollections = \App\Models\Collection::query()
+        /* $englishCollections = \App\Models\Collection::query()
             ->where('cb_collections.is_deleted', false)
             ->where(function ($query) {
                 $query->where('cb_collections.name', 'like', "%lgen") // see YnhFramework::collectionName
@@ -213,9 +213,9 @@ class QueryKnowledgeBase extends AbstractAction
             ->orderBy('cb_collections.name')
             ->get()
             ->pluck('id')
-            ->toArray();
+            ->toArray(); */
         /** @var array<int> $frenchCollections */
-        $frenchCollections = \App\Models\Collection::query()
+        /* $frenchCollections = \App\Models\Collection::query()
             ->where('cb_collections.is_deleted', false)
             ->where(function ($query) {
                 $query->where('cb_collections.name', 'like', "%lgfr") // see YnhFramework::collectionName
@@ -225,11 +225,11 @@ class QueryKnowledgeBase extends AbstractAction
             ->orderBy('cb_collections.name')
             ->get()
             ->pluck('id')
-            ->toArray();
+            ->toArray(); */
 
         $chunks = collect();
 
-        foreach ($englishKeywords as $keywords) {
+        /* foreach ($englishKeywords as $keywords) {
             try {
                 $start2 = microtime(true);
                 $results = Chunk::search($keywords)
@@ -262,7 +262,7 @@ class QueryKnowledgeBase extends AbstractAction
             if ($chunks->isNotEmpty()) {
                 break;
             }
-        }
+        } */
 
         $stop = microtime(true);
         Log::debug("Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$chunks->count()} results");
