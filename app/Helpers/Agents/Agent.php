@@ -29,10 +29,12 @@ class Agent
             } else {
                 $action = $this->decideNextAction($user, $threadId, $messages);
             }
+            return $action->execute();
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             $action = new ClarifyRequest($user, $threadId, $messages, [], "An error occurred, please try again later ({$e->getMessage()})");
+            return $action->execute();
         }
-        return $action->execute();
     }
 
     protected function decideNextAction(User $user, string $threadId, array $messages): AbstractAction
