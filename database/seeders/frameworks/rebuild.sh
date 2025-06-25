@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CISO_ASSISTANT=/opt/a_src/ciso-assistant-community/tools
-TOWERIFY=/opt/a_src/towerify/database/seeds/frameworks
+TOWERIFY=/opt/a_src/towerify/database/seeders/frameworks
 
 rm $TOWERIFY/anssi/* \
   $TOWERIFY/dora/* \

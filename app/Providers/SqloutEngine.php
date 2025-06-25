@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Baril\Sqlout\Engine as Engine;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use StopWords\StopWords;
 use Wamania\Snowball\StemmerFactory;
@@ -23,7 +24,8 @@ class SqloutEngine extends Engine
         }
 
         $lang = Str::substr($content, 0, 2);
-        $content = Str::substr($content, 3);
+        $contentOriginal = Str::substr($content, 3);
+        $content = $contentOriginal;
 
         // Apply custom filters:
         foreach (config('scout.sqlout.filters', []) as $filter) {
@@ -33,8 +35,13 @@ class SqloutEngine extends Engine
         }
 
         // Remove stopwords:
-        $stopwords = new StopWords($lang);
-        $content = $stopwords->clean($content);
+        try {
+            $stopwords = new StopWords($lang);
+            $content = $stopwords->clean($content);
+        } catch (\Exception $e) {
+            Log::warning($e->getMessage());
+            return parent::processString($contentOriginal);
+        }
 
         // Tokenize:
         $words = preg_split(config('scout.sqlout.token_delimiter', '/[\s]+/'), $content);
@@ -44,9 +51,14 @@ class SqloutEngine extends Engine
         $words = collect($words)->reject(fn($word) => mb_strlen($word) < $minLength)->all();
 
         // Stem:
-        $stemmer = StemmerFactory::create($lang);
-        foreach ($words as $k => $word) {
-            $words[$k] = $stemmer->stem($word);
+        try {
+            $stemmer = StemmerFactory::create($lang);
+            foreach ($words as $k => $word) {
+                $words[$k] = $stemmer->stem($word);
+            }
+        } catch (\Exception $e) {
+            Log::warning($e->getMessage());
+            return parent::processString($contentOriginal);
         }
 
         // Return result:
