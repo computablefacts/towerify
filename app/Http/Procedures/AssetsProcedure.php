@@ -485,6 +485,7 @@ class AssetsProcedure extends Procedure
         $asset = Asset::find($params['asset_id']);
 
         if ($asset->is_monitored) {
+            $asset->next_scan_id = null;
             $asset->is_monitored = false;
             $asset->save();
         }
