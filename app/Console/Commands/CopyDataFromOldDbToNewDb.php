@@ -47,7 +47,7 @@ class CopyDataFromOldDbToNewDb extends Command
                         foreach ($items as $item) {
                             $count = --$usernameCounts[$item->name];
                             $item->username = $count === 0 ? $item->name : ($item->name . $count);
-                            $item->password = Hash::make(cywise_unhash($item->password));
+                            $item->password = ($item->password === '<deleted>') ? '<deleted>' : Hash::make(cywise_unhash($item->password));
                             $item->verified = true;
                             $item->avatar = 'demo/default.png';
                             $this->upsert('users', $item);
