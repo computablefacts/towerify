@@ -38,7 +38,7 @@ class EndPortsScan
 
     public function sink(): void
     {
-        EndPortsScan::dispatch($this->start, $this->asset(), $this->scan());
+        // TODO : EndPortsScan::dispatch($this->start, $this->asset(), $this->scan());
     }
 
     public function drop(): bool

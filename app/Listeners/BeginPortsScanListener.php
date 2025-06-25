@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\BeginPortsScan;
-use App\Events\EndPortsScan;
 use App\Helpers\VulnerabilityScannerApiUtilsFacade as ApiUtils;
 use App\Models\Scan;
 use Carbon\Carbon;
@@ -45,7 +44,7 @@ class BeginPortsScanListener extends AbstractListener
             $asset->next_scan_id = $taskId;
             $asset->save();
 
-            EndPortsScan::dispatch(Carbon::now(), $asset, $scan);
+            // TODO : EndPortsScan::dispatch(Carbon::now(), $asset, $scan);
         }
     }
 
