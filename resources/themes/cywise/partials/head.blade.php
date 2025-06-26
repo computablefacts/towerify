@@ -45,4 +45,4 @@
 
 @filamentStyles
 @livewireStyles
-@vite(['resources/themes/anchor/assets/css/app.css', 'resources/themes/anchor/assets/js/app.js'])
+@vite(["resources/themes/cywise/assets/css/app.css", "resources/themes/cywise/assets/js/app.js"])
