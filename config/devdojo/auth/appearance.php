@@ -7,7 +7,7 @@
 return [
     'logo' => [
         'type' => 'image',
-        'image_src' => '/cywise/images/cywise.png',
+        'image_src' => '/cywise/img/cywise.png',
         'svg_string' => '',
         'height' => '100',
     ],
