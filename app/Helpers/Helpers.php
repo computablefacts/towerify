@@ -11,6 +11,31 @@ if (!function_exists('format_bytes')) {
         return round($bytes, $precision) . $units[$pow];
     }
 }
+if (!function_exists('format_number')) {
+    function format_number(int $number, int $precision = 1): array
+    {
+        if ($number < 1000) {
+            return [(string)$number, ''];
+        }
+        $divisors = [
+            pow(1000, 4) => 'T',
+            pow(1000, 3) => 'Md',
+            pow(1000, 2) => 'M',
+            pow(1000, 1) => 'K',
+        ];
+        foreach ($divisors as $divisor => $suffix) {
+            if ($number >= $divisor) {
+                $val = $number / $divisor;
+                $rounded = round($val, $precision);
+                if ($rounded == (int)$rounded) {
+                    return [(int)$rounded, $suffix];
+                }
+                return [$rounded, $suffix];
+            }
+        }
+        return [(string)$number, ''];
+    }
+}
 if (!function_exists('app_url')) {
     function app_url(): string
     {

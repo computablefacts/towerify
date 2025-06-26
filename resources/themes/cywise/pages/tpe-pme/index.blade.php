@@ -127,5 +127,107 @@ name('tpe-pme');
       </div>
     </div>
     <!-- PROBLEMS : END -->
+    <!-- SOLUTION : BEGIN -->
+    <div class="overflow-hidden bg-white py-24 sm:py-32">
+      <div class="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
+        <div class="max-w-4xl">
+          <p class="text-base/7 font-semibold text-indigo-600">
+            {{ __('TPE_PME_SOLUTION_SECTION') }}
+          </p>
+          <h1 class="mt-2 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+            {{ __('TPE_PME_SOLUTION_TITLE') }}
+          </h1>
+          <p class="mt-6 text-balance text-xl/8 text-gray-700">
+            {{ __('TPE_PME_SOLUTION_SUBTITLE') }}
+          </p>
+        </div>
+        <section class="mt-20 grid grid-cols-1 lg:grid-cols-2 lg:gap-x-8 lg:gap-y-16">
+          <div class="lg:pr-8">
+            <h2 class="text-pretty text-2xl font-semibold tracking-tight text-gray-900">
+              {{ __('TPE_PME_SOLUTION_PARAGRAPH_TITLE_1') }}
+            </h2>
+            <p class="mt-6 text-base/7 text-gray-600">
+              {{ __('TPE_PME_SOLUTION_PARAGRAPH_TEXT_1') }}
+            </p>
+            <h2 class="mt-6 text-pretty text-2xl font-semibold tracking-tight text-gray-900">
+              {{ __('TPE_PME_SOLUTION_PARAGRAPH_TITLE_2') }}
+            </h2>
+            <p class="mt-6 text-base/7 text-gray-600">
+              {{ __('TPE_PME_SOLUTION_PARAGRAPH_TEXT_2') }}
+            </p>
+            <h2 class="mt-6 text-pretty text-2xl font-semibold tracking-tight text-gray-900">
+              {{ __('TPE_PME_SOLUTION_PARAGRAPH_TITLE_3') }}
+            </h2>
+            <p class="mt-6 text-base/7 text-gray-600">
+              {{ __('TPE_PME_SOLUTION_PARAGRAPH_TEXT_3') }}
+            </p>
+          </div>
+          <div class="pt-16 lg:row-span-2 lg:-mr-16 xl:mr-auto">
+            <div class="-mx-8 grid grid-cols-2 gap-4 sm:-mx-16 sm:grid-cols-4 lg:mx-0 lg:grid-cols-2 lg:gap-4 xl:gap-8">
+              <div class="aspect-square overflow-hidden rounded-xl shadow-xl outline outline-1 -outline-offset-1 outline-black/10">
+                <img alt="" src="https://images.unsplash.com/photo-1590650516494-0c8e4a4dd67e?&auto=format&fit=crop&crop=center&w=560&h=560&q=90" class="block size-full object-cover" />
+              </div>
+              <div class="-mt-8 aspect-square overflow-hidden rounded-xl shadow-xl outline outline-1 -outline-offset-1 outline-black/10 lg:-mt-40">
+                <img alt="" src="https://images.unsplash.com/photo-1557804506-669a67965ba0?&auto=format&fit=crop&crop=left&w=560&h=560&q=90" class="block size-full object-cover" />
+              </div>
+              <div class="aspect-square overflow-hidden rounded-xl shadow-xl outline outline-1 -outline-offset-1 outline-black/10">
+                <img alt="" src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?&auto=format&fit=crop&crop=left&w=560&h=560&q=90" class="block size-full object-cover" />
+              </div>
+              <div class="-mt-8 aspect-square overflow-hidden rounded-xl shadow-xl outline outline-1 -outline-offset-1 outline-black/10 lg:-mt-40">
+                <img alt="" src="https://images.unsplash.com/photo-1598257006458-087169a1f08d?&auto=format&fit=crop&crop=center&w=560&h=560&q=90" class="block size-full object-cover" />
+              </div>
+            </div>
+          </div>
+          @php
+          $user = \App\Models\User::where('email', config('towerify.admin.email'))->firstOrFail();
+          $nbUsers = format_number(\App\Models\User::count());
+          $nbAssets = format_number(\App\Models\Asset::count() + \App\Models\YnhServer::count());
+          $nbHoneypots = format_number(\App\Models\Honeypot::count());
+          $nbLeaks = format_number(\App\Helpers\JosianneClient::numberOfRows('dumps_login_email_domain'));
+          @endphp
+          <div class="max-lg:mt-16 lg:col-span-1">
+            <p class="text-base/7 font-semibold text-gray-500">
+              {{ __('TPE_PME_SOLUTION_NUMBERS') }}
+            </p>
+            <hr class="mt-6 border-t border-gray-200" />
+            <dl class="mt-6 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+              <div class="flex flex-col gap-y-2 border-b border-dotted border-gray-200 pb-4">
+                <dt class="text-sm/6 text-gray-600">
+                  {{ __('Users') }}
+                </dt>
+                <dd class="order-first text-6xl font-semibold tracking-tight">
+                  <span>{{ $nbUsers[0] }}</span> {{ $nbUsers[1] }}
+                </dd>
+              </div>
+              <div class="flex flex-col gap-y-2 border-b border-dotted border-gray-200 pb-4">
+                <dt class="text-sm/6 text-gray-600">
+                  {{ __('Monitored Servers') }}
+                </dt>
+                <dd class="order-first text-6xl font-semibold tracking-tight">
+                  <span>{{ $nbAssets[0] }}</span> {{ $nbAssets[1] }}
+                </dd>
+              </div>
+              <div class="flex flex-col gap-y-2 max-sm:border-b max-sm:border-dotted max-sm:border-gray-200 max-sm:pb-4">
+                <dt class="text-sm/6 text-gray-600">
+                  {{ __('Compromised Credentials') }}
+                </dt>
+                <dd class="order-first text-6xl font-semibold tracking-tight">
+                  <span>{{ $nbLeaks[0] }}</span> {{ $nbLeaks[1] }}
+                </dd>
+              </div>
+              <div class="flex flex-col gap-y-2">
+                <dt class="text-sm/6 text-gray-600">
+                  {{ __('Honeypots') }}
+                </dt>
+                <dd class="order-first text-6xl font-semibold tracking-tight">
+                  <span>{{ $nbHoneypots[0] }}</span> {{ $nbHoneypots[1] }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+      </div>
+    </div>
+    <!-- SOLUTION : END -->
   </x-container>
 </x-layouts.marketing>
