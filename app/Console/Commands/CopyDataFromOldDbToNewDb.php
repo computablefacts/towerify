@@ -52,6 +52,7 @@ class CopyDataFromOldDbToNewDb extends Command
                             $count = --$usernameCounts[Str::lower($item->name)];
                             $item->username = $count === 0 ? $item->name : ($item->name . $count);
                             $item->password = ($item->password === '<deleted>') ? '<deleted>' : Hash::make(cywise_unhash($item->password));
+                            $item->ynh_password = $item->password;
                             $item->verified = true;
                             $item->avatar = 'demo/default.png';
                             $this->upsert('users', $item);
