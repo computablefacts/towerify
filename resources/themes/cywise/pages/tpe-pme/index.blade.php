@@ -7,6 +7,7 @@ name('tpe-pme');
 
 <x-layouts.marketing>
   <x-container class="py-0">
+    <!-- HERO : BEGIN -->
     <div class="relative isolate overflow-visible bg-white">
       <svg class="absolute inset-0 -z-10 size-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]" aria-hidden="true">
         <defs>
@@ -49,5 +50,82 @@ name('tpe-pme');
         </div>
       </div>
     </div>
+    <!-- HERO : END -->
+    <!-- SOCIAL PROOF : BEGIN -->
+    <div class="bg-white py-24 sm:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <h2 class="text-center text-lg/8 font-semibold text-gray-900">
+          {{ __('TPE_PME_SOCIAL_PROOF_1') }}
+        </h2>
+        <div class="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5">
+          <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" src="/cywise/img/logo-elephantastic.jpg" alt="Elephantastic" width="158" height="48" />
+          <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" src="/cywise/img/logo-oppscience.svg" alt="Oppscience" width="158" height="48" />
+          <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" src="/cywise/img/logo-netemedia.png" alt="Netemedia" width="158" height="48" />
+          <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" src="/cywise/img/logo-ista.png" alt="ISTA" width="158" height="48" />
+          <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" src="/cywise/img/logo-hermes.png" alt="Hermès" width="158" height="48" />
+        </div>
+      </div>
+    </div>
+    <!-- SOCIAL PROOF : END -->
+    <!-- PROBLEMS : BEGIN -->
+    <div class="bg-white py-3 sm:py-3">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl lg:text-center">
+          <h2 class="text-base/7 font-semibold text-indigo-600">
+            {{ __('TPE_PME_PROBLEM_TITLE') }}
+          </h2>
+          <p class="mt-2 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl lg:text-balance">
+            {{ __('TPE_PME_PROBLEM_SUBTITLE') }}
+          </p>
+          <p class="mt-6 text-lg/8 text-gray-600">
+            {{ __('TPE_PME_PROBLEM_TEXT') }}
+          </p>
+        </div>
+        <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+          <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+            <div class="flex flex-col">
+              <dt class="flex items-center gap-x-3 text-base/7 font-semibold text-gray-900">
+                <svg class="size-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                  <path fill-rule="evenodd" d="M5.5 17a4.5 4.5 0 0 1-1.44-8.765 4.5 4.5 0 0 1 8.302-3.046 3.5 3.5 0 0 1 4.504 4.272A4 4 0 0 1 15 17H5.5Zm3.75-2.75a.75.75 0 0 0 1.5 0V9.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0l-3.25 3.5a.75.75 0 1 0 1.1 1.02l1.95-2.1v4.59Z" clip-rule="evenodd" />
+                </svg>
+                {{ __('TPE_PME_PROBLEM_TITLE_1') }}
+              </dt>
+              <dd class="mt-4 flex flex-auto flex-col text-base/7 text-gray-600">
+                <p class="flex-auto">
+                  {!! __('TPE_PME_PROBLEM_TEXT_1') !!}
+                </p>
+              </dd>
+            </div>
+            <div class="flex flex-col">
+              <dt class="flex items-center gap-x-3 text-base/7 font-semibold text-gray-900">
+                <svg class="size-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                  <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
+                </svg>
+                {{ __('TPE_PME_PROBLEM_TITLE_2') }}
+              </dt>
+              <dd class="mt-4 flex flex-auto flex-col text-base/7 text-gray-600">
+                <p class="flex-auto">
+                  {!! __('TPE_PME_PROBLEM_TEXT_2') !!}
+                </p>
+              </dd>
+            </div>
+            <div class="flex flex-col">
+              <dt class="flex items-center gap-x-3 text-base/7 font-semibold text-gray-900">
+                <svg class="size-5 flex-none text-indigo-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+                  <path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z" clip-rule="evenodd" />
+                </svg>
+                {{ __('TPE_PME_PROBLEM_TITLE_3') }}
+              </dt>
+              <dd class="mt-4 flex flex-auto flex-col text-base/7 text-gray-600">
+                <p class="flex-auto">
+                  {!! __('TPE_PME_PROBLEM_TEXT_3') !!}
+                </p>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <!-- PROBLEMS : END -->
   </x-container>
 </x-layouts.marketing>
