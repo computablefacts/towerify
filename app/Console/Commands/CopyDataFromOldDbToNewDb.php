@@ -90,7 +90,7 @@ class CopyDataFromOldDbToNewDb extends Command
                     ->each(function (object $item) {
                         $item->model_type = 'users';
                         $objKeys = array_keys((array)$item);
-                        $tblKeys = Schema::getColumnListing('model_has_roles');
+                        $tblKeys = Schema::getColumnListing('model_has_permissions');
                         $keys = array_intersect($objKeys, $tblKeys);
                         $newItem = array_intersect_key((array)$item, array_flip($tblKeys));
                         \DB::table('model_has_permissions')->upsert($newItem, $tblKeys, $keys);
