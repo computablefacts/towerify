@@ -66,7 +66,7 @@ Route::get('/cyber-check', function (\Illuminate\Http\Request $request) {
         'hash' => Str::random(128),
         'step' => 1,
     ]);
-});
+})->name('tools.cybercheck.init');
 
 Route::match(['get', 'post'], '/cyber-check/{hash}/{step}', [\App\Http\Controllers\ToolsController::class, 'cyberCheck'])
     ->name('tools.cybercheck');
