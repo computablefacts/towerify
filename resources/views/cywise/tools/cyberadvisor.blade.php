@@ -210,5 +210,6 @@
       sécurité.</p>
   </div>
 </div>
+@include('cywise._analytics')
 </body>
 </html>

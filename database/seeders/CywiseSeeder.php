@@ -99,16 +99,18 @@ class CywiseSeeder extends Seeder
             'order' => 2,
             'group' => 'Site',
         ]);
-        Setting::updateOrCreate([
-            'key' => 'site.google_analytics_tracking_id',
-        ], [
-            'display_name' => 'Google Analytics Tracking ID',
-            'value' => null,
-            'details' => '',
-            'type' => 'text',
-            'order' => 3,
-            'group' => 'Site',
-        ]);
+        if (Setting::query()->where('key', 'site.google_analytics_tracking_id')->whereNull('value')->exists()) {
+            Setting::updateOrCreate([
+                'key' => 'site.google_analytics_tracking_id',
+            ], [
+                'display_name' => 'Google Analytics Tracking ID',
+                'value' => null,
+                'details' => '',
+                'type' => 'text',
+                'order' => 3,
+                'group' => 'Site',
+            ]);
+        }
         Theme::updateOrCreate([
             'folder' => 'cywise',
         ], [

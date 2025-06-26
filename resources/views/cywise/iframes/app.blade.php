@@ -31,5 +31,7 @@
 <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
 <!-- page-specific scripts -->
 @stack('scripts')
+<!-- app-specific scripts -->
+@include('cywise._analytics')
 </body>
 </html>
