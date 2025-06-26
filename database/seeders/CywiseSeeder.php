@@ -110,10 +110,10 @@ class CywiseSeeder extends Seeder
             'group' => 'Site',
         ]);
         Theme::updateOrCreate([
-            'folder' => 'anchor',
+            'folder' => 'cywise',
         ], [
-            'name' => 'Anchor Theme',
-            'folder' => 'anchor',
+            'name' => 'Cywise Theme',
+            'folder' => 'cywise',
             'active' => 1,
             'version' => 1.0
         ]);

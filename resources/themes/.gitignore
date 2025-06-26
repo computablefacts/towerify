@@ -9,5 +9,9 @@
 !anchor/
 !anchor/**/*
 
+# Do not ignore the "cywise" folder and its contents
+!cywise/
+!cywise/**/*
+
 # Ignore all .DS_Store files
 .DS_Store
