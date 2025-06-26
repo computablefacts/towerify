@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Role;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -264,6 +265,39 @@ class CopyDataFromOldDbToNewDb extends Command
                 \DB::connection('mysql_legacy')
                     ->table('saml2_tenants')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('saml2_tenants', $items));
+
+                Log::info('create plans...');
+
+                Plan::updateOrCreate([
+                    'name' => 'Essential',
+                ], [
+                    'description' => '',
+                    'features' => '',
+                    'role_id' => Role::where('name', 'administrator')->where('guard_name', 'web')->firstOrFail()->id,
+                    'default' => 0,
+                    'monthly_price' => '150',
+                    'monthly_price_id' => config('towerify.stripe.plans.essential'),
+                ]);
+                Plan::updateOrCreate([
+                    'name' => 'Standard',
+                ], [
+                    'description' => '',
+                    'features' => '',
+                    'role_id' => Role::where('name', 'administrator')->where('guard_name', 'web')->firstOrFail()->id,
+                    'default' => 1,
+                    'monthly_price' => '400',
+                    'monthly_price_id' => config('towerify.stripe.plans.standard'),
+                ]);
+                Plan::updateOrCreate([
+                    'name' => 'Premium',
+                ], [
+                    'description' => '',
+                    'features' => '',
+                    'role_id' => Role::where('name', 'administrator')->where('guard_name', 'web')->firstOrFail()->id,
+                    'default' => 0,
+                    'monthly_price' => '600',
+                    'monthly_price_id' => config('towerify.stripe.plans.premium'),
+                ]);
 
                 Log::info('subscriptions...');
 
