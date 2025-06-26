@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Wave\Plan;
+use Wave\Subscription;
 
 class CopyDataFromOldDbToNewDb extends Command
 {
@@ -51,7 +53,6 @@ class CopyDataFromOldDbToNewDb extends Command
                             $item->verified = true;
                             $item->avatar = 'demo/default.png';
                             $this->upsert('users', $item);
-                            // TODO : deal with stripe_id
                         }
                     });
 
@@ -262,6 +263,41 @@ class CopyDataFromOldDbToNewDb extends Command
                 \DB::connection('mysql_legacy')
                     ->table('saml2_tenants')
                     ->chunkById(100, fn(Collection $items) => $this->upsertAll('saml2_tenants', $items));
+
+                Log::info('subscriptions...');
+
+                \DB::connection('mysql_legacy')
+                    ->table('subscriptions')
+                    ->get()
+                    ->each(function (object $item) {
+                        $user = \DB::connection('mysql_legacy')
+                            ->table('users')
+                            ->where('id', $item->user_id)
+                            ->first();
+
+                        $plan = Plan::query()
+                            ->where('monthly_price_id', $item->stripe_price)
+                            ->first();
+                        if (is_null($plan)) {
+                            // Default to Essential plan
+                            $plan = Plan::query()
+                                ->where('name', '=', 'Essential')
+                                ->firstOrFail();
+                        }
+
+                        Subscription::query()->updateOrCreate([
+                            'billable_type' => 'user',
+                            'billable_id' => $item->user_id,
+                        ], [
+                            'plan_id' => $plan->id,
+                            'vendor_slug' => 'stripe',
+                            'vendor_customer_id' => $user->stripe_id,
+                            'vendor_subscription_id' => $item->stripe_id,
+                            'status' => $item->stripe_status,
+                            'cycle' => 'month',
+                            'seats' => 1,
+                        ]);
+                    });
 
                 Log::info('t_facts...');
 
