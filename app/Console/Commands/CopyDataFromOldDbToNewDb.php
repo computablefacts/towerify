@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Wave\Plan;
 use Wave\Subscription;
 
@@ -34,10 +35,10 @@ class CopyDataFromOldDbToNewDb extends Command
 
                 $usernameCounts = \DB::connection('mysql_legacy')
                     ->table('users')
-                    ->select('name', \DB::raw('COUNT(*) as count'))
-                    ->groupBy('name')
+                    ->select(\DB::raw('LOWER(name) as name_lower'), \DB::raw('COUNT(*) as count'))
+                    ->groupBy('name_lower')
                     ->get()
-                    ->pluck('count', 'name')
+                    ->pluck('count', 'name_lower')
                     ->toArray();
 
                 Log::info($usernameCounts);
@@ -47,7 +48,7 @@ class CopyDataFromOldDbToNewDb extends Command
                     ->chunkById(100, function ($items) use (&$usernameCounts) {
                         /** @var object $item */
                         foreach ($items as $item) {
-                            $count = --$usernameCounts[$item->name];
+                            $count = --$usernameCounts[Str::lower($item->name)];
                             $item->username = $count === 0 ? $item->name : ($item->name . $count);
                             $item->password = ($item->password === '<deleted>') ? '<deleted>' : Hash::make(cywise_unhash($item->password));
                             $item->verified = true;
