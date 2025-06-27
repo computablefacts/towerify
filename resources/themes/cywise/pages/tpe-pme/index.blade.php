@@ -333,5 +333,53 @@ name('tpe-pme');
       </div>
     </div>
     <!-- FEATURES : END -->
+    <!-- TESTIMONIALS : BEGIN -->
+    <section class="bg-white py-24 sm:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto grid max-w-2xl grid-cols-1 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+          <div class="flex flex-col pb-10 sm:pb-16 lg:pb-0 lg:pr-8 xl:pr-20">
+            <img class="h-12 self-start" src="/cywise/img/logo-oppscience.svg" alt="" />
+            <figure class="mt-10 flex flex-auto flex-col justify-between">
+              <blockquote class="text-lg/8 text-gray-900">
+                <p>
+                  “Amet amet eget scelerisque tellus sit neque faucibus non eleifend. Integer eu praesent at a. Ornare arcu gravida natoque erat et cursus tortor consequat at. Vulputate gravida sociis enim nullam ultricies habitant malesuada lorem ac. Tincidunt urna dui pellentesque sagittis.”
+                </p>
+              </blockquote>
+              <figcaption class="mt-10 flex items-center gap-x-6">
+                <div class="text-base">
+                  <div class="font-semibold text-gray-900">
+                    John Doe
+                  </div>
+                  <div class="mt-1 text-gray-500">
+                    RSSI d'Oppscience
+                  </div>
+                </div>
+              </figcaption>
+            </figure>
+          </div>
+          <div class="flex flex-col pt-10 sm:pt-16 lg:pl-8 lg:pt-0 xl:pl-20">
+            <img class="h-12 self-start" src="/cywise/img/logo-elephantastic.jpg" alt="" />
+            <figure class="mt-10 flex flex-auto flex-col justify-between">
+              <blockquote class="text-lg/8 text-gray-900">
+                <p>
+                  “Excepteur veniam labore ullamco eiusmod. Pariatur consequat proident duis dolore nulla veniam reprehenderit nisi officia voluptate incididunt exercitation exercitation elit. Nostrud veniam sint dolor nisi ullamco.”
+                </p>
+              </blockquote>
+              <figcaption class="mt-10 flex items-center gap-x-6">
+                <div class="text-base">
+                  <div class="font-semibold text-gray-900">
+                    John Doe
+                  </div>
+                  <div class="mt-1 text-gray-500">
+                    CEO d'Elephantastic
+                  </div>
+                </div>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- TESTIMONIALS : END -->
   </x-container>
 </x-layouts.marketing>
