@@ -73,7 +73,8 @@ RUN install-php-extensions \
         pdo_pgsql \
         exif \
         opcache \
-        imagick/imagick@master
+        imagick/imagick@master \
+        bcmath
 
 # PHP configuration
 # Use the default production configuration
