@@ -296,7 +296,7 @@ name('tpe-pme');
           <div class="relative lg:col-span-2">
             <div class="absolute inset-0 rounded-lg bg-white"></div>
             <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)]">
-              <img class="h-80 object-cover" src="/cywise/img/events.png" alt="" />
+              <img class="h-80 object-cover object-left" src="/cywise/img/events.png" alt="" />
               <div class="p-10 pt-4">
                 <h3 class="text-sm/4 font-semibold text-indigo-600">
                   {{ __('TPE_PME_FEATURE_SECTION_4') }}
@@ -314,7 +314,7 @@ name('tpe-pme');
           <div class="relative lg:col-span-2">
             <div class="absolute inset-0 rounded-lg bg-white max-lg:rounded-b-[2rem] lg:rounded-br-[2rem]"></div>
             <div class="relative flex h-full flex-col overflow-hidden rounded-[calc(theme(borderRadius.lg)+1px)] max-lg:rounded-b-[calc(2rem+1px)] lg:rounded-br-[calc(2rem+1px)]">
-              <img class="h-80 object-cover" src="/cywise/img/honeypots.png" alt="" />
+              <img class="h-80 object-cover object-left" src="/cywise/img/honeypots.png" alt="" />
               <div class="p-10 pt-4">
                 <h3 class="text-sm/4 font-semibold text-indigo-600">
                   {{ __('TPE_PME_FEATURE_SECTION_5') }}
