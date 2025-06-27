@@ -105,7 +105,8 @@ class AdminPanelProvider extends PanelProvider
     // located at storage/app/analytics/service-account-credentials.json
     // Find More details here: https://github.com/spatie/laravel-analytics
     private function renderAnalyticsIfCredentialsExist(){
-        if(file_exists(storage_path('app/analytics/service-account-credentials.json'))){
+        if(is_array(config('analytics.service_account_credentials_json')) ||
+           file_exists(storage_path('app/analytics/service-account-credentials.json'))){
             \Config::set('filament-google-analytics.page_views.filament_dashboard', true);
             \Config::set('filament-google-analytics.active_users_one_day.filament_dashboard', true);
             \Config::set('filament-google-analytics.active_users_seven_day.filament_dashboard', true);
