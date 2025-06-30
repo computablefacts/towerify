@@ -230,5 +230,9 @@
     executeJsonRpcApiCall('tables@promptToQuery', {prompt: prompt}, onSuccess);
   }
 
+  function toggleGetsAuditReportApiCall(userId, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('users@toggleGetsAuditReport', {user_id: userId}, onSuccess);
+  }
+
 </script>
 @endonce

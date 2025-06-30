@@ -22,6 +22,10 @@ class UsersProcedure extends Procedure
     )]
     public function toggleGetsAuditReport(Request $request): array
     {
+        if (!$request->user()->canManageUsers()) {
+            throw new \Exception('Missing permission.');
+        }
+
         $params = $request->validate([
             'user_id' => 'required|integer|exists:users,id',
         ]);
@@ -31,9 +35,9 @@ class UsersProcedure extends Procedure
 
         /** @var User $user */
         $user = User::query()
-            ->where('id', '=', $params['id'])
-            ->when($user->tenant_id, fn($query) => $query->where('tenant_id', '=', $user->tenant_id))
-            ->when($user->customer_id, fn($query) => $query->where('customer_id', '=', $user->customer_id))
+            ->where('id', '=', $params['user_id'])
+            ->when($loggedInUser->tenant_id, fn($query) => $query->where('tenant_id', '=', $loggedInUser->tenant_id))
+            ->when($loggedInUser->customer_id, fn($query) => $query->where('customer_id', '=', $loggedInUser->customer_id))
             ->first();
 
         if (!$user) {

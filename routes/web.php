@@ -31,6 +31,7 @@ use App\Http\Controllers\Iframes\TableController;
 use App\Http\Controllers\Iframes\TablesController;
 use App\Http\Controllers\Iframes\TermsController;
 use App\Http\Controllers\Iframes\TimelineController;
+use App\Http\Controllers\Iframes\UsersController;
 use App\Jobs\DownloadDebianSecurityBugTracker;
 use App\Listeners\EndVulnsScanListener;
 use App\Mail\AuditReport;
@@ -631,5 +632,6 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
     Route::get('/table', [TableController::class, '__invoke'])->name('table');
     Route::get('/tables', [TablesController::class, '__invoke'])->name('tables');
     Route::get('/terms', [TermsController::class, '__invoke'])->name('terms');
+    Route::get('/users', [UsersController::class, '__invoke'])->name('users');
     Route::get('/vulnerabilities', [TimelineController::class, '__invoke'])->name('vulnerabilities');
 });

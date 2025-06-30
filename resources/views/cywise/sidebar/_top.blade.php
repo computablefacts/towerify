@@ -108,3 +108,14 @@
     {{ __('Chunks') }}
   </x-app.sidebar-link>
 </x-app.sidebar-dropdown>
+<x-app.sidebar-dropdown text="{{ __('Administration') }}"
+                        icon="phosphor-gear"
+                        id="admin_dropdown"
+                        :active="(Request::is('users'))"
+                        :open="(Request::is('users')) ? '1' : '0'">
+  <x-app.sidebar-link href="{{ route('users') }}"
+                      icon="phosphor-users"
+                      :active="Request::is('users')">
+    {{ __('Users') }}
+  </x-app.sidebar-link>
+</x-app.sidebar-dropdown>
