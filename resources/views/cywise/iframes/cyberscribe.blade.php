@@ -92,7 +92,7 @@
     files = items;
     elSubmit.disabled = !files;
   });
-  elFile.text = "{{ __('Import your own model...') }}";
+  elFile.text = "{{ __('Import your own template...') }}";
   elFile.buttonText = "{{ __('Browse') }}";
 
   document.addEventListener('DOMContentLoaded', function (event) {
