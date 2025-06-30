@@ -319,6 +319,7 @@ $apps = \App\Models\YnhServer::forUser(request()->user())
 @endif
 <!-- APPS : END -->
 <!-- AGENT : BEGIN -->
+<!--
 <div class="row pt-3">
   <div class="col">
     <div class="card">
@@ -366,6 +367,7 @@ Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->
     </div>
   </div>
 </div>
+-->
 <!-- AGENT : END -->
 <!-- HONEYPOTS : BEGIN -->
 @if(count($honeypots) > 0)
