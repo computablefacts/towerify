@@ -1,9 +1,5 @@
 @extends('cywise.iframes.app')
 
-@push('styles')
-
-@endpush
-
 @section('content')
 <div class="card mt-3 mb-3">
   @if($users->isEmpty())

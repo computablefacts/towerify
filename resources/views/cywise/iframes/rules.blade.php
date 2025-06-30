@@ -1,15 +1,18 @@
-<div class="card">
+@extends('cywise.iframes.app')
+
+@section('content')
+<div class="card mt-3 mb-3">
   @if($rules->isEmpty())
   <div class="card-body">
     <div class="row">
       <div class="col">
-        None.
+        {{ __('None.') }}
       </div>
     </div>
   </div>
   @else
   <div class="card-body p-0">
-    <table class="table table-hover no-bottom-margin">
+    <table class="table table-hover mb-0">
       <thead>
       <tr>
         <th>{{ __('Name') }}</th>
@@ -57,9 +60,9 @@
         </td>
         <td>
           @if($rule->is_ioc)
-          <span class="lozenge error">yes</span>
+          <span class="lozenge error">{{ __('yes') }}</span>
           @else
-          <span class="lozenge success">no</span>
+          <span class="lozenge success">{{ __('no') }}</span>
           @endif
         </td>
         <td class="text-end">
@@ -73,7 +76,7 @@
         </td>
         <td>
           <span class="lozenge new">
-            {{ $rule->platform->value }}
+            {{ __($rule->platform->value) }}
           </span>
         </td>
       </tr>
@@ -83,3 +86,5 @@
   </div>
   @endif
 </div>
+@endsection
+

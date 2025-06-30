@@ -64,8 +64,8 @@
 <x-app.sidebar-dropdown text="{{ __('Libraries') }}"
                         icon="phosphor-books"
                         id="libraries_dropdown"
-                        :active="(Request::is('frameworks') || Request::is('sca'))"
-                        :open="(Request::is('frameworks') || Request::is('sca')) ? '1' : '0'">
+                        :active="(Request::is('frameworks') || Request::is('sca') || Request::is('rules'))"
+                        :open="(Request::is('frameworks') || Request::is('sca') || Request::is('rules')) ? '1' : '0'">
   <x-app.sidebar-link href="{{ route('frameworks') }}"
                       icon="phosphor-cube"
                       :active="Request::is('frameworks')">
@@ -75,6 +75,11 @@
                       icon="phosphor-cube"
                       :active="Request::is('sca')">
     {{ __('Security Checks Automation') }}
+  </x-app.sidebar-link>
+  <x-app.sidebar-link href="{{ route('rules') }}"
+                      icon="phosphor-cube"
+                      :active="Request::is('rules')">
+    {{ __('Security Rules') }}
   </x-app.sidebar-link>
 </x-app.sidebar-dropdown>
 <x-app.sidebar-dropdown text="{{ __('Data Management') }}"

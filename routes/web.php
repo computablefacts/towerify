@@ -27,6 +27,7 @@ use App\Http\Controllers\Iframes\DashboardController;
 use App\Http\Controllers\Iframes\DocumentsController;
 use App\Http\Controllers\Iframes\FrameworksController;
 use App\Http\Controllers\Iframes\PromptsController;
+use App\Http\Controllers\Iframes\RulesController;
 use App\Http\Controllers\Iframes\ScaController;
 use App\Http\Controllers\Iframes\TableController;
 use App\Http\Controllers\Iframes\TablesController;
@@ -615,7 +616,6 @@ Route::delete('/frameworks/{id}', '\App\Http\Controllers\CyberBuddyController@un
 Route::post('/frameworks/{id}', '\App\Http\Controllers\CyberBuddyController@loadFramework')->middleware('auth');
 
 Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function () {
-    Route::get('/applications', [ApplicationsController::class, '__invoke'])->name('applications');
     Route::get('/assets', [TimelineController::class, '__invoke'])->name('assets');
     Route::get('/chunks', [ChunksController::class, '__invoke'])->name('chunks');
     Route::get('/collections', [CollectionsController::class, '__invoke'])->name('collections');
@@ -630,6 +630,7 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
     Route::get('/leaks', [TimelineController::class, '__invoke'])->name('leaks');
     Route::get('/notes-and-memos', [TimelineController::class, '__invoke'])->name('notes-and-memos');
     Route::get('/prompts', [PromptsController::class, '__invoke'])->name('prompts');
+    Route::get('/rules', [RulesController::class, '__invoke'])->name('rules');
     Route::get('/sca', [ScaController::class, '__invoke'])->name('sca');
     Route::get('/table', [TableController::class, '__invoke'])->name('table');
     Route::get('/tables', [TablesController::class, '__invoke'])->name('tables');
