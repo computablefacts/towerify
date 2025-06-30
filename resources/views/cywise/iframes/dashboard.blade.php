@@ -261,6 +261,65 @@
     <!-- ACTIONS : BEGIN -->
   </div>
 </div>
+<!-- APPS : BEGIN -->
+@if(request()->user()->tenant_id === 1)
+@php
+$apps = \App\Models\YnhServer::forUser(request()->user())
+->flatMap(fn(\App\Models\YnhServer $server) => $server->applications)
+->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE);
+@endphp
+@if($apps->isNotEmpty())
+<div class="row pt-3">
+  <div class="col">
+    <div class="card">
+      <div class="card-body p-0">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>{{ __('Server') }}</th>
+            <th>{{ __('Name') }}</th>
+            <th>{{ __('Description') }}</th>
+            <th>{{ __('Sku') }}</th>
+            <th>{{ __('Version') }}</th>
+          </tr>
+          </thead>
+          <tbody>
+          @foreach($apps as $app)
+          <tr>
+            <td>
+          <span class="font-lg mb-3 fw-bold">
+            <a href="{{ route('ynh.servers.edit', $app->server->id) }}">
+              {{ $app->server->name }}
+            </a>
+          </span>
+            </td>
+            <td>
+              <span class="font-lg mb-3 fw-bold">
+                <a href="https://{{ $app->path }}" target="_blank">
+                  {{ $app->name }}
+                </a>
+              </span>
+            </td>
+            <td>
+              {{ $app->description }}
+            </td>
+            <td>
+              {{ $app->sku }}
+            </td>
+            <td>
+              {{ $app->version }}
+            </td>
+          </tr>
+          @endforeach
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
+@endif
+<!-- APPS : END -->
 <!-- AGENT : BEGIN -->
 <div class="row pt-3">
   <div class="col">
