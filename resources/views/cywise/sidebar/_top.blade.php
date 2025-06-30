@@ -71,15 +71,15 @@
                       :active="Request::is('frameworks')">
     {{ __('Frameworks') }}
   </x-app.sidebar-link>
-  <x-app.sidebar-link href="{{ route('sca') }}"
-                      icon="phosphor-cube"
-                      :active="Request::is('sca')">
-    {{ __('Security Checks Automation') }}
-  </x-app.sidebar-link>
   <x-app.sidebar-link href="{{ route('rules') }}"
                       icon="phosphor-cube"
                       :active="Request::is('rules')">
     {{ __('Security Rules') }}
+  </x-app.sidebar-link>
+  <x-app.sidebar-link href="{{ route('sca') }}"
+                      icon="phosphor-cube"
+                      :active="Request::is('sca')">
+    {{ __('Security Checks Automation') }}
   </x-app.sidebar-link>
 </x-app.sidebar-dropdown>
 <x-app.sidebar-dropdown text="{{ __('Data Management') }}"
