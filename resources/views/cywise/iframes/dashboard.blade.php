@@ -262,7 +262,6 @@
   </div>
 </div>
 <!-- APPS : BEGIN -->
-@if(request()->user()->tenant_id === 1)
 @php
 $apps = \App\Models\YnhServer::forUser(request()->user())
 ->flatMap(fn(\App\Models\YnhServer $server) => $server->applications)
@@ -317,7 +316,6 @@ $apps = \App\Models\YnhServer::forUser(request()->user())
     </div>
   </div>
 </div>
-@endif
 @endif
 <!-- APPS : END -->
 <!-- AGENT : BEGIN -->
