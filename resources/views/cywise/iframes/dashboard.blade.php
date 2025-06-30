@@ -479,7 +479,7 @@ Invoke-WebRequest -Uri "{{ app_url() }}/setup/script?api_token={{ Auth::user()->
 
   function createAsset() {
     const asset = document.querySelector('#asset').value;
-    createAssetApiCall(asset, true, () => toaster.toastSuccess(`La surveillance de ${asset} a commencé.`));
+    createAssetApiCall(asset, true, () => toaster.toastSuccess("{{ __('The monitoring started.') }}"));
   }
 
 </script>
