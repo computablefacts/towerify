@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasTenant;
+use Baril\Sqlout\Searchable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Laravel\Scout\Searchable;
+use Illuminate\Support\Str;
 
 /**
  * @property int id
@@ -48,14 +49,39 @@ class Chunk extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected $weights = [
+        'section' => 2,
+        'subsection' => 3,
+        'subsubsection' => 4,
+        'text' => 1,
+    ];
+
     public function toSearchableArray()
     {
+        $lang = $this->language();
+        $lines = explode("\n", $this->text);
+        $section = '';
+        $subsection = '';
+        $subsubsection = '';
+        $text = '';
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (preg_match('/^#\s(.+)$/', $line, $matches)) {
+                $section = trim($matches[1]);
+            } elseif (preg_match('/^##\s(.+)$/', $line, $matches)) {
+                $subsection = trim($matches[1]);
+            } elseif (preg_match('/^###\s(.+)$/', $line, $matches)) {
+                $subsubsection = trim($matches[1]);
+            } else {
+                $text .= ($line . "\n");
+            }
+        }
         return [
-            'id' => $this->id,
-            'url' => $this->url,
-            'text' => $this->text,
-            'tags' => $this->tags()->get()->pluck('tag')->join(" | "),
-            'collection_id' => $this->collection_id,
+            'section' => $lang . ":" . $section,
+            'subsection' => $lang . ":" . $subsection,
+            'subsubsection' => $lang . ":" . $subsubsection,
+            'text' => $lang . ":" . $text,
         ];
     }
 
@@ -82,5 +108,17 @@ class Chunk extends Model
     public function tags(): HasMany
     {
         return $this->hasMany(ChunkTag::class, 'chunk_id', 'id');
+    }
+
+    public function language()
+    {
+        /** @var Collection $collection */
+        $collection = $this->collection()->first();
+        $suffix = Str::substr($collection->name, Str::length($collection->name) - 4, 4);
+
+        if ($collection && Str::startsWith($suffix, 'lg')) {
+            return Str::substr($suffix, Str::length($suffix) - 2, 2);
+        }
+        return '';
     }
 }

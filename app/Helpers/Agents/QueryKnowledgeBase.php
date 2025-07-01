@@ -60,7 +60,17 @@ class QueryKnowledgeBase extends AbstractAction
             return $this;
         }
 
-        $response = ApiUtils::chat_manual_demo($this->threadId, null, $question, $fallbackOnNextCollection);
+        $lang = $json['lang'] ?? '';
+
+        if ($lang === 'french') {
+            $newQuestion = $json['question_fr'] ?? $question;
+        } else if ($lang === 'english') {
+            $newQuestion = $json['question_en'] ?? $question;
+        } else {
+            $newQuestion = $question;
+        }
+
+        $response = ApiUtils::chat_manual_demo($this->threadId, null, $newQuestion, $fallbackOnNextCollection);
 
         if ($response['error']) {
             Log::error($response);
@@ -199,11 +209,11 @@ class QueryKnowledgeBase extends AbstractAction
 
         $start = microtime(true);
         /** @var array<string> $englishKeywords */
-        // $englishKeywords = $this->combine($json['keywords_en']);
+        $englishKeywords = $this->combine($json['keywords_en']);
         /** @var array<string> $frenchKeywords */
-        // $frenchKeywords = $this->combine($json['keywords_fr']);
+        $frenchKeywords = $this->combine($json['keywords_fr']);
         /** @var array<int> $englishCollections */
-        /* $englishCollections = \App\Models\Collection::query()
+        $englishCollections = \App\Models\Collection::query()
             ->where('cb_collections.is_deleted', false)
             ->where(function ($query) {
                 $query->where('cb_collections.name', 'like', "%lgen") // see YnhFramework::collectionName
@@ -213,9 +223,9 @@ class QueryKnowledgeBase extends AbstractAction
             ->orderBy('cb_collections.name')
             ->get()
             ->pluck('id')
-            ->toArray(); */
+            ->toArray();
         /** @var array<int> $frenchCollections */
-        /* $frenchCollections = \App\Models\Collection::query()
+        $frenchCollections = \App\Models\Collection::query()
             ->where('cb_collections.is_deleted', false)
             ->where(function ($query) {
                 $query->where('cb_collections.name', 'like', "%lgfr") // see YnhFramework::collectionName
@@ -225,58 +235,52 @@ class QueryKnowledgeBase extends AbstractAction
             ->orderBy('cb_collections.name')
             ->get()
             ->pluck('id')
-            ->toArray(); */
+            ->toArray();
 
         $chunks = collect();
 
-        /* foreach ($englishKeywords as $keywords) {
+        foreach ($englishKeywords as $keywords) {
             try {
                 $start2 = microtime(true);
-                $results = Chunk::search($keywords)
+                $results = Chunk::search("en:$keywords")
                     ->whereIn('collection_id', $englishCollections)
-                    ->paginate(10)
-                    ->getCollection();
+                    ->take(50)
+                    ->get();
                 $chunks = $chunks->merge($results);
                 $stop2 = microtime(true);
                 Log::debug("[EN] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
-            if ($chunks->isNotEmpty()) {
-                break;
-            }
         }
         foreach ($frenchKeywords as $keywords) {
             try {
                 $start2 = microtime(true);
-                $results = Chunk::search($keywords)
+                $results = Chunk::search("fr:$keywords")
                     ->whereIn('collection_id', $frenchCollections)
-                    ->paginate(10)
-                    ->getCollection();
+                    ->take(50)
+                    ->get();
                 $chunks = $chunks->merge($results);
                 $stop2 = microtime(true);
                 Log::debug("[FR] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
-            if ($chunks->isNotEmpty()) {
-                break;
-            }
-        } */
+        }
 
         $stop = microtime(true);
         Log::debug("Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$chunks->count()} results");
 
         $notes = $chunks
             ->groupBy('text') // remove duplicates
-            ->map(fn(Collection $group) => $group->sortByDesc('__tntSearchScore__')->first()) // the higher the better
+            ->map(fn(Collection $group) => $group->sortByDesc('_score')->first()) // the higher the better
             ->values() // associative array => array
-            ->sortByDesc('__tntSearchScore__')
+            ->sortByDesc('_score')
             ->sortBy('priority')
-            ->take(10)
+            ->take(25)
             ->map(function (Chunk $chunk) {
 
-                $text = Str::replace("#", "", $chunk->text);
+                $text = preg_replace('/^#/m', '###', $chunk->text);
 
                 $tags = ChunkTag::where('chunk_id', '=', $chunk->id)
                     ->orderBy('id')
@@ -286,7 +290,7 @@ class QueryKnowledgeBase extends AbstractAction
 
                 $tags = empty($tags) ? 'n/a' : $tags;
 
-                return "## Note {$chunk->id}\n\n{$text}\n\nTags: {$tags}\nScore: {$chunk->{'__tntSearchScore__'}}";
+                return "## Note {$chunk->id}\n\n{$text}\n\n**Tags:** {$tags}\n**Score:** {$chunk->{'_score'}}";
             })
             ->join("\n\n");
 
