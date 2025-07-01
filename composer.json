@@ -1,11 +1,10 @@
 {
-    "name": "devdojo/wave",
-    "description": "Wave SaaS Starter Kit",
+    "name": "computablefacts/cywise",
+    "description": "Cywise",
     "keywords": [
-        "framework",
-        "laravel",
-        "SaaS",
-        "Starter Kit"
+        "cywise",
+        "cyberbuddy",
+        "cyberscribe"
     ],
     "license": "MIT",
     "type": "project",
