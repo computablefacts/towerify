@@ -112,9 +112,9 @@ class LlmProvider
                 return $json;
             }
             Log::error($response->body());
-            return [];
         } catch (\Exception $e) {
             Log::error($e->getMessage());
         }
+        return [];
     }
 }
