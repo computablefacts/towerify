@@ -302,7 +302,7 @@ class QueryKnowledgeBase extends AbstractAction
         $prompt->template = Str::replace('{NOTES}', $notes, $prompt->template);
         $prompt->template = Str::replace('{QUESTION}', $json['question_en'], $prompt->template);
         Log::debug("[QUERY_CHUNKS][{$this->threadId}] prompt : {$prompt->template}");
-        $response = (new LlmProvider(LlmProvider::DEEP_INFRA))->execute($prompt->template, 'Qwen/Qwen3-30B-A3B');
+        $response = (new LlmProvider(LlmProvider::DEEP_INFRA))->execute($prompt->template, self::MODEL);
         $answer = $response['choices'][0]['message']['content'] ?? '';
         Log::debug("[QUERY_CHUNKS][{$this->threadId}] answer : {$answer}");
         return preg_replace('/<think>.*?<\/think>/s', '', $answer);
