@@ -114,10 +114,11 @@ class Chunk extends Model
     {
         /** @var Collection $collection */
         $collection = $this->collection()->first();
-        $suffix = Str::substr($collection->name, Str::length($collection->name) - 4, 4);
-
-        if ($collection && Str::startsWith($suffix, 'lg')) {
-            return Str::substr($suffix, Str::length($suffix) - 2, 2);
+        if ($collection) {
+            $suffix = Str::substr($collection->name, Str::length($collection->name) - 4, 4);
+            if (Str::startsWith($suffix, 'lg')) {
+                return Str::substr($suffix, Str::length($suffix) - 2, 2);
+            }
         }
         return '';
     }
