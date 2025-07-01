@@ -67,7 +67,7 @@ class Agent
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
 
-                Log::warning("[1] $name(" . $matches[2] . ")");
+                Log::warning("[NEXT_ACTION_1][{$threadId}] $name(" . $matches[2] . ")");
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
@@ -76,16 +76,18 @@ class Agent
                 $name = trim($matches[1]);
                 $args = json_decode(trim($matches[2]), true) ?? [];
 
-                Log::warning("[2] $name(" . $matches[2] . ")");
+                Log::warning("[NEXT_ACTION_2][{$threadId}] $name(" . $matches[2] . ")");
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
             if (preg_match('/^\[?([a-zA-Z0-9_]+)\(question="(.*)"\)]?.*/i', $answer, $matches)) {
 
                 $name = trim($matches[1]);
-                $args = json_decode(trim($matches[2]), true) ?? [];
+                $args = [
+                    'question' => trim($matches[2]),
+                ];
 
-                Log::warning("[3] $name(" . $matches[2] . ")");
+                Log::warning("[NEXT_ACTION_3][{$threadId}] $name(" . $matches[2] . ")");
 
                 return $this->findTool($user, $threadId, $messages, $name, $args);
             }
@@ -98,7 +100,7 @@ class Agent
         $name = $toolCalls[0]['function']['name'] ?? '';
         $args = json_decode($toolCalls[0]['function']['arguments'], true) ?? [];
 
-        Log::debug("[4] $name(" . $toolCalls[0]['function']['arguments'] . ")");
+        Log::debug("[NEXT_ACTION_4][{$threadId}] $name(" . $toolCalls[0]['function']['arguments'] . ")");
 
         return $this->findTool($user, $threadId, $messages, $name, $args);
     }
@@ -106,7 +108,6 @@ class Agent
     protected function llm(array $messages): array
     {
         return DeepInfra::executeEx($messages, 'meta-llama/Llama-4-Scout-17B-16E-Instruct', 0.7, $this->tools());
-        // return DeepSeek::executeEx($messages, 'deepseek-chat', 0.7, $this->tools());
     }
 
     protected function tools(): array
