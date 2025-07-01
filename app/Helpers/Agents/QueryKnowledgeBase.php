@@ -17,6 +17,8 @@ use Parsedown;
 
 class QueryKnowledgeBase extends AbstractAction
 {
+    private const string MODEL = 'deepseek-ai/DeepSeek-R1-0528-Turbo';
+
     static function schema(): array
     {
         return [
@@ -60,7 +62,17 @@ class QueryKnowledgeBase extends AbstractAction
             return $this;
         }
 
-        $response = ApiUtils::chat_manual_demo($this->threadId, null, $question, $fallbackOnNextCollection);
+        $lang = $json['lang'] ?? '';
+
+        if ($lang === 'french') {
+            $newQuestion = $json['question_fr'] ?? $question;
+        } else if ($lang === 'english') {
+            $newQuestion = $json['question_en'] ?? $question;
+        } else {
+            $newQuestion = $question;
+        }
+
+        $response = ApiUtils::chat_manual_demo($this->threadId, null, $newQuestion, $fallbackOnNextCollection);
 
         if ($response['error']) {
             Log::error($response);
@@ -169,17 +181,16 @@ class QueryKnowledgeBase extends AbstractAction
     {
         $prompt = Prompt::where('created_by', $this->user->id)->where('name', 'default_reformulate_question')->firstOrfail();
         $prompt->template = Str::replace('{QUESTION}', $question, $prompt->template);
-        $response = (new LlmProvider(LlmProvider::DEEP_INFRA))->execute($prompt->template, 'Qwen/Qwen3-30B-A3B');
+        Log::debug("[REF_QUESTION][{$this->threadId}] prompt : {$prompt->template}");
+        $response = (new LlmProvider(LlmProvider::DEEP_INFRA))->execute($prompt->template, self::MODEL);
         $answer = $response['choices'][0]['message']['content'] ?? '';
-        // Log::debug("[2] answer : {$answer}");
+        Log::debug("[REF_QUESTION][{$this->threadId}] answer : {$answer}");
         $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
         return json_decode($answer, true);
     }
 
     private function queryChunks(array $json): string
     {
-        Log::debug($json);
-
         $memos = TimelineItem::fetchNotes($this->user->id, null, null, 0)
             ->map(function (TimelineItem $note) {
                 $attributes = $note->attributes();
@@ -190,6 +201,7 @@ class QueryKnowledgeBase extends AbstractAction
             ->join("\n\n");
 
         if (empty($memos) && (empty($json) || (empty($json['keywords_fr']) && empty($json['keywords_en'])))) {
+            Log::debug("[QUERY_CHUNKS][{$this->threadId}] No chunk found");
             return '';
         }
 
@@ -234,7 +246,7 @@ class QueryKnowledgeBase extends AbstractAction
                     ->get();
                 $chunks = $chunks->merge($results);
                 $stop2 = microtime(true);
-                Log::debug("[EN] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
+                Log::debug("[QUERY_CHUNKS][{$this->threadId}][EN] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
@@ -248,14 +260,14 @@ class QueryKnowledgeBase extends AbstractAction
                     ->get();
                 $chunks = $chunks->merge($results);
                 $stop2 = microtime(true);
-                Log::debug("[FR] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
+                Log::debug("[QUERY_CHUNKS][{$this->threadId}][FR] Search for '{$keywords}' took " . ((int)ceil($stop2 - $start2)) . " seconds and returned {$results->count()} results");
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
         }
 
         $stop = microtime(true);
-        Log::debug("Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$chunks->count()} results");
+        Log::debug("[QUERY_CHUNKS][{$this->threadId}] Search took " . ((int)ceil($stop - $start)) . " seconds and returned {$chunks->count()} results");
 
         $notes = $chunks
             ->groupBy('text') // remove duplicates
@@ -289,10 +301,10 @@ class QueryKnowledgeBase extends AbstractAction
         $prompt->template = Str::replace('{MEMOS}', $memos, $prompt->template);
         $prompt->template = Str::replace('{NOTES}', $notes, $prompt->template);
         $prompt->template = Str::replace('{QUESTION}', $json['question_en'], $prompt->template);
-        Log::debug($prompt->template);
+        Log::debug("[QUERY_CHUNKS][{$this->threadId}] prompt : {$prompt->template}");
         $response = (new LlmProvider(LlmProvider::DEEP_INFRA))->execute($prompt->template, 'Qwen/Qwen3-30B-A3B');
         $answer = $response['choices'][0]['message']['content'] ?? '';
-        Log::debug("[3] answer : {$answer}");
+        Log::debug("[QUERY_CHUNKS][{$this->threadId}] answer : {$answer}");
         return preg_replace('/<think>.*?<\/think>/s', '', $answer);
     }
 
