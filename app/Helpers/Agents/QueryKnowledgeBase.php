@@ -79,7 +79,7 @@ class QueryKnowledgeBase extends AbstractAction
 
     public function html(): string
     {
-        return $this->enhanceHtmlAnswerWithSources($this->output['answer'], $this->output['sources']);
+        return $this->enhanceHtmlAnswerWithSources($this->output['answer']);
     }
 
     public function text(): string
@@ -89,10 +89,10 @@ class QueryKnowledgeBase extends AbstractAction
 
     public function markdown(): string
     {
-        return $this->enhanceMarkdownAnswerWithSources($this->output['answer'], $this->output['sources']);
+        return $this->enhanceMarkdownAnswerWithSources($this->output['answer']);
     }
 
-    private function enhanceHtmlAnswerWithSources(string $answer, Collection $sources): string
+    private function enhanceHtmlAnswerWithSources(string $answer): string
     {
         $matches = [];
         // Extract: [12] from [[12]] or [[12] and [13]] from [[12],[13]]
@@ -105,23 +105,21 @@ class QueryKnowledgeBase extends AbstractAction
         $refs = $matches[0];
         foreach ($refs as $ref) {
             $id = Str::replace(['[', ']'], '', $ref);
-            /** @var array $tooltip */
-            $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
             /** @var Chunk $chunk */
             $chunk = Chunk::find($id);
             /** @var File $file */
             $file = $chunk?->file()->first();
-            $src = $file ? "<a href=\"{$file->downloadUrl()}\" style=\"text-decoration:none;color:black\">{$file->name_normalized}.{$file->extension}</a>, p. {$chunk->page}" : "";
-            if (Str::startsWith($tooltip['text'] ?? '', 'ESSENTIAL DIRECTIVE')) {
+            $src = $file ? "<a href=\"{$file->downloadUrl()}\" style=\"text-decoration:none;color:black\">{$file->name_normalized}.{$file->extension}</a>, p. {$chunk?->page}" : "";
+            if (Str::startsWith($chunk?->text ?? '', 'ESSENTIAL DIRECTIVE')) {
                 $color = '#1DD288';
-            } else if (Str::startsWith($tooltip['text'] ?? '', 'STANDARD DIRECTIVE')) {
+            } else if (Str::startsWith($chunk?->text ?? '', 'STANDARD DIRECTIVE')) {
                 $color = '#C5C3C3';
-            } else if (Str::startsWith($tooltip['text'] ?? '', 'ADVANCED DIRECTIVE')) {
+            } else if (Str::startsWith($chunk?->text ?? '', 'ADVANCED DIRECTIVE')) {
                 $color = '#FDC99D';
             } else {
                 $color = '#F8B500';
             }
-            $tt = $tooltip['text'] ?? ($chunk?->text ?? '');
+            $tt = $chunk?->text ?? '';
             $answer = Str::replace($ref, "<b style=\"color:{$color}\">[{$id}]</b>", $answer);
             $references[$id] = "
               <li style=\"padding:0;margin-bottom:0.25rem\">
@@ -140,7 +138,7 @@ class QueryKnowledgeBase extends AbstractAction
         return Str::replace(["\n\n", "\n-"], "<br>", $answer);
     }
 
-    private function enhanceMarkdownAnswerWithSources(string $answer, Collection $sources): string
+    private function enhanceMarkdownAnswerWithSources(string $answer): string
     {
         $matches = [];
         // Extract: [12] from [[12]] or [[12] and [13]] from [[12],[13]]
@@ -153,14 +151,12 @@ class QueryKnowledgeBase extends AbstractAction
         $refs = $matches[0];
         foreach ($refs as $ref) {
             $id = Str::replace(['[', ']'], '', $ref);
-            /** @var array $tooltip */
-            $tooltip = $sources->filter(fn($ctx) => $ctx['id'] == $id)->first();
             /** @var Chunk $chunk */
             $chunk = Chunk::find($id);
             /** @var File $file */
             $file = $chunk?->file()->first();
-            $src = $file ? "({$file->name_normalized}.{$file->extension})[{$file->downloadUrl()}], p. {$chunk->page}" : "";
-            $tt = $tooltip['text'] ?? ($chunk?->text ?? '');
+            $src = $file ? "({$file->name_normalized}.{$file->extension})[{$file->downloadUrl()}], p. {$chunk?->page}" : "";
+            $tt = $chunk?->text ?? '';
             $answer = Str::replace($ref, "**[{$id}]**", $answer);
             $references[$id] = "<li>**[{$id}]** {$src}: {$tt}</li>";
         }
