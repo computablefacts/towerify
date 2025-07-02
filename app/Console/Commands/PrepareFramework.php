@@ -29,12 +29,15 @@ class PrepareFramework extends Command
      */
     public function handle()
     {
-        if (is_dir($this->argument('input'))) {
-            $this->processDirectory($this->argument('input'), $this->argument('output'));
-        } elseif (is_file($this->argument('input'))) {
-            $this->processFile($this->argument('input'), $this->argument('output'));
+        $in = $this->argument('input');
+        $out = $this->argument('output');
+
+        if (is_dir($in)) {
+            $this->processDirectory($in, $out);
+        } elseif (is_file($in)) {
+            $this->processFile($in, $out);
         } else {
-            throw new \Exception('Invalid input path : ' . $this->argument('input'));
+            throw new \Exception('Invalid input path : ' . $in);
         }
     }
 
