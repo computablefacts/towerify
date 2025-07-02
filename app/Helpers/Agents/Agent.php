@@ -56,6 +56,10 @@ class Agent
         $response = $this->llm($messages);
         $toolCalls = $response['choices'][0]['message']['tool_calls'] ?? [];
 
+        // TODO: deal with multiline answers
+        //      Cette fiche projet est un modèle de base. Selon la complexité et les spécificités de votre projet, vous pourriez avoir besoin d'ajouter ou de modifier des sections.
+        //      [query_knowledge_base(question="Quelles sont les bonnes pratiques pour intégrer un site e-commerce dans un SI ?")]
+
         if (count($toolCalls) === 0) {
 
             $answer = $response['choices'][0]['message']['content'] ?? '';
