@@ -14,6 +14,7 @@ class LlmProvider
     const string GEMINI = 'gemini';
 
     protected string $provider;
+    protected int $timeoutInSeconds;
 
     public static function isHyperlink(string $text): bool
     {
@@ -41,9 +42,10 @@ class LlmProvider
         return Str::rtrim($query, ';');
     }
 
-    public function __construct(string $provider)
+    public function __construct(string $provider, int $timeoutInSeconds = 60)
     {
         $this->provider = $provider;
+        $this->timeoutInSeconds = $timeoutInSeconds > 0 ? $timeoutInSeconds : 60;
     }
 
     public function execute(string|array $messages, ?string $model = null, array $tools = []): array
@@ -103,7 +105,7 @@ class LlmProvider
                 'Authorization' => "Bearer {$bearer}",
                 'Accept' => 'application/json',
             ])
-                ->timeout(60)
+                ->timeout($this->timeoutInSeconds)
                 ->post($url, $payload);
 
             if ($response->successful()) {
