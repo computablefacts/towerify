@@ -24,7 +24,7 @@ class PrepareLegalDocuments extends Command
      */
     protected $description = 'Convert a legal document to a list of chunks.';
 
-    private FileVectorStore $vectors;
+    private FileVectorStore $vectorStore;
     private EmbeddingProvider $embeddingProvider;
     private LlmProvider $llmProvider;
     private string $llmModel;
@@ -37,26 +37,20 @@ class PrepareLegalDocuments extends Command
         $in = $this->argument('input');
         $out = $this->argument('output');
         $prompt = $this->argument('prompt');
-        $this->vectors = new FileVectorStore($out, 4, 'objets', '.vectors');
+        $this->vectorStore = new FileVectorStore($out);
         $this->embeddingProvider = new EmbeddingProvider(LlmProvider::DEEP_INFRA);
-        $this->llmProvider = new LlmProvider(LlmProvider::DEEP_INFRA, 15 * 60);
+        $this->llmProvider = new LlmProvider(LlmProvider::DEEP_INFRA, 30 * 60);
         $this->llmModel = 'google/gemini-2.5-pro';
 
-        // PoC : BEGIN
-        // $this->buildVectorDatabase($out);
-        $arguments = $this->search('bien-fondé du licenciement pour inaptitude');
-        Log::debug($arguments);
-        // PoC : END
-
-        return;
-
         if (is_dir($in)) {
-            $this->processDirectory($in, $out, $prompt);
+            //$this->processDirectory($in, $out, $prompt);
         } elseif (is_file($in)) {
             $this->processFile($in, $in, $prompt);
         } else {
             throw new \Exception('Invalid input path : ' . $in);
         }
+
+        $this->updateVectorDatabase($out);
     }
 
     private function processDirectory(string $dir, string $output, string $prompt): void
@@ -106,7 +100,9 @@ class PrepareLegalDocuments extends Command
             $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
             $array = json_decode($answer, true);
 
-            file_put_contents($json, $array ? json_encode($array, JSON_PRETTY_PRINT) : $answer);
+            if ($array) {
+                file_put_contents($json, json_encode($array, JSON_PRETTY_PRINT));
+            }
         }
         if (!file_exists($json)) {
             Log::warning("Skipping file $file : no json file.");
@@ -114,33 +110,44 @@ class PrepareLegalDocuments extends Command
         }
     }
 
-    private function buildVectorDatabase(string $output): void
+    private function updateVectorDatabase(string $output): void
     {
+        // $this->vectorStore->delete();
         $files = glob("{$output}/*.json");
 
+        /** @var string $file */
         foreach ($files as $file) {
 
-            $array = json_decode(file_get_contents($file), true);
+            $document = new Document($file);
 
-            if (is_array($array)) {
-                foreach ($array as $index => $json) {
-                    if (isset($json['objet'])) {
-                        $this->vectors->addDocument([
-                            'file' => $file,
-                            'index' => $index,
-                            'objet' => $json['objet'],
-                            'argumentation' => $json['argumentation'] ?? [],
-                            'embedding' => $this->embed($json['objet']),
-                        ]);
-                    }
+            for ($i = 0; $i < $document->nbObjets(); $i++) {
+
+                $metadata = [
+                    'file' => $file,
+                    'index' => $i,
+                ];
+
+                if (empty($this->vectorStore->find($metadata))) {
+                    $topic = $this->topic($document->objet($i));
+                    $vector = new Vector($topic, $this->embed($topic), $metadata);
+                    $this->vectorStore->addVector($vector);
                 }
             }
         }
     }
 
-    private function search(string $text): array
+    private function topic(string $str): string
     {
-        return $this->vectors->search($this->embed($text));
+        $prompt = "
+            Ta réponse devra être en plein texte sans markdown.
+            Retourne uniquement l'objet de cette phrase en enlevant notamment les noms de personnes et de sociétés :
+            
+            {$str}
+        ";
+        $response = $this->llmProvider->execute($prompt, $this->llmModel);
+        $answer = $response['choices'][0]['message']['content'] ?? '';
+        $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
+        return trim($answer);
     }
 
     private function embed(string $text)

@@ -21,90 +21,116 @@ class FileVectorStore
         }
     }
 
-    protected function storage(): string
+    public function delete(): void
     {
-        return $this->directory . DIRECTORY_SEPARATOR . $this->name . $this->ext;
+        if (file_exists($this->storage())) {
+            unlink($this->storage());
+        }
     }
 
-    public function addDocument(array $document): void
+    public function addVector(Vector $vector): void
     {
-        $this->addDocuments([$document]);
+        $this->addVectors([$vector]);
     }
 
-    public function addDocuments(array $documents): void
+    /** @param Vector[] $vectors */
+    public function addVectors(array $vectors): void
     {
-        $this->appendToFile($documents);
+        $this->appendToFile($vectors);
+    }
+
+    public function deleteVectors(string $key, mixed $value): void
+    {
+        $tmpFile = $this->directory . DIRECTORY_SEPARATOR . $this->name . '_tmp' . $this->ext;
+        $tmpHandle = fopen($tmpFile, 'w');
+
+        if (!$tmpHandle) {
+            throw new \Exception("Cannot create temporary file: {$tmpFile}");
+        }
+        try {
+            foreach ($this->line($this->storage()) as $line) {
+
+                $vector = Vector::fromString((string)$line);
+
+                if ($vector->metadata($key) !== $value) {
+                    fwrite($tmpHandle, $line);
+                }
+            }
+        } finally {
+            fclose($tmpHandle);
+        }
+
+        $this->delete();
+
+        if (!rename($tmpFile, $this->storage())) {
+            throw new \Exception(self::class . " failed to replace original file.");
+        }
+    }
+
+    /** @return Vector[] */
+    public function find(array $metadata): array
+    {
+        $vectors = [];
+
+        if (file_exists($this->storage())) {
+
+            foreach ($this->line($this->storage()) as $line) {
+
+                $match = true;
+                $vector = Vector::fromString((string)$line);
+
+                foreach ($metadata as $key => $value) {
+                    if ($vector->metadata($key) !== $value) {
+                        $match = false;
+                        break;
+                    }
+                }
+                if ($match) {
+                    $vectors[] = $vector;
+                }
+            }
+        }
+        return $vectors;
     }
 
     public function search(array $embedding): array
     {
         $topItems = [];
 
-        foreach ($this->line($this->storage()) as $document) {
+        foreach ($this->line($this->storage()) as $line) {
 
-            $document = json_decode((string)$document, true);
+            $vector = Vector::fromString((string)$line);
+            $vectorEmbedding = $vector->embedding();
 
-            if (empty($document['embedding'])) {
-                throw new \Exception("Document with the following content has no embedding: {$document['text']}");
+            if (empty($vectorEmbedding)) {
+                throw new \Exception("Vector with the following content has no embedding: {$vector->text()}");
             }
 
-            $dist = VectorsSimilarity::cosineDistance($embedding, $document['embedding']);
-
-            unset($document['embedding']);
-
+            $dist = VectorsSimilarity::cosineDistance($embedding, $vectorEmbedding);
             $topItems[] = [
-                'dist' => $dist,
-                'document' => $document,
+                'distance' => $dist,
+                'vector' => $vector,
             ];
 
-            usort($topItems, fn(array $a, array $b): int => $a['dist'] <=> $b['dist']);
+            usort($topItems, fn(array $a, array $b): int => $a['distance'] <=> $b['distance']);
 
             if (count($topItems) > $this->topK) {
                 $topItems = array_slice($topItems, 0, $this->topK, true);
             }
         }
         return array_map(function (array $item): array {
-            $item['similarity'] = VectorsSimilarity::similarityFromDistance($item['dist']);
-            unset($item['dist']);
+            $item['similarity'] = VectorsSimilarity::similarityFromDistance($item['distance']);
+            unset($item['distance']);
             return $item;
         }, $topItems);
     }
 
-    public function delete(string $file, int $index): void
-    {
-        // Temporary file
-        $tmpFile = $this->directory . DIRECTORY_SEPARATOR . $this->name . '_tmp' . $this->ext;
-
-        // Create a temporary file handle
-        $tempHandle = fopen($tmpFile, 'w');
-
-        if (!$tempHandle) {
-            throw new \Exception("Cannot create temporary file: {$tmpFile}");
-        }
-        try {
-            foreach ($this->line($this->storage()) as $line) {
-                $document = json_decode((string)$line, true);
-                if ($document['file'] !== $file || $document['index'] !== $index) {
-                    fwrite($tempHandle, $line);
-                }
-            }
-        } finally {
-            fclose($tempHandle);
-        }
-
-        // Replace the original file with the filtered version
-        \unlink($this->storage());
-
-        if (!\rename($tmpFile, $this->storage())) {
-            throw new \Exception(self::class . " failed to replace original file.");
-        }
-    }
-
-    private function appendToFile(array $documents): void
+    /** @param Vector[] $vectors */
+    private function appendToFile(array $vectors): void
     {
         file_put_contents(
             $this->storage(),
-            implode(PHP_EOL, array_map(fn(array $vector) => json_encode($vector), $documents)) . PHP_EOL,
+            implode(PHP_EOL, array_map(fn(Vector $vector) => Vector::toString($vector), $vectors)) . PHP_EOL,
             FILE_APPEND
         );
     }
@@ -119,5 +145,10 @@ class FileVectorStore
         } finally {
             fclose($f);
         }
+    }
+
+    private function storage(): string
+    {
+        return $this->directory . DIRECTORY_SEPARATOR . $this->name . $this->ext;
     }
 }
