@@ -40,55 +40,68 @@ class FindLegalArguments extends Command
 
         $topic = $this->ask('Quelle est la thématique à développer ?');
 
-        $vectors = $this->search($topic);
-        $results = array_map(function (array $item): array {
+        $results = array_merge(array_map(function (array $item): array {
+
             /** @var Vector $vector */
             $vector = $item['vector'];
             $item['obj'] = $vector->text();
             $item['doc'] = new Document($vector->metadata('file'));
             $item['idx'] = $vector->metadata('index');
+            $item['idx_arg'] = $vector->metadata('index_argument');
+
             unset($item['vector']);
             return $item;
-        }, $vectors);
+        }, $this->searchArguments($topic)), array_map(function (array $item): array {
+
+            /** @var Vector $vector */
+            $vector = $item['vector'];
+            $item['obj'] = $vector->text();
+            $item['doc'] = new Document($vector->metadata('file'));
+            $item['idx'] = $vector->metadata('index');
+
+            unset($item['vector']);
+            return $item;
+        }, $this->searchObjets($topic)));
 
         $objets = array_unique(array_map(fn(array $item) => $item['obj'], $results));
         $choice = $this->choice('Quel est l\'objet à développer ?', $objets);
-        $documents = array_values(array_filter($results, fn(array $item) => $item['obj'] === $choice));
-        $nbArguments = count($documents);
+        $items = array_values(array_filter($results, fn(array $item) => $item['obj'] === $choice));
 
-        $this->info("{$nbArguments} argumentaire(s) trouvé");
+        foreach ($items as $item) {
+            if (isset($item['idx_arg'])) {
 
-        foreach ($documents as $i => $document) {
+                /** @var int $idxObj */
+                $idxObj = $item['idx'];
+                /** @var int $idxArg */
+                $idxArg = $item['idx_arg'];
+                /** @var Document $doc */
+                $doc = $item['doc'];
 
-            $pos = $i + 1;
-            /** @var int $idx */
-            $idx = $document['idx'];
-            /** @var Document $doc */
-            $doc = $document['doc'];
-            $this->info("\nL'argumentaire n°{$pos} est composé de {$doc->nbArguments($idx)} arguments :");
+                $enDroit = $doc->en_droit($idxObj);
+                $argument = $doc->argument($idxObj, $idxArg);
+                $this->info($this->extract($enDroit, $argument));
+            } else {
 
-            $choices = [];
+                /** @var int $idxObj */
+                $idxObj = $item['idx'];
+                /** @var Document $doc */
+                $doc = $item['doc'];
 
-            for ($j = 0; $j < $doc->nbArguments($idx); $j++) {
+                $objets = [];
 
-                // $this->info("- {$doc->argument($idx, $j)}");
+                for ($idxArg = 0; $idxArg < $doc->nbArguments($idxObj); $idxArg++) {
+                    $objets[] = $doc->argument($idxObj, $idxArg);
+                }
 
-                /** @var string $fait */
-                /* foreach ($doc->faits($idx, $j) as $fait) {
-                    $this->info("  - {$fait}");
-                } */
+                $objets[] = "Passer à l'objet suivant";
+                $choice = $this->choice('Quel est l\'objet à développer ?', $objets);
 
-                $choices[] = $doc->argument($idx, $j);
-            }
-
-            $choices[] = 'Passer à l\'argumentaire suivant';
-            $choice = $this->choice("Choisissez l'argument à détailler en droit", $choices);
-
-            if ($choice !== 'Passer à l\'argumentaire suivant') {
-                $pos = array_search($choice, $choices);
-                $enDroit = $doc->en_droit($idx);
-                $argument = $doc->argument($idx, $pos);
-                $this->info($this->extract($enDroit, $argument));;
+                if ($choice !== "Passer à l'objet suivant") {
+                    $idxArg = array_search($choice, $objets);
+                    $enDroit = $doc->en_droit($idxObj);
+                    $argument = $doc->argument($idxObj, $idxArg);
+                    $this->info($this->extract($enDroit, $argument));
+                }
             }
         }
     }
@@ -112,9 +125,16 @@ class FindLegalArguments extends Command
         return trim($answer);
     }
 
-    private function search(string $text): array
+    private function searchObjets(string $text): array
     {
         return $this->vectorStore->search($this->embed($text));
+    }
+
+    private function searchArguments(string $text): array
+    {
+        return $this->vectorStore->filterAndSearch($this->embed($text), [
+            'type' => 'argument',
+        ]);
     }
 
     private function embed(string $text)

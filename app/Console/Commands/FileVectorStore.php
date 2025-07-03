@@ -67,6 +67,51 @@ class FileVectorStore
         }
     }
 
+    public function filterAndSearch(array $embedding, array $metadata): array
+    {
+        $topItems = [];
+
+        if (file_exists($this->storage())) {
+            foreach ($this->line($this->storage()) as $line) {
+
+                $match = true;
+                $vector = Vector::fromString((string)$line);
+
+                foreach ($metadata as $key => $value) {
+                    if ($vector->metadata($key) !== $value) {
+                        $match = false;
+                        break;
+                    }
+                }
+                if ($match) {
+
+                    $vectorEmbedding = $vector->embedding();
+
+                    if (empty($vectorEmbedding)) {
+                        throw new \Exception("Vector with the following content has no embedding: {$vector->text()}");
+                    }
+
+                    $dist = VectorsSimilarity::cosineDistance($embedding, $vectorEmbedding);
+                    $topItems[] = [
+                        'distance' => $dist,
+                        'vector' => $vector,
+                    ];
+
+                    usort($topItems, fn(array $a, array $b): int => $a['distance'] <=> $b['distance']);
+
+                    if (count($topItems) > $this->topK) {
+                        $topItems = array_slice($topItems, 0, $this->topK, true);
+                    }
+                }
+            }
+        }
+        return array_map(function (array $item): array {
+            $item['similarity'] = VectorsSimilarity::similarityFromDistance($item['distance']);
+            unset($item['distance']);
+            return $item;
+        }, $topItems);
+    }
+
     /** @return Vector[] */
     public function find(array $metadata): array
     {

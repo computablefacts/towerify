@@ -132,6 +132,17 @@ class PrepareLegalDocuments extends Command
                     $vector = new Vector($topic, $this->embed($topic), $metadata);
                     $this->vectorStore->addVector($vector);
                 }
+                for ($j = 0; $j < $document->nbArguments($i); $j++) {
+
+                    $metadata['type'] = 'argument';
+                    $metadata['index_argument'] = $j;
+
+                    if (empty($this->vectorStore->find($metadata))) {
+                        $argument = $document->argument($i, $j);
+                        $vector = new Vector($argument, $this->embed($argument), $metadata);
+                        $this->vectorStore->addVector($vector);
+                    }
+                }
             }
         }
     }
