@@ -14,20 +14,11 @@
   @if($tab === 'domains')
   <x-domains/>
   @endif
-  @if($tab === 'applications')
-  <x-applications/>
-  @endif
   @if($tab === 'orders')
   <x-orders/>
   @endif
-  @if($tab === 'users')
-  <x-users/>
-  @endif
   @if($tab === 'invitations')
   <x-invitations/>
-  @endif
-  @if($tab === 'security_rules')
-  <x-osquery-rules/>
   @endif
   @if($tab === 'conversations')
   <x-conversations :currentPage="request()->input('page') ? request()->input('page') : 1"/>

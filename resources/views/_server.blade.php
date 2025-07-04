@@ -98,11 +98,6 @@
   <x-domains :server="$server"/>
   @endif
   @if($tab === 'applications')
-  <div class="row mb-4">
-    <div class="col-12">
-      <x-applications :server="$server"/>
-    </div>
-  </div>
   <div class="row">
     <div class="col-12">
       <x-applications-ready-to-be-deployed :server="$server"/>
@@ -111,9 +106,6 @@
   @endif
   @if($tab === 'interdependencies')
   <x-interdependencies :server="$server"/>
-  @endif
-  @if($tab === 'users')
-  <x-users :server="$server"/>
   @endif
 </div>
 @endsection
