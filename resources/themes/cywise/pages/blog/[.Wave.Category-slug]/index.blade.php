@@ -13,7 +13,7 @@
         <div class="relative pt-6">
             <x-marketing.elements.heading
                 title="{{ $category->name }} Articles"
-                description="Our latest {{ $category->name }} posts below."
+                description="{{ __('Our latest :category posts below.', [ 'category' => $category->name ]) }}"
                 align="left"
             />
             
