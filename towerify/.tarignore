@@ -8,6 +8,8 @@
 ./public/build/manifest.json
 ./storage/*.key
 ./storage/app/public/deb-cve-*
+./storage/app/public/docs/docs.private.html
+./storage/app/public/docs/docs.public.html
 ./storage/app/public/images/*
 ./storage/app/public/livewire-tmp/*
 ./storage/debugbar/*
