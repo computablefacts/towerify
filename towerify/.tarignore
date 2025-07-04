@@ -3,6 +3,7 @@
 ./node_modules
 ./public/hot
 ./public/storage
+./public/wave/docs
 ./public/build/assets/*
 ./public/build/manifest.json
 ./storage/*.key
