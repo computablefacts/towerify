@@ -461,7 +461,7 @@ name('tpe-pme');
           {!! __('Vous souhaitez évaluer la sécurité de votre site web?') !!}
         </h2>
         <div class="mt-10 flex items-center gap-x-6 lg:mt-0 lg:shrink-0">
-          <a href="{{ route('tools.cybercheck.init"
+          <a href="{{ route('tools.cybercheck.init') }}"
              class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             Démarrez l’audit gratuit maintenant !
           </a>
