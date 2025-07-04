@@ -90,6 +90,36 @@ class CywiseSeeder extends Seeder
             'group' => 'Site',
         ]);
         Setting::updateOrCreate([
+            'key' => 'site.linkedin',
+        ], [
+            'display_name' => 'LinkedIn',
+            'value' => 'https://www.linkedin.com/company/cywise/',
+            'details' => '',
+            'type' => 'text',
+            'order' => 1,
+            'group' => 'Site',
+        ]);
+        Setting::updateOrCreate([
+            'key' => 'site.instagram',
+        ], [
+            'display_name' => 'Instagram',
+            'value' => 'https://www.instagram.com/cywise_cybersec/',
+            'details' => '',
+            'type' => 'text',
+            'order' => 1,
+            'group' => 'Site',
+        ]);
+        Setting::updateOrCreate([
+            'key' => 'site.facebook',
+        ], [
+            'display_name' => 'Facebook',
+            'value' => 'https://www.facebook.com/profile.php?viewas=100000686899395&id=61577113076576',
+            'details' => '',
+            'type' => 'text',
+            'order' => 1,
+            'group' => 'Site',
+        ]);
+        Setting::updateOrCreate([
             'key' => 'site.description',
         ], [
             'display_name' => 'Site Description',
