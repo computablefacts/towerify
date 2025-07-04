@@ -26,7 +26,7 @@ name('tpe-pme');
             <a href="{{ route('changelogs') }}" class="inline-flex space-x-6">
               <span
                 class="rounded-full bg-indigo-600/10 px-3 py-1 text-sm/6 font-semibold text-indigo-600 ring-1 ring-inset ring-indigo-600/10">
-                What\'s new
+                {{ __('What\'s new') }}
               </span>
             </a>
           </div>
