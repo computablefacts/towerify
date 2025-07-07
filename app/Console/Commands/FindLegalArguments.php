@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\AgentSquad\Orchestrator;
 use App\Enums\RoleEnum;
 use App\Helpers\AgentSquad\ClarifyRequest;
 use App\Models\User;

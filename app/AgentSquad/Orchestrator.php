@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\AgentSquad;
 
 use App\Enums\RoleEnum;
 use App\Helpers\LlmProvider;
@@ -62,7 +62,7 @@ class Orchestrator
         if (!isset($this->commands[$command])) {
             return new Answer("Sorry, I did not find your command: {$command}", false);
         }
-        return $this->commands[$command]->execute($user, $threadId, $command);
+        return $this->commands[$command]->execute($user, $threadId, $messages, $command);
     }
 
     private function processInput(User $user, string $threadId, array $messages, string $input, array $chainOfThought = [], int $depth = 0): Answer

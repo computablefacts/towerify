@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\AgentSquad\AbstractAction;
+use App\AgentSquad\Answer;
 use App\Enums\RoleEnum;
 use App\Helpers\EmbeddingProvider;
 use App\Helpers\LlmProvider;
