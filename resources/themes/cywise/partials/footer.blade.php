@@ -55,7 +55,7 @@
           </h3>
           <ul class="mt-6 space-y-4 text-sm">
             <li>
-              <a href="#_" class="relative inline-block text-black group">
+              <a href="{{ route('a-propos') }}" class="relative inline-block text-black group">
                 <span
                   class="absolute bottom-0 w-full transition duration-150 ease-out transform -translate-y-1 border-b border-black opacity-0 group-hover:opacity-100 group-hover:translate-y-1"></span>
                 <span>{{ __('About') }}</span>

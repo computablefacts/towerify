@@ -82,7 +82,7 @@ name('tpe-pme');
     </div>
     <!-- SOCIAL PROOF : END -->
     <!-- PROBLEMS : BEGIN -->
-    <div class="bg-white py-3 sm:py-3">
+    <div class="bg-white py-24 sm:py-32">
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <div class="mx-auto max-w-2xl lg:text-center">
           <h2 class="text-base/7 font-semibold text-indigo-600">
