@@ -7,7 +7,6 @@ use App\Helpers\ApiUtilsFacade as ApiUtils;
 use App\Models\Chunk;
 use App\Models\Conversation;
 use App\Models\File;
-use App\Models\Prompt;
 use App\Models\Template;
 use App\Models\User;
 use App\Models\YnhFramework;
@@ -648,26 +647,6 @@ class CyberBuddyController extends Controller
         Conversation::where('id', $id)->delete();
         return response()->json([
             'success' => __('The conversation has been deleted!'),
-        ]);
-    }
-
-    public function deletePrompt(int $id)
-    {
-        Prompt::where('id', $id)->delete();
-        return response()->json([
-            'success' => __('The prompt has been deleted!'),
-        ]);
-    }
-
-    public function savePrompt(int $id, Request $request)
-    {
-        $this->validate($request, [
-            'template' => 'required|string|min:0|max:10000',
-        ]);
-        $text = $request->string('template');
-        Prompt::where('id', $id)->update(['template' => $text]);
-        return response()->json([
-            'success' => __('The prompt has been saved!'),
         ]);
     }
 

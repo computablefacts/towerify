@@ -218,25 +218,27 @@ class User extends WaveUser
 
     private static function setupPrompts(User $user, string $name, string $root)
     {
-        $promptNext = File::get(database_path($root));
+        $newPrompt = File::get(database_path($root));
 
-        /** @var Prompt $p */
-        $p = Prompt::where('created_by', $user->id)
+        /** @var Prompt $oldPrompt */
+        $oldPrompt = Prompt::query()
+            ->where('created_by', $user->id)
             ->where('name', $name)
             ->first();
 
-        if (isset($p)) {
+        if (isset($oldPrompt)) {
             $promptPrev = Str::lower(Str::trim(File::get(database_path("$root.prev"))));
-            if (Str::lower(Str::trim($p->template)) === $promptPrev) {
-                $p->update(['template' => $promptNext]);
+            if (Str::lower(Str::trim($oldPrompt->template)) === $promptPrev) {
+                $oldPrompt->update(['template' => $newPrompt]);
             } else {
-                Log::debug("The user {$user->email} prompt {$p->name} has not been updated");
+                Log::debug("The user {$user->email} prompt {$oldPrompt->name} has not been updated");
             }
         } else {
-            $p = Prompt::create([
+            /** @var Prompt $oldPrompt */
+            $oldPrompt = Prompt::create([
                 'created_by' => $user->id,
                 'name' => $name,
-                'template' => $promptNext
+                'template' => $newPrompt
             ]);
         }
     }

@@ -18,7 +18,6 @@ use App\Events\EndVulnsScan;
 use App\Events\RebuildLatestEventsCache;
 use App\Events\RebuildPackagesList;
 use App\Helpers\SshKeyPair;
-use App\Http\Controllers\Iframes\ApplicationsController;
 use App\Http\Controllers\Iframes\ChunksController;
 use App\Http\Controllers\Iframes\CollectionsController;
 use App\Http\Controllers\Iframes\CyberBuddyController;
@@ -604,10 +603,6 @@ Route::post('/collections/{id}', '\App\Http\Controllers\CyberBuddyController@sav
 Route::delete('/chunks/{id}', '\App\Http\Controllers\CyberBuddyController@deleteChunk')->middleware('auth');
 
 Route::post('/chunks/{id}', '\App\Http\Controllers\CyberBuddyController@saveChunk')->middleware('auth');
-
-Route::delete('/prompts/{id}', '\App\Http\Controllers\CyberBuddyController@deletePrompt')->middleware('auth');
-
-Route::post('/prompts/{id}', '\App\Http\Controllers\CyberBuddyController@savePrompt')->middleware('auth');
 
 Route::delete('/conversations/{id}', '\App\Http\Controllers\CyberBuddyController@deleteConversation')->middleware('auth');
 

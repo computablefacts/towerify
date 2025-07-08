@@ -179,6 +179,7 @@ class QueryKnowledgeBase extends AbstractAction
 
     private function reformulateQuestion(string $question): array
     {
+        /** @var Prompt $prompt */
         $prompt = Prompt::where('created_by', $this->user->id)->where('name', 'default_reformulate_question')->firstOrfail();
         $prompt->template = Str::replace('{QUESTION}', $question, $prompt->template);
         Log::debug("[REF_QUESTION][{$this->threadId}] prompt : {$prompt->template}");
@@ -296,6 +297,7 @@ class QueryKnowledgeBase extends AbstractAction
             return '';
         }
 
+        /** @var Prompt $prompt */
         $prompt = Prompt::where('created_by', $this->user->id)->where('name', 'default_answer_question')->firstOrfail();
         $prompt->template = Str::replace('{LANGUAGE}', $json['lang'], $prompt->template);
         $prompt->template = Str::replace('{MEMOS}', $memos, $prompt->template);

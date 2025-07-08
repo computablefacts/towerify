@@ -123,15 +123,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this prompt?') }}");
 
     if (response) {
-      axios.delete(`/prompts/${promptId}`).then(function (response) {
-        if (response.data.success) {
-          toaster.toastSuccess(response.data.success);
-        } else if (response.data.error) {
-          toaster.toastError(response.data.error);
-        } else {
-          console.log(response.data);
-        }
-      }).catch(error => toaster.toastAxiosError(error));
+      deletePromptApiCall(promptId, response => toaster.toastSuccess(response.msg));
     }
   }
 
@@ -161,15 +153,7 @@
       if (!response) {
         pre.innerText = oldValue;
       } else {
-        axios.post(`/prompts/${promptId}`, {template: newValue}).then(function (response) {
-          if (response.data.success) {
-            toaster.toastSuccess(response.data.success);
-          } else if (response.data.error) {
-            toaster.toastError(response.data.error);
-          } else {
-            console.log(response.data);
-          }
-        }).catch(error => toaster.toastAxiosError(error));
+        updatePromptApiCall(promptId, newValue, response => toaster.toastSuccess(response.msg));
       }
     }
   }

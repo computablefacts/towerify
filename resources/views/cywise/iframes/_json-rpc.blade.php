@@ -234,5 +234,13 @@
     executeJsonRpcApiCall('users@toggleGetsAuditReport', {user_id: userId}, onSuccess);
   }
 
+  function deletePromptApiCall(promptId, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('prompts@delete', {prompt_id: promptId}, onSuccess);
+  }
+
+  function updatePromptApiCall(promptId, template, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('prompts@update', {prompt_id: promptId, template: template}, onSuccess);
+  }
+
 </script>
 @endonce
