@@ -726,6 +726,96 @@ class AssetsProcedure extends Procedure
     }
 
     #[RpcMethod(
+        description: "Get the assets that belong to a given group.",
+        params: [
+            "group" => "The group hash.",
+        ],
+        result: [
+            "msg" => "A success message.",
+        ]
+    )]
+    public function assetsInGroup(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+
+        $params = $request->validate([
+            'group' => 'required|string|exists:am_assets_tags_hashes,hash',
+        ]);
+
+        /** @var AssetTagHash $group */
+        $group = AssetTagHash::where('hash', $params['group'])->firstOrFail();
+        $group->views = $group->views + 1;
+        $group->update();
+
+        $assets = Asset::select('am_assets.*')
+            ->where('am_assets.is_monitored', true)
+            ->join('am_assets_tags', 'am_assets_tags.asset_id', '=', 'am_assets.id')
+            ->join('am_assets_tags_hashes', 'am_assets_tags_hashes.tag', '=', 'am_assets_tags.tag')
+            ->where('am_assets_tags_hashes.hash', $group->hash)
+            ->get()
+            ->map(fn(Asset $asset) => $this->convertAsset($asset));
+
+        return [
+            'assets' => $assets,
+        ];
+    }
+
+    #[RpcMethod(
+        description: "Get the vulnerabilities that belong to a given group.",
+        params: [
+            "group" => "The group hash.",
+        ],
+        result: [
+            "msg" => "A success message.",
+        ]
+    )]
+    public function vulnerabilitiesInGroup(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+
+        $params = $request->validate([
+            'group' => 'required|string|exists:am_assets_tags_hashes,hash',
+        ]);
+
+        /** @var AssetTagHash $group */
+        $group = AssetTagHash::where('hash', $params['group'])->firstOrFail();
+        $group->views = $group->views + 1;
+        $group->update();
+
+        $assets = Asset::select('am_assets.*')
+            ->where('am_assets.is_monitored', true)
+            ->join('am_assets_tags', 'am_assets_tags.asset_id', '=', 'am_assets.id')
+            ->join('am_assets_tags_hashes', 'am_assets_tags_hashes.tag', '=', 'am_assets_tags.tag')
+            ->where('am_assets_tags_hashes.hash', $group->hash)
+            ->get();
+
+        $vulnerabilities = $assets
+            ->flatMap(fn(Asset $asset) => $asset->alerts()->get()->map(function (Alert $alert) use ($asset) {
+                $port = $alert->port();
+                return [
+                    'id' => $alert->id,
+                    'asset' => $asset->asset,
+                    'ip' => $port->ip,
+                    'port' => $port->port,
+                    'level' => $alert->level,
+                    'title' => $alert->title,
+                    'vulnerability' => $alert->vulnerability,
+                    'remediation' => $alert->remediation,
+                    'is_scan_in_progress' => $asset->scanInProgress()->isNotEmpty(),
+                ];
+            }))
+            ->toArray();
+
+        return [
+            'vulnerabilities' => $vulnerabilities,
+        ];
+    }
+
+    #[RpcMethod(
         description: "Mark a vulnerability that belongs to a given group as resolved.",
         params: [
             "group" => "The group hash.",
@@ -750,10 +840,8 @@ class AssetsProcedure extends Procedure
         $group = AssetTagHash::query()->where('hash', '=', $params['group'])->firstOrFail();
         /** @var Alert $alert */
         $alert = Alert::find($params['vulnerability_id']);
-
-        $this->restartScan(new Request([
-            'asset_id' => $alert->asset()->id,
-        ]));
+        $request->replace(['asset_id' => $alert->asset()->id]);
+        $this->restartScan($request);
 
         return [
             'msg' => "The vulnerability has been marked as resolved and will be re-scanned soon.",

@@ -109,4 +109,33 @@ class VulnerabilitiesProcedure extends Procedure
                 "Your alerts will be hidden from now on!",
         ];
     }
+
+    #[RpcMethod(
+        description: "Flag a given vulnerability as resolved and trigger a new scan.",
+        params: [
+            'vulnerability_id' => 'The vulnerability id.',
+        ],
+        result: [
+            "msg" => "A success message.",
+        ]
+    )]
+    public function markAsResolved(Request $request): array
+    {
+        if (!$request->user()->canUseAdversaryMeter()) {
+            throw new \Exception('Missing permission.');
+        }
+
+        $params = $request->validate([
+            'vulnerability_id' => 'required|integer|exists:am_alerts,id',
+        ]);
+
+        /** @var Alert $alert */
+        $alert = Alert::find($params['vulnerability_id']);
+        $request = $request->replace(['asset_id' => $alert->asset()->id]);
+        (new AssetsProcedure())->restartScan($request);
+
+        return [
+            'msg' => "The vulnerability has been marked as resolved and will be re-scanned soon.",
+        ];
+    }
 }

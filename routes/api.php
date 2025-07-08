@@ -26,7 +26,6 @@ use Wave\Facades\Wave;
 |
 */
 
-
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return auth()->user();
 });
@@ -41,8 +40,6 @@ Route::group(['middleware' => 'auth:api'], function () {
 Route::group([
     'prefix' => 'public',
 ], function () {
-    Route::post('alert/{alert}/mark-and-check-again', '\App\Http\Controllers\CyberTodoController@markAsResolved');
-    Route::get('vulnerabilities/{hash}', '\App\Http\Controllers\CyberTodoController@vulns');
     Route::post('honeypots/{dns}', function (string $dns, \Illuminate\Http\Request $request) {
 
         if (!$request->hasFile('data')) {
