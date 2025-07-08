@@ -523,7 +523,7 @@ class CyberBuddyController extends Controller
         $successes = [];
         $errors = [];
 
-        foreach ($files['files'] as $file) {
+        foreach ($files as $file) {
             $url = self::saveUploadedFile($collection, $file);
             if ($url) {
                 $successes[] = $url;
