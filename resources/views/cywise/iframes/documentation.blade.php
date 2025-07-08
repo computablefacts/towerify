@@ -23,7 +23,7 @@
           {{ __('Data Management') }}
         </h6>
         <div class="card-text mb-3">
-          La documentation concernant la gestion des données est <a
+          La documentation de l'interface utilisateur est accessible <a
             href="https://computablefacts.notion.site/Guide-utilisateur-2160a1f68ecc80689497e7dd5c07a817?source=copy_link"
             class="link"
             target="_blank">ici</a>.
