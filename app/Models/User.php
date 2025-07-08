@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Hashing\TwHasher;
+use App\Helpers\SupersetApiUtilsFacade as SupersetApiUtils;
 use App\Jobs\DeleteEmbeddedChunks;
 use App\Rules\IsValidCollectionName;
 use Illuminate\Notifications\Notifiable;
@@ -28,6 +29,7 @@ use Wave\User as WaveUser;
  * @property string performa_secret
  * @property boolean terms_accepted
  * @property boolean gets_audit_report
+ * @property ?int superset_id
  */
 class User extends WaveUser
 {
@@ -53,6 +55,7 @@ class User extends WaveUser
         'customer_id',
         'tenant_id',
         'am_api_token',
+        'superset_id',
     ];
 
     /**
@@ -125,6 +128,11 @@ class User extends WaveUser
             ]);
 
             $user->syncRoles(Role::ADMINISTRATOR, Role::LIMITED_ADMINISTRATOR, Role::BASIC_END_USER);
+        }
+        if (!isset($user->superset_id)) { // Automatically create a proper superset account for all users
+            $json = SupersetApiUtils::get_or_add_user($user);
+            $user->superset_id = $json['id'] ?? null;
+            $user->save();
         }
         return $user;
     }
