@@ -1,19 +1,10 @@
-<x-app.sidebar-link href="{{ route('v2.private.rpc.docs') }}"
-                    target="_blank"
+<x-app.sidebar-link href="{{ route('documentation') }}"
                     icon="phosphor-book-bookmark-duotone"
-                    active="false">
-    Documentation
+                    :active="Request::is('private/documentation')">
+    {{ __('Documentation') }}
 </x-app.sidebar-link>
-<!--
-<x-app.sidebar-link href="https://devdojo.com/questions"
-                    target="_blank"
-                    icon="phosphor-chat-duotone"
-                    active="false">
-    Questions
-</x-app.sidebar-link>
--->
 <x-app.sidebar-link :href="route('changelogs')"
                     icon="phosphor-book-open-text-duotone"
                     :active="Request::is('changelog') || Request::is('changelog/*')">
-    Changelog
+    {{ __('Changelog') }}
 </x-app.sidebar-link>

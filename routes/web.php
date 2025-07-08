@@ -23,6 +23,7 @@ use App\Http\Controllers\Iframes\CollectionsController;
 use App\Http\Controllers\Iframes\CyberBuddyController;
 use App\Http\Controllers\Iframes\CyberScribeController;
 use App\Http\Controllers\Iframes\DashboardController;
+use App\Http\Controllers\Iframes\DocumentationController;
 use App\Http\Controllers\Iframes\DocumentsController;
 use App\Http\Controllers\Iframes\FrameworksController;
 use App\Http\Controllers\Iframes\PromptsController;
@@ -612,6 +613,7 @@ Route::middleware(['auth'])->prefix('iframes')->name('iframes.')->group(function
     Route::get('/cyberbuddy', [CyberBuddyController::class, '__invoke'])->name('cyberbuddy');
     Route::get('/cyberscribe', [CyberScribeController::class, '__invoke'])->name('cyberscribe');
     Route::get('/dashboard', [DashboardController::class, '__invoke'])->name('dashboard');
+    Route::get('/documentation', [DocumentationController::class, '__invoke'])->name('documentation');
     Route::get('/documents', [DocumentsController::class, '__invoke'])->name('documents');
     Route::get('/events', [TimelineController::class, '__invoke'])->name('events');
     Route::get('/frameworks', [FrameworksController::class, '__invoke'])->name('frameworks');
