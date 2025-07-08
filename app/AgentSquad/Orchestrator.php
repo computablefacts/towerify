@@ -53,14 +53,14 @@ class Orchestrator
             return $this->processInput($user, $threadId, $messages, $input);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-            return new Answer("Sorry, an error occurred: {$e->getMessage()}", false);
+            return new FailedAnswer("Sorry, an error occurred: {$e->getMessage()}");
         }
     }
 
     private function processCommand(User $user, string $threadId, array $messages, string $command): Answer
     {
         if (!isset($this->commands[$command])) {
-            return new Answer("Sorry, I did not find your command: {$command}", false);
+            return new FailedAnswer("Sorry, I did not find your command: {$command}");
         }
         return $this->commands[$command]->execute($user, $threadId, $messages, $command);
     }
@@ -73,7 +73,7 @@ class Orchestrator
             Log::error("chain-of-thought: " . json_encode($chainOfThought));
             /** @var ThoughtActionObservation $cot */
             $cot = array_pop($chainOfThought);
-            return new Answer($cot->observation(), false);
+            return new FailedAnswer($cot->observation(), $chainOfThought);
         }
 
         $template = '{"thought":"describe here succinctly your thoughts about the question you have been asked", "action_name":"set here the name of the action to execute", "action_input":"set here the input for the action"}';
@@ -141,30 +141,31 @@ The user's input (between [INPUT] and [/INPUT]) is:
             }
         }
         if (empty($json)) {
-            return new Answer("Invalid JSON response: {$answer}", false);
+            return new FailedAnswer("Invalid JSON response: {$answer}", $chainOfThought);
         }
         if (!isset($json['thought'])) {
-            return new Answer("The thought is missing: {$answer}", false);
+            return new FailedAnswer("The thought is missing: {$answer}", $chainOfThought);
         }
         if (!isset($json['action_name'])) {
-            return new Answer("The action name is missing: {$answer}", false);
+            return new FailedAnswer("The action name is missing: {$answer}", $chainOfThought);
         }
         if (!isset($json['action_input'])) {
-            return new Answer("The action input is missing: {$answer}", false);
+            return new FailedAnswer("The action input is missing: {$answer}", $chainOfThought);
         }
         if ($json['action_name'] === 'respond_to_user') {
-            return new Answer($json['action_input']);
+            return new SuccessfulAnswer($json['action_input'], $chainOfThought);
         }
         if ($json['action_name'] === 'clarify_request') {
-            return new Answer($json['action_input']);
+            return new SuccessfulAnswer($json['action_input'], $chainOfThought);
         }
         if (!isset($this->agents[$json['action_name']])) {
-            return new Answer("The action is unknown: {$answer}", false);
+            return new FailedAnswer("The action is unknown: {$answer}", $chainOfThought);
         }
 
         $answer = $this->agents[$json['action_name']]->execute($user, $threadId, $messages, $json['action_input']);
 
         if ($answer->failure()) {
+            $answer->setChainOfThought($chainOfThought);
             return $answer;
         }
 

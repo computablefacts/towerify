@@ -5,17 +5,25 @@ namespace App\AgentSquad;
 class Answer
 {
     private string $answer;
+    /** @var ThoughtActionObservation[] $chainOfThought */
+    private array $chainOfThought;
     private bool $success;
 
-    public function __construct(string $answer, bool $success = true)
+    protected function __construct(string $answer, array $chainOfThought = [], bool $success = true)
     {
         $this->answer = $answer;
+        $this->chainOfThought = $chainOfThought;
         $this->success = $success;
     }
 
     public function __toString()
     {
-        return ($this->success ? '[SUCCESS] ' : '[FAILURE]') . $this->answer;
+        return ($this->success ? '[SUCCESS] ' : '[FAILURE] ') . $this->answer;
+    }
+
+    public function chainOfThought(): array
+    {
+        return $this->chainOfThought;
     }
 
     public function success(): bool
@@ -36,5 +44,11 @@ class Answer
     public function markdown(): string
     {
         return $this->answer;
+    }
+
+    /** @param ThoughtActionObservation[] $chainOfThought */
+    public function setChainOfThought(array $chainOfThought = []): void
+    {
+        $this->chainOfThought = $chainOfThought;
     }
 }
