@@ -111,7 +111,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this collection?') }}");
 
     if (response) {
-      deleteCollection(collectionId, response => toaster.toastSuccess(response.msg));
+      deleteCollectionApiCall(collectionId);
     }
   }
 
@@ -140,7 +140,7 @@
       if (!response) {
         td.innerText = oldValue;
       } else {
-        updateCollectionApiCall(collectionId, newValue, response => toaster.toastSuccess(response.msg));
+        updateCollectionApiCall(collectionId, newValue);
       }
     }
   }

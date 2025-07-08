@@ -123,7 +123,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this prompt?') }}");
 
     if (response) {
-      deletePromptApiCall(promptId, response => toaster.toastSuccess(response.msg));
+      deletePromptApiCall(promptId);
     }
   }
 
@@ -153,7 +153,7 @@
       if (!response) {
         pre.innerText = oldValue;
       } else {
-        updatePromptApiCall(promptId, newValue, response => toaster.toastSuccess(response.msg));
+        updatePromptApiCall(promptId, newValue);
       }
     }
   }

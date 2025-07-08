@@ -26,7 +26,7 @@
   <div class="card-body">
     <div class="row">
       <div class="col">
-        {{ __('Only the documents from the ":collection" collection are displayed.', ['collection' => $collection]) }}
+        {{ __('Only the chunks from the ":collection" collection are displayed.', ['collection' => $collection]) }}
       </div>
     </div>
   </div>
@@ -168,15 +168,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this chunk?') }}");
 
     if (response) {
-      axios.delete(`/chunks/${chunkId}`).then(function (response) {
-        if (response.data.success) {
-          toaster.toastSuccess(response.data.success);
-        } else if (response.data.error) {
-          toaster.toastError(response.data.error);
-        } else {
-          console.log(response.data);
-        }
-      }).catch(error => toaster.toastAxiosError(error));
+      deleteChunkApiCall(chunkId);
     }
   }
 
@@ -206,15 +198,7 @@
       if (!response) {
         pre.innerText = oldValue;
       } else {
-        axios.post(`/chunks/${chunkId}`, {text: newValue}).then(function (response) {
-          if (response.data.success) {
-            toaster.toastSuccess(response.data.success);
-          } else if (response.data.error) {
-            toaster.toastError(response.data.error);
-          } else {
-            console.log(response.data);
-          }
-        }).catch(error => toaster.toastAxiosError(error));
+        updateChunkApiCall(chunkId, newValue);
       }
     }
   }

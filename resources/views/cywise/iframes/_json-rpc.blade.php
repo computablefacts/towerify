@@ -234,24 +234,32 @@
     executeJsonRpcApiCall('users@toggleGetsAuditReport', {user_id: userId}, onSuccess);
   }
 
-  function deletePromptApiCall(promptId, onSuccess = onSuccessDefault) {
-    executeJsonRpcApiCall('prompts@delete', {prompt_id: promptId}, onSuccess);
+  function deletePromptApiCall(promptId) {
+    executeJsonRpcApiCall('prompts@delete', {prompt_id: promptId});
   }
 
-  function updatePromptApiCall(promptId, template, onSuccess = onSuccessDefault) {
-    executeJsonRpcApiCall('prompts@update', {prompt_id: promptId, template: template}, onSuccess);
+  function updatePromptApiCall(promptId, template) {
+    executeJsonRpcApiCall('prompts@update', {prompt_id: promptId, template: template});
   }
 
-  function deleteCollectionApiCall(collectionId, onSuccess = onSuccessDefault) {
-    executeJsonRpcApiCall('collections@delete', {collection_id: collectionId}, onSuccess);
+  function deleteCollectionApiCall(collectionId) {
+    executeJsonRpcApiCall('collections@delete', {collection_id: collectionId});
   }
 
-  function updateCollectionApiCall(collectionId, priority, onSuccess = onSuccessDefault) {
-    executeJsonRpcApiCall('collections@update', {collection_id: collectionId, priority: priority}, onSuccess);
+  function updateCollectionApiCall(collectionId, priority) {
+    executeJsonRpcApiCall('collections@update', {collection_id: collectionId, priority: priority});
   }
 
   function listCollectionsApiCall(onSuccess = onSuccessDefault) {
     executeJsonRpcApiCall('collections@list', {}, onSuccess);
+  }
+
+  function deleteChunkApiCall(chunkId) {
+    executeJsonRpcApiCall('chunks@delete', {chunk_id: chunkId});
+  }
+
+  function updateChunkApiCall(chunkId, value) {
+    executeJsonRpcApiCall('chunks@update', {chunk_id: chunkId, value: value});
   }
 
 </script>
