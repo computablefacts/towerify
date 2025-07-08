@@ -242,5 +242,17 @@
     executeJsonRpcApiCall('prompts@update', {prompt_id: promptId, template: template}, onSuccess);
   }
 
+  function deleteCollectionApiCall(collectionId, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('collections@delete', {collection_id: collectionId}, onSuccess);
+  }
+
+  function updateCollectionApiCall(collectionId, priority, onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('collections@update', {collection_id: collectionId, priority: priority}, onSuccess);
+  }
+
+  function listCollectionsApiCall(onSuccess = onSuccessDefault) {
+    executeJsonRpcApiCall('collections@list', {}, onSuccess);
+  }
+
 </script>
 @endonce

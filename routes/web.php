@@ -594,12 +594,6 @@ Route::post('/files/one', '\App\Http\Controllers\CyberBuddyController@uploadOneF
 
 Route::post('/files/many', '\App\Http\Controllers\CyberBuddyController@uploadManyFiles')->middleware('auth:sanctum');
 
-Route::get('/collections', '\App\Http\Controllers\CyberBuddyController@collections')->middleware('auth');
-
-Route::delete('/collections/{id}', '\App\Http\Controllers\CyberBuddyController@deleteCollection')->middleware('auth');
-
-Route::post('/collections/{id}', '\App\Http\Controllers\CyberBuddyController@saveCollection')->middleware('auth');
-
 Route::delete('/chunks/{id}', '\App\Http\Controllers\CyberBuddyController@deleteChunk')->middleware('auth');
 
 Route::post('/chunks/{id}', '\App\Http\Controllers\CyberBuddyController@saveChunk')->middleware('auth');

@@ -198,9 +198,14 @@
   elCollections.defaultText = "{{ __('Select or create collection...') }}";
 
   document.addEventListener('DOMContentLoaded', function (event) {
-    axios.get('/collections').then(response => {
-      elCollections.items = response.data.map(collection => collection.name);
-    }).catch(error => toaster.toastAxiosError(error));
+    listCollectionsApiCall(response => {
+      elCollections.items = response.collections.map(collection => collection.name);
+      if ("{{ $collection }}" !== "") {
+        elCollections.selectedItem = "{{ $collection }}";
+        elCollections.disabled = true;
+        collection = elCollections.selectedItem;
+      }
+    });
   });
 
   function deleteFile(fileId) {

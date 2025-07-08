@@ -111,15 +111,7 @@
     const response = confirm("{{ __('Are you sure you want to delete this collection?') }}");
 
     if (response) {
-      axios.delete(`/collections/${collectionId}`).then(function (response) {
-        if (response.data.success) {
-          toaster.toastSuccess(response.data.success);
-        } else if (response.data.error) {
-          toaster.toastError(response.data.error);
-        } else {
-          console.log(response.data);
-        }
-      }).catch(error => toaster.toastAxiosError(error));
+      deleteCollection(collectionId, response => toaster.toastSuccess(response.msg));
     }
   }
 
@@ -148,15 +140,7 @@
       if (!response) {
         td.innerText = oldValue;
       } else {
-        axios.post(`/collections/${collectionId}`, {priority: newValue}).then(function (response) {
-          if (response.data.success) {
-            toaster.toastSuccess(response.data.success);
-          } else if (response.data.error) {
-            toaster.toastError(response.data.error);
-          } else {
-            console.log(response.data);
-          }
-        }).catch(error => toaster.toastAxiosError(error));
+        updateCollectionApiCall(collectionId, newValue, response => toaster.toastSuccess(response.msg));
       }
     }
   }

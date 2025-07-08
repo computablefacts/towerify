@@ -268,18 +268,6 @@ class CyberBuddyController extends Controller
         ]);
     }
 
-    public function collections()
-    {
-        return \App\Models\Collection::orderBy('name', 'asc')
-            ->get()
-            ->map(function (\App\Models\Collection $collection) {
-                return [
-                    'id' => $collection->id,
-                    'name' => $collection->name,
-                ];
-            });
-    }
-
     public function llm1(Request $request)
     {
         // TODO : validate request
@@ -562,26 +550,6 @@ class CyberBuddyController extends Controller
         \App\Models\File::where('id', $id)->update(['is_deleted' => true]);
         return response()->json([
             'success' => __('The file will be deleted soon!'),
-        ]);
-    }
-
-    public function deleteCollection(int $id)
-    {
-        \App\Models\Collection::where('id', $id)->update(['is_deleted' => true]);
-        return response()->json([
-            'success' => __('The collection will be deleted soon!'),
-        ]);
-    }
-
-    public function saveCollection(int $id, Request $request)
-    {
-        $this->validate($request, [
-            'priority' => 'required|integer|min:0',
-        ]);
-        $priority = $request->string('priority');
-        \App\Models\Collection::where('id', $id)->update(['priority' => $priority]);
-        return response()->json([
-            'success' => __('The collection has been saved!'),
         ]);
     }
 
