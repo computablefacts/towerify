@@ -69,8 +69,8 @@ class Orchestrator
     {
         if ($depth >= 3) {
             Log::error("Too many iterations: $depth");
-            Log::error("message: " . json_encode($messages));
-            Log::error("chain-of-thought: " . json_encode($chainOfThought));
+            Log::error("Messages: " . json_encode($messages));
+            Log::error("Chain-of-thought: " . json_encode($chainOfThought));
             /** @var ThoughtActionObservation $cot */
             $cot = array_pop($chainOfThought);
             return new FailedAnswer($cot->observation(), $chainOfThought);
@@ -92,7 +92,7 @@ Your guidelines:
 - If there are no actions to be taken, then make the action 'respond_to_user' with your final thoughts combining all previous responses as 'input'.
 - As soon as your chain-of-thought provides enough information to answer something to the user, you should respond with 'respond_to_user'.
 - Respond with 'respond_to_user' only when there are no actions to select from or there is no next action to take.
-- Ensure the action's input are in the same language as the user's input.
+- Ensure the actions' input are in the same language as the user's input.
 - Always return a valid JSON like {$template} and nothing else.
 
 Your current chain-of-thought (between [COT] and [/COT]) to help you plan the next action to execute:
