@@ -262,5 +262,9 @@
     executeJsonRpcApiCall('chunks@update', {chunk_id: chunkId, value: value});
   }
 
+  function deleteFileApiCall(fileId) {
+    executeJsonRpcApiCall('files@delete', {file_id: fileId});
+  }
+
 </script>
 @endonce

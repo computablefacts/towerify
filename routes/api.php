@@ -242,6 +242,7 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.'], function () {
             \App\Http\Procedures\CollectionsProcedure::class,
             \App\Http\Procedures\CyberBuddyProcedure::class,
             \App\Http\Procedures\EventsProcedure::class,
+            \App\Http\Procedures\FilesProcedure::class,
             \App\Http\Procedures\InvitationsProcedure::class,
             \App\Http\Procedures\NotesProcedure::class,
             \App\Http\Procedures\PromptsProcedure::class,

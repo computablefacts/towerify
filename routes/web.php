@@ -583,10 +583,6 @@ Route::post('/templates', '\App\Http\Controllers\CyberBuddyController@saveTempla
 
 Route::delete('/templates/{id}', '\App\Http\Controllers\CyberBuddyController@deleteTemplate')->middleware('auth');
 
-Route::get('/files', '\App\Http\Controllers\CyberBuddyController@files')->middleware('auth');
-
-Route::delete('/files/{id}', '\App\Http\Controllers\CyberBuddyController@deleteFile')->middleware('auth');
-
 Route::get('/files/stream/{secret}', '\App\Http\Controllers\CyberBuddyController@streamFile');
 
 Route::get('/files/download/{secret}', '\App\Http\Controllers\CyberBuddyController@downloadFile');

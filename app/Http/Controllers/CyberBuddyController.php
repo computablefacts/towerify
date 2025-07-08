@@ -544,14 +544,6 @@ class CyberBuddyController extends Controller
         ], 500);
     }
 
-    public function deleteFile(int $id)
-    {
-        \App\Models\File::where('id', $id)->update(['is_deleted' => true]);
-        return response()->json([
-            'success' => __('The file will be deleted soon!'),
-        ]);
-    }
-
     public function deleteConversation(int $id)
     {
         Conversation::where('id', $id)->delete();
