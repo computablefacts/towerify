@@ -185,16 +185,6 @@ class CyberBuddyController extends Controller
         return "{$file->id}_{$file->name_normalized}.{$file->extension}";
     }
 
-    public function showPage()
-    {
-        return view('modules.cyber-buddy.page');
-    }
-
-    public function showChat()
-    {
-        return view('modules.cyber-buddy.chat');
-    }
-
     public function templates()
     {
         return Template::where('readonly', true)

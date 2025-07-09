@@ -5,6 +5,7 @@ namespace Tests\Unit\WithoutDb;
 use App\Http\Controllers\CyberBuddyController;
 use Tests\TestCaseNoDb;
 
+/** @deprecated */
 class CyberBuddyControllerTest extends TestCaseNoDb
 {
     public function testItRemovesSourcesFromAnswer()
