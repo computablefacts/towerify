@@ -6,6 +6,7 @@ use App\AgentSquad\Orchestrator;
 use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class FindLegalArguments extends Command
@@ -36,6 +37,9 @@ class FindLegalArguments extends Command
         $messages = [];
         $orchestrator = new Orchestrator();
         $orchestrator->registerAgent(new LabourLawyer($in));
+        $user = User::query()->where('email', 'engineering@computablefacts.com')->first();
+        
+        Auth::login($user);
 
         while (true) {
             $answer = $orchestrator->run($user, "123abc", $messages, $input);

@@ -1,8 +1,10 @@
 <?php
 
-namespace App\AgentSquad;
+namespace App\AgentSquad\Answers;
 
-class Answer
+use App\AgentSquad\ThoughtActionObservation;
+
+abstract class AbstractAnswer
 {
     private string $answer;
     /** @var ThoughtActionObservation[] $chainOfThought */

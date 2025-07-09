@@ -2,15 +2,18 @@
 
 namespace App\AgentSquad;
 
+use App\AgentSquad\Answers\AbstractAnswer;
+use App\AgentSquad\Answers\FailedAnswer;
+use App\AgentSquad\Answers\SuccessfulAnswer;
+use App\AgentSquad\Providers\LlmsProvider;
+use App\AgentSquad\Providers\PromptsProvider;
 use App\Enums\RoleEnum;
-use App\Helpers\LlmProvider;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class Orchestrator
 {
-    private LlmProvider $llmProvider;
     private string $model;
     /** @var AbstractAction[] $agents */
     private array $agents = [];
@@ -19,7 +22,6 @@ class Orchestrator
 
     public function __construct(string $model = 'meta-llama/Llama-4-Scout-17B-16E-Instruct')
     {
-        $this->llmProvider = new LlmProvider(LlmProvider::DEEP_INFRA);
         $this->model = $model;
     }
 
@@ -43,7 +45,7 @@ class Orchestrator
         unset($this->commands[$name]);
     }
 
-    public function run(User $user, string $threadId, array $messages, string $input): Answer
+    public function run(User $user, string $threadId, array $messages, string $input): AbstractAnswer
     {
         try {
             $input = Str::trim($input);
@@ -57,7 +59,7 @@ class Orchestrator
         }
     }
 
-    private function processCommand(User $user, string $threadId, array $messages, string $command): Answer
+    private function processCommand(User $user, string $threadId, array $messages, string $command): AbstractAnswer
     {
         if (!isset($this->commands[$command])) {
             return new FailedAnswer("Sorry, I did not find your command: {$command}");
@@ -65,7 +67,7 @@ class Orchestrator
         return $this->commands[$command]->execute($user, $threadId, $messages, $command);
     }
 
-    private function processInput(User $user, string $threadId, array $messages, string $input, array $chainOfThought = [], int $depth = 0): Answer
+    private function processInput(User $user, string $threadId, array $messages, string $input, array $chainOfThought = [], int $depth = 0): AbstractAnswer
     {
         if ($depth >= 3) {
             Log::error("Too many iterations: $depth");
@@ -77,39 +79,14 @@ class Orchestrator
         }
 
         $template = '{"thought":"describe here succinctly your thoughts about the question you have been asked", "action_name":"set here the name of the action to execute", "action_input":"set here the input for the action"}';
-        $ctx = implode("\n", array_map(fn(ThoughtActionObservation $tao) => "> Thought: {$tao->thought()}\n> Observation: {$tao->observation()}", $chainOfThought));
+        $cot = implode("\n", array_map(fn(ThoughtActionObservation $tao) => "> Thought: {$tao->thought()}\n> Observation: {$tao->observation()}", $chainOfThought));
         $actions = implode("\n", array_map(fn(AbstractAction $action) => "- {$action->name()}: {$action->description()}", $this->agents));
-        $prompt = "
-You are an expert intent classifier.
-You will use the chain-of-thought provided (between [COT] and [/COT]) and the user's input (between [INPUT] and [/INPUT]) to understand the user's intent and select the appropriate action (between [ACTIONS] and [/ACTIONS]).
-You will rewrite the input for the action so that the action can efficiently be executed.
-
-Your guidelines:
-- Sometimes you might have to use multiple actions to solve the user's task. You have to do that in a loop.
-- The original user input could have multiple tasks, you will use your chain-of-thought to understand the previous actions taken and the next steps you should take.
-- Read your chain-of-thought, take your time to understand it, see if there were many tasks and if you executed them all.
-- If the user's intent is not clear, then make the action 'clarify_request' with a clarifying question as 'input'.
-- If there are no actions to be taken, then make the action 'respond_to_user' with your final thoughts combining all previous responses as 'input'.
-- As soon as your chain-of-thought provides enough information to answer something to the user, you should respond with 'respond_to_user'.
-- Respond with 'respond_to_user' only when there are no actions to select from or there is no next action to take.
-- Ensure the actions' input are in the same language as the user's input.
-- Always return a valid JSON like {$template} and nothing else.
-
-Your current chain-of-thought (between [COT] and [/COT]) to help you plan the next action to execute:
-[COT]
-{$ctx}
-[/COT]
-
-Your available actions (between [ACTIONS] and [/ACTIONS]) are:
-[ACTIONS]
-{$actions}
-[/ACTIONS]
-
-The user's input (between [INPUT] and [/INPUT]) is:
-[INPUT]
-{$input}
-[/INPUT]
-        ";
+        $prompt = PromptsProvider::provide('default_orchestrator', [
+            'TEMPLATE' => $template,
+            'COT' => $cot,
+            'ACTIONS' => $actions,
+            'INPUT' => $input,
+        ]);
 
         // Log::debug($prompt);
 
@@ -117,10 +94,8 @@ The user's input (between [INPUT] and [/INPUT]) is:
             'role' => RoleEnum::USER->value,
             'content' => $prompt,
         ];
-        $response = $this->callLlm($messages);
+        $answer = LlmsProvider::provide($messages, $this->model);
         array_pop($messages);
-        $answer = $response['choices'][0]['message']['content'] ?? '';
-        $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
         $json = json_decode(Str::trim($answer), true);
 
         // Log::debug($answer);
@@ -171,10 +146,5 @@ The user's input (between [INPUT] and [/INPUT]) is:
 
         $chainOfThought[] = new ThoughtActionObservation($json['thought'], "{$json['action_name']}[{$json['action_input']}]", $answer->markdown());
         return $this->processInput($user, $threadId, $messages, $input, $chainOfThought, $depth + 1);
-    }
-
-    private function callLlm(array $messages): array
-    {
-        return $this->llmProvider->execute($messages, $this->model);
     }
 }

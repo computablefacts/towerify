@@ -1,8 +1,8 @@
 <?php
 
-namespace App\AgentSquad;
+namespace App\AgentSquad\Answers;
 
-class FailedAnswer extends Answer
+class FailedAnswer extends AbstractAnswer
 {
     public function __construct(string $answer, array $chainOfThought = [])
     {

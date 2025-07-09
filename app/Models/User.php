@@ -149,6 +149,7 @@ class User extends WaveUser
             self::setupPrompts($user, 'default_chat', 'seeders/prompts/default_chat.txt');
             self::setupPrompts($user, 'default_chat_history', 'seeders/prompts/default_chat_history.txt');
             self::setupPrompts($user, 'default_debugger', 'seeders/prompts/default_debugger.txt');
+            self::setupPrompts($user, 'default_orchestrator', 'seeders/prompts/default_orchestrator.txt');
             self::setupPrompts($user, 'default_reformulate_question', 'seeders/prompts/default_reformulate_question.txt');
 
             // Get the oldest user of the tenant. We will automatically attach the frameworks to this user

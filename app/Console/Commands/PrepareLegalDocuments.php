@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\EmbeddingProvider;
-use App\Helpers\LlmProvider;
+use App\AgentSquad\Providers\EmbeddingsProvider;
+use App\AgentSquad\Providers\LlmsProvider;
+use App\AgentSquad\Vectors\AbstractVectorStore;
+use App\AgentSquad\Vectors\FileVectorStore;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -24,10 +26,8 @@ class PrepareLegalDocuments extends Command
      */
     protected $description = 'Convert a legal document to a list of chunks.';
 
-    private FileVectorStore $vectorStore;
-    private EmbeddingProvider $embeddingProvider;
-    private LlmProvider $llmProvider;
-    private string $llmModel;
+    private AbstractVectorStore $vectorStore;
+    private string $model;
 
     /**
      * Execute the console command.
@@ -38,12 +38,10 @@ class PrepareLegalDocuments extends Command
         $out = $this->argument('output');
         $prompt = $this->argument('prompt');
         $this->vectorStore = new FileVectorStore($out);
-        $this->embeddingProvider = new EmbeddingProvider(LlmProvider::DEEP_INFRA);
-        $this->llmProvider = new LlmProvider(LlmProvider::DEEP_INFRA, 30 * 60);
-        $this->llmModel = 'google/gemini-2.5-pro';
+        $this->model = 'google/gemini-2.5-pro';
 
         if (is_dir($in)) {
-            //$this->processDirectory($in, $out, $prompt);
+            $this->processDirectory($in, $out, $prompt);
         } elseif (is_file($in)) {
             $this->processFile($in, $in, $prompt);
         } else {
@@ -95,9 +93,7 @@ class PrepareLegalDocuments extends Command
             $markdown = file_get_contents($md);
             $prompt = \Illuminate\Support\Facades\File::get($prompt);
             $prompt = Str::replace('{DOC}', $markdown, $prompt);
-            $response = $this->llmProvider->execute($prompt, $this->llmModel);
-            $answer = $response['choices'][0]['message']['content'] ?? '';
-            $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
+            $answer = LlmsProvider::provide($prompt, $this->model, 30 * 60);
             $array = json_decode($answer, true);
 
             if ($array) {
@@ -112,7 +108,7 @@ class PrepareLegalDocuments extends Command
 
     private function updateVectorDatabase(string $output): void
     {
-        // $this->vectorStore->delete();
+        // $this->vectorStore->clear();
         $files = glob("{$output}/*.json");
 
         /** @var string $file */
@@ -129,7 +125,7 @@ class PrepareLegalDocuments extends Command
 
                 if (empty($this->vectorStore->find($metadata))) {
                     $topic = $this->topic($document->objet($i));
-                    $vector = new Vector($topic, $this->embed($topic), $metadata);
+                    $vector = EmbeddingsProvider::provide($topic, $metadata);
                     $this->vectorStore->addVector($vector);
                 }
                 for ($j = 0; $j < $document->nbArguments($i); $j++) {
@@ -139,7 +135,7 @@ class PrepareLegalDocuments extends Command
 
                     if (empty($this->vectorStore->find($metadata))) {
                         $argument = $document->argument($i, $j);
-                        $vector = new Vector($argument, $this->embed($argument), $metadata);
+                        $vector = EmbeddingsProvider::provide($argument, $metadata);
                         $this->vectorStore->addVector($vector);
                     }
                 }
@@ -155,14 +151,6 @@ class PrepareLegalDocuments extends Command
             
             {$str}
         ";
-        $response = $this->llmProvider->execute($prompt, $this->llmModel);
-        $answer = $response['choices'][0]['message']['content'] ?? '';
-        $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
-        return trim($answer);
-    }
-
-    private function embed(string $text)
-    {
-        return $this->embeddingProvider->execute($text)['data'][0]['embedding'];
+        return LlmsProvider::provide($prompt, $this->model, 30 * 60);
     }
 }

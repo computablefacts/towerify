@@ -3,20 +3,20 @@
 namespace App\Console\Commands;
 
 use App\AgentSquad\AbstractAction;
-use App\AgentSquad\Answer;
-use App\AgentSquad\SuccessfulAnswer;
+use App\AgentSquad\Answers\AbstractAnswer;
+use App\AgentSquad\Answers\SuccessfulAnswer;
+use App\AgentSquad\Providers\EmbeddingsProvider;
+use App\AgentSquad\Providers\LlmsProvider;
+use App\AgentSquad\Vectors\AbstractVectorStore;
+use App\AgentSquad\Vectors\FileVectorStore;
+use App\AgentSquad\Vectors\Vector;
 use App\Enums\RoleEnum;
-use App\Helpers\EmbeddingProvider;
-use App\Helpers\LlmProvider;
 use App\Models\User;
-use Illuminate\Support\Str;
 
 class LabourLawyer extends AbstractAction
 {
-    private FileVectorStore $vectorStore;
-    private EmbeddingProvider $embeddingProvider;
-    private LlmProvider $llmProvider;
-    private string $llmModel;
+    private AbstractVectorStore $vectorStore;
+    private string $model;
 
     static function schema(): array
     {
@@ -44,13 +44,14 @@ class LabourLawyer extends AbstractAction
     public function __construct(string $in)
     {
         $this->vectorStore = new FileVectorStore($in);
-        $this->embeddingProvider = new EmbeddingProvider(LlmProvider::DEEP_INFRA);
-        $this->llmProvider = new LlmProvider(LlmProvider::DEEP_INFRA, 30);
-        $this->llmModel = 'Qwen/Qwen3-14B';
+        $this->model = 'Qwen/Qwen3-14B';
     }
 
-    public function execute(User $user, string $threadId, array $messages, string $input): Answer
+    public function execute(User $user, string $threadId, array $messages, string $input): AbstractAnswer
     {
+        $vector = EmbeddingsProvider::provide($input);
+        $objets = $this->vectorStore->search($vector->embedding());
+        $arguments = $this->vectorStore->filterAndSearch($vector->embedding(), ['type' => 'argument']);
         $results = array_merge(array_map(function (array $item): array {
 
             /** @var Vector $vector */
@@ -62,7 +63,7 @@ class LabourLawyer extends AbstractAction
 
             unset($item['vector']);
             return $item;
-        }, $this->searchArguments($input)), array_map(function (array $item): array {
+        }, $arguments), array_map(function (array $item): array {
 
             /** @var Vector $vector */
             $vector = $item['vector'];
@@ -72,7 +73,7 @@ class LabourLawyer extends AbstractAction
 
             unset($item['vector']);
             return $item;
-        }, $this->searchObjets($input)));
+        }, $objets));
 
         $enDroit = implode("\n", array_unique(array_map(fn(array $item) => "[ARGUMENT][OBJ]{$item['obj']}[/OBJ][ARG]{$item['doc']->en_droit($item['idx'])}[/ARG][/ARGUMENT]", $results)));
 
@@ -92,27 +93,8 @@ N'hésite pas à extraire du texte contenu entre les balises [EN_DROIT] et [/EN_
             'role' => RoleEnum::USER->value,
             'content' => $prompt,
         ];
-        $response = $this->llmProvider->execute($messages, $this->llmModel);
+        $answer = LlmsProvider::provide($messages, $this->model, 30);
         array_pop($messages);
-        $answer = $response['choices'][0]['message']['content'] ?? '';
-        $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
-        return new SuccessfulAnswer(Str::trim($answer));
-    }
-
-    private function searchObjets(string $text): array
-    {
-        return $this->vectorStore->search($this->embed($text));
-    }
-
-    private function searchArguments(string $text): array
-    {
-        return $this->vectorStore->filterAndSearch($this->embed($text), [
-            'type' => 'argument',
-        ]);
-    }
-
-    private function embed(string $text)
-    {
-        return $this->embeddingProvider->execute($text)['data'][0]['embedding'];
+        return new SuccessfulAnswer($answer);
     }
 }

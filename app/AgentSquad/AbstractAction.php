@@ -2,6 +2,7 @@
 
 namespace App\AgentSquad;
 
+use App\AgentSquad\Answers\AbstractAnswer;
 use App\Models\User;
 
 abstract class AbstractAction
@@ -18,5 +19,5 @@ abstract class AbstractAction
         return $this->schema()['function']['description'] ?? '';
     }
 
-    public abstract function execute(User $user, string $threadId, array $messages, string $input): Answer;
+    public abstract function execute(User $user, string $threadId, array $messages, string $input): AbstractAnswer;
 }
