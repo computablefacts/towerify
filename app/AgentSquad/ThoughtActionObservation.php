@@ -2,7 +2,9 @@
 
 namespace App\AgentSquad;
 
-class ThoughtActionObservation
+use JsonSerializable;
+
+class ThoughtActionObservation implements JsonSerializable
 {
     private string $thought;
     private string $action;
@@ -15,9 +17,13 @@ class ThoughtActionObservation
         $this->observation = $observation;
     }
 
-    public function __toString()
+    public function jsonSerialize(): array
     {
-        return "Thought: {$this->thought}\nAction: {$this->action}\nObservation: {$this->observation}";
+        return [
+            'thought' => $this->thought,
+            'action' => $this->action,
+            'observation' => $this->observation,
+        ];
     }
 
     public function thought(): string

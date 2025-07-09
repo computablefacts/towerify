@@ -2,7 +2,9 @@
 
 namespace App\AgentSquad\Vectors;
 
-class Vector
+use JsonSerializable;
+
+class Vector implements JsonSerializable
 {
     private string $text;
     private array $embedding;
@@ -10,7 +12,7 @@ class Vector
 
     public static function toString(Vector $vector): string
     {
-        return json_encode($vector->toArray());
+        return json_encode($vector->jsonSerialize());
     }
 
     public static function fromString(string $str): Vector
@@ -26,6 +28,15 @@ class Vector
         $this->metadata = $metadata;
     }
 
+    public function jsonSerialize()
+    {
+        return [
+            'text' => $this->text,
+            'embedding' => $this->embedding,
+            'metadata' => $this->metadata,
+        ];
+    }
+
     public function text(): string
     {
         return $this->text;
@@ -39,14 +50,5 @@ class Vector
     public function metadata(string $key): mixed
     {
         return $this->metadata[$key] ?? null;
-    }
-
-    public function toArray()
-    {
-        return [
-            'text' => $this->text,
-            'embedding' => $this->embedding,
-            'metadata' => $this->metadata,
-        ];
     }
 }

@@ -21,7 +21,7 @@ class DatabaseVectorStore extends AbstractVectorStore
     {
         DB::transaction(function () use ($vectors) {
             foreach ($vectors as $vector) {
-                DB::table('cb_vectors')->insert($vector->toArray());
+                DB::table('cb_vectors')->insert($vector->jsonSerialize());
             }
         });
     }
