@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\AgentSquad\AbstractAction;
 use App\AgentSquad\Answer;
+use App\AgentSquad\SuccessfulAnswer;
 use App\Enums\RoleEnum;
 use App\Helpers\EmbeddingProvider;
 use App\Helpers\LlmProvider;
@@ -95,7 +96,7 @@ N'hésite pas à extraire du texte contenu entre les balises [EN_DROIT] et [/EN_
         array_pop($messages);
         $answer = $response['choices'][0]['message']['content'] ?? '';
         $answer = preg_replace('/<think>.*?<\/think>/s', '', $answer);
-        return new Answer(Str::trim($answer));
+        return new SuccessfulAnswer(Str::trim($answer));
     }
 
     private function searchObjets(string $text): array
