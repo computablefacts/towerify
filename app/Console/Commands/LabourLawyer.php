@@ -82,11 +82,11 @@ class LabourLawyer extends AbstractAction
 
         $prompt = "
 Tu es un avocat en droit social.
-Tu cherches à développer un argumentaire juridique succinct lié à : {$input}
+Tu cherches à réaliser cette tâche : {$input}
 Utilise le texte contenu entre les balises [EN_DROIT] et [/EN_DROIT] pour développer ton argumentaire:
 - Les balises [EN_DROIT] et [/EN_DROIT] contiennent des sections thématiques placées entre [SECTION] et [/SECTION].
 - Les balises [SECTION] et [/SECTION] contiennent une thématique entre [TOPIC] et [/TOPIC] ainsi que des citations de la loi se rapportant à cette thématique entre [LAW] et [/LAW].
-N'hésite utiliser des citations de textes de loi pour appuyer ton argumentaire.
+Utilise toujours des citations de textes de loi pour appuyer ton argumentaire.
 Anonymise les noms de personnes et de sociétés dans ton argumentaire.
 N'utilise pas de markdown pour formuler ta réponse.
 
