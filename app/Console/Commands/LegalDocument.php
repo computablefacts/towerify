@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Support\Facades\Log;
 
-class Document
+class LegalDocument
 {
     private string $file;
     private ?array $objets;

@@ -45,13 +45,15 @@ class FileVectorStore extends AbstractVectorStore
 
     private function line(string $filename): \Generator
     {
-        $f = fopen($filename, 'r');
-        try {
-            while ($line = fgets($f)) {
-                yield Vector::fromString($line);
+        if (file_exists($filename)) {
+            $f = fopen($filename, 'r');
+            try {
+                while ($line = fgets($f)) {
+                    yield Vector::fromString($line);
+                }
+            } finally {
+                fclose($f);
             }
-        } finally {
-            fclose($f);
         }
     }
 

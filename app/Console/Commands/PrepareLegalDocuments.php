@@ -26,7 +26,8 @@ class PrepareLegalDocuments extends Command
      */
     protected $description = 'Convert a legal document to a list of chunks.';
 
-    private AbstractVectorStore $vectorStore;
+    private AbstractVectorStore $vectorStoreObjets;
+    private AbstractVectorStore $vectorStoreArguments;
     private string $model;
 
     /**
@@ -37,7 +38,9 @@ class PrepareLegalDocuments extends Command
         $in = $this->argument('input');
         $out = $this->argument('output');
         $prompt = $this->argument('prompt');
-        $this->vectorStore = new FileVectorStore($out);
+        
+        $this->vectorStoreObjets = new FileVectorStore($out, 4, 'objets');
+        $this->vectorStoreArguments = new FileVectorStore($out, 4, 'arguments');
         $this->model = 'google/gemini-2.5-pro';
 
         if (is_dir($in)) {
@@ -108,42 +111,41 @@ class PrepareLegalDocuments extends Command
 
     private function updateVectorDatabase(string $output): void
     {
-        // $this->vectorStore->clear();
         $files = glob("{$output}/*.json");
 
         /** @var string $file */
         foreach ($files as $file) {
 
-            $document = new Document($file);
+            $document = new LegalDocument($file);
 
             for ($i = 0; $i < $document->nbObjets(); $i++) {
 
                 $metadata = [
                     'file' => $file,
-                    'index' => $i,
+                    'index_objet' => $i,
                 ];
 
-                if (empty($this->vectorStore->find($metadata))) {
-                    $topic = $this->topic($document->objet($i));
-                    $vector = EmbeddingsProvider::provide($topic, $metadata);
-                    $this->vectorStore->addVector($vector);
+                if (empty($this->vectorStoreObjets->find($metadata))) {
+                    $objet = $document->objet($i);
+                    $vector = EmbeddingsProvider::provide($objet, $metadata);
+                    $this->vectorStoreObjets->addVector($vector);
                 }
                 for ($j = 0; $j < $document->nbArguments($i); $j++) {
 
-                    $metadata['type'] = 'argument';
                     $metadata['index_argument'] = $j;
 
-                    if (empty($this->vectorStore->find($metadata))) {
+                    if (empty($this->vectorStoreArguments->find($metadata))) {
                         $argument = $document->argument($i, $j);
                         $vector = EmbeddingsProvider::provide($argument, $metadata);
-                        $this->vectorStore->addVector($vector);
+                        $this->vectorStoreArguments->addVector($vector);
                     }
                 }
             }
         }
     }
 
-    private function topic(string $str): string
+    /** @deprecated */
+    private function objet(string $str): string
     {
         $prompt = "
             Ta réponse devra être en plein texte sans markdown.

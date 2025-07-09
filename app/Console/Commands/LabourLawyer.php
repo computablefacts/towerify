@@ -15,7 +15,8 @@ use App\Models\User;
 
 class LabourLawyer extends AbstractAction
 {
-    private AbstractVectorStore $vectorStore;
+    private AbstractVectorStore $vectorStoreObjets;
+    private AbstractVectorStore $vectorStoreArguments;
     private string $model;
 
     static function schema(): array
@@ -41,48 +42,53 @@ class LabourLawyer extends AbstractAction
         ];
     }
 
-    public function __construct(string $in)
+    public function __construct(string $in, string $model = 'Qwen/Qwen3-14B')
     {
-        $this->vectorStore = new FileVectorStore($in);
-        $this->model = 'Qwen/Qwen3-14B';
+        $this->vectorStoreObjets = new FileVectorStore($in, 5, 'objets');
+        $this->vectorStoreArguments = new FileVectorStore($in, 5, 'arguments');
+        $this->model = $model;
     }
 
     public function execute(User $user, string $threadId, array $messages, string $input): AbstractAnswer
     {
         $vector = EmbeddingsProvider::provide($input);
-        $objets = $this->vectorStore->search($vector->embedding());
-        $arguments = $this->vectorStore->filterAndSearch($vector->embedding(), ['type' => 'argument']);
+        $objets = $this->vectorStoreObjets->search($vector->embedding());
+        $arguments = $this->vectorStoreArguments->search($vector->embedding());
         $results = array_merge(array_map(function (array $item): array {
 
             /** @var Vector $vector */
             $vector = $item['vector'];
-            $item['obj'] = $vector->text();
-            $item['doc'] = new Document($vector->metadata('file'));
-            $item['idx'] = $vector->metadata('index');
-            $item['idx_arg'] = $vector->metadata('index_argument');
+            $idx = $vector->metadata('index_objet');
+            $document = new LegalDocument($vector->metadata('file'));
 
-            unset($item['vector']);
-            return $item;
+            return [
+                'objet' => $document->objet($idx),
+                'en_droit' => $document->en_droit($idx),
+            ];
         }, $arguments), array_map(function (array $item): array {
 
             /** @var Vector $vector */
             $vector = $item['vector'];
-            $item['obj'] = $vector->text();
-            $item['doc'] = new Document($vector->metadata('file'));
-            $item['idx'] = $vector->metadata('index');
+            $idx = $vector->metadata('index_objet');
+            $document = new LegalDocument($vector->metadata('file'));
 
-            unset($item['vector']);
-            return $item;
+            return [
+                'objet' => $document->objet($idx),
+                'en_droit' => $document->en_droit($idx),
+            ];
         }, $objets));
 
-        $enDroit = implode("\n", array_unique(array_map(fn(array $item) => "[ARGUMENT][OBJ]{$item['obj']}[/OBJ][ARG]{$item['doc']->en_droit($item['idx'])}[/ARG][/ARGUMENT]", $results)));
+        $enDroit = implode("\n", array_unique(array_map(fn(array $item) => "[SECTION][TOPIC]{$item['objet']}[/TOPIC][LAW]{$item['en_droit']}[/LAW][/SECTION]", $results)));
 
         $prompt = "
 Tu es un avocat en droit social.
 Tu cherches à développer un argumentaire juridique succinct lié à : {$input}
-Tu n'utiliseras pas de markdown pour formuler ta réponse.
-Utilise le texte contenu entre les balises [EN_DROIT] et [/EN_DROIT] pour développer cet argumentaire.
-N'hésite pas à extraire du texte contenu entre les balises [EN_DROIT] et [/EN_DROIT] des citations de la loi pour appuyer ton argumentaire.
+Utilise le texte contenu entre les balises [EN_DROIT] et [/EN_DROIT] pour développer ton argumentaire:
+- Les balises [EN_DROIT] et [/EN_DROIT] contiennent des sections thématiques placées entre [SECTION] et [/SECTION].
+- Les balises [SECTION] et [/SECTION] contiennent une thématique entre [TOPIC] et [/TOPIC] ainsi que des citations de la loi se rapportant à cette thématique entre [LAW] et [/LAW].
+N'hésite utiliser des citations de textes de loi pour appuyer ton argumentaire.
+Anonymise les noms de personnes et de sociétés dans ton argumentaire.
+N'utilise pas de markdown pour formuler ta réponse.
 
 [EN_DROIT]
 {$enDroit}

@@ -33,12 +33,11 @@ class FindLegalArguments extends Command
     {
         $in = $this->argument('input');
         $input = $this->ask('Quelle est la thématique à développer ?');
-        $user = new User();
         $messages = [];
         $orchestrator = new Orchestrator();
         $orchestrator->registerAgent(new LabourLawyer($in));
         $user = User::query()->where('email', 'engineering@computablefacts.com')->first();
-        
+
         Auth::login($user);
 
         while (true) {
