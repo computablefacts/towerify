@@ -67,7 +67,7 @@ return [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
+            'port' => env('DB_LEGACY_PORT', '3306'),
             'database' => env('DB_LEGACY_DATABASE', 'forge'),
             'username' => env('DB_LEGACY_USERNAME', 'forge'),
             'password' => env('DB_LEGACY_PASSWORD', ''),
