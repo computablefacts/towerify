@@ -18,5 +18,5 @@
     une *instance Towerify* des applications hors catalogue, i.e. développées
     par vos soins, au moyen d'un processus d'[intégration continue][5].
 
-[4]: cli/index.md
+[4]: ../index.md
 [5]: https://fr.wikipedia.org/wiki/Int%C3%A9gration_continue

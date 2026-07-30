@@ -28,7 +28,7 @@ conservant la certitude que le code développé peut-être déployé partout où
 
 # La solution
 
-[**Towerify CLI**](towerify/cli/index.md) est une ligne de commande permettant de déployer des applications développées par vos
+**Towerify CLI** est une ligne de commande permettant de déployer des applications développées par vos
 soins, au moyen d'un processus d'intégration continue.
 
 # La démo
