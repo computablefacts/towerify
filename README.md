@@ -1,9 +1,9 @@
-# Towerify CLI
+# Towerify
 
 Cette repo contient le script Bash `towerify` qui permet d'interagir avec
 une instance Towerify.
 
-Elle contient également le script d'installation de Towerify CLI.
+Elle contient également le script d'installation de Towerify.
 
 Ces 2 scripts sont générés grâce à [Bashly](https://bashly.dannyb.co/).
 
@@ -21,7 +21,7 @@ La build utilise l'image Docker de Bashly.
 Elle génère les 2 scripts en version production.
 
 Le script d'installation se trouve dans `./install/install` et
-le script Towerify CLI se trouve dans `./towerify/towerify`.
+le script Towerify se trouve dans `./towerify/towerify`.
 
 ## Publication
 
@@ -32,14 +32,14 @@ Ce mettre à la racine de la repo et faire la commande :
 towerify deploy --profile cywise
 ```
 
-Towerify CLI sera publié sur https://acme.towerify.io/cli/.
+Towerify sera publié sur https://acme.towerify.io/cli/.
 
 Ce mettre à la racine de la repo et faire la commande :
 ```
 towerify deploy --env=prod --profile cywise
 ```
 
-Towerify CLI sera publié sur https://cli.towerify.io/.
+Towerify sera publié sur https://cli.towerify.io/.
 
 La publication en DEV correspond à l'ancienne URL et sera bientôt supprimée.
 
