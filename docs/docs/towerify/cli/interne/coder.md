@@ -1,4 +1,4 @@
-# Fonctionnement de la CLI
+# Fonctionnement
 
 ## Idéal
 
